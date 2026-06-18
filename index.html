@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play Legends - Official Website</title>
+    <style>
+        /* Genel Temizleme ve Renk Paleti */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #0b0c10;
+            color: #c5c6c7;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Üst Menü Barı */
+        .top-navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 30px;
+            background-color: #0b0c10;
+            border-bottom: 1px solid rgba(102, 252, 241, 0.1);
+            position: relative;
+            z-index: 150;
+        }
+
+        .lang-switcher-nav {
+            display: flex;
+            gap: 5px;
+            background-color: #1f2833;
+            padding: 5px;
+            border-radius: 20px;
+            border: 1px solid rgba(102, 252, 241, 0.3);
+        }
+
+        .lang-btn {
+            background: none;
+            border: none;
+            color: #c5c6c7;
+            padding: 5px 15px;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 15px;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+        }
+
+        .lang-btn.active {
+            background-color: #66fcf1;
+            color: #0b0c10;
+            box-shadow: 0 0 10px rgba(102, 252, 241, 0.4);
+        }
+
+        /* PROFİL ALANI */
+        .profile-nav-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .profile-summary {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background-color: #1f2833;
+            padding: 8px 15px;
+            border-radius: 25px;
+            border: 1px solid rgba(102, 252, 241, 0.3);
+            transition: all 0.3s;
+        }
+
+        .profile-summary:hover {
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.4);
+        }
+
+        .profile-img {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background-color: #66fcf1;
+            border: 2px solid #66fcf1;
+            object-fit: cover;
+        }
+
+        .profile-name {
+            color: #fff;
+            font-weight: bold;
+            font-size: 0.95rem;
+        }
+
+        /* AÇILIR PROFİL MENÜSÜ */
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 50px;
+            right: 0;
+            background-color: #1f2833;
+            border: 1px solid #66fcf1;
+            border-radius: 8px;
+            width: 280px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            padding: 15px;
+            z-index: 200;
+        }
+
+        .profile-dropdown h4 {
+            color: #66fcf1;
+            border-bottom: 1px solid rgba(102, 252, 241, 0.2);
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            text-transform: uppercase;
+        }
+
+        .menu-item {
+            display: block;
+            padding: 10px;
+            color: #c5c6c7;
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-radius: 5px;
+            transition: background 0.2s;
+            text-align: left;
+            background: none;
+            border: none;
+            width: 100%;
+            cursor: pointer;
+        }
+
+        .menu-item:hover {
+            background-color: #0b0c10;
+            color: #66fcf1;
+        }
+
+        /* MODAL PENCERELERİ */
+        .sub-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(11, 12, 16, 0.85);
+            z-index: 30000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .sub-modal-content {
+            background-color: #1f2833;
+            padding: 25px;
+            border-radius: 10px;
+            border: 1px solid #66fcf1;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .close-sub {
+            position: absolute;
+            top: 10px; right: 15px;
+            color: #ff4d4d;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        /* Header / Başlık */
+        header {
+            background: linear-gradient(rgba(0, 0, 0, 0.75), rgba(11, 12, 16, 1)), url('https://i.ibb.co/B2ZmF2x7/resim1.jpg') no-repeat center center/cover;
+            height: 50vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        header h1 {
+            font-size: 3.5rem;
+            color: #66fcf1;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(102, 252, 241, 0.5);
+        }
+
+        header p {
+            font-size: 1.2rem;
+            color: #45f3ff;
+            margin-bottom: 30px;
+            font-weight: 300;
+        }
+
+        /* Butonlar */
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background-color: #66fcf1;
+            color: #0b0c10;
+            box-shadow: 0 0 15px rgba(102, 252, 241, 0.3);
+            border: none;
+        }
+
+        .btn-primary:hover {
+            background-color: #45f3ff;
+            transform: translateY(-3px);
+            box-shadow: 0 0 25px rgba(102, 252, 241, 0.6);
+        }
+
+        .btn-secondary {
+            background-color: #1f2833;
+            color: #66fcf1;
+            border: 1px solid #66fcf1;
+        }
+
+        .btn-secondary:hover {
+            background-color: #66fcf1;
+            color: #0b0c10;
+            transform: translateY(-3px);
+        }
+
+        /* OYUN EKRANI (MODAL) */
+        .game-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: #000; z-index: 9999;
+        }
+
+        .game-container { width: 100%; height: 100%; position: relative; }
+        .close-game-btn {
+            position: absolute; top: 15px; left: 15px;
+            background-color: rgba(255, 0, 0, 0.7); color: white;
+            border: none; padding: 8px 15px; font-weight: bold;
+            cursor: pointer; border-radius: 5px; z-index: 10000;
+        }
+        .game-frame { width: 100%; height: 100%; border: none; }
+
+        /* Ana İçerik */
+        .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
+        section { margin-bottom: 60px; }
+        section h2 {
+            font-size: 2rem; color: #66fcf1; border-bottom: 2px solid #1f2833;
+            padding-bottom: 10px; margin-bottom: 20px; text-transform: uppercase;
+        }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+        .gallery-item {
+            background-color: #1f2833; border-radius: 8px; overflow: hidden;
+            border: 1px solid rgba(102, 252, 241, 0.1); transition: transform 0.3s ease;
+        }
+        .gallery-item:hover { transform: scale(1.03); border-color: #66fcf1; }
+        .gallery-item img { width: 100%; height: 200px; object-fit: cover; display: block; }
+        .gallery-item p { padding: 15px; font-size: 0.9rem; text-align: center; }
+
+        footer { background-color: #1f2833; text-align: center; padding: 20px; font-size: 0.9rem; color: #c5c6c7; border-top: 1px solid rgba(102, 252, 241, 0.1); }
+
+        /* HESAP SİSTEMİ PANELI */
+        .account-overlay {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(11, 12, 16, 0.96); z-index: 20000;
+            display: flex; justify-content: center; align-items: center; padding: 20px;
+        }
+        .auth-box {
+            background-color: #1f2833; padding: 30px; border-radius: 10px;
+            border: 1px solid #66fcf1; box-shadow: 0 0 25px rgba(102, 252, 241, 0.2);
+            width: 100%; max-width: 420px; text-align: center;
+        }
+        .auth-box h2 { color: #66fcf1; margin-bottom: 20px; font-size: 1.6rem; text-transform: uppercase; }
+        .auth-box input, .sub-modal-content input {
+            width: 100%; padding: 12px; margin-bottom: 15px; background-color: #0b0c10;
+            border: 1px solid rgba(102, 252, 241, 0.3); color: #fff; border-radius: 5px; outline: none;
+        }
+        .auth-box input:focus, .sub-modal-content input:focus { border-color: #66fcf1; }
+        .auth-link { color: #66fcf1; cursor: pointer; text-decoration: underline; font-weight: bold; }
+        .captcha-box { display: flex; align-items: center; justify-content: space-between; background: #0b0c10; padding: 10px 15px; margin-bottom: 15px; border-radius: 5px; border: 1px solid rgba(102, 252, 241, 0.3); }
+
+        /* ADMIN PANEL LISTE GÖRÜNÜMÜ */
+        .admin-users-list {
+            max-height: 250px;
+            overflow-y: auto;
+            background: #0b0c10;
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 15px;
+        }
+        .admin-user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 0.85rem;
+        }
+        /* ========================================== */
+        /* 👥 ARKADAŞLIK SİSTEMİ GÖRSEL TASARIMI       */
+        /* ========================================== */
+        .friends-tab-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1f2833;
+            padding-bottom: 10px;
+        }
+
+        .friends-tab {
+            background: #0b0c10;
+            border: 1px solid rgba(102, 252, 241, 0.3);
+            color: #c5c6c7;
+            padding: 8px 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: all 0.2s ease;
+            flex: 1;
+            text-align: center;
+        }
+
+        .friends-tab.active {
+            background: #66fcf1;
+            color: #0b0c10;
+            box-shadow: 0 0 10px rgba(102, 252, 241, 0.4);
+            border-color: #66fcf1;
+        }
+
+        .friends-list-content {
+            display: none;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .friends-list-content.active {
+            display: block;
+        }
+
+        .friend-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: #0b0c10;
+            padding: 12px 15px;
+            border-radius: 6px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(102, 252, 241, 0.2);
+            transition: all 0.2s;
+        }
+
+        .friend-item:hover {
+            border-color: #66fcf1;
+            box-shadow: 0 0 8px rgba(102, 252, 241, 0.1);
+        }
+
+        .friend-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            text-align: left;
+        }
+
+        .friend-info strong {
+            color: #fff;
+            font-size: 0.95rem;
+        }
+
+        .friend-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Aksiyon Butonları */
+        .btn-action {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: transform 0.1s, background-color 0.2s;
+        }
+
+        .btn-action:active { transform: scale(0.95); }
+
+        .btn-add { background-color: #66fcf1; color: #0b0c10; }
+        .btn-add:hover { background-color: #45f3ff; }
+
+        .btn-accept { background-color: #2ecc71; color: #fff; }
+        .btn-accept:hover { background-color: #27ae60; }
+
+        .btn-reject { background-color: #e74c3c; color: #fff; }
+        .btn-reject:hover { background-color: #c0392b; }
+
+        .btn-cancel { background-color: #7f8c8d; color: #fff; }
+        .btn-cancel:hover { background-color: #95a5a6; }
+
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+    <div class="top-navbar">
+        <div class="lang-switcher-nav">
+    <button class="lang-btn active" id="btn-en" onclick="setLanguage('en'); renderRanksList();">EN</button>
+    <button class="lang-btn" id="btn-tr" onclick="setLanguage('tr'); renderRanksList();">TR</button>
+</div>
+
+        <div class="profile-nav-container" onclick="toggleProfileMenu()">
+            <div class="profile-summary">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Legends" class="profile-img" id="navAvatar" alt="Avatar">
+                <span class="profile-name" id="navProfileName">Not Logged In</span>
+            </div>
+            
+            <div class="profile-dropdown" id="profileDropdown">
+                <button class="menu-item" id="adminMenuBtn" style="display: none; background-color: #ff4d4d; color: #fff; font-weight: bold; border-radius: 5px; margin-bottom: 10px; text-align: center;" onclick="openSubModal('adminPanelModal')">👑 ADMIN PANEL</button>
+                
+                <h4 id="menu-title-acc">Account Settings</h4>
+                <button class="menu-item" onclick="openSubModal('changeAvatarModal')" id="m-avatar">Change Avatar</button>
+                <button class="menu-item" onclick="openSubModal('changeNameModal')" id="m-name">Change Username</button>
+                <button class="menu-item" onclick="openSubModal('changePassModal')" id="m-pass">Change Password</button>
+              <button class="menu-item" id="m-friends" style="color: #66fcf1; font-weight: bold;" onclick="openFriendsModal()">👥 Arkadaşlarım</button>
+                
+                <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
+                <button class="menu-item" style="color: #ff4d4d; font-weight: bold;" onclick="handleSignOut()" id="m-logout">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="account-overlay" id="accountOverlay">
+        <div class="auth-box">
+            <div id="loginForm">
+                <h2 id="auth-login-title">Login to Legends</h2>
+                <input type="email" id="loginEmail" placeholder="Email Address" required>
+                <input type="password" id="loginPass" placeholder="Password" required>
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleLogin()" id="btn-login-submit">Login</button>
+                <hr style="border-color: #0b0c10; margin: 20px 0;">
+                <p id="text-no-account" style="font-size:0.9rem;">Don't have an account? <span class="auth-link" onclick="switchAuth('register')">Register</span></p>
+                <p style="font-size:0.9rem; margin-top:10px;"><span class="auth-link" style="color: #c5c6c7;" onclick="guestLogin()" id="btn-guest-submit">Play as Guest (No Account)</span></p>
+            </div>
+
+            <div id="registerForm" style="display: none;">
+                <h2 id="auth-reg-title">Create New Account</h2>
+                <input type="email" id="regEmail" placeholder="Email Address" required>
+                <input type="text" id="regUser" placeholder="Username" required>
+                <input type="password" id="regPass" placeholder="Password" required>
+                <input type="password" id="regPassConfirm" placeholder="Confirm Password" required>
+                
+                <div class="captcha-box">
+                    <span id="captchaText">4 + 3 = ?</span>
+                    <input type="number" id="captchaInput" placeholder="Answer" style="margin: 0; width: 90px; padding: 8px;">
+                </div>
+
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleRegister()" id="btn-reg-submit">Register</button>
+                <hr style="border-color: #0b0c10; margin: 20px 0;">
+                <p id="text-have-account" style="font-size:0.9rem;">Already have an account? <span class="auth-link" onclick="switchAuth('login')">Login</span></p>
+            </div>
+        </div>
+    </div>
+
+    <div class="sub-modal" id="adminPanelModal">
+        <div class="sub-modal-content" style="max-width: 550px;">
+            <span class="close-sub" onclick="closeSubModal('adminPanelModal')">&times;</span>
+            <h3 style="color: #ff4d4d; margin-bottom: 15px;">👑 Legends - Admin Control Panel</h3>
+            <p style="font-size: 0.85rem; margin-bottom: 15px;">Aşağıdan kayıtlı tüm kullanıcıları görebilirsin.</p>
+            
+            <div class="admin-users-list" id="adminUsersContainer">
+                <p style="text-align:center; padding:20px; color:#aaa;" id="adminLoadingText">Yükleniyor...</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="sub-modal" id="changeAvatarModal">
+        <div class="sub-modal-content">
+            <span class="close-sub" onclick="closeSubModal('changeAvatarModal')">&times;</span>
+            <h3 id="sub-title-avatar">Select Profile Picture</h3>
+            <div style="display: flex; gap: 15px; justify-content: center; margin-top: 20px;">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Legends" class="profile-img" style="width: 60px; height: 60px;" onclick="selectAvatar('Legends')">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Shadow" class="profile-img" style="width: 60px; height: 60px;" onclick="selectAvatar('Shadow')">
+                <img src="https://api.dicebear.com/7.x/bottts/svg?seed=Warrior" class="profile-img" style="width: 60px; height: 60px;" onclick="selectAvatar('Warrior')">
+            </div>
+        </div>
+    </div>
+
+    <div class="sub-modal" id="changeNameModal">
+        <div class="sub-modal-content">
+            <span class="close-sub" onclick="closeSubModal('changeNameModal')">&times;</span>
+            <h3 id="sub-title-name">Change Username</h3>
+            <p id="sub-desc-name" style="font-size:0.8rem; color:#ff4d4d; margin-bottom:10px;">(You can only change your name once every 30 days.)</p>
+            <input type="text" id="newPlayerName" placeholder="New Username">
+            <button class="btn btn-primary" style="width:100%;" onclick="updatePlayerName()" id="btn-sub-name-submit">Update</button>
+        </div>
+    </div>
+
+    <div class="sub-modal" id="changePassModal">
+        <div class="sub-modal-content">
+            <span class="close-sub" onclick="closeSubModal('changePassModal')">&times;</span>
+            <h3 id="sub-title-pass">Update Password</h3>
+            <input type="password" id="oldPass" placeholder="Current Password">
+            <input type="password" id="newPass" placeholder="New Password">
+            <input type="password" id="newPassConfirm" placeholder="Confirm New Password">
+            <button class="btn btn-primary" style="width:100%;" onclick="updatePassword()" id="btn-sub-pass-submit">Update Password</button>
+        </div>
+    </div> 
+
+<div class="sub-modal" id="friendsModal">
+    <div class="sub-modal-content" style="max-width: 500px;">
+        <span class="close-sub" onclick="closeSubModal('friendsModal')">&times;</span>
+        <h3 id="friendsModalTitle" style="color: #66fcf1; margin-bottom: 15px; text-align: center;">👥 Arkadaşlık Sistemi</h3>
+        
+        <div class="friends-tab-container">
+            <button class="friends-tab data-lang-tab active" id="lblTabSearch" onclick="switchFriendsTab('tabSearch')">Arkadaş Ara</button>
+            <button class="friends-tab data-lang-tab" id="lblTabFriends" onclick="switchFriendsTab('tabFriends')">Arkadaşlar</button>
+            <button class="friends-tab data-lang-tab" id="lblTabPending" onclick="switchFriendsTab('tabPending')">Bekleyenler</button>
+        </div>
+
+        <div class="friends-list-content active" id="tabSearch">
+            <input type="text" id="friendSearchInput" oninput="searchPlayers()" style="margin-bottom: 10px;">
+            <div id="searchResultContainer"></div>
+        </div>
+
+        <div class="friends-list-content" id="tabFriends">
+            <div id="friendsListContainer"></div>
+        </div>
+
+        <div class="friends-list-content" id="tabPending">
+            <h4 id="lblIncomingReq" style="color: #66fcf1; font-size: 0.9rem; margin-bottom: 5px;">Gelen İstekler</h4>
+            <div id="incomingRequestsContainer" style="margin-bottom: 15px;"></div>
+            <h4 id="lblOutgoingReq" style="color: #f39c12; font-size: 0.9rem; margin-bottom: 5px;">Giden İstekler</h4>
+            <div id="outgoingRequestsContainer"></div>
+        </div>
+    </div>
+</div>
+
+    <div class="game-overlay" id="gameOverlay">
+        <div class="game-container">
+            <button class="close-game-btn" onclick="closeGame()" id="btn-close-game">X Close Game</button>
+            <iframe class="game-frame" id="gameFrame" src=""></iframe>
+        </div>
+    </div>
+
+  <div style="text-align: center; margin-top: 20px;">
+    <button id="btnRanksMenu" onclick="toggleRanksMenu()" style="background: linear-gradient(45deg, #ffd700, #ffb300); color: #000; font-weight: bold; border: none; padding: 12px 30px; font-size: 16px; border-radius: 8px; cursor: pointer; box-shadow: 0 0 15px rgba(255, 215, 0, 0.4); transition: transform 0.2s, box-shadow: 0 0 25px rgba(255, 215, 0, 0.7);">
+        👑 <span id="textRanksBtn">Rütbeler / Ranks</span>
+    </button>
+</div>
+
+<div id="ranksMenuOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; justify-content: center; align-items: center; padding: 20px; box-sizing: border-box;">
+    <div style="background: #111; border: 2px solid #ffd700; width: 100%; max-width: 600px; max-height: 85vh; border-radius: 12px; overflow-y: auto; padding: 20px; color: #fff; box-shadow: 0 0 30px rgba(255, 215, 0, 0.2); position: relative;">
+        
+        <h2 id="textRanksTitle" style="text-align: center; color: #ffd700; margin-top: 0; font-size: 22px; border-bottom: 2px solid #333; padding-bottom: 10px;">👑 SUNUCU RÜTBELERİ</h2>
+        
+        <span onclick="toggleRanksMenu()" style="position: absolute; top: 15px; right: 20px; color: #aaa; font-size: 28px; cursor: pointer; font-weight: bold;">&times;</span>
+        
+        <div id="ranksListContainer" style="margin-top: 15px;"></div>
+    </div>
+</div>
+
+    <header>
+        <h1>LEGENDS</h1>
+        <p id="hero-subtitle">Get Ready to Explore an Unique World!</p>
+        <div class="btn-container">
+            <button class="btn btn-primary" id="btn-download" onclick="openGame()">Play Game</button>
+            <a href="https://discord.gg/pC4d2hcv8D" target="_blank" class="btn btn-secondary" id="btn-discord">Join Discord Community</a>
+        </div>
+    </header>
+
+    <div class="container">
+        <section id="media">
+            <h2 id="title-media">In-Game Screenshots</h2>
+            <div class="gallery">
+                <div class="gallery-item">
+                    <img src="https://i.ibb.co/B2ZmF2x7/resim1.jpg" alt="Legends Screenshot 1">
+                    <p id="img-desc-1">World Generation and Core Details</p>
+                </div>
+                <div class="gallery-item">
+                    <img src="https://i.ibb.co/xtsD1BWd/resim2.png" alt="Legends Screenshot 2">
+                    <p id="img-desc-2">Advanced Hotbar and Inventory System</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <footer>
+        <p id="footer-text">&copy; 2026 Legends Game. All Rights Reserved.</p>
+    </footer>
+
+    <script>
+       // ==========================================
+        // 🔥 FIREBASE YAPILANDIRMASI 🔥
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAG6FsNjMgIXIGQmmmHC6GWjWuzNVDq5KM",
+            authDomain: "play-legends.firebaseapp.com",
+            projectId: "play-legends",
+            storageBucket: "play-legends.firebasestorage.app",
+            messagingSenderId: "64273518072",
+            appId: "1:64273518072:web:5c811f3c0862596ae19a0d",
+            measurementId: "G-96SNV1RDJG",
+            databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const database = firebase.database();
+
+        // 🛡️ GÜVENLİK AYARLARI VE YASAKLI İSİMLER
+        const ADMIN_EMAIL = "omerasaf243458@gmail.com"; 
+        const forbiddenNames = [
+            "Admin", "Moderator", "Mod", "Owner", "Kurucu", "Dream", 
+            "Technoblade", "Georgenotfound", "Sapnap", "Developer", "Yapimci", "System", "Lsplash", "Roblox", "Minecraft", "Vector", "Aphernix", "Adal", "Dogukan_Adal", "DogukanAdal", "PlayLegends", "Legends", "Notch", "Jeb", "Tommyinnit", "Philza", "Wilbursoot", "Tubbo", "Ranboo", "Quackity", "Purpled", "Punz", "Foolish", "Captainsparklez", "Dantdm", "Popularmmos", "Mrbeast",
+            "Enesbatur", "Kafalar", "Delimine", "Reynmen", "Orkunisitmak", "Ruhicenet", "Mervan", "Turgutekim", "Muratabigf", "Baturay", "Meryemcan", "Ndng",
+            "Buraoyunda", "Teasycat", "Tunca", "Eastergamersetv", "Meteozbey", "Pintiypanda", "Videoyun", "Gereksizoda", "Tersmaske", "Ismetrg", "Batuhancelik", "Adalyam", "Efecan", "Llorien", "R00t", "Bross", "Mami", "Mamiemen", "Berkmuhammet",
+            "Elraenn", "Tugkan", "Jahrein", "Ahmetsonuc", "Wtcn", "Ferit", "Kendinemuzisyen", "Kemalcan", "Unlost", "Cantug", "Mithrain", "Hypes", "Cagriergun", "Pqueen", "Pelerin", "Bblol", "Purplebixi", "Bahadir", "Swaggybark", "Rraenee", "Limontayfa", "BenFatik", "OguzAslan", "TheDevDude", "Yuukrp", "GamersTurk", "MaviSlime", "BaldiBack", "Beyaz_Kurt", "Kelly_da_Cheetah", "AT_Kafasi", "ViolinistGamer", "StudioHub_Games","Buradan_Gecen_Biri", "DS_STUDIOS", "ErdemDublaj", "Itsme64", "NotBlitzX", "Samet_Karatas", "Lizy", "Nahia", "Heronpuppy", "Mert_Gultas", "NUMACHER", "YunusLP", "KreekCraft", "BoraLo", "Alan_Becker", "Ters_Maske", "Wubzzy", "Parotter", "Alice", "Bot", "KanusMaximus", "Minecraft_Evi", "Mob_Entertainment", "itz_asx", "Legends_Official", "Plush", "Wither_Editsz", "joudaALT", "Bcb", "MineTrumps", "LegendDriver_HCR2YT", "Pyrox", "Yavuzito", "Lily", "YouTube", "Discord", "TikTok", "Instagram", "Telegram", "Capcut", "Whatsapp", "BrownieLogic", "Brownie_Logic", "NebulaDiscover", "Miniblox", "Fortnite", "PUBG", "SoloKup", "ChatGPT", "Gemini", "Grok", "Ai", "YandexAi", "Yandex", "Goggle", "Anderoid", "Apple", "Linux", "Windows", "Not_Senpai", "SmoothDude", "NYN", "Alpy", "Alp_YT", "KRP_kerim_TRY", "Lofi_Song", "CG5", "OPTIMUSPIRME", "Sleep", "OyunKardesleri", "Loqle", "Bifcan", "Mustfy", "Skibidi", "EAMR", "MehmetGHD", "Emir_Kaya", "Cimen_Adam", "EmirhanCTN", "YunusPE", "Wollech", "Erenn", "Ero", "Exe", "Buseadmin", "BeratGL", "DS_187", "Jeny_Punker", "Goktugv", "YusufTE", "Risty", "Armut", "Erenay_Bey", "OnlyAnimation", "Cinavar", "ChickenHolmes", "NUMCUK", "DOM_Studio", "MonsterGames", "MonsterGames_Series", "MonsterGames860", "MonsterGames_Studios", "TheLEGENDSOfMonsters", "PlayStation", "Xbox", "Nintendo", "Porno", "Porn", "Pornhub", "Pornohub", "XXX", "Xhamster", "Hentai", "Hitler", "Adolf_Hitler", "Nazi", "Gay", "Pic", "Oe", "Orrospu", "Gey", "Lord", "Sex", "Sexy", "S3x", "S3xy", "Valorant", "LeagueOfLegends", "LoL", "CSGO", "CS2", "CounterStrike", "BrawlStars", "ClashOfClans", "ClashRoyale", "AmongUs", "FallGuys", "Terraria", "GenshinImpact", "FiveM", "GrandTheftAuto", "GTA", "GTA5", "GTA6", "Cyberpunk", "Steam", "EpicGames", "EA_Sports", "UbiSoft", "Twitch", "Kick", "Spotify", "Netflix", "DisneyPlus", "Zoom", "Pinterest", "Reddit", "Twitter", "Facebook", "X_Com", "Threads", "Snapchat", "PewDiePie", "Markiplier", "Jacksepticeye", "Ninja", "Pokimane", "xQc", "KaiCenat", "IShowSpeed", "T-Series", "DudePerfect", "Hugola", "Porcay", "Kaanflix", "Saniye", "Post42", "FilmlerVeFilimler", "TunaAksen", "Tuna_Aksen", "MendeburLemur", "EkinKollama", "Ronaldo", "Cristiano", "Messi", "Neymar", "Mbappe", "LeBron", "ElonMusk", "Elon_Musk", "Zuckerberg", "JeffBezos", "Tarkan", "Hadise", "Sik", "Yarrak", "Yarak", "Amcik", "Got", "G0t", "Pezevenk", "Kahpe", "Sikis", "Sikismek", "Tassak", "Yavsak", "Pic", "Piic", "Kasar", "Kasarlar", "Surtuk", "Gavat", "Gevsek", "Kaltak", "Meme", "Amina", "Aminakoyim", "Amk", "Aq", "Ananci", "Fuck", "Fucker", "Bitch", "Ass", "Asshole", "Dick", "Pussy", "Cock", "Bastard", "Slut", "Whore", "Cunt", "Motherfucker", "Nigger", "Niga", "Anal", "Blowjob", "Deepthroat", "Masturbate", "Orgasm", "Hacker", "Cheater", "Exploiter", "AimBot", "WallHack", "DDOS", "DDoS_Attacker", "Crack", "Warez", "Weed", "Esrar", "Kokain", "Cocaine", "Eroin", "Heroin", "Meth", "Ecstasy", "Herobrine", "Null", "Entity303", "Entity_303", "Entity666", "Entity_666", "Lick", "GreenSteve", "RedSteve", "GiantAlex", "TheWatcher", "Error422", "Israphel", "WhiteEyes", "Farlander", "GlitchSteve", "Entity404", "Entity_404", "Bobby", "Sorrow", "Varek", "Sezar"
+        ];
+
+      const translations = {
+            en: {
+                heroSubtitle: "Get Ready to Explore an Unique World!",
+                btnDownload: "Play Game",
+                btnDiscord: "Join Discord Community",
+                btnCloseGame: "X Close Game",
+                titleMedia: "In-Game Screenshots",
+                imgDesc1: "World Generation and Core Details",
+                imgDesc2: "Advanced Hotbar and Inventory System",
+                footerText: "&copy; 2026 Legends Game. All Rights Reserved.",
+                navNoLogin: "Not Logged In",
+                menuTitleAcc: "Account Settings",
+                mAvatar: "Change Avatar",
+                mName: "Change Username",
+                mPass: "Change Password",
+                mLogout: "Logout",
+                authLoginTitle: "Login to Legends",
+                authRegTitle: "Create New Account",
+                btnLoginSubmit: "Login",
+                btnRegSubmit: "Register",
+                btnGuestSubmit: "Play as Guest",
+                textNoAccount: "Don't have an account? <span class='auth-link' onclick='switchAuth(\"register\")'>Register</span>",
+                textHaveAccount: "Already have an account? <span class='auth-link' onclick='switchAuth(\"login\")'>Login</span>",
+                errPassMatch: "Passwords do not match!", errCaptcha: "Incorrect captcha answer!", errLoginFail: "Invalid email or password!", msgRegSuccess: "Account created! Logging in...",
+              menuFriends: "👥 My Friends",
+        friendsTitle: "👥 Friendship System",
+        tabSearch: "Search Friends",
+        tabFriends: "Friends",
+        tabPending: "Pending",
+        searchPlaceholder: "Search player name...",
+        noFriends: "You don't have any friends yet.",
+        incomingReq: "Incoming Requests",
+        outgoingReq: "Outgoing Requests",
+        noIncoming: "No incoming requests.",
+        noOutgoing: "No outgoing pending requests.",
+        noPlayerFound: "Player not found.",
+        errGuestFriends: "You must log in to use the friendship system! Guest accounts cannot add friends.",
+        msgReqSent: "friend request sent to",
+        msgNowFriends: "is now your friend!",
+        confirmRemoveFriend: "Are you sure you want to remove this person from your friends?",
+        btnAccept: "Accept",
+        btnReject: "Reject",
+        btnAdd: "Add",
+        btnCancel: "Cancel Request",
+        btnRemove: "Unfriend"
+            },
+            tr: {
+                heroSubtitle: "Eşsiz Bir Dünyayı Keşfetmeye Hazır Ol!",
+                btnDownload: "Oyunu Oyna",
+                btnDiscord: "Discord Topluluğuna Katıl",
+                btnCloseGame: "X Oyunu Kapat",
+                titleMedia: "Oyun İçi Görseller",
+                imgDesc1: "Dünya Oluşturma ve İlk Detaylar",
+                imgDesc2: "Gelişmiş Hotbar ve Envanter Sistemi",
+                footerText: "&copy; 2026 Legends Game. Tüm Hakları Saklıdır.",
+                navNoLogin: "Giriş Yapılmadı",
+                menuTitleAcc: "Hesap Ayarları",
+                mAvatar: "Profil Resmini Değiştir",
+                mName: "Oyuncu Adını Değiştir",
+                mPass: "Şifreyi Değiştir",
+                mLogout: "Çıkış Yap",
+                authLoginTitle: "Legends Giriş",
+                authRegTitle: "Yeni Hesap Oluştur",
+                btnLoginSubmit: "Giriş Yap",
+                btnRegSubmit: "Kaydol",
+                btnGuestSubmit: "Misafir Girişi",
+                textNoAccount: "Hesabın yok mu? <span class='auth-link' onclick='switchAuth(\"register\")'>Kaydol</span>",
+                textHaveAccount: "Zaten hesabın var mı? <span class='auth-link' onclick='switchAuth(\"login\")'>Giriş Yap</span>",
+                errPassMatch: "Şifreler birbiriyle eşleşmiyor!", errCaptcha: "Bot doğrulaması hatalı!", errLoginFail: "Hatalı e-posta veya şifre!", msgRegSuccess: "Hesap başarıyla açıldı! Giriş yapılıyor...",
+              menuFriends: "👥 Arkadaşlarım",
+        friendsTitle: "👥 Arkadaşlık Sistemi",
+        tabSearch: "Arkadaş Ara",
+        tabFriends: "Arkadaşlar",
+        tabPending: "Bekleyenler",
+        searchPlaceholder: "Oyuncu adı ara...",
+        noFriends: "Henüz arkadaşınız yok.",
+        incomingReq: "Gelen İstekler",
+        outgoingReq: "Giden İstekler",
+        noIncoming: "Gelen istek yok.",
+        noOutgoing: "Giden bekleyen istek yok.",
+        noPlayerFound: "Oyuncu bulunamadı.",
+        errGuestFriends: "Arkadaşlık sistemini kullanabilmek için giriş yapmalısınız! Misafir hesaplar arkadaş ekleyemez.",
+        msgReqSent: "kullanıcısına arkadaşlık isteği gönderildi!",
+        msgNowFriends: "ile artık arkadaşsınız!",
+        confirmRemoveFriend: "Bu kişiyi arkadaşlarınızdan çıkarmak istediğinize emin misiniz?",
+        btnAccept: "Onayla",
+        btnReject: "Reddet",
+        btnAdd: "Ekle",
+        btnCancel: "İsteği Geri Al",
+        btnRemove: "Arkadaşlıktan Çıkar"
+            }
+        };
+
+        let isGuest = false;
+        let num1, num2;
+
+        function setLanguage(lang) {
+document.documentElement.lang = lang;            
+          document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+            document.getElementById('btn-tr').classList.toggle('active', lang === 'tr');
+            document.documentElement.lang = lang;
+            document.getElementById('hero-subtitle').innerText = translations[lang].heroSubtitle;
+            document.getElementById('btn-download').innerText = translations[lang].btnDownload;
+            document.getElementById('btn-discord').innerText = translations[lang].btnDiscord;
+            document.getElementById('btn-close-game').innerText = translations[lang].btnCloseGame;
+            document.getElementById('title-media').innerText = translations[lang].titleMedia;
+            document.getElementById('img-desc-1').innerText = translations[lang].imgDesc1;
+            document.getElementById('img-desc-2').innerText = translations[lang].imgDesc2;
+            document.getElementById('footer-text').innerHTML = translations[lang].footerText;
+            
+            // Profil menüsü başlıkları dil desteği güncellemesi
+            document.getElementById('menu-title-acc').innerText = translations[lang].menuTitleAcc;
+            document.getElementById('m-avatar').innerText = translations[lang].mAvatar;
+            document.getElementById('m-name').innerText = translations[lang].mName;
+            document.getElementById('m-pass').innerText = translations[lang].mPass;
+            document.getElementById('m-logout').innerText = translations[lang].mLogout;
+          // setLanguage fonksiyonunun en altına eklenecekler:
+if(document.getElementById('m-friends')) document.getElementById('m-friends').innerText = translations[lang].menuFriends;
+if(document.getElementById('friendsModalTitle')) document.getElementById('friendsModalTitle').innerText = translations[lang].friendsTitle;
+        }
+// Arkadaşlık Modalı Açma Kontrolü (Dil Destekli)
+function openFriendsModal() {
+    const lang = document.documentElement.lang || 'tr';
+    if (!auth.currentUser || isGuest) {
+        alert(translations[lang].errGuestFriends);
+        return;
+    }
+    
+    // Modal metinlerini anlık dile göre güncelle
+    document.getElementById('lblTabSearch').innerText = translations[lang].tabSearch;
+    document.getElementById('lblTabFriends').innerText = translations[lang].tabFriends;
+    document.getElementById('lblTabPending').innerText = translations[lang].tabPending;
+    document.getElementById('lblIncomingReq').innerText = translations[lang].incomingReq;
+    document.getElementById('lblOutgoingReq').innerText = translations[lang].outgoingReq;
+    document.getElementById('friendSearchInput').placeholder = translations[lang].searchPlaceholder;
+
+    openSubModal('friendsModal');
+    switchFriendsTab('tabSearch');
+    searchPlayers(); 
+    listenToFriendsAndRequests(); 
+}
+    
+function switchFriendsTab(tabId) {
+    const tabs = document.querySelectorAll('.friends-tab');
+    const contents = document.querySelectorAll('.friends-list-content');
+    
+    contents.forEach(content => content.classList.remove('active'));
+    tabs.forEach(tab => tab.classList.remove('active'));
+
+    document.getElementById(tabId).classList.add('active');
+    
+    if(tabId === 'tabSearch') tabs[0].classList.add('active');
+    if(tabId === 'tabFriends') tabs[1].classList.add('active');
+    if(tabId === 'tabPending') tabs[2].classList.add('active');
+}
+
+// 1. SEKME: OYUNCU ARAMA (Dil Dosyalarından Tamamen Bağımsız - Güvenli)
+function searchPlayers() {
+    const query = document.getElementById('friendSearchInput').value.toLowerCase().trim();
+    const container = document.getElementById('searchResultContainer');
+    const currentUid = auth.currentUser ? auth.currentUser.uid : null;
+
+    if (!currentUid) return;
+
+    database.ref('users').once('value', (snapshot) => {
+        container.innerHTML = '';
+        if(!snapshot.exists()) return;
+
+        let matchCount = 0;
+
+        snapshot.forEach((childSnapshot) => {
+            const targetUid = childSnapshot.key;
+            const userData = childSnapshot.val();
+
+            // Kendini ve admini listede gösterme
+            if(targetUid === currentUid || userData.email === ADMIN_EMAIL) return;
+            if(query !== "" && !userData.username.toLowerCase().includes(query)) return;
+
+            matchCount++;
+            
+            const item = document.createElement('div');
+            item.className = 'friend-item';
+            item.innerHTML = `
+                <div class="friend-info">
+                    <strong>${userData.username}</strong>
+                    <span style="font-size:0.75rem; color:#aaa;">${userData.role || 'Player'}</span>
+                </div>
+                <div class="friend-actions">
+                    <button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${userData.username}')">Ekle / Add</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+
+        if(matchCount === 0) {
+            container.innerHTML = `<p style="color:#aaa; text-align:center; padding:10px;">Oyuncu bulunamadı / No player found.</p>`;
+        }
+    });
+}
+
+// İSTEK GÖNDERME (Dil Nesnesini Pas Geçen - Asla Donmayan Sürüm)
+function sendFriendRequest(targetUid, targetUsername) {
+    const lang = document.documentElement.lang || 'tr';
+    const currentUid = auth.currentUser ? auth.currentUser.uid : null;
+    
+    if (!currentUid) {
+        alert("Lütfen önce giriş yapın!");
+        return;
+    }
+
+    // Profil ismini çek, bulamazsa Firebase'den al
+    let currentUsername = document.getElementById('navProfileName') ? document.getElementById('navProfileName').innerText : "Player";
+    if (currentUsername === "Not Logged In" || currentUsername === "Player") {
+        currentUsername = auth.currentUser.displayName || "Gamer";
+    }
+
+    // Firebase'e verileri yaz
+    database.ref(`friendRequests/${currentUid}/outgoing/${targetUid}`).set({
+        username: targetUsername,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    });
+
+    database.ref(`friendRequests/${targetUid}/incoming/${currentUid}`).set({
+        username: currentUsername,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    }).then(() => {
+        // translations kullanmadan doğrudan tarayıcı diline göre mesaj verir
+        if(lang === 'tr') {
+            alert(`${targetUsername} kullanıcısına arkadaşlık isteği gönderildi!`);
+        } else {
+            alert(`Friend request sent to ${targetUsername}!`);
+        }
+        searchPlayers();
+    }).catch((error) => {
+        console.error("Hata oluştu:", error);
+        alert("Hata: " + error.message);
+    });
+}
+
+// 2. VE 3. SEKME: DİNAMİK LİSTELEME
+function listenToFriendsAndRequests() {
+    const lang = document.documentElement.lang || 'tr';
+    const currentUid = auth.currentUser.uid;
+
+    // Gelen İstekler
+    database.ref(`friendRequests/${currentUid}/incoming`).on('value', (snapshot) => {
+        const container = document.getElementById('incomingRequestsContainer');
+        container.innerHTML = '';
+        if(!snapshot.exists()) {
+            container.innerHTML = `<p style="color:#aaa; font-size:0.85rem;">${translations[lang].noIncoming}</p>`;
+            return;
+        }
+        snapshot.forEach((child) => {
+            const senderUid = child.key;
+            const data = child.val();
+            const item = document.createElement('div');
+            item.className = 'friend-item';
+            item.innerHTML = `
+                <span><strong>${data.username}</strong></span>
+                <div class="friend-actions">
+                    <button class="btn-action btn-accept" onclick="acceptFriendRequest('${senderUid}', '${data.username}')">${translations[lang].btnAccept}</button>
+                    <button class="btn-action btn-reject" onclick="rejectFriendRequest('${senderUid}')">${translations[lang].btnReject}</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    });
+
+    // Giden İstekler
+    database.ref(`friendRequests/${currentUid}/outgoing`).on('value', (snapshot) => {
+        const container = document.getElementById('outgoingRequestsContainer');
+        container.innerHTML = '';
+        if(!snapshot.exists()) {
+            container.innerHTML = `<p style="color:#aaa; font-size:0.85rem;">${translations[lang].noOutgoing}</p>`;
+            return;
+        }
+        snapshot.forEach((child) => {
+            const targetUid = child.key;
+            const data = child.val();
+            const item = document.createElement('div');
+            item.className = 'friend-item';
+            item.innerHTML = `
+                <span>${data.username} <span style="color:#f39c12; font-size:0.8rem;">...</span></span>
+                <div class="friend-actions">
+                    <button class="btn-action btn-cancel" onclick="cancelFriendRequest('${targetUid}')">${translations[lang].btnCancel}</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    });
+
+    // Gerçek Arkadaşlar
+    database.ref(`friends/${currentUid}`).on('value', (snapshot) => {
+        const container = document.getElementById('friendsListContainer');
+        container.innerHTML = '';
+        if(!snapshot.exists()) {
+            container.innerHTML = `<p style="color:#aaa; text-align:center; padding:10px;">${translations[lang].noFriends}</p>`;
+            return;
+        }
+        snapshot.forEach((child) => {
+            const friendUid = child.key;
+            const data = child.val();
+            const item = document.createElement('div');
+            item.className = 'friend-item';
+            item.innerHTML = `
+                <span>🟢 <strong>${data.username}</strong></span>
+                <div class="friend-actions">
+                    <button class="btn-action btn-reject" onclick="removeFriend('${friendUid}')">${translations[lang].btnRemove}</button>
+                </div>
+            `;
+            container.appendChild(item);
+        });
+    });
+}
+
+function cancelFriendRequest(targetUid) {
+    const currentUid = auth.currentUser.uid;
+    database.ref(`friendRequests/${currentUid}/outgoing/${targetUid}`).remove();
+    database.ref(`friendRequests/${targetUid}/incoming/${currentUid}`).remove();
+}
+
+function rejectFriendRequest(senderUid) {
+    const currentUid = auth.currentUser.uid;
+    database.ref(`friendRequests/${currentUid}/incoming/${senderUid}`).remove();
+    database.ref(`friendRequests/${senderUid}/outgoing/${currentUid}`).remove();
+}
+
+function acceptFriendRequest(senderUid, senderUsername) {
+    const lang = document.documentElement.lang || 'tr';
+    const currentUid = auth.currentUser.uid;
+    const currentUsername = document.getElementById('nav-profile-name').innerText;
+
+    const updates = {};
+    updates[`friends/${currentUid}/${senderUid}`] = { username: senderUsername };
+    updates[`friends/${senderUid}/${currentUid}`] = { username: currentUsername };
+    
+    database.ref().update(updates).then(() => {
+        rejectFriendRequest(senderUid);
+        if(lang === 'tr') {
+            alert(`${senderUsername} ${translations[lang].msgNowFriends}`);
+        } else {
+            alert(`${senderUsername} ${translations[lang].msgNowFriends}`);
+        }
+    });
+}
+
+function removeFriend(friendUid) {
+    const lang = document.documentElement.lang || 'tr';
+    if(!confirm(translations[lang].confirmRemoveFriend)) return;
+    const currentUid = auth.currentUser.uid;
+    database.ref(`friends/${currentUid}/${friendUid}`).remove();
+    database.ref(`friends/${friendUid}/${currentUid}`).remove();
+}
+
+        function toggleProfileMenu() {
+            if(!auth.currentUser && !isGuest) {
+                document.getElementById('accountOverlay').style.display = 'flex';
+                return;
+            }
+            const drop = document.getElementById('profileDropdown');
+            drop.style.display = drop.style.display === 'block' ? 'none' : 'block';
+        }
+
+        function openSubModal(id) {
+            const lang = document.documentElement.lang || 'en';
+            if (isGuest && (id === 'changeAvatarModal' || id === 'changeNameModal' || id === 'changePassModal')) {
+                alert(lang === 'tr' ? "Misafir kullanıcılar bu özelliği kullanamaz! Lütfen kayıt olun." : "Guest users cannot use this feature! Please register.");
+                return;
+            }
+            if(id === 'adminPanelModal') { loadUsersForAdmin(); }
+            document.getElementById(id).style.display = 'flex';
+        }
+
+        function closeSubModal(id) {
+            document.getElementById(id).style.display = 'none';
+        }
+
+        function selectAvatar(seed) {
+            const url = `https://api.dicebear.com/7.x/bottts/svg?seed=${seed}`;
+            document.getElementById('navAvatar').src = url;
+            closeSubModal('changeAvatarModal');
+        }
+
+        function switchAuth(mode) {
+            document.getElementById('loginForm').style.display = mode === 'register' ? 'none' : 'block';
+            document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+            if(mode === 'register') generateCaptcha();
+        }
+
+        function generateCaptcha() {
+            num1 = Math.floor(Math.random() * 10) + 1;
+            num2 = Math.floor(Math.random() * 10) + 1;
+            document.getElementById('captchaText').innerText = `${num1} + ${num2} = ?`;
+        }
+
+        function checkAdminAndDatabase(user, customUsername) {
+            const adminPanelBtn = document.getElementById('adminMenuBtn');
+            // 'Developer' rütbesini admin panelini görebilecek yetkililer listesine ekledik!
+            const authorizedRoles = ['Admin', 'Mod', 'Helper', 'Developer', 'Admin / Developer', 'Owner / Developer'];
+
+            // 1. Kurucu e-posta kontrolü
+            if (user.email === ADMIN_EMAIL) {
+                database.ref('users/' + user.uid).update({
+                    username: customUsername || user.displayName || "Legends_Player",
+                    email: user.email,
+                    role: 'Owner / Developer'
+                }).then(() => {
+                    if (adminPanelBtn) adminPanelBtn.style.display = 'block';
+                });
+                return;
+            }
+
+            // 2. Veritabanından rütbe kontrolü
+            database.ref('users/' + user.uid).once('value', (snapshot) => {
+                if (snapshot.exists()) {
+                    const userData = snapshot.val();
+                    
+                    // Kullanıcının rütbesi listede varsa (Developer dahil) butonu göster
+                    if (userData.role && authorizedRoles.includes(userData.role)) {
+                        if (adminPanelBtn) adminPanelBtn.style.display = 'block';
+                    } else {
+                        if (adminPanelBtn) adminPanelBtn.style.display = 'none';
+                    }
+                } else {
+                    // Yeni oyuncu kaydı
+                    database.ref('users/' + user.uid).set({
+                        username: customUsername || user.displayName || "Legends_Player",
+                        email: user.email,
+                        role: 'Player'
+                    });
+                    if (adminPanelBtn) adminPanelBtn.style.display = 'none';
+                }
+            });
+        }
+
+        function handleRegister() {
+    const lang = document.documentElement.lang || 'en';
+    const email = document.getElementById('regEmail').value;
+    const regUser = document.getElementById('regUser').value.trim(); // Doğru değişken ismi
+    const pass = document.getElementById('regPass').value;
+    
+    // Şifre ve Captcha Kontrolleri
+    if (pass !== document.getElementById('regPassConfirm').value) { 
+        alert(translations[lang].errPassMatch); 
+        return; 
+    }
+    if (parseInt(document.getElementById('captchaInput').value) !== (num1 + num2)) { 
+        alert(translations[lang].errCaptcha); 
+        return; 
+    }
+
+    // Yasaklı İsim Kontrolü (Hatasız)
+    const lowerCaseForbidden = forbiddenNames.map(name => name.toLowerCase());
+    if (lowerCaseForbidden.includes(regUser.toLowerCase())) {
+        alert(lang === 'tr' ? "Bu kullanıcı adı koruma altındadır veya yasaklıdır! Başka bir isim deneyin." : "This username is protected or forbidden! Try another name.");
+        return;
+    }
+
+    // Kayıt Butonunu Geçici Olarak Kilitle (Çift tıklamayı engellemek için)
+    const regBtn = document.getElementById('btn-reg-submit');
+    regBtn.disabled = true;
+
+    // 🔥 Firebase Kayıt Başlangıcı
+    auth.createUserWithEmailAndPassword(email, pass)
+    .then((cred) => {
+        // Firebase Profil Güncelleme
+        return cred.user.updateProfile({ displayName: regUser }).then(() => {
+            // Veritabanına admin/oyuncu rolünü kaydetme
+            checkAdminAndDatabase(cred.user, regUser);
+            alert(translations[lang].msgRegSuccess);
+            location.reload();
+        });
+    })
+    .catch((err) => {
+        alert(err.message);
+        regBtn.disabled = false; // Hata durumunda butonu tekrar aç
+    });
+}
+
+        function handleLogin() {
+            const lang = document.documentElement.lang || 'en';
+            const email = document.getElementById('loginEmail').value;
+            const pass = document.getElementById('loginPass').value;
+            const loginBtn = document.getElementById('btn-login-submit');
+
+            if(!email || !pass) return;
+
+            loginBtn.disabled = true;
+            loginBtn.innerText = lang === 'tr' ? "GİRİŞ YAPILIYOR..." : "LOGGING IN...";
+
+            auth.signInWithEmailAndPassword(email, pass).then((cred) => {
+                checkAdminAndDatabase(cred.user);
+                document.getElementById('navProfileName').innerText = cred.user.displayName || "Player";
+                document.getElementById('accountOverlay').style.display = 'none';
+            }).catch((error) => {
+                console.error("Giriş Hatası:", error.code);
+                if (error.code === "auth/quota-exceeded") {
+                    alert(lang === 'tr' ? "Çok fazla giriş denemesi yapıldı! Lütfen internetinizi değiştirip tekrar deneyin." : "Too many login attempts! Please change your network.");
+                } else {
+                    alert(translations[lang].errLoginFail);
+                }
+            }).finally(() => {
+                loginBtn.disabled = false;
+                loginBtn.innerText = translations[lang].btnLoginSubmit;
+            });
+        }
+
+        // 📝 OYUNCU ADI DEĞİŞTİRME FONKSİYONU + 30 GÜN COOLDOWN SİSTEMİ
+        function updatePlayerName() {
+            const lang = document.documentElement.lang || 'en';
+            const newName = document.getElementById('newPlayerName').value.trim();
+            
+            if (!newName) return;
+            
+            const lowerCaseForbidden = forbiddenNames.map(name => name.toLowerCase());
+            if (lowerCaseForbidden.includes(newName.toLowerCase())) {
+                alert(lang === 'tr' ? "Bu kullanıcı adı koruma altındadır veya yasaklıdır! Başka bir isim deneyin." : "This username is protected or forbidden! Try another name.");
+                return;
+            }
+            
+            database.ref('users').once('value', (snapshot) => {
+                // ⏱️ 30 Günlük Cooldown Kontrolü
+                const currentUserData = snapshot.child(auth.currentUser.uid).val();
+                if (currentUserData && currentUserData.lastUsernameChange) {
+                    const lastChange = currentUserData.lastUsernameChange;
+                    const cooldown = 30 * 24 * 60 * 60 * 1000; // 30 günün milisaniye karşılığı
+                    
+                    if (Date.now() - lastChange < cooldown) {
+                        const daysLeft = Math.ceil((cooldown - (Date.now() - lastChange)) / (24 * 60 * 60 * 1000));
+                        alert(lang === 'tr' ? `Kullanıcı adını değiştirmek için ${daysLeft} gün beklemelisin!` : `You must wait ${daysLeft} days to change your username!`);
+                        return;
+                    }
+                }
+
+                // 🔍 Benzersizlik Kontrolü
+                let nameExists = false;
+                snapshot.forEach((childSnapshot) => {
+                    if (childSnapshot.val().username.toLowerCase() === newName.toLowerCase() && childSnapshot.key !== auth.currentUser.uid) {
+                        nameExists = true;
+                    }
+                });
+                
+                if (nameExists) {
+                    alert(lang === 'tr' ? "Bu kullanıcı adı zaten başka bir oyuncu tarafından alınmış!" : "This username is already taken by another player!");
+                    return;
+                }
+                
+                // 💾 Güncelleme ve Zaman Damgası Kaydı
+                auth.currentUser.updateProfile({ displayName: newName }).then(() => {
+                    database.ref('users/' + auth.currentUser.uid).update({
+                        username: newName,
+                        lastUsernameChange: Date.now() // Şu anki zamanı kaydet
+                    }).then(() => {
+                        document.getElementById('navProfileName').innerText = newName;
+                        alert(lang === 'tr' ? "Kullanıcı adın başarıyla güncellendi!" : "Your username has been successfully updated!");
+                        closeSubModal('changeNameModal');
+                        document.getElementById('newPlayerName').value = '';
+                    });
+                }).catch(err => alert(err.message));
+            });
+        }
+
+        function updatePassword() {
+            const lang = document.documentElement.lang || 'en';
+            const oldPass = document.getElementById('oldPass').value;
+            const newPass = document.getElementById('newPass').value;
+            const newPassConfirm = document.getElementById('newPassConfirm').value;
+            
+            if (!oldPass || !newPass || !newPassConfirm) return;
+            
+            if (newPass !== newPassConfirm) {
+                alert(translations[lang].errPassMatch);
+                return;
+            }
+            
+            const user = auth.currentUser;
+            const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPass);
+            
+            user.reauthenticateWithCredential(credential).then(() => {
+                return user.updatePassword(newPass);
+            }).then(() => {
+                alert(lang === 'tr' ? "Şifreniz başarıyla güncellendi!" : "Your password has been successfully updated!");
+                closeSubModal('changePassModal');
+                document.getElementById('oldPass').value = '';
+                document.getElementById('newPass').value = '';
+                document.getElementById('newPassConfirm').value = '';
+            }).catch((error) => {
+                console.error(error);
+                alert(lang === 'tr' ? "Şifre güncellenemedi! Mevcut şifrenizi doğru girdiğinizden emin olun." : "Failed to update password! Make sure your current password is correct.");
+            });
+        }
+
+        function loadUsersForAdmin() {
+            const container = document.getElementById('adminUsersContainer');
+            
+            database.ref('users').once('value', (snapshot) => {
+                container.innerHTML = '';
+                if(!snapshot.exists()) {
+                    container.innerHTML = '<p style="text-align:center; padding:20px; color:#aaa;">Henüz kayıtlı kullanıcı yok.</p>';
+                    return;
+                }
+                snapshot.forEach((childSnapshot) => {
+                    const userData = childSnapshot.val();
+                    const item = document.createElement('div');
+                    item.className = 'admin-user-item';
+                    
+                    // Rütbeye göre dinamik renk belirleme sistemi
+                    let roleColor = '#ffffff'; // Varsayılan: Beyaz (Player)
+                    const currentRole = userData.role || 'Player';
+
+                    if (currentRole === 'Owner / Developer' || currentRole === 'Admin / Developer') {
+                        roleColor = '#ff4d4d'; // Kırmızı
+                    } else if (currentRole === 'Developer') {
+                        roleColor = '#660000'; // Özel Developer Bordo/Kırmızı Rengi
+                    } else if (currentRole === 'Admin') {
+                        roleColor = '#0049ff'; // Koyu Mavi
+                    } else if (currentRole === 'Mod') {
+                        roleColor = '#ffeb3b'; // Sarı
+                    } else if (currentRole === 'Helper') {
+                        roleColor = '#66fcf1'; // Turkuaz
+                    } else if (currentRole === 'YouTube') {
+                        roleColor = '#e91e63'; // Pembe
+                    } else if (currentRole === 'Twitch') {
+    roleColor = '#6441a5'; // Twitch Moru
+} else if (currentRole === 'TikToker') {
+    roleColor = '#00f2fe'; // Neon Mavi
+} else if (currentRole === 'VIP') {
+    roleColor = '#ff9800'; // Turuncu
+} else if (currentRole === 'MVP') {
+    roleColor = '#9c27b0'; // Mor
+} else if (currentRole === 'Champion') {
+    roleColor = '#ffd700'; // Altın
+} else if (currentRole === 'Veteran') {
+    roleColor = '#4caf50'; // Yeşil
+} else if (currentRole === 'Beta Tester') {
+    roleColor = '#9e9e9e'; // Gri
+                    }
+
+                    // 🔒 GİZLİLİK KONTROLÜ: Owner ve Developer rütbelerinin e-postalarını sansürle
+                    let userEmail = userData.email || 'N/A';
+                    if (currentRole === 'Owner / Developer' ) {
+                        userEmail = '********@gmail.com'; // Hem Owner hem Developer e-postaları gizlendi!
+                    }
+
+                    item.innerHTML = `
+                        <div>
+                            <strong>${userData.username}</strong> (${userEmail})
+                        </div>
+                        <span style="color: ${roleColor}; font-weight: bold;">
+                            ${currentRole}
+                        </span>
+                    `;
+                    container.appendChild(item);
+                });
+            }).catch((error) => {
+                container.innerHTML = `<p style="text-align:center; padding:20px; color:#ff4d4d; font-weight:bold;">❌ ERİŞİM ENGELLENDİ: Güvenlik Duvarı Reddetti!</p>`;
+            });
+        }
+
+      // Rütbeler menüsünü açıp kapatan fonksiyon
+function toggleRanksMenu() {
+    const overlay = document.getElementById('ranksMenuOverlay');
+    if (!overlay) return;
+    
+    if (overlay.style.display === 'none' || overlay.style.display === '') {
+        overlay.style.display = 'flex';
+        renderRanksList(); // Menü açılınca o anki dile göre listeyi doldur
+    } else {
+        overlay.style.display = 'none';
+    }
+}
+
+// Çift dil destekli rütbeleri ekrana basan fonksiyon
+function renderRanksList() {
+    const container = document.getElementById('ranksListContainer');
+    if (!container) return;
+    
+    // Sitenin o anki aktif dilini belgenin etiketinden veya ana değişkenden en garanti yolla alıyoruz:
+    const currentLang = document.documentElement.lang || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'tr');
+    
+    const btnText = document.getElementById('textRanksBtn');
+    const titleText = document.getElementById('textRanksTitle');
+    
+    if(currentLang === 'en') {
+        if(btnText) btnText.innerText = "Ranks";
+        if(titleText) titleText.innerText = "👑 SERVER RANKS";
+    } else {
+        if(btnText) btnText.innerText = "Rütbeler";
+        if(titleText) titleText.innerText = "👑 SUNUCU RÜTBELERİ";
+    }
+
+    const ranksData = [
+        { name: "Owner / Developer", color: "#ff4d4d", desc: { tr: "Proje Kurucusu ve Baş Geliştirici", en: "Project Founder and Lead Developer" }, get: { tr: "Alınamaz", en: "Unobtainable" } },
+        { name: "Admin / Developer", color: "#ff4d4d", desc: { tr: "Yönetim yetkisine sahip Sistem Geliştiricisi", en: "System Developer with management authority" }, get: { tr: "Geliştirici ekibine katılarak alınır", en: "By joining the development team" } },
+        { name: "Developer", color: "#660000", desc: { tr: "Oyun ve site kodlamasından sorumlu yazılımcı", en: "Developer responsible for game and site coding" }, get: { tr: "Başvuru ve teknik mülakat ile alınır", en: "Through application and technical interview" } },
+        { name: "Admin", color: "#0049ff", desc: { tr: "Sunucu düzeni ve genel yönetimden sorumlu üst düzey yetkili", en: "High-level official responsible for server order and general management" }, get: { tr: "Yönetim kadrosu kararıyla yükseltilir", en: "Promoted by management decision" } },
+        { name: "Mod", color: "#ffeb3b", desc: { tr: "Oyun içi düzeni sağlayan, kuralları uygulayan moderatör", en: "Moderator who maintains in-game order and enforces rules" }, get: { tr: "Moderatör başvuruları ile alınır", en: "Through moderator applications" } },
+        { name: "Helper", color: "#66fcf1", desc: { tr: "Oyuncuların sorularını yanıtlayan, destek olan yardımcı", en: "Helper who answers players' questions and provides support" }, get: { tr: "Rehberlik başvuruları ile alınır", en: "Through helper applications" } },
+        { name: "Beta Tester", color: "#9e9e9e", desc: { tr: "Hataları (bug) test eden ve gelişim sürecine destek olan kişi", en: "Person who tests bugs and supports the development process" }, get: { get: "Oyun test süreçlerine aktif katılarak alınır", en: "By actively participating in game test phases" } },
+        { name: "YouTube", color: "#e91e63", desc: { tr: "YouTube platformunda oyunu tanıtan içerik üreticisi unvanı", en: "Content creator title promoting the game on YouTube" }, get: { tr: "Belirli bir bilet ve izlenme sınırı ile alınır", en: "Obtained with a certain subscriber and view limit" } },
+        { name: "Twitch", color: "#6441a5", desc: { tr: "Twitch üzerinde oyun canlı yayınları açan yayıncı unvanı", en: "Streamer title opening game live streams on Twitch" }, get: { tr: "Düzenli Legends yayını açarak alınır", en: "By regularly streaming Legends" } },
+        { name: "Tiktoker", color: "#00f2fe", desc: { tr: "TikTok platformunda Legends videoları üreten içerik üreticisi", en: "Content creator producing Legends videos on TikTok" }, get: { tr: "Keşfet etkileşimi ve video şartıyla alınır", en: "Obtained via algorithm reach and video requirements" } },
+        { name: "MVP", color: "#9c27b0", desc: { tr: "Sunucuya en üst düzey maddi veya aktiflik desteği veren üye", en: "Member providing top-tier financial or activity support to the server" }, get: { tr: "Mağaza destekleri veya etkinliklerle alınır", en: "Through store support or special events" } },
+        { name: "VIP", color: "#ff9800", desc: { tr: "Sunucuya özel katkıda bulunmuş seçkin topluluk üyesi", en: "Distinguished community member who made special contributions" }, get: { tr: "Özel destekçi paketleri ile alınır", en: "Through special supporter packages" } },
+        { name: "Champion", color: "#ffd700", desc: { tr: "Resmi Legends turnuvalarında şampiyonluk kazanan oyuncu", en: "Player who won a championship in official Legends tournaments" }, get: { tr: "Turnuvalarda 1. olarak alınır", en: "By placing 1st in tournaments" } },
+        { name: "Veteran", color: "#4caf50", desc: { tr: "Oyunun ilk çıkışından (Indev) beri oynayan emektar oyuncu", en: "Veteran player who has been playing since the initial release (Indev)" }, get: { tr: "Çok eski bir kayıt tarihine sahip olarak alınır", en: "By having a very old registration date" } }
+    ];
+    
+    container.innerHTML = '';
+    
+    ranksData.forEach((rank) => {
+        const item = document.createElement('div');
+        item.style.background = '#1c1c1c';
+        item.style.borderLeft = `4px solid ${rank.color}`;
+        item.style.margin = '12px 0';
+        item.style.padding = '14px';
+        item.style.borderRadius = '0 6px 6px 0';
+        item.style.display = 'flex';
+        item.style.flexDirection = 'column'; // Elemanları alt alta dizerek taşmayı önlüyoruz
+        item.style.gap = '8px';
+        
+        const activeDesc = currentLang === 'en' ? rank.desc.en : rank.desc.tr;
+        const activeGet = currentLang === 'en' ? rank.get.en : rank.get.tr;
+        const howToGetLabel = currentLang === 'en' ? "How to Get" : "Nasıl Alınır";
+        
+        item.innerHTML = `
+            <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;">
+                <span style="color: ${rank.color}; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">${rank.name}</span>
+                <span style="font-size: 11px; background: rgba(51, 51, 51, 0.6); padding: 4px 10px; border-radius: 6px; color: #ffd700; border: 1px solid rgba(255,215,0,0.2); white-space: normal; word-break: break-word;">
+                    🔨 ${howToGetLabel}: ${activeGet}
+                </span>
+            </div>
+            <div style="color: #bbb; font-size: 13px; line-height: 1.5; border-top: 1px solid #2a2a2a; padding-top: 6px;">
+                ${activeDesc}
+            </div>
+        `;
+        container.appendChild(item);
+    });
+}
+
+        function guestLogin() {
+            isGuest = true;
+            const gName = `Guest_${Math.floor(1000 + Math.random() * 9000)}`;
+            document.getElementById('navProfileName').innerText = gName;
+            document.getElementById('accountOverlay').style.display = 'none';
+        }
+
+        function handleSignOut() {
+            auth.signOut().then(() => { location.reload(); });
+        }
+
+        function openGame() {
+            const playerName = document.getElementById('navProfileName').innerText;
+            const overlay = document.getElementById('gameOverlay');
+            const iframe = document.getElementById('gameFrame');
+            
+            overlay.style.display = 'block';
+            iframe.src = 'game.html';
+
+            iframe.onload = () => {
+                try {
+                    iframe.contentWindow.postMessage({
+                        type: 'SET_USERNAME',
+                        username: playerName
+                    }, '*');
+                } catch (e) {
+                    console.error("İsim gönderilemedi, iframe henüz hazır değil.");
+                }
+            };
+        }
+
+        function closeGame() {
+            document.getElementById('gameOverlay').style.display = 'none';
+            document.getElementById('gameFrame').src = ''; 
+        }
+        // --- AUTH DURUM TAKİBİ (ÇÖKME KORUMALI) ---
+        auth.createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        const user = userCredential.user;
+        
+        // 1. Önce kullanıcının profilindeki displayName (Kullanıcı Adı) kısmını güncelliyoruz
+        return user.updateProfile({
+            displayName: username
+        }).then(() => {
+            // Profil güncellemesi BAŞARIYLA BİTTİKTEN SONRA veritabanına yazıyoruz
+            return database.ref('users/' + user.uid).set({
+                username: username, // Artık null değil, kesinlikle girilen isim yazılacak
+                email: email,
+                role: "player",
+                status: "online",
+                createdAt: Date.now()
+            });
+        });
+    })
+    .then(() => {
+        alert("Account created successfully!");
+        // Kayıt başarılı olunca overlay'i kapatabilirsiniz
+        document.getElementById('accountOverlay').style.display = 'none';
+    })
+    .catch((error) => {
+        console.error("Kayıt hatası:", error);
+        alert(error.message);
+    });
+
+        setLanguage('en');
+    </script>
+</body>
+</html>

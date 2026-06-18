@@ -1,0 +1,3306 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<title>Legends Indev v1.3 - Perlin World - Fix v1.34</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:monospace}
+#menu-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;}
+.menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px;max-height:95vh;overflow-y:auto;}
+.menu-screen.active{display:flex;}
+.game-logo{font-size:34px;font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:2px;margin-bottom:4px;}
+.game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
+.mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
+.mbtn:hover{filter:brightness(1.2);}
+.mbtn:active{border-top-color:#1a1a1a;border-left-color:#1a1a1a;border-bottom-color:#7a7a7a;border-right-color:#7a7a7a;filter:brightness(.9);}
+.mbtn:disabled,.mbtn.disabled{opacity:.4;cursor:not-allowed;filter:none!important;}
+.mbtn.back{background:linear-gradient(180deg,#3a3a3a,#222);font-size:12px;padding:9px;margin-top:14px;width:55%;}
+.mbtn.primary{background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border-top-color:#4a8acf;border-left-color:#4a8acf;border-bottom-color:#0a1a4f;border-right-color:#0a1a4f;}
+.mbtn.quit-btn{background:linear-gradient(180deg,#9f2a2a,#7a1a1a);border-top-color:#cf4a4a;border-left-color:#cf4a4a;border-bottom-color:#4f0a0a;border-right-color:#4f0a0a;}
+.world-cards,.device-cards,.mp-cards{display:flex;gap:12px;width:100%;margin-bottom:4px;}
+.world-card,.device-card,.mp-card{flex:1;padding:14px 10px;background:linear-gradient(180deg,#2a3a4a,#1a2a3a);border:3px solid #3a4a5a;border-radius:6px;cursor:pointer;transition:border-color .15s,transform .1s;text-align:center;}
+.world-card:hover,.device-card:hover,.mp-card:hover{border-color:#75a7ff;transform:translateY(-2px);}
+.world-card:active,.device-card:active,.mp-card:active{transform:translateY(0);}
+.world-card .wc-icon,.device-card .dc-icon,.mp-card .mc-icon{font-size:26px;margin-bottom:6px;}
+.world-card .wc-title,.device-card .dc-title,.mp-card .mc-title{font-size:13px;font-weight:bold;color:#fff;margin-bottom:3px;}
+.world-card .wc-desc{font-size:9px;color:rgba(255,255,255,.5);line-height:1.4;}
+.mp-card.disabled-card{opacity:.4;cursor:not-allowed;}
+.mp-card.disabled-card:hover{border-color:#3a4a5a;transform:none;}
+.screen-title{font-size:12px;color:rgba(255,255,255,.4);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;}
+.sub-title{font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin:5px 0 3px;}
+#lang-select{position:absolute;top:16px;right:20px;font-size:14px;font-weight:bold;color:#fff;z-index:1010;background:rgba(0,0,0,.4);padding:5px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.2);}
+.lang-opt{cursor:pointer;opacity:.4;padding:2px 5px;}
+.lang-opt.active{opacity:1;color:#75a7ff;}
+.menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
+.menu-input::placeholder{letter-spacing:1px;color:rgba(255,255,255,.3);}
+.menu-input:focus{border-color:rgba(117,167,255,.6);}
+.name-input{letter-spacing:1px;text-align:left;font-size:13px;}
+.code-display{font-size:38px;font-weight:bold;letter-spacing:10px;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;margin:4px 0 2px;font-family:monospace;}
+.code-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.mini-cards{display:flex;gap:8px;width:100%;margin:3px 0 5px;}
+.mini-card{flex:1;padding:8px 6px;background:linear-gradient(180deg,#1e2e3e,#121e2e);border:2px solid #2a3a4a;border-radius:5px;cursor:pointer;text-align:center;transition:border-color .15s;}
+.mini-card.sel{border-color:#75a7ff;background:linear-gradient(180deg,#1a3055,#0e1e3e);}
+.mini-card:hover:not(.sel){border-color:#4a6a8a;}
+.mini-card .mc2-icon{font-size:15px;margin-bottom:2px;}
+.mini-card .mc2-title{font-size:9px;font-weight:bold;color:#fff;}
+.status-msg{font-size:11px;color:rgba(255,255,255,.55);margin:3px 0;min-height:14px;text-align:center;}
+.setting-row{width:100%;display:flex;align-items:center;justify-content:space-between;margin:6px 0;padding:8px 10px;background:rgba(0,0,0,.3);border-radius:5px;}
+.setting-label{font-size:12px;color:#ccc;}
+.setting-value{font-size:12px;color:#75a7ff;font-weight:bold;}
+.setting-row input[type=range]{width:55%;accent-color:#75a7ff;}
+.kb-list{width:100%;max-height:200px;overflow-y:auto;margin:4px 0 8px;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
+.kb-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:6px 10px;background:rgba(0,0,0,.22);border-radius:4px;margin:2px 0;}
+.kb-label{font-size:12px;color:#ccc;}
+.kb-key{font-size:11px;color:#75a7ff;font-weight:bold;background:rgba(117,167,255,.12);padding:3px 8px;border-radius:3px;border:1px solid rgba(117,167,255,.3);}
+#game-title{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#fff;font-size:15px;font-weight:bold;text-shadow:2px 2px #000;z-index:10;pointer-events:none;display:none;}
+#crosshair{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);color:#fff;font-size:24px;font-weight:bold;display:none;justify-content:center;align-items:center;pointer-events:none;z-index:10;text-shadow:1px 1px #000;}
+#mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
+#bars-wrap{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:3px;z-index:11;pointer-events:none;}
+.bar-row{display:flex;gap:2px;}
+.hrt,.hnr{font-size:13px;line-height:1;text-shadow:1px 1px #000;}
+#water-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:15;opacity:0;transition:opacity .35s ease;background:
+  radial-gradient(ellipse at center, rgba(40,110,200,0) 45%, rgba(30,90,180,.35) 78%, rgba(15,55,120,.65) 100%),
+  linear-gradient(rgba(40,120,220,.18), rgba(40,120,220,.18));
+  box-shadow:inset 0 0 140px 40px rgba(20,80,170,.55);}
+#joystick-container{position:absolute;bottom:35px;left:45px;width:120px;height:120px;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.25);border-radius:50%;display:none;justify-content:center;align-items:center;z-index:10;touch-action:none;}
+#joystick-thumb{width:50px;height:50px;background:rgba(255,255,255,.92);border-radius:50%;position:absolute;box-shadow:0 4px 10px rgba(0,0,0,.3);}
+#mobile-jump-container{position:absolute;bottom:35px;right:45px;display:none;z-index:10;flex-direction:column;gap:8px;align-items:flex-end;}
+.btn{width:55px;height:55px;background:rgba(0,0,0,.45);border:2px solid #fff;border-radius:8px;color:#fff;font-size:11px;font-weight:bold;display:flex;justify-content:center;align-items:center;}
+#btn-mobile-jump{width:90px;height:58px;font-size:13px;background:rgba(0,100,250,.5);border-color:#77c8ff;border-radius:12px;}
+#btn-mobile-crouch{width:70px;height:42px;background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.6);border-radius:10px;}
+#hotbar{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);display:none;background:rgba(0,0,0,.65);padding:5px;border-radius:12px;border:2px solid #fff;z-index:100;gap:4px;max-width:90vw;box-shadow:0 4px 15px rgba(0,0,0,.5);}
+.hotbar-slot{width:50px;height:50px;background:rgba(255,255,255,.1);border:2px solid #aaa;border-radius:6px;overflow:hidden;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all .15s;}
+.hotbar-slot canvas{width:100%;height:100%;image-rendering:pixelated;}
+.hotbar-slot.active{border-color:#75a7ff;background:rgba(117,167,255,.3);box-shadow:0 0 10px #75a7ff;}
+#mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:monospace;cursor:pointer;letter-spacing:1px;}
+#error-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,40,40,.95);color:#fff;padding:20px;border-radius:12px;text-align:center;z-index:1100;border:2px solid #fff;display:none;}
+/* ─── Kırma Çatlak Overlay ─── */
+#break-overlay{position:absolute;pointer-events:none;z-index:30;display:none;border:2px solid rgba(0,0,0,0.6);box-sizing:border-box;}
+#break-overlay canvas{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.7;}
+#pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.72);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:900;color:#fff;}
+#pause-overlay.active{display:flex;}
+#pause-box{display:flex;flex-direction:column;align-items:center;width:100%;max-width:320px;padding:0 24px;}
+#pause-title{font-size:19px;font-weight:bold;color:#75a7ff;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;text-shadow:0 0 12px rgba(117,167,255,.5),2px 2px #000;}
+#pause-version{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:18px;}
+.pause-setting{width:100%;display:flex;align-items:center;justify-content:space-between;margin:4px 0;padding:7px 10px;background:rgba(255,255,255,.06);border-radius:5px;font-size:12px;color:#ccc;}
+.pause-setting input[type=range]{width:50%;accent-color:#75a7ff;}
+.pause-setting span.val{color:#75a7ff;font-weight:bold;min-width:20px;text-align:right;}
+#chat-container{position:absolute;bottom:90px;left:10px;width:300px;max-width:calc(100vw - 20px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
+#chat-log{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;}
+#chat-log::-webkit-scrollbar{display:none;}
+.chat-msg{color:#fff;font-size:12px;font-family:monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
+.chat-msg.sys{color:#acd4ff;}
+.chat-msg.srv{color:#2effdc;}
+.chat-msg.warn{color:#ffbb44;}
+#chat-input-row{display:none;margin-top:4px;pointer-events:all;}
+#chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
+#chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
+#btn-mobile-chat{position:absolute;bottom:118px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:16px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
+#death-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(180,0,0,0.52);z-index:850;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding-top:18%;}
+#death-screen.active{display:flex;}
+#death-title{font-size:44px;font-weight:bold;color:#fff;text-shadow:0 0 24px rgba(255,0,0,.9),3px 3px #000;letter-spacing:5px;margin-bottom:12px;font-family:monospace;}
+#death-msg{font-size:18px;color:#fff;text-shadow:2px 2px #000;margin-bottom:28px;background:rgba(0,0,0,0.5);padding:6px 20px;border-radius:30px;font-family:monospace;}
+#btn-respawn{padding:14px 32px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:16px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;letter-spacing:2px;}
+#btn-respawn:hover{filter:brightness(1.2);}
+#ban-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(60,0,0,0.95);z-index:960;display:none;flex-direction:column;justify-content:center;align-items:center;}
+#ban-screen.active{display:flex;}
+#ban-title{font-size:36px;font-weight:bold;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:monospace;text-align:center;padding:0 20px;}
+#ban-by{font-size:14px;color:rgba(255,190,190,.75);text-shadow:1px 1px #000;font-family:monospace;margin-bottom:28px;}
+#btn-ban-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-ban-menu:hover{filter:brightness(1.2);}
+#kick-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(20,20,60,0.95);z-index:960;display:none;flex-direction:column;justify-content:center;align-items:center;}
+#kick-screen.active{display:flex;}
+#kick-title{font-size:36px;font-weight:bold;color:#ffaa44;text-shadow:0 0 30px rgba(255,160,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:monospace;text-align:center;padding:0 20px;}
+#kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:monospace;margin-bottom:28px;}
+#btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-kick-menu:hover{filter:brightness(1.2);}
+#inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:800;color:#fff;}
+#inv-overlay.active{display:flex;}
+#inv-box{background:rgba(12,18,30,.97);border:2px solid rgba(117,167,255,.35);border-radius:10px;padding:16px 18px;max-width:660px;width:96%;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;}
+#inv-title{font-size:17px;font-weight:bold;letter-spacing:5px;color:#75a7ff;text-shadow:0 0 12px rgba(117,167,255,.5);margin-bottom:8px;}
+.inv-section-label{font-size:9px;letter-spacing:3px;color:rgba(255,255,255,.35);text-align:left;width:100%;margin:4px 0 6px;}
+#inv-grid{display:grid;grid-template-columns:repeat(9,1fr);gap:4px;width:100%;margin-bottom:8px;}
+.inv-item{display:flex;flex-direction:column;align-items:center;padding:5px 2px 3px;background:rgba(255,255,255,.06);border:2px solid rgba(255,255,255,.12);border-radius:5px;cursor:pointer;transition:border-color .1s;}
+.inv-item:hover{border-color:rgba(117,167,255,.45);}
+.inv-item.selected{border-color:#75a7ff;background:rgba(117,167,255,.18);}
+.inv-item canvas{width:40px;height:40px;image-rendering:pixelated;}
+.inv-item-name{font-size:7px;color:rgba(255,255,255,.6);margin-top:2px;text-align:center;line-height:1.1;}
+#inv-hint{font-size:8px;color:rgba(255,255,255,.32);letter-spacing:.5px;text-align:center;margin:4px 0 8px;font-family:monospace;}
+#inv-hotbar-row{display:flex;gap:4px;width:100%;justify-content:center;margin-bottom:5px;}
+.inv-hslot{display:flex;flex-direction:column;align-items:center;padding:4px 2px 3px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);border-radius:5px;cursor:pointer;flex:1;max-width:58px;transition:border-color .1s;}
+.inv-hslot:hover{border-color:rgba(117,167,255,.5);}
+.inv-hslot canvas{width:38px;height:38px;image-rendering:pixelated;}
+.inv-hslot-num{font-size:8px;color:rgba(255,255,255,.38);margin-bottom:1px;}
+.inv-hslot-name{font-size:7px;color:rgba(255,255,255,.55);margin-top:2px;text-align:center;}
+#inv-close-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:5px;font-family:monospace;}
+#btn-mobile-inv{position:absolute;bottom:164px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:14px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
+body.low-health::after {
+    content: '';
+      position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    box-shadow: inset 0 0 80px rgba(0,0,0,0.7);
+    z-index: 999;
+}
+@media(max-width:768px){
+  #hotbar{bottom:15px;padding:3px;gap:2px;width:94%;max-width:360px;justify-content:center;}
+  .hotbar-slot{width:10%;height:36px;border-radius:4px;border:1px solid #aaa;}
+  .hotbar-slot.active{border:1.5px solid #75a7ff;}
+  #joystick-container{width:100px;height:100px;bottom:25px;left:25px;}
+  #joystick-thumb{width:42px;height:42px;}
+  #btn-mobile-jump{width:80px;height:54px;font-size:12px;}
+  #mobile-jump-container{bottom:25px;right:25px;}
+  .world-cards,.device-cards,.mp-cards{flex-direction:column;}
+  .game-logo{font-size:26px;}
+  #chat-container{bottom:76px;}
+  #chat-hint{bottom:55px;}
+  #btn-mobile-chat{bottom:100px;right:25px;}
+  #btn-mobile-inv{bottom:145px;right:25px;}
+  #bars-wrap{bottom:76px;}
+  #inv-grid{grid-template-columns:repeat(5,1fr);}
+  #inv-hotbar-row{gap:3px;flex-wrap:wrap;}
+  .inv-hslot{max-width:36px;}
+}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/three@0.128.0/build/three.min.js';document.head.appendChild(s);"></script>
+<script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s);"></script>
+</head>
+<body>
+<div id="error-msg"><h3></h3><p style="font-size:12px;margin-top:8px;opacity:.9"></p></div>
+<div id="break-overlay"><canvas id="break-canvas" width="64" height="64"></canvas></div>
+<div id="menu-overlay">
+  <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
+  <div class="menu-screen active" id="screen-main">
+    <div class="game-logo" id="txt-title">LEGENDS INDEV</div>
+    <div class="game-version">v1.3 - Perlin World</div>
+    <button class="mbtn primary" id="btn-singleplayer"></button>
+    <button class="mbtn" id="btn-multiplayer"></button>
+    <button class="mbtn" id="btn-settings"></button>
+  </div>
+  <div class="menu-screen" id="screen-settings">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-settings-title">AYARLAR</div>
+    <div class="device-cards">
+      <div class="device-card" id="btn-settings-pc"><div class="dc-icon">🖥️</div><div class="dc-title" id="txt-settings-pc-btn">PC AYARLARI</div></div>
+      <div class="device-card" id="btn-settings-mobile"><div class="dc-icon">📱</div><div class="dc-title" id="txt-settings-mobile-btn">MOBİL AYARLAR</div></div>
+    </div>
+    <button class="mbtn back" id="btn-back-settings"></button>
+  </div>
+  <div class="menu-screen" id="screen-pc-settings">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-pc-settings-title">PC AYARLARI</div>
+    <div class="setting-row">
+      <span class="setting-label" id="txt-sens-pc-label">Hassasiyet</span>
+      <input type="range" id="sens-pc-slider" min="1" max="30" value="10" step="1">
+      <span class="setting-value" id="sens-pc-val">1.0</span>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label" id="txt-fov-pc-label">Görüş Açısı (FOV)</span>
+      <input type="range" id="fov-pc-slider" min="50" max="120" value="70">
+      <span class="setting-value" id="fov-pc-val">70</span>
+    </div>
+    <div class="sub-title" id="txt-keybinds">TUŞ ATAMALARI</div>
+    <div class="kb-list">
+      <div class="kb-row"><span class="kb-label" id="kb-forward">İleri</span><span class="kb-key">W / ↑</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-back">Geri</span><span class="kb-key">S / ↓</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-left">Sol</span><span class="kb-key">A / ←</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-right">Sağ</span><span class="kb-key">D / →</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-jump">Zıpla</span><span class="kb-key">SPACE</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-slot">Slot Seç</span><span class="kb-key">1-9</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-break">Blok Kır</span><span class="kb-key">LMB</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-place">Blok Koy</span><span class="kb-key">RMB</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-chat">Sohbet</span><span class="kb-key">ENTER</span></div>
+      <div class="kb-row"><span class="kb-label" id="kb-pause">Duraklat</span><span class="kb-key">P</span></div>
+    </div>
+    <button class="mbtn back" id="btn-back-pc-settings"></button>
+  </div>
+  <div class="menu-screen" id="screen-mobile-settings">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-mobile-settings-title">MOBİL AYARLAR</div>
+    <div class="setting-row">
+      <span class="setting-label" id="txt-sens-m-label">Hassasiyet</span>
+      <input type="range" id="sens-m-slider" min="1" max="30" value="10" step="1">
+      <span class="setting-value" id="sens-m-val">1.0</span>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label" id="txt-fov-m-label">Görüş Açısı (FOV)</span>
+      <input type="range" id="fov-m-slider" min="50" max="120" value="70">
+      <span class="setting-value" id="fov-m-val">70</span>
+    </div>
+    <button class="mbtn back" id="btn-back-mobile-settings"></button>
+  </div>
+  <div class="menu-screen" id="screen-device">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-device-title">CİHAZ SEÇİMİ</div>
+    <div class="device-cards">
+      <div class="device-card" id="btn-pc"><div class="dc-icon">🖥️</div><div class="dc-title" id="txt-pc-btn">BİLGİSAYAR</div></div>
+      <div class="device-card" id="btn-mobile"><div class="dc-icon">📱</div><div class="dc-title" id="txt-mobile-btn">MOBİL</div></div>
+    </div>
+    <button class="mbtn back" id="btn-back-device"></button>
+  </div>
+  <div class="menu-screen" id="screen-world">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-world-title">DÜNYA SEÇİMİ</div>
+    <div class="world-cards">
+      <div class="world-card" id="btn-world-infinite"><div class="wc-icon">🌍</div><div class="wc-title" id="txt-w-inf-title">SONSUZ DÜNYA</div><div class="wc-desc" id="txt-w-inf-desc">Sınırsız keşif</div></div>
+      <div class="world-card" id="btn-world-small"><div class="wc-icon">🏝️</div><div class="wc-title" id="txt-w-sm-title">KÜÇÜK DÜNYA</div><div class="wc-desc" id="txt-w-sm-desc">Hafif ve hızlı</div></div>
+    </div>
+    <div class="sub-title">OYUN MODU</div>
+    <div class="mini-cards">
+      <div class="mini-card sel" id="sp-mode-survival"><div class="mc2-icon">⚔️</div><div class="mc2-title" id="txt-sp-surv">HAY. KALMA</div></div>
+      <div class="mini-card" id="sp-mode-creative"><div class="mc2-icon">✨</div><div class="mc2-title" id="txt-sp-crea">YARATICI</div></div>
+    </div>
+    <div class="sub-title" id="txt-sp-cheats-label">HİLELER</div>
+    <div class="mini-cards">
+      <div class="mini-card sel" id="sp-cheat-off"><div class="mc2-icon">🔒</div><div class="mc2-title" id="txt-sp-cheat-off">KAPALI</div></div>
+      <div class="mini-card" id="sp-cheat-on"><div class="mc2-icon">🔓</div><div class="mc2-title" id="txt-sp-cheat-on">AÇIK</div></div>
+    </div>
+    <button class="mbtn back" id="btn-back-world"></button>
+  </div>
+  <div class="menu-screen" id="screen-multiplayer">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-mp-title">ÇOK OYUNCULU</div>
+    <div class="mp-cards">
+      <div class="mp-card" id="btn-mp-join"><div class="mc-icon">🔗</div><div class="mc-title" id="txt-mp-join">KATIL</div></div>
+      <div class="mp-card" id="btn-mp-host"><div class="mc-icon">🏠</div><div class="mc-title" id="txt-mp-host">ODA KUR</div></div>
+      <div class="mp-card disabled-card"><div class="mc-icon">🔍</div><div class="mc-title" id="txt-mp-browse">GÖZ AT</div></div>
+    </div>
+    <button class="mbtn back" id="btn-back-mp"></button>
+  </div>
+  <div class="menu-screen" id="screen-join">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-join-title">ODAYA KATIL</div>
+    <input class="menu-input" id="join-code-input" maxlength="4" autocomplete="off" spellcheck="false">
+    <button class="mbtn primary" id="btn-do-join"></button>
+    <div class="status-msg" id="join-status"></div>
+    <button class="mbtn back" id="btn-back-join"></button>
+  </div>
+  <div class="menu-screen" id="screen-host">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-host-title">ODA KUR</div>
+    <div class="sub-title">DÜNYA</div>
+    <div class="mini-cards">
+      <div class="mini-card sel" id="wmc-infinite"><div class="mc2-icon">🌍</div><div class="mc2-title" id="txt-wmc-inf">SONSUZ</div></div>
+      <div class="mini-card" id="wmc-small"><div class="mc2-icon">🏝️</div><div class="mc2-title" id="txt-wmc-sm">KÜÇÜK</div></div>
+    </div>
+    <div class="sub-title">OYUN MODU</div>
+    <div class="mini-cards">
+      <div class="mini-card sel" id="gmc-survival"><div class="mc2-icon">⚔️</div><div class="mc2-title" id="txt-gmc-surv">HAY. KALMA</div></div>
+      <div class="mini-card" id="gmc-creative"><div class="mc2-icon">✨</div><div class="mc2-title" id="txt-gmc-crea">YARATICI</div></div>
+    </div>
+    <div class="sub-title">HİLELER</div>
+    <div class="mini-cards">
+      <div class="mini-card sel" id="cheat-off"><div class="mc2-icon">🔒</div><div class="mc2-title">KAPALI</div></div>
+      <div class="mini-card" id="cheat-on"><div class="mc2-icon">🔓</div><div class="mc2-title">AÇIK</div></div>
+    </div>
+    <div class="code-label">ODA ŞİFRESİ</div>
+    <div class="code-display" id="host-code-display">----</div>
+    <button class="mbtn primary" id="btn-do-host"></button>
+    <div class="status-msg" id="host-status"></div>
+    <button class="mbtn back" id="btn-back-host"></button>
+  </div>
+</div>
+ 
+<div id="game-title"></div>
+<div id="crosshair">+</div>
+<div id="mode-indicator"></div>
+<div id="water-vignette"></div>
+<div id="bars-wrap">
+  <div class="bar-row" id="hearts-row"></div>
+  <div class="bar-row" id="hunger-row"></div>
+</div>
+<div id="hotbar">
+  <div class="hotbar-slot active" data-index="0"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="1"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="2"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="3"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="4"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="5"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="6"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="7"><canvas width="50" height="50"></canvas></div>
+  <div class="hotbar-slot" data-index="8"><canvas width="50" height="50"></canvas></div>
+</div>
+<div id="joystick-container"><div id="joystick-thumb"></div></div>
+<div id="mobile-jump-container">
+  <div class="btn" id="btn-mobile-crouch">ÇÖMEL</div>
+  <div class="btn" id="btn-mobile-jump"></div>
+</div>
+<button id="mobile-pause-btn">&#9646;&#9646;</button>
+<div id="btn-mobile-chat">💬</div>
+<div id="btn-mobile-inv">🎒</div>
+<div id="chat-container">
+  <div id="chat-log"></div>
+  <div id="chat-input-row"><input id="chat-input" maxlength="200" autocomplete="off" spellcheck="false"></div>
+</div>
+<div id="chat-hint"></div>
+<div id="death-screen">
+  <div id="death-title">Öldün!</div>
+  <div id="death-msg"></div>
+  <button id="btn-respawn">Yeniden Doğ</button>
+</div>
+<div id="ban-screen">
+  <div id="ban-title">Bu Sunucudan Yasaklandın!</div>
+  <div id="ban-by"></div>
+  <button id="btn-ban-menu">Ana Menüye Dön</button>
+</div>
+<div id="kick-screen">
+  <div id="kick-title">Sunucudan Atıldın!</div>
+  <div id="kick-by"></div>
+  <button id="btn-kick-menu">Ana Menüye Dön</button>
+</div>
+<div id="inv-overlay">
+  <div id="inv-box">
+    <div id="inv-title">ENVANTER</div>
+    <div class="inv-section-label" id="inv-lbl-blocks">BLOKLAR</div>
+    <div id="inv-grid"></div>
+    <div id="inv-hint">HOTBAR – ATAMAK İÇİN BLOK SEÇ, SONRA SLOTA TIKLA</div>
+    <div id="inv-hotbar-row"></div>
+    <div id="inv-close-hint">[E] kapat</div>
+  </div>
+</div>
+<div id="pause-overlay">
+  <div id="pause-box">
+    <div id="pause-title">OYUN MENÜSÜ</div>
+    <div id="pause-version">v1.2</div>
+    <button class="mbtn primary" id="btn-resume"></button>
+    <div class="pause-setting">
+      <span id="txt-rd-label">Görüş Mesafesi</span>
+      <input type="range" id="pause-rd-slider" min="1" max="6" value="3" step="1">
+      <span class="val" id="pause-rd-val">3</span>
+    </div>
+    <button class="mbtn" id="btn-pause-settings"></button>
+    <button class="mbtn quit-btn" id="btn-quit"></button>
+  </div>
+</div>
+ 
+<script>
+// ─── [FIX] Güvenlik: İsim sanitizasyonu ───
+function sanitizeName(n){
+  if(!n||typeof n!=='string') return 'Guest_'+(Math.floor(1000+Math.random()*9000));
+  return n.replace(/[<>&"'/\\]/g,'').replace(/\s+/g,' ').trim().substring(0,16)||'Player';
+}
+function sanitizeText(t){
+  if(!t||typeof t!=='string') return '';
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+ 
+let myUsername='Guest_'+(Math.floor(1000+Math.random()*9000));
+ 
+window.addEventListener('message',function(event){
+  if(event.data&&event.data.type==='SET_USERNAME'){
+    const incoming=event.data.username;
+    if(!incoming||incoming==='Not Logged In'||incoming==='Giriş Yapılmadı'||incoming==='Giriş Yapilmadi'){
+      myUsername='Guest_'+(Math.floor(1000+Math.random()*9000));
+    } else {
+      myUsername=sanitizeName(incoming);
+    }
+  }
+  if(event.data&&event.data.type==='friendResult'){
+    addChat(null,event.data.msg,true,event.data.success?'srv':'warn');
+  }
+});
+ 
+if(typeof THREE==='undefined'){document.getElementById('error-msg').style.display='block';throw new Error('Three.js yüklenemedi');}
+ 
+// ─── Rate Limiting ───
+const rateLimits={};
+function checkRate(key,maxPerSec,windowMs=1000){
+  const now=Date.now();
+  if(!rateLimits[key]) rateLimits[key]=[];
+  rateLimits[key]=rateLimits[key].filter(t=>now-t<windowMs);
+  if(rateLimits[key].length>=maxPerSec) return false;
+  rateLimits[key].push(now);
+  return true;
+}
+ 
+// ─── i18n ───
+const langData={
+  tr:{title:'LEGENDS INDEV',singleplayer:'TEK OYUNCU',multiplayer:'ÇOK OYUNCU',settings:'AYARLAR',
+      deviceTitle:'CİHAZ SEÇİMİ',pcBtn:'BİLGİSAYAR',mobileBtn:'MOBİL',worldTitle:'DÜNYA SEÇİMİ',
+      wInfTitle:'SONSUZ DÜNYA',wInfDesc:'Sınırsız keşif, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',back:'← GERİ',
+      errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.2',jumpBtn:'ZIPLA',
+      mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
+      joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
+      hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
+      codeLabel:'ODA ŞİFRESİ',wmcInf:'SONSUZ',wmcSm:'KÜÇÜK',gmcSurv:'HAY. KALMA',gmcCrea:'YARATICI',
+      chatHint:'⌨  Enter → Sohbet',chatPh:'Mesajınızı yazın...',
+      sysJoin:' odaya katıldı',sysLeft:' ayrıldı',sysDisc:'Bağlantı kesildi',
+      modeCreative:'Yaratıcı Mod',modeSurvival:'Hayatta Kalma',rdLabel:'Görüş Mesafesi',
+      spSurv:'HAY. KALMA',spCrea:'YARATICI',crouchBtn:'ÇÖMEL',cheatsLabel:'HİLELER',cheatOff:'KAPALI',cheatOn:'AÇIK',
+      deathTitle:'Öldün!',respawnBtn:'Yeniden Doğ',pauseSettings:'AYARLAR',
+      mpBrowse:'GÖZ AT',
+      invTitle:'ENVANTER',invBlocks:'BLOKLAR',invHint:'HOTBAR – ATAMAK İÇİN BLOK SEÇ, SONRA SLOTA TIKLA',invClose:'[E] kapat',
+      bkNames:['Tahta','Çimen','Toprak','Taş','Odun','Karaktas','Cam','Yaprak','Kum','Su'],
+      settingsPcBtn:'PC AYARLARI',settingsMobileBtn:'MOBİL AYARLAR',
+      pcSettingsTitle:'PC AYARLARI',mobileSettingsTitle:'MOBİL AYARLAR',
+      sensLabel:'Hassasiyet',fovLabel:'Görüş Açısı (FOV)',keybindsTitle:'TUŞ ATAMALARI',
+      kbForward:'İleri',kbBack:'Geri',kbLeft:'Sol',kbRight:'Sağ',kbJump:'Zıpla',
+      kbSlot:'Slot Seç',kbBreak:'Blok Kır',kbPlace:'Blok Koy',kbChat:'Sohbet',kbPause:'Duraklat',
+      srvPrefix:'[Sunucu]: ',srvNoCheat:'[Sunucu]: Hileler kapalı!',srvNoPerms:'[Sunucu]: Yetkiniz yok!',
+      srvHostOnly:'[Sunucu]: Sadece yönetici!',srvUsageMode:'Kullanım: /mode c veya /mode s',
+      srvUsageOp:'Kullanım: /op <isim>',srvUsageUnop:'Kullanım: /unop <isim>',
+      srvUsageKick:'Kullanım: /kick <isim>',srvUsageBan:'Kullanım: /ban <isim>',
+      srvNoPlayer:'[Sunucu]: Oyuncu bulunamadı: ',srvNoCantKickOp:'[Sunucu]: Operatörleri atamazsınız!',
+      srvNoCantBanOp:'[Sunucu]: Operatörleri banlayamazsınız!',srvUnknownCmd:'Bilinmeyen komut: /',
+      srvFriendUsage:'Kullanım: /friend <oyuncuİsmi>',srvFriendSent:'Arkadaşlık isteği gönderildi!',
+      srvFriendGuest:'Kayıtlı olmayan oyuncuya arkadaşlık isteği atamazsın!',srvFriendSelf:'Kendine arkadaşlık isteği atamazsın!',
+      srvModeChanged:'Mod: ',srvOpGranted:' artık operatör!',srvOpRevoked:' operatörlüğü alındı.',
+      srvKicked:' sunucudan atıldı.',srvBanned:' banlandı.',srvUnbanned:' banı kaldırıldı.',
+      srvKickedBy:' tarafından atıldınız.',srvOpBecame:' operatör oldu',srvOpLost:' operatörlüğü kaybetti',
+      srvKickedNotice:'Sunucudan çıkarıldınız: ',banScreenTitle:'Bu Sunucudan Yasaklandın!',
+      kickScreenTitle:'Sunucudan Atıldın!',banByText:' sizi yasakladı!',kickByText:' sizi attı!',backToMenuBtn:'Ana Menüye Dön',
+      rateLimitMsg:'Çok hızlı mesaj gönderiyorsunuz!',
+      deathMessages:{fall:'Yüksek düşüş',suffocation:'Sıkışma',void:'Boşluk',pvp:'PvP',unknown:'Bilinmeyen neden'},
+      deathChat:{pvp:'%V%, %A% tarafından öldürüldü',suffocation:'%V% blokların arasına sıkışarak öldü',void:'%V% boşluktan düşerek öldü',fall:'%V% yüksekten düşerek öldü'},
+      killDeathMsg:'Oyuncu öldü',killAllMsg:'[Sunucu]: Tüm oyuncular öldürüldü',
+      srvUsageKillCmd:'Kullanım: /kill | /kill @p | /kill @a | /kill <isim>',srvKillNoPlayer:'[Sunucu]: Oyuncu bulunamadı: ',
+      srvCheatsOn:'[Sunucu]: Hileler açıldı!',srvCheatsOff:'[Sunucu]: Hileler kapatıldı!',srvUsageCheats:'Kullanım: /cheats on veya /cheats off',srvCheatsHostOnly:'[Sunucu]: Hileler sadece yönetici tarafından değiştirilebilir!',
+      srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
+      srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!'},
+  en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
+      deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
+      wInfTitle:'INFINITE WORLD',wInfDesc:'Endless exploration',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',back:'← BACK',
+      errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.2',jumpBtn:'JUMP',
+      mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
+      joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
+      hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
+      codeLabel:'ROOM CODE',wmcInf:'INFINITE',wmcSm:'SMALL',gmcSurv:'SURVIVAL',gmcCrea:'CREATIVE',
+      chatHint:'⌨  Enter → Chat',chatPh:'Type a message...',
+      sysJoin:' joined',sysLeft:' left',sysDisc:'Connection lost',
+      modeCreative:'Creative Mode',modeSurvival:'Survival Mode',rdLabel:'Render Distance',
+      spSurv:'SURVIVAL',spCrea:'CREATIVE',crouchBtn:'CROUCH',cheatsLabel:'CHEATS',cheatOff:'OFF',cheatOn:'ON',
+      deathTitle:'You Died!',respawnBtn:'Respawn',pauseSettings:'SETTINGS',
+      mpBrowse:'BROWSE',
+      invTitle:'INVENTORY',invBlocks:'BLOCKS',invHint:'HOTBAR – SELECT A BLOCK, THEN CLICK A SLOT TO ASSIGN',invClose:'[E] close',
+      bkNames:['Planks','Grass','Dirt','Stone','Log','Cobblestone','Glass','Leaves','Sand','Water'],
+      settingsPcBtn:'PC SETTINGS',settingsMobileBtn:'MOBILE SETTINGS',
+      pcSettingsTitle:'PC SETTINGS',mobileSettingsTitle:'MOBILE SETTINGS',
+      sensLabel:'Sensitivity',fovLabel:'Field of View (FOV)',keybindsTitle:'KEY BINDINGS',
+      kbForward:'Forward',kbBack:'Back',kbLeft:'Left',kbRight:'Right',kbJump:'Jump',
+      kbSlot:'Select Slot',kbBreak:'Break Block',kbPlace:'Place Block',kbChat:'Chat',kbPause:'Pause',
+      srvPrefix:'[Server]: ',srvNoCheat:'[Server]: Cheats are disabled!',srvNoPerms:'[Server]: You don\'t have permission!',
+      srvHostOnly:'[Server]: Host only!',srvUsageMode:'Usage: /mode c or /mode s',
+      srvUsageOp:'Usage: /op <name>',srvUsageUnop:'Usage: /unop <name>',
+      srvUsageKick:'Usage: /kick <name>',srvUsageBan:'Usage: /ban <name>',
+      srvNoPlayer:'[Server]: Player not found: ',srvNoCantKickOp:'[Server]: Cannot kick operators!',
+      srvNoCantBanOp:'[Server]: Cannot ban operators!',srvUnknownCmd:'Unknown command: /',
+      srvFriendUsage:'Usage: /friend <playerName>',srvFriendSent:'Friend request sent!',
+      srvFriendGuest:'Cannot send friend request to unregistered players!',srvFriendSelf:'You cannot send a friend request to yourself!',
+      srvModeChanged:'Mode: ',srvOpGranted:' is now operator!',srvOpRevoked:' is no longer operator.',
+      srvKicked:' was kicked.',srvBanned:' was banned.',srvUnbanned:' was unbanned.',
+      srvKickedBy:' kicked you.',srvOpBecame:' became operator',srvOpLost:' is no longer operator',
+      srvKickedNotice:'You were removed from the server: ',banScreenTitle:'You have been banned from this server!',
+      kickScreenTitle:'You have been kicked from the server!',banByText:' banned you!',kickByText:' kicked you!',backToMenuBtn:'Back to Main Menu',
+      rateLimitMsg:'You are sending messages too fast!',
+      deathMessages:{fall:'High fall',suffocation:'Suffocation',void:'Void',pvp:'PvP',unknown:'Unknown'},
+      deathChat:{pvp:'%V% was killed by %A%',suffocation:'%V% suffocated in a wall',void:'%V% fell out of the world',fall:'%V% fell from a high place'},
+      killDeathMsg:'Player died',killAllMsg:'[Server]: All players were killed',
+      srvUsageKillCmd:'Usage: /kill | /kill @p | /kill @a | /kill <name>',srvKillNoPlayer:'[Server]: Player not found: ',
+      srvCheatsOn:'[Server]: Cheats enabled!',srvCheatsOff:'[Server]: Cheats disabled!',srvUsageCheats:'Usage: /cheats on or /cheats off',srvCheatsHostOnly:'[Server]: Only the host can change cheats!',
+      srvMpOnlyCmd:'[Server]: This command can only be used in multiplayer',
+      srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!'}
+};
+let currentLang='tr';
+function setLanguage(l){
+  currentLang=l;
+  document.getElementById('lang-tr').classList.toggle('active',l==='tr');
+  document.getElementById('lang-en').classList.toggle('active',l==='en');
+  const d=langData[l];
+  const s=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
+  s('txt-title',d.title);s('btn-singleplayer',d.singleplayer);s('btn-multiplayer',d.multiplayer);s('btn-settings',d.settings);
+  s('txt-settings-title',d.settingsTitle);s('btn-back-settings',d.back);
+  s('txt-settings-pc-btn',d.settingsPcBtn);s('txt-settings-mobile-btn',d.settingsMobileBtn);
+  s('txt-pc-settings-title',d.pcSettingsTitle);s('txt-mobile-settings-title',d.mobileSettingsTitle);
+  s('txt-sens-pc-label',d.sensLabel);s('txt-fov-pc-label',d.fovLabel);s('txt-keybinds',d.keybindsTitle);
+  s('txt-sens-m-label',d.sensLabel);s('txt-fov-m-label',d.fovLabel);
+  s('kb-forward',d.kbForward);s('kb-back',d.kbBack);s('kb-left',d.kbLeft);s('kb-right',d.kbRight);
+  s('kb-jump',d.kbJump);s('kb-slot',d.kbSlot);s('kb-break',d.kbBreak);s('kb-place',d.kbPlace);
+  s('kb-chat',d.kbChat);s('kb-pause',d.kbPause);
+  document.getElementById('btn-back-pc-settings').textContent=d.back;
+  document.getElementById('btn-back-mobile-settings').textContent=d.back;
+  s('txt-mp-browse',d.mpBrowse);s('btn-pause-settings',d.pauseSettings);
+  s('inv-title',d.invTitle);s('inv-lbl-blocks',d.invBlocks);s('inv-hint',d.invHint);s('inv-close-hint',d.invClose);
+  s('txt-device-title',d.deviceTitle);s('txt-pc-btn',d.pcBtn);s('txt-mobile-btn',d.mobileBtn);
+  s('txt-world-title',d.worldTitle);s('txt-w-inf-title',d.wInfTitle);s('txt-w-inf-desc',d.wInfDesc);
+  s('txt-w-sm-title',d.wSmTitle);s('txt-w-sm-desc',d.wSmDesc);
+  document.querySelectorAll('.mbtn.back').forEach(b=>b.textContent=d.back);
+  document.querySelector('#error-msg h3').textContent=d.errTitle;
+  document.querySelector('#error-msg p').textContent=d.errDesc;
+  s('btn-mobile-jump',d.jumpBtn);s('btn-resume',d.resume);s('btn-quit',d.quit);
+  s('pause-title',d.pauseTitle);s('txt-mp-title',d.mpTitle);s('txt-mp-join',d.mpJoin);s('txt-mp-host',d.mpHost);
+  s('txt-join-title',d.joinTitle);s('txt-host-title',d.hostTitle);s('txt-gmc-surv',d.gmcSurv);s('txt-gmc-crea',d.gmcCrea);
+  s('txt-wmc-inf',d.wmcInf);s('txt-wmc-sm',d.wmcSm);s('txt-sp-surv',d.spSurv);s('txt-sp-crea',d.spCrea);
+  s('txt-rd-label',d.rdLabel);s('btn-mobile-crouch',d.crouchBtn);
+  s('txt-sp-cheats-label',d.cheatsLabel);s('txt-sp-cheat-off',d.cheatOff);s('txt-sp-cheat-on',d.cheatOn);
+  s('death-title',d.deathTitle);s('btn-respawn',d.respawnBtn);
+  document.getElementById('join-code-input').placeholder=d.joinCodePh;
+  document.getElementById('btn-do-join').textContent=d.joinBtn;
+  document.getElementById('btn-do-host').textContent=d.hostStart;
+  document.getElementById('chat-hint').textContent=d.chatHint;
+  document.getElementById('chat-input').placeholder=d.chatPh;
+  s('ban-title',d.banScreenTitle);s('kick-title',d.kickScreenTitle);
+  s('btn-ban-menu',d.backToMenuBtn);s('btn-kick-menu',d.backToMenuBtn);
+}
+document.getElementById('lang-tr').addEventListener('click',e=>{e.stopPropagation();setLanguage('tr');});
+document.getElementById('lang-en').addEventListener('click',e=>{e.stopPropagation();setLanguage('en');});
+ 
+// ─── Pause ───
+let isPaused=false,renderDist=3;
+// FPS: Render distance değişince fog ve kamera far plane'i güncelle
+function applyRenderDist(v){
+  renderDist=v;
+  // Fog yoğunluğu: uzak görüş = az yoğun sis, yakın görüş = yoğun sis (FPS kazanır)
+  scene.fog.density=0.055-v*0.004;
+  // Far plane: render distance'a göre ayarla
+  camera.far=v*16+32;camera.updateProjectionMatrix();
+}
+ 
+let sensitivity=1.0,fov=70;
+const sensPcSlider=document.getElementById('sens-pc-slider'),sensPcVal=document.getElementById('sens-pc-val');
+const sensMSlider=document.getElementById('sens-m-slider'),sensMVal=document.getElementById('sens-m-val');
+const fovPcSlider=document.getElementById('fov-pc-slider'),fovPcVal=document.getElementById('fov-pc-val');
+const fovMSlider=document.getElementById('fov-m-slider'),fovMVal=document.getElementById('fov-m-val');
+function applySens(v){sensitivity=v/10;const t=v/10;sensPcVal.textContent=t.toFixed(1);sensMVal.textContent=t.toFixed(1);sensPcSlider.value=v;sensMSlider.value=v;}
+function applyFov(v){fov=v;fovPcVal.textContent=v;fovMVal.textContent=v;fovPcSlider.value=v;fovMSlider.value=v;camera.fov=v;camera.updateProjectionMatrix();}
+sensPcSlider.addEventListener('input',()=>applySens(+sensPcSlider.value));
+sensMSlider.addEventListener('input',()=>applySens(+sensMSlider.value));
+fovPcSlider.addEventListener('input',()=>applyFov(+fovPcSlider.value));
+fovMSlider.addEventListener('input',()=>applyFov(+fovMSlider.value));
+// FPS: Görüş mesafesi slider (pause menüsünde)
+const pauseRdSlider=document.getElementById('pause-rd-slider');
+const pauseRdVal=document.getElementById('pause-rd-val');
+if(pauseRdSlider) pauseRdSlider.addEventListener('input',()=>{
+  const v=+pauseRdSlider.value;
+  pauseRdVal.textContent=v;
+  applyRenderDist(v);
+  if(worldType==='infinite') updateChunks();
+});
+ 
+function openPauseMenu(){if(!deviceMode||isChatOpen||invOpen) return;isPaused=true;document.getElementById('pause-overlay').classList.add('active');if(deviceMode==='pc'&&document.pointerLockElement===document.body) document.exitPointerLock();}
+function closePauseMenu(){isPaused=false;document.getElementById('pause-overlay').classList.remove('active');if(deviceMode==='pc') document.body.requestPointerLock();}
+document.getElementById('btn-pause-settings').addEventListener('click',()=>{
+  settingsFromPause=true;isPaused=false;
+  document.getElementById('pause-overlay').classList.remove('active');
+  document.getElementById('menu-overlay').style.display='flex';
+  // Fix 2: Ayarlar menüsü açıkken dokunmatik girdi menüye gitsin
+  document.getElementById('menu-overlay').style.pointerEvents='auto';
+  showScreen('screen-settings');
+});
+document.getElementById('btn-resume').addEventListener('click',closePauseMenu);
+document.getElementById('btn-quit').addEventListener('click',()=>{
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
+  cleanupMP();isPaused=false;DeathManager.isDead=false;deviceMode=null;isFlying=false;isCrouching=false;spaceDown=false;
+  document.getElementById('pause-overlay').classList.remove('active');
+  document.getElementById('death-screen').classList.remove('active');
+  ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv']
+   .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const mo=document.getElementById('menu-overlay');
+  mo.style.display='flex';
+  mo.style.pointerEvents='auto';
+  mo.style.zIndex='1000';
+  showScreen('screen-main');
+});
+document.getElementById('mobile-pause-btn').addEventListener('click',e=>{e.stopPropagation();if(isPaused) closePauseMenu(); else openPauseMenu();});
+ 
+// ─── Menü Nav ───
+let selectedDevice=null,worldType=null,mpHostWorld='infinite';
+let spGameMode='survival',mpGameMode='survival',cheatsEnabled=false,spCheatsEnabled=false;
+function showScreen(id){document.querySelectorAll('.menu-screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function selMini(g,id){g.forEach(el=>document.getElementById(el).classList.toggle('sel',el===id));}
+let settingsFromPause=false;
+document.getElementById('btn-singleplayer').addEventListener('click',()=>showScreen('screen-device'));
+document.getElementById('btn-settings').addEventListener('click',()=>showScreen('screen-settings'));
+document.getElementById('btn-back-settings').addEventListener('click',()=>{
+  if(settingsFromPause){settingsFromPause=false;document.getElementById('menu-overlay').style.display='none';
+  // Fix 2: Ayarlardan oyuna dönerken menü katmanı girdi engellemesin
+  document.getElementById('menu-overlay').style.pointerEvents='none';openPauseMenu();}
+  else showScreen('screen-main');
+});
+document.getElementById('btn-settings-pc').addEventListener('click',()=>showScreen('screen-pc-settings'));
+document.getElementById('btn-settings-mobile').addEventListener('click',()=>showScreen('screen-mobile-settings'));
+document.getElementById('btn-back-pc-settings').addEventListener('click',()=>showScreen('screen-settings'));
+document.getElementById('btn-back-mobile-settings').addEventListener('click',()=>showScreen('screen-settings'));
+document.getElementById('btn-back-device').addEventListener('click',()=>showScreen('screen-main'));
+document.getElementById('btn-back-world').addEventListener('click',()=>showScreen('screen-device'));
+document.getElementById('btn-pc').addEventListener('click',()=>{selectedDevice='pc';showScreen('screen-world');});
+document.getElementById('btn-mobile').addEventListener('click',()=>{selectedDevice='mobile';showScreen('screen-world');});
+document.getElementById('btn-world-infinite').addEventListener('click',()=>startGame(selectedDevice,'infinite',false,spGameMode,spCheatsEnabled));
+document.getElementById('btn-world-small').addEventListener('click',()=>startGame(selectedDevice,'small',false,spGameMode,spCheatsEnabled));
+document.getElementById('sp-mode-survival').addEventListener('click',()=>{spGameMode='survival';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-survival');});
+document.getElementById('sp-mode-creative').addEventListener('click',()=>{spGameMode='creative';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-creative');});
+document.getElementById('btn-multiplayer').addEventListener('click',()=>showScreen('screen-multiplayer'));
+document.getElementById('btn-back-mp').addEventListener('click',()=>showScreen('screen-main'));
+document.getElementById('btn-mp-join').addEventListener('click',()=>showScreen('screen-join'));
+document.getElementById('btn-mp-host').addEventListener('click',()=>{document.getElementById('host-code-display').textContent=genCode();document.getElementById('host-status').textContent='';showScreen('screen-host');});
+document.getElementById('btn-back-join').addEventListener('click',()=>{cleanupMP();showScreen('screen-multiplayer');});
+document.getElementById('btn-back-host').addEventListener('click',()=>{cleanupMP();showScreen('screen-multiplayer');});
+document.getElementById('wmc-infinite').addEventListener('click',()=>{mpHostWorld='infinite';selMini(['wmc-infinite','wmc-small'],'wmc-infinite');});
+document.getElementById('wmc-small').addEventListener('click',()=>{mpHostWorld='small';selMini(['wmc-infinite','wmc-small'],'wmc-small');});
+document.getElementById('gmc-survival').addEventListener('click',()=>{mpGameMode='survival';selMini(['gmc-survival','gmc-creative'],'gmc-survival');});
+document.getElementById('gmc-creative').addEventListener('click',()=>{mpGameMode='creative';selMini(['gmc-survival','gmc-creative'],'gmc-creative');});
+document.getElementById('sp-cheat-off').addEventListener('click',()=>{spCheatsEnabled=false;selMini(['sp-cheat-off','sp-cheat-on'],'sp-cheat-off');});
+document.getElementById('sp-cheat-on').addEventListener('click',()=>{spCheatsEnabled=true;selMini(['sp-cheat-off','sp-cheat-on'],'sp-cheat-on');});
+document.getElementById('cheat-off').addEventListener('click',()=>{cheatsEnabled=false;selMini(['cheat-off','cheat-on'],'cheat-off');});
+document.getElementById('cheat-on').addEventListener('click',()=>{cheatsEnabled=true;selMini(['cheat-off','cheat-on'],'cheat-on');});
+document.getElementById('join-code-input').addEventListener('input',e=>{e.target.value=e.target.value.toUpperCase().replace(/[^A-Z]/g,'').slice(0,4);});
+ 
+// ─── Three.js ───
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x75a7ff);
+scene.fog=new THREE.FogExp2(0x75a7ff,0.045);
+// FPS: Kamera uzak kesim düzlemini render distance ile sınırla
+const camera=new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,0.1,80);
+const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
+renderer.setSize(window.innerWidth,window.innerHeight);
+// FPS: Piksel oranını sınırla (mobilde büyük kazanç)
+renderer.setPixelRatio(Math.min(window.devicePixelRatio,1.5));
+// FPS: Gereksiz işlemleri kapat
+renderer.shadowMap.enabled=false;
+renderer.sortObjects=false;
+document.body.appendChild(renderer.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,0.85));
+const sun=new THREE.DirectionalLight(0xffffff,0.3);sun.position.set(15,35,10);scene.add(sun);
+ 
+// ─── Dokular ───
+const rawTexC={};
+function genTex(t){
+  const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');
+  for(let x=0;x<16;x++){for(let y=0;y<16;y++){
+    let r,g,b,n=(Math.random()-.5)*18,alpha=1;
+    if(t==='grass_top'){r=85;g=155;b=55;}
+    else if(t==='dirt'){r=115;g=80;b=50;}
+    else if(t==='stone'){r=120;g=120;b=120;}
+    else if(t==='oak_planks'){r=155;g=120;b=80;if(y===0||y===4||y===8||y===12||x===0)n-=30;}
+    else if(t==='grass_side'){if(y<4||(y<7&&Math.random()>.4)){r=85;g=155;b=55;}else{r=115;g=80;b=50;}}
+    else if(t==='log_side'){r=105;g=77;b=47;if(x===2||x===6||x===9||x===13){r=65;g=46;b=27;n-=10;}if((y+x)%7===0){r=80;g=58;b=35;}}
+    else if(t==='log_top'){r=178;g=149;b=107;const d=Math.sqrt((x-7.5)**2+(y-7.5)**2);if(d>=7){r=105;g=77;b=47;}else if(Math.floor(d)===4||Math.floor(d)===2){r=150;g=121;b=84;}}
+    else if(t==='cobblestone'){r=115;g=115;b=115;if(y===0||y===8||x===0||x===8||((y===4||y===12)&&x>0&&x<9)){r=75;g=75;b=75;n-=12;}else if((x===4||x===12||x===3||x===11)&&Math.random()>.3){r=140;g=140;b=140;n+=12;}}
+    else if(t==='glass'){alpha=.25;r=195;g=230;b=255;if(x===0||x===15||y===0||y===15||((x===y||x===y+1)&&x>2&&x<11)){alpha=.85;r=255;g=255;b=255;}}
+    else if(t==='leaves'){r=40;g=105;b=32;if((x+y)%2===0){r=30;g=85;b=22;}}
+    else if(t==='sand'){r=218;g=199;b=145;if((x*y)%4===0){r-=12;g-=10;b-=8;}}
+    r=Math.max(0,Math.min(255,r+n));g=Math.max(0,Math.min(255,g+n));b=Math.max(0,Math.min(255,b+n));
+    ctx.fillStyle=t==='glass'?`rgba(${~~r},${~~g},${~~b},${alpha})`:`rgb(${~~r},${~~g},${~~b})`;
+    ctx.fillRect(x,y,1,1);
+  }}
+  rawTexC[t]=c;
+  const tex=new THREE.CanvasTexture(c);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
+  tex.wrapS=tex.wrapT=THREE.ClampToEdgeWrapping;
+  return new THREE.MeshStandardMaterial({map:tex,roughness:.95,transparent:t==='glass'});
+}
+const texGT=genTex('grass_top'),texGS=genTex('grass_side'),texDirt=genTex('dirt'),texWood=genTex('oak_planks'),texStone=genTex('stone');
+const texLS=genTex('log_side'),texLT=genTex('log_top'),texCob=genTex('cobblestone'),texGlass=genTex('glass'),texLeaves=genTex('leaves'),texSand=genTex('sand');
+// Su önizleme dokuları (envanter/hotbar için)
+rawTexC['water_top']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(120,210,255,0.35)';for(let i=0;i<4;i++){ctx.fillRect(i%2===0?0:8,i*4,8,2);}return c;})();
+rawTexC['water_side']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#155a8a';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(80,170,230,0.3)';for(let i=0;i<4;i++){ctx.fillRect(0,i*4,16,2);}return c;})();
+const matGrass=[texGS,texGS,texGT,texDirt,texGS,texGS];
+const matLog=[texLS,texLS,texLT,texLT,texLS,texLS];
+// Su materyali: yarı saydam mavi
+const matWater=(()=>{
+  const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(100,180,255,0.12)';for(let i=0;i<4;i++){ctx.fillRect(0,i*4,16,2);}
+  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;
+  return new THREE.MeshStandardMaterial({
+    map:t,transparent:true,opacity:0.62,roughness:0.1,metalness:0.15,
+    side:THREE.DoubleSide,
+    depthWrite:false,
+    depthTest:true,
+    polygonOffset:true,
+    polygonOffsetFactor:-1,
+    polygonOffsetUnits:-1,
+  });
+})();
+
+// ─── Su Yüz Culling (özel geometry) ───
+// Su için sadece görünür yüzleri içeren merged geometry oluşturur:
+// - Üst yüz: üstte su yoksa göster
+// - Yan yüzler: komşu su YOK ve (komşu blok yok VEYA komşu cam) ise göster
+// - Alt yüz: hiçbir zaman gösterme
+let waterMesh=null;
+// dx/dy/dz yönündeki komşunun su yüzeyi yüksekliğini (topY, blok-yerel -0.5..0.5) döndürür.
+// Komşu su değilse null döner.
+function neighborWaterTopY(nb){
+  if(!nb||!(isAnyWater(nb)||nb.isLiquid)) return null;
+  const nLvl=Math.max(1,Math.min(8,nb.waterLevel!=null?nb.waterLevel:8));
+  return nLvl>=8?0.5:(-0.5+(nLvl/8)*1.0);
+}
+function isWaterFaceVisible(x,y,z,dx,dy,dz){
+  const nx=x+dx,ny=y+dy,nz=z+dz;
+  const nb=blockMap[pk(nx,ny,nz)];
+  if(!nb){
+    // Komşu boş (hava) → yüzü göster
+    if(worldType==='small') return true;
+    const ch=getChunkAt(nx,nz);
+    if(!ch||!ch.loaded){ return dy===1; }
+    return true;
+  }
+  if(isAnyWater(nb)||nb.isLiquid){
+    // Yatay komşu da su ama SEVİYESİ daha düşükse (basamak/şelale geçişi) → yüzü göster.
+    // Aynı yükseklikteki normal yatay komşular için gizle (gereksiz iç yüzey yok).
+    if(dy===0){
+      const myLvl=Math.max(1,Math.min(8,blockMap[pk(x,y,z)]?.waterLevel??8));
+      const nLvl=Math.max(1,Math.min(8,nb.waterLevel??8));
+      return nLvl<myLvl;
+    }
+    return false;
+  }
+  if(nb.mat===texGlass) return true;             // cam → göster (şeffaf)
+  // Katı/opak blok → bu yönde su yüzü çizme (Z-fighting önleme)
+  return false;
+}
+// Su bloklarını takip et (sadece görünür olanlar) – tüm blockMap taramasını önle
+const visibleWaterSet = new Set(); // pk string'leri tutar
+
+function buildWaterGeometry(){
+  const positions=[],normals=[],uvs=[],indices=[];
+  let vtx=0;
+  const UV_SET=[[0,1],[0,0],[1,0],[1,1]];
+  function pushFace(verts,n){
+    for(let i=0;i<4;i++){
+      positions.push(verts[i][0],verts[i][1],verts[i][2]);
+      normals.push(n[0],n[1],n[2]);
+      uvs.push(UV_SET[i][0],UV_SET[i][1]);
+    }
+    indices.push(vtx,vtx+1,vtx+2,vtx,vtx+2,vtx+3);
+    vtx+=4;
+  }
+  // Yan yüzler: üst iki köşe "t" (seviyeye göre yükseklik), alt iki köşe "b" parametresiyle.
+  // Normalde b=-0.5 (bloğun tabanı). Komşu da su ama daha alçaksa, b=komşunun topY'si
+  // olur (sadece seviye farkının oluşturduğu "basamak" bandı çizilir, çakışma/Z-fighting önlenir).
+  // Şeffaf (depthWrite:false) yüzeyler arasında olası ince "dikiş" (seam) çizgisini
+  // önlemek için komşu su bandı sınırına minik bir örtüşme (epsilon) payı veriyoruz.
+  const SEAM_EPS=0.015;
+  const SIDE_DEFS=[
+    {dx:1,dy:0,dz:0, n:[1,0,0], v:(t,b)=>[[0.5,t,0.5],[0.5,b,0.5],[0.5,b,-0.5],[0.5,t,-0.5]]},
+    {dx:-1,dy:0,dz:0,n:[-1,0,0],v:(t,b)=>[[-0.5,t,-0.5],[-0.5,b,-0.5],[-0.5,b,0.5],[-0.5,t,0.5]]},
+    {dx:0,dy:0,dz:1, n:[0,0,1], v:(t,b)=>[[-0.5,t,0.5],[-0.5,b,0.5],[0.5,b,0.5],[0.5,t,0.5]]},
+    {dx:0,dy:0,dz:-1,n:[0,0,-1],v:(t,b)=>[[0.5,t,-0.5],[0.5,b,-0.5],[-0.5,b,-0.5],[-0.5,t,-0.5]]},
+  ];
+  // Sadece visibleWaterSet'teki bloklara bak – blockMap taraması yok
+  for(const k of visibleWaterSet){
+    const bd=blockMap[k];
+    if(!bd||!isAnyWater(bd)||!bd.visible) continue;
+    const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+    // Su seviyesine göre görsel yükseklik: seviye azaldıkça su daha "ince" görünür (azalma belirtisi)
+    const lvl=Math.max(1,Math.min(8,bd.waterLevel!=null?bd.waterLevel:8));
+    const aboveBd=blockMap[pk(bx,by+1,bz)];
+    const aboveIsWater=!!(aboveBd&&(isAnyWater(aboveBd)||aboveBd.isLiquid));
+    // Üstünde başka bir su bloğu varsa VEYA level==8 ise tam dolu → pixel boşluk olmasın
+    const topY=(aboveIsWater||lvl>=8)?0.5:(-0.5+(lvl/8)*1.0);
+    // Üst yüz
+    if(isWaterFaceVisible(bx,by,bz,0,1,0)){
+      pushFace([
+        [bx-0.5,by+topY,bz-0.5],
+        [bx-0.5,by+topY,bz+0.5],
+        [bx+0.5,by+topY,bz+0.5],
+        [bx+0.5,by+topY,bz-0.5]
+      ],[0,1,0]);
+    }
+    // Yan yüzler
+    for(const s of SIDE_DEFS){
+      if(!isWaterFaceVisible(bx,by,bz,s.dx,s.dy,s.dz)) continue;
+      const nb=blockMap[pk(bx+s.dx,by+s.dy,bz+s.dz)];
+      const nbTopY=neighborWaterTopY(nb);
+      // Komşu daha alçak su ise sadece basamak bandını çiz (kendi topY'sinden komşu topY'sine);
+      // diğer durumlarda (komşu yok/hava/cam) tam yüzü çiz (-0.5'e kadar).
+      // SEAM_EPS ile komşu yüzeyin biraz altına taşarak olası ince dikiş çizgisini kapatıyoruz.
+      const bottomY=(nbTopY!=null)?(nbTopY-SEAM_EPS):-0.5;
+      const vl=s.v(topY,bottomY);
+      pushFace(vl.map(p=>[bx+p[0],by+p[1],bz+p[2]]),s.n);
+    }
+  }
+  if(vtx===0) return null;
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
+  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  geo.setIndex(indices);
+  return geo;
+}
+function rebuildWaterMesh(){
+  if(waterMesh){scene.remove(waterMesh);waterMesh.geometry.dispose();waterMesh=null;}
+  const geo=buildWaterGeometry();
+  if(!geo) return;
+  waterMesh=new THREE.Mesh(geo,matWater);
+  waterMesh.renderOrder=1;
+  waterMesh.frustumCulled=false;
+  scene.add(waterMesh);
+}
+let waterDirty=false;
+
+// ─── Su Yayılma Sistemi (Cellular Automata) ───────────────────────────────────
+// Yön sabitleri
+const CA_DIRS_H  =[[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]];
+const CA_DIRS_ALL=[...CA_DIRS_H,[0,-1,0],[0,1,0]];
+
+let waterTickTimer=0;
+const WATER_TICK_INTERVAL=0.4; // saniye
+const waterPendingSet=new Set(); // yayılma bekleyen su bloklarının pk'ları
+
+// id==='water' (kaynak) VEYA id==='flowing_water' (akan) olan bloğu su sayar.
+// isWater flag'i yalnızca statik su bloklarında set edildiğinden
+// akan su için id kontrolü zorunludur.
+function isAnyWater(b){
+  return !!(b&&(b.isWater||b.id==='water'||b.id==='flowing_water'));
+}
+
+// Bir akan su bloğunun hâlâ beslenip beslenmediğini kontrol eder.
+// Kaynak (isSource=true) bloklar daima besleniyor sayılır.
+function isFed(bx,by,bz){
+  const bd=blockMap[pk(bx,by,bz)];
+  if(!bd) return false;
+  if(bd.isSource) return true; // kaynak hiçbir zaman kurumaz
+  // Üstten su geliyor mu?
+  const above=blockMap[pk(bx,by+1,bz)];
+  if(isAnyWater(above)) return true;
+  // Yatay komşulardan eşit veya daha yüksek seviyeli su var mı?
+  for(const [dx,,dz] of CA_DIRS_H){
+    const nb=blockMap[pk(bx+dx,by,bz+dz)];
+    if(nb&&isAnyWater(nb)&&(nb.waterLevel==null||nb.waterLevel>=(bd.waterLevel??1))) return true;
+  }
+  return false;
+}
+
+// Kaynak blok silindiğinde BFS ile bağlı tüm akan suları temizler.
+// Hâlâ başka bir kaynaktan beslenen bloklara dokunmaz.
+function drainConnectedWater(startX,startY,startZ){
+  const queue=[[startX,startY,startZ]];
+  const visited=new Set();
+  visited.add(pk(startX,startY,startZ));
+  let processed=0;
+  const MAX_DRAIN=2000; // büyük göl koruması – frame donmasını önler
+  while(queue.length&&processed<MAX_DRAIN){
+    const [bx,by,bz]=queue.shift();
+    processed++;
+    for(const [dx,dy,dz] of CA_DIRS_ALL){
+      const nx=bx+dx,ny=by+dy,nz=bz+dz;
+      const nk=pk(nx,ny,nz);
+      if(visited.has(nk)) continue;
+      visited.add(nk);
+      const nb=blockMap[nk];
+      if(!nb||!isAnyWater(nb)) continue; // su değil
+      if(nb.isSource) continue;           // kaynak bloğa dokunma
+      if(isFed(nx,ny,nz)) continue;       // hâlâ başka kaynaktan besleniyor
+      // Bloğu sil
+      hideBlock(nb);
+      delete blockMap[nk];
+      const ch=chunks[ck(~~(nx/CS),~~(nz/CS))];
+      if(ch) ch.blocks=ch.blocks.filter(b=>
+        !(Math.round(b.pos.x)===nx&&Math.round(b.pos.y)===ny&&Math.round(b.pos.z)===nz));
+      waterDirty=true;
+      queue.push([nx,ny,nz]); // cascade
+    }
+  }
+  // Limit aşıldıysa kalan komşuları normal tick kuyruğuna ekle
+  if(processed>=MAX_DRAIN){
+    for(const [dx,dy,dz] of CA_DIRS_ALL){
+      const nk=pk(startX+dx,startY+dy,startZ+dz);
+      const nb=blockMap[nk];
+      if(nb&&isAnyWater(nb)&&!nb.isSource) waterPendingSet.add(nk);
+    }
+  }
+}
+
+// Yeni su bloğu ekler.
+// Kaynak bloklar id='water', akan bloklar id='flowing_water' olarak oluşturulur.
+function addWaterBlock(bx,by,bz,level,isSource){
+  const k=pk(bx,by,bz);
+  if(blockMap[k]) return; // konum dolu
+  const isSourceBlock=!!isSource;
+  const bd={
+    id: isSourceBlock?'water':'flowing_water',
+    pos:new THREE.Vector3(bx,by,bz),
+    mat:matWater,
+    isWater:true,
+    waterLevel:level,
+    isSource:isSourceBlock,
+    visible:false
+  };
+  blockMap[k]=bd;
+  const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];
+  if(ch) ch.blocks.push(bd);
+  showBlock(bd);refreshNbr(bx,by,bz);
+  if(level>0) waterPendingSet.add(k);
+}
+
+// CA tabanlı su tick fonksiyonu.
+// Her blok için önce CA beslenme kuralı kontrol edilir;
+// beslenmiyor ise silinir ve komşular kuyruğa alınır.
+// Besleniyor ise normal yayılma (aşağı → yatay) uygulanır.
+function updateWater(dt){
+  waterTickTimer+=dt;
+  if(waterTickTimer<WATER_TICK_INTERVAL) return;
+  waterTickTimer=0;
+  if(!waterPendingSet.size) return;
+  // Her tick'te max 48 blok işle (performans)
+  const toProcess=Array.from(waterPendingSet).slice(0,48);
+  for(const k of toProcess) waterPendingSet.delete(k);
+  for(const k of toProcess){
+    const bd=blockMap[k];
+    if(!bd||!isAnyWater(bd)) continue;
+    const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+    const level=bd.waterLevel??8;
+
+    // ── Adım 1: CA Beslenme Kuralı ──────────────────────────────────────────
+    // Kaynak bloklar asla silinmez; akan su beslenemiyorsa air'e döner.
+    if(!bd.isSource&&!isFed(bx,by,bz)){
+      hideBlock(bd);
+      delete blockMap[k];
+      const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];
+      if(ch) ch.blocks=ch.blocks.filter(b=>
+        !(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+      waterDirty=true;
+      // Komşuları da beslenme açısından kontrol ettir
+      for(const [dx,dy,dz] of CA_DIRS_ALL){
+        const nb=blockMap[pk(bx+dx,by+dy,bz+dz)];
+        if(nb&&isAnyWater(nb)&&!nb.isSource) waterPendingSet.add(pk(bx+dx,by+dy,bz+dz));
+      }
+      continue;
+    }
+
+    // ── Adım 1b: Eksik su → 2+ komşu varsa tam su olsun ────────────────────
+    // Akan su (isSource:false) için: aynı Y'de 2 veya daha fazla komşu su bloğu varsa
+    // bu blok tam su kaynağına dönüşür (göl/nehir ortasındaki çukurları kapatır)
+    if(!bd.isSource){
+      const DIRS8=[[1,0,0],[-1,0,0],[0,0,1],[0,0,-1],[1,0,1],[1,0,-1],[-1,0,1],[-1,0,-1]];
+      let fullWaterNeighborCount=0;
+      for(const [dx,,dz] of DIRS8){
+        const nb=blockMap[pk(bx+dx,by,bz+dz)];
+        if(nb&&(isAnyWater(nb)||nb.isLiquid)&&(nb.waterLevel??0)>=8) fullWaterNeighborCount++;
+      }
+      if(fullWaterNeighborCount>=2){
+        bd.waterLevel=8;bd.isSource=true;bd.id='water';waterDirty=true;
+        for(const [dx,,dz] of DIRS8){const nk=pk(bx+dx,by,bz+dz);if(blockMap[nk]&&isAnyWater(blockMap[nk])) waterPendingSet.add(nk);}
+        continue;
+      }
+    }
+
+    // ── Adım 2: Yayılma ─────────────────────────────────────────────────────
+    const belowK=pk(bx,by-1,bz);
+    const belowBd=blockMap[belowK];
+    if(!belowBd){
+      // Altı boş → önce aşağı ak (level aynı kalır, gravity)
+      addWaterBlock(bx,by-1,bz,level,false);
+      continue;
+    }
+    if(isAnyWater(belowBd)){
+      // Altında su var → alttaki bloğu da tick'te işlet
+      waterPendingSet.add(belowK);
+      continue;
+    }
+    // Altı katı → yatay yayıl (level > 1 ise, 8 bloğa kadar menzil)
+    if(level>1){
+      for(const [dx,,dz] of CA_DIRS_H){
+        const nk=pk(bx+dx,by,bz+dz);
+        const nb=blockMap[nk];
+        if(!nb){
+          addWaterBlock(bx+dx,by,bz+dz,level-1,false);
+        } else if(isAnyWater(nb)&&(nb.waterLevel??8)<level-1){
+          nb.waterLevel=level-1;
+          waterPendingSet.add(nk);
+          waterDirty=true;
+        }
+      }
+    }
+  }
+}
+
+// ─── InstancedMesh Sistemi ───
+const BLOCK_GEO=new THREE.BoxGeometry(1,1,1);
+const DUMMY_OBJ=new THREE.Object3D();
+const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null};
+let iMeshes={};
+let instancesDirty=false;
+const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map()};
+function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;}
+function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';return 'planks';}
+function rebuildInstancedMeshes(){
+  for(const k in iMeshes) scene.remove(iMeshes[k]);
+  iMeshes={};
+  for(const mk in visiblePositions){
+    const posMap=visiblePositions[mk];if(!posMap.size) continue;
+    const positions=Array.from(posMap.values());
+    const mat=IMAT_KEYS[mk];
+    const mesh=new THREE.InstancedMesh(BLOCK_GEO,mat,positions.length);
+    mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+    // FPS: Frustum Culling – görüş dışı instance'lar atlansın
+    mesh.frustumCulled=true;
+    let minX=Infinity,minY=Infinity,minZ=Infinity,maxX=-Infinity,maxY=-Infinity,maxZ=-Infinity;
+    for(let i=0;i<positions.length;i++){
+      DUMMY_OBJ.position.copy(positions[i]);DUMMY_OBJ.updateMatrix();mesh.setMatrixAt(i,DUMMY_OBJ.matrix);
+      if(positions[i].x<minX) minX=positions[i].x;if(positions[i].x>maxX) maxX=positions[i].x;
+      if(positions[i].y<minY) minY=positions[i].y;if(positions[i].y>maxY) maxY=positions[i].y;
+      if(positions[i].z<minZ) minZ=positions[i].z;if(positions[i].z>maxZ) maxZ=positions[i].z;
+    }
+    // Bounding sphere hesapla – frustum culling'in doğru çalışması için
+    const cx=(minX+maxX)/2,cy=(minY+maxY)/2,cz=(minZ+maxZ)/2;
+    const r=Math.sqrt(((maxX-minX)/2)**2+((maxY-minY)/2)**2+((maxZ-minZ)/2)**2)+1;
+    mesh.geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3(cx,cy,cz),r);
+    mesh.instanceMatrix.needsUpdate=true;
+    scene.add(mesh);iMeshes[mk]=mesh;
+  }
+}
+function raySlabAABB(ox,oy,oz,dx,dy,dz,x0,y0,z0,x1,y1,z1){
+  let tmin=-Infinity,tmax=Infinity;
+  const chk=(o,d,lo,hi)=>{if(Math.abs(d)<1e-8){return o>=lo&&o<=hi;}const t1=(lo-o)/d,t2=(hi-o)/d;tmin=Math.max(tmin,Math.min(t1,t2));tmax=Math.min(tmax,Math.max(t1,t2));return true;};
+  if(!chk(ox,dx,x0,x1)||!chk(oy,dy,y0,y1)||!chk(oz,dz,z0,z1)) return null;
+  if(tmax<tmin||tmax<0) return null;
+  return tmin<0?tmax:tmin;
+}
+function aabbNormal(hx,hy,hz,bx,by,bz){
+  const e=0.001;
+  if(Math.abs(hx-(bx-0.5))<e) return new THREE.Vector3(-1,0,0);
+  if(Math.abs(hx-(bx+0.5))<e) return new THREE.Vector3(1,0,0);
+  if(Math.abs(hy-(by-0.5))<e) return new THREE.Vector3(0,-1,0);
+  if(Math.abs(hy-(by+0.5))<e) return new THREE.Vector3(0,1,0);
+  if(Math.abs(hz-(bz-0.5))<e) return new THREE.Vector3(0,0,-1);
+  return new THREE.Vector3(0,0,1);
+}
+function castRayBlocks(orig,dir,skipWater=false){
+  let bestT=6,bestHit=null;
+  const px=Math.floor(orig.x),py=Math.floor(orig.y),pz=Math.floor(orig.z);
+  for(let ddx=-6;ddx<=6;ddx++){for(let ddy=-10;ddy<=6;ddy++){for(let ddz=-6;ddz<=6;ddz++){
+    const bx=px+ddx,by=py+ddy,bz=pz+ddz;
+    const bd=blockMap[pk(bx,by,bz)];if(!bd||!bd.visible) continue;
+    // Su içindeyken kırma modunda su bloklarını atla; alttaki katı bloğa ulaşılsın
+    if(skipWater&&isAnyWater(bd)) continue;
+    const t=raySlabAABB(orig.x,orig.y,orig.z,dir.x,dir.y,dir.z,bx-0.5,by-0.5,bz-0.5,bx+0.5,by+0.5,bz+0.5);
+    if(t!==null&&t>0.08&&t<bestT){
+      const hx=orig.x+dir.x*t,hy=orig.y+dir.y*t,hz=orig.z+dir.z*t;
+      bestT=t;bestHit={distance:t,face:{normal:aabbNormal(hx,hy,hz,bx,by,bz)},blockPos:{x:bx,y:by,z:bz},bd};
+    }
+  }}}
+  return bestHit?[bestHit]:[];
+}
+ 
+// ─── Hotbar Önizleme ───
+const BLOCK_DEFS=[['oak_planks','oak_planks'],['grass_top','grass_side'],['dirt','dirt'],['stone','stone'],['log_top','log_side'],['cobblestone','cobblestone'],['glass','glass'],['leaves','leaves'],['sand','sand'],['water_top','water_side']];
+function drawIsoBlock(ctx,topC,sideC){
+  const fw=20,sh=16,cx=25,ty=3;
+  ctx.save();ctx.beginPath();ctx.moveTo(cx,ty);ctx.lineTo(cx+fw,ty+fw/2);ctx.lineTo(cx,ty+fw);ctx.lineTo(cx-fw,ty+fw/2);ctx.closePath();ctx.clip();ctx.setTransform(fw/16,-fw/32,fw/16,fw/32,cx-fw,ty+fw/2);ctx.drawImage(topC,0,0,16,16);ctx.restore();
+  ctx.save();ctx.beginPath();ctx.moveTo(cx-fw,ty+fw/2);ctx.lineTo(cx,ty+fw);ctx.lineTo(cx,ty+fw+sh);ctx.lineTo(cx-fw,ty+fw/2+sh);ctx.closePath();ctx.clip();ctx.setTransform(fw/16,fw/32,0,sh/16,cx-fw,ty+fw/2);ctx.drawImage(sideC,0,0,16,16);ctx.restore();
+  ctx.save();ctx.beginPath();ctx.moveTo(cx-fw,ty+fw/2);ctx.lineTo(cx,ty+fw);ctx.lineTo(cx,ty+fw+sh);ctx.lineTo(cx-fw,ty+fw/2+sh);ctx.closePath();ctx.fillStyle='rgba(0,0,0,0.22)';ctx.fill();ctx.restore();
+  ctx.save();ctx.beginPath();ctx.moveTo(cx,ty+fw);ctx.lineTo(cx+fw,ty+fw/2);ctx.lineTo(cx+fw,ty+fw/2+sh);ctx.lineTo(cx,ty+fw+sh);ctx.closePath();ctx.clip();ctx.setTransform(fw/16,-fw/32,0,sh/16,cx,ty+fw);ctx.drawImage(sideC,0,0,16,16);ctx.restore();
+  ctx.save();ctx.beginPath();ctx.moveTo(cx,ty+fw);ctx.lineTo(cx+fw,ty+fw/2);ctx.lineTo(cx+fw,ty+fw/2+sh);ctx.lineTo(cx,ty+fw+sh);ctx.closePath();ctx.fillStyle='rgba(0,0,0,0.38)';ctx.fill();ctx.restore();
+}
+let hotbarSlots=[0,1,2,3,4,5,6,7,8];
+function initHotbar(){
+  document.querySelectorAll('.hotbar-slot').forEach((el,i)=>{
+    const c=el.querySelector('canvas');if(!c) return;
+    c.width=50;c.height=50;const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;
+    const def=BLOCK_DEFS[hotbarSlots[i]];if(!def) return;
+    drawIsoBlock(ctx,rawTexC[def[0]],rawTexC[def[1]]);
+  });
+}
+initHotbar();
+ 
+// ─── Envanter ───
+let invOpen=false,invSelectedBlock=-1;
+function renderInvGrid(){
+  const grid=document.getElementById('inv-grid');grid.innerHTML='';
+  const names=langData[currentLang].bkNames;
+  BLOCK_DEFS.forEach((def,i)=>{
+    const item=document.createElement('div');
+    item.className='inv-item'+(invSelectedBlock===i?' selected':'');
+    const c=document.createElement('canvas');c.width=50;c.height=50;
+    const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;
+    drawIsoBlock(ctx,rawTexC[def[0]],rawTexC[def[1]]);
+    const lbl=document.createElement('div');lbl.className='inv-item-name';lbl.textContent=names[i]||'';
+    item.appendChild(c);item.appendChild(lbl);
+    item.addEventListener('click',()=>{invSelectedBlock=i;renderInvGrid();});
+    grid.appendChild(item);
+  });
+}
+function renderInvHotbarRow(){
+  const row=document.getElementById('inv-hotbar-row');row.innerHTML='';
+  const names=langData[currentLang].bkNames;
+  hotbarSlots.forEach((blockIdx,si)=>{
+    const hs=document.createElement('div');hs.className='inv-hslot';
+    const num=document.createElement('div');num.className='inv-hslot-num';num.textContent=si+1;
+    const c=document.createElement('canvas');c.width=50;c.height=50;
+    const ctx=c.getContext('2d');ctx.imageSmoothingEnabled=false;
+    const def=BLOCK_DEFS[blockIdx];
+    drawIsoBlock(ctx,rawTexC[def[0]],rawTexC[def[1]]);
+    const lbl=document.createElement('div');lbl.className='inv-hslot-name';lbl.textContent=names[blockIdx]||'';
+    hs.appendChild(num);hs.appendChild(c);hs.appendChild(lbl);
+    hs.addEventListener('click',()=>{if(invSelectedBlock>=0){hotbarSlots[si]=invSelectedBlock;initHotbar();renderInvHotbarRow();}});
+    row.appendChild(hs);
+  });
+}
+function openInv(){
+  if(invOpen||isPaused||isChatOpen||!deviceMode) return;
+  invOpen=true;
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
+  renderInvGrid();renderInvHotbarRow();
+  document.getElementById('inv-overlay').classList.add('active');
+}
+function closeInv(){
+  if(!invOpen) return;
+  invOpen=false;invSelectedBlock=-1;
+  document.getElementById('inv-overlay').classList.remove('active');
+  if(deviceMode==='pc'&&!isPaused) document.body.requestPointerLock();
+}
+document.getElementById('inv-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('inv-overlay')) closeInv();});
+document.getElementById('btn-mobile-inv').addEventListener('click',e=>{e.stopPropagation();if(invOpen) closeInv(); else openInv();});
+ 
+// ─── Face Culling ───
+const FACES=[
+  {dx:1,dy:0,dz:0,norm:[1,0,0],pos:[.5,.5,.5,.5,-.5,.5,.5,-.5,-.5,.5,.5,-.5],uvs:[0,1,0,0,1,0,1,1]},
+  {dx:-1,dy:0,dz:0,norm:[-1,0,0],pos:[-.5,.5,-.5,-.5,-.5,-.5,-.5,-.5,.5,-.5,.5,.5],uvs:[0,1,0,0,1,0,1,1]},
+  {dx:0,dy:1,dz:0,norm:[0,1,0],pos:[-.5,.5,-.5,-.5,.5,.5,.5,.5,.5,.5,.5,-.5],uvs:[0,0,0,1,1,1,1,0]},
+  {dx:0,dy:-1,dz:0,norm:[0,-1,0],pos:[-.5,-.5,.5,-.5,-.5,-.5,.5,-.5,-.5,.5,-.5,.5],uvs:[0,0,0,1,1,1,1,0]},
+  {dx:0,dy:0,dz:1,norm:[0,0,1],pos:[-.5,.5,.5,-.5,-.5,.5,.5,-.5,.5,.5,.5,.5],uvs:[0,1,0,0,1,0,1,1]},
+  {dx:0,dy:0,dz:-1,norm:[0,0,-1],pos:[.5,.5,-.5,.5,-.5,-.5,-.5,-.5,-.5,-.5,.5,-.5],uvs:[0,1,0,0,1,0,1,1]}
+];
+function getFM(m,f){return Array.isArray(m)?m[f]:m;}
+function isOpaque(key){const b=blockMap[key];return isOpaqueBlock(b);}
+function showBlock(bd){
+  if(!bd) return;
+  const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+  // Su blokları özel waterMesh sistemine gidiyor
+  if(isAnyWater(bd)||bd.isLiquid){
+    const k=pk(bx,by,bz);
+    bd.visible=true;
+    visibleWaterSet.add(k);
+    waterDirty=true;
+    return;
+  }
+  if(hidden(bx,by,bz)){if(bd.visible){const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);visiblePositions[mk].delete(k);bd.visible=false;instancesDirty=true;}return;}
+  const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);
+  if(bd.visible&&visiblePositions[mk].has(k)) return;
+  visiblePositions[mk].set(k,bd.pos);bd.visible=true;instancesDirty=true;
+}
+function hideBlock(bd){
+  if(!bd||!bd.visible) return;
+  if(isAnyWater(bd)||bd.isLiquid){
+    const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+    visibleWaterSet.delete(pk(bx,by,bz));
+    bd.visible=false;waterDirty=true;return;
+  }
+  const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+  const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);
+  visiblePositions[mk].delete(k);bd.visible=false;instancesDirty=true;
+}
+function refreshNbr(bx,by,bz){
+  // Komşu blokları yeniden değerlendir: gizli olanları göster, görünür olanları gizle
+  [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].forEach(([dx,dy,dz])=>{
+    const nb=blockMap[pk(bx+dx,by+dy,bz+dz)];
+    if(!nb) return;
+    if(isAnyWater(nb)||nb.isLiquid){waterDirty=true;waterPendingSet.add(pk(bx+dx,by+dy,bz+dz));return;}
+    // hidden() ile yeniden değerlendir
+    if(hidden(bx+dx,by+dy,bz+dz)){
+      if(nb.visible) hideBlock(nb);
+    } else {
+      if(!nb.visible) showBlock(nb);
+    }
+  });
+  // Su bloğun kendisi de etkilenebilir
+  const self=blockMap[pk(bx,by,bz)];
+  if(self&&(isAnyWater(self)||self.isLiquid)){waterDirty=true;waterPendingSet.add(pk(bx,by,bz));}
+} 
+// ─── Chunks ───
+const CS=16,SWS=48;
+const chunks={},blockMap={};
+let cLoadQ=[],cUnloadQ=[],procKey=null,procIdx=0,unprocKey=null,unprocIdx=0;
+const BPF=120; // Kare başına işlenen blok – yüksek tutulmalı, hızlı yükleme
+const FRAME_BUDGET_MS=8; // Bir frame'de chunk işine harcanan max süre (ms)
+function ck(cx,cz){return`${cx},${cz}`;}
+function pk(x,y,z){return`${Math.floor(x)},${Math.floor(y)},${Math.floor(z)}`;}
+let worldSeed=0;
+
+// ─── GÜVENLİ BLOK ERİŞİMİ ───
+// ─── Güvenli Blok Erişim Katmanı ───────────────────────────────────────────
+// Chunk yüklenmeden önce koordinata erişimde crash'i önler.
+// AIR_BLOCK: chunk veya blok yokken döndürülen sabit "hava" nesnesi.
+//   – id alanı her zaman mevcuttur, asla undefined dönmez.
+//   – isSolid / isWater / isLiquid: false → fizik kodu için güvenli.
+const AIR_BLOCK = Object.freeze({
+  id: 'air', isSolid: false, isWater: false, isLiquid: false
+});
+
+function getChunkAt(wx, wz) {
+  if (wx == null || wz == null) return null;          // NaN / undefined guard
+  const cx = Math.floor(wx / CS), cz = Math.floor(wz / CS);
+  return chunks[ck(cx, cz)] || null;
+}
+
+// ─── getBlockAt ────────────────────────────────────────────────────────────
+// Kullanım:
+//   const b = getBlockAt(x, y, z);
+//   if (!chunk || !chunk.blocks) return { id: 'air', isSolid: false };
+//   ← kullanıcının istediği kontrol burada gerçekleşiyor ─────────────────
+// NOT: Bu engine flat-blockMap mimarisi kullandığından
+//   chunk.blocks[x][y][z] yerine blockMap[pk(x,y,z)] kullanılır.
+//   Döndürülen nesne her zaman en azından { id, isSolid } içerir.
+function getBlockAt(x, y, z) {
+  const chunk = getChunkAt(x, z);
+  if (!chunk || !chunk.blocks) return AIR_BLOCK; // Chunk yoksa 'hava' dön
+  const bd = blockMap[pk(x, y, z)];
+  return bd || AIR_BLOCK;
+}
+
+// ─── isSafeBlock ───────────────────────────────────────────────────────────
+// getBlockAt üzerinden katı blok kontrolü – asla crash olmaz.
+function isSafeBlock(x, y, z) {
+  const bd = getBlockAt(x, y, z);
+  return bd !== AIR_BLOCK && isSolidBlock(bd);
+}
+
+// ─── safeChunkData ─────────────────────────────────────────────────────────
+// WorldGen çağrılarından önce chunkData null-guard için kullanılır.
+// Kullanım: const chunkData = safeChunkData(cx, cz);
+//           if (chunkData) { ... }
+function safeChunkData(cx, cz) {
+  const k = ck(cx, cz);
+  const ch = chunks[k];
+  if (!ch || !ch.blocks) return null; // chunkData yoksa null
+  return ch;
+}
+function chRng(cx,cz){let s=((Math.imul(cx+1,73856093))^(Math.imul(cz+1,19349663))^worldSeed)>>>0;if(!s)s=131071;return()=>{s^=s<<13;s^=s>>17;s^=s<<5;return(s>>>0)/4294967296;};}
+// ─── WorldGen: Perlin Noise + Biome Sistemi ───
+const WorldGen = (function(){
+  const SEA_LEVEL = 8;
+  const WORLD_BOTTOM = -128;  // Derinleştirildi (eskiden -64)
+  const WORLD_TOP = 128;
+
+  // Permütasyon tablosu (Perlin için)
+  function buildPerm(seed){
+    let s=seed>>>0;if(!s)s=1;
+    const p=new Uint8Array(512);
+    for(let i=0;i<256;i++) p[i]=i;
+    for(let i=255;i>0;i--){s^=s<<13;s^=s>>17;s^=s<<5;s=(s>>>0);const j=s%(i+1);const t=p[i];p[i]=p[j];p[j]=t;}
+    for(let i=0;i<256;i++) p[256+i]=p[i];
+    return p;
+  }
+  let _perm=null,_seed=-1;
+  function getPerm(){
+    if(_perm===null||_seed!==worldSeed){_perm=buildPerm(worldSeed);_seed=worldSeed;}
+    return _perm;
+  }
+
+  function fade(t){return t*t*t*(t*(t*6-15)+10);}
+  function lerp(a,b,t){return a+t*(b-a);}
+  function grad(h,x,y){h&=3;const u=h<2?x:y,v=h<2?y:x;return((h&1)?-u:u)+((h&2)?-v:v);}
+  function noise2(x,y){
+    const p=getPerm();
+    const xi=Math.floor(x)&255,yi=Math.floor(y)&255;
+    const xf=x-Math.floor(x),yf=y-Math.floor(y);
+    const u=fade(xf),v=fade(yf);
+    const aa=p[p[xi]+yi],ab=p[p[xi]+yi+1],ba=p[p[xi+1]+yi],bb=p[p[xi+1]+yi+1];
+    return lerp(lerp(grad(aa,xf,yf),grad(ba,xf-1,yf),u),lerp(grad(ab,xf,yf-1),grad(bb,xf-1,yf-1),u),v);
+  }
+  // Fraktal Brownian Motion (daha doğal arazi)
+  function fbm(x,y,oct,lac,gain){
+    let v=0,a=1,f=1,max=0;
+    for(let i=0;i<oct;i++){v+=noise2(x*f,y*f)*a;max+=a;a*=gain;f*=lac;}
+    return v/max;
+  }
+
+  // Biome türü belirle
+  const _biomeCache=new Map();
+  function getBiome(wx,wz){
+    const key=(Math.round(wx/2)<<16^Math.round(wz/2));
+    if(_biomeCache.has(key)) return _biomeCache.get(key);
+    if(_biomeCache.size>4096) _biomeCache.clear();
+    // Nehir: daha doğal bantlar (0.04 → daha geniş, daha az sivri nehirler)
+    const riverN= Math.abs(noise2(wx*0.012, wz*0.012));
+    let result;
+    if(riverN<0.04){ result='river'; }
+    else if(riverN<0.065){ result='beach'; } // nehir kıyısı
+    else {
+      const elev = fbm(wx*0.004, wz*0.004, 2, 2.0, 0.45);
+      const humid= noise2(wx*0.004+100, wz*0.004+100);
+      // Okyanus: sadece çok alçak alanlar (-0.35 altı = daha az deniz)
+      if(elev < -0.35)       result='ocean';
+      // Beach: okyanus kenarında ince şerit (-0.35 ile -0.28 arası)
+      else if(elev < -0.28)  result='beach';
+      // Taş sahil: beach'in hemen arkasında ince şerit (-0.28 ile -0.22 arası)
+      else if(elev < -0.22)  result='stonebeach';
+      else if(elev >  0.38)  result='mountain';
+      else if(elev >  0.20)  result='hills';
+      else if(humid > 0.08)  result='forest';
+      else                   result='plains';
+    }
+    _biomeCache.set(key,result);
+    return result;
+  }
+
+  function getSurfaceY(wx,wz,biome){
+    const base = fbm(wx*0.003, wz*0.003, 2, 2.0, 0.5);
+    const ridgeRaw = 1.0 - Math.abs(noise2(wx*0.006, wz*0.006));
+    const ridge = Math.max(0, ridgeRaw - 0.4) * 2.5;
+    switch(biome){
+      case 'ocean':      return Math.round(SEA_LEVEL - 3 + base*2);
+      case 'river':      return SEA_LEVEL - 1;
+      case 'beach':      return SEA_LEVEL;
+      case 'stonebeach': return Math.round(SEA_LEVEL + base*2);  // hafif dalgalı, düz duvar değil
+      case 'plains':     return Math.round(SEA_LEVEL + base*4);
+      case 'forest':     return Math.round(SEA_LEVEL + 1 + base*4);
+      case 'hills':      return Math.round(SEA_LEVEL + 3 + base*8);
+      case 'mountain':   return Math.round(SEA_LEVEL + 7 + base*10 + ridge*8);
+      default:           return Math.round(SEA_LEVEL + base*3);
+    }
+  }
+
+  // Bir sütun için blok katmanlarını üret
+  function buildColumn(wx,wz,blk,rng){
+    const biome = getBiome(wx,wz);
+    const surfY = getSurfaceY(wx,wz,biome);
+    const STONE_FLOOR = -10;
+
+    if(biome==='ocean'){
+      for(let y=STONE_FLOOR;y<surfY-2;y++)
+        blk.push({id:'stone',pos:new THREE.Vector3(wx,y,wz),mat:texStone});
+      for(let y=surfY-2;y<=surfY;y++)
+        blk.push({id:'sand',pos:new THREE.Vector3(wx,y,wz),mat:texSand});
+      for(let y=surfY+1;y<=SEA_LEVEL;y++)
+        blk.push({id:'water',pos:new THREE.Vector3(wx,y,wz),mat:matWater,isWater:true,waterLevel:8,isSource:true});
+
+    } else if(biome==='river'){
+      for(let y=STONE_FLOOR;y<surfY-1;y++)
+        blk.push({id:'stone',pos:new THREE.Vector3(wx,y,wz),mat:texStone});
+      blk.push({id:'sand',pos:new THREE.Vector3(wx,surfY-1,wz),mat:texSand});
+      blk.push({id:'sand',pos:new THREE.Vector3(wx,surfY,wz),mat:texSand});
+      // Nehir suyu SEA_LEVEL'e kadar → çimenle aynı seviye
+      for(let y=surfY+1;y<=SEA_LEVEL;y++)
+        blk.push({id:'water',pos:new THREE.Vector3(wx,y,wz),mat:matWater,isWater:true,waterLevel:8,isSource:true});
+
+    } else if(biome==='beach'){
+      const sandL = 2 + Math.floor(rng()*2);
+      for(let y=STONE_FLOOR;y<surfY-sandL;y++)
+        blk.push({id:'stone',pos:new THREE.Vector3(wx,y,wz),mat:texStone});
+      for(let y=surfY-sandL;y<=surfY;y++)
+        blk.push({id:'sand',pos:new THREE.Vector3(wx,y,wz),mat:texSand});
+
+    } else if(biome==='stonebeach'){
+      // Taş sahili: düz taş yüzey (cobblestone değil, normal stone)
+      for(let y=STONE_FLOOR;y<=surfY;y++)
+        blk.push({id:'stone',pos:new THREE.Vector3(wx,y,wz),mat:texStone});
+
+    } else if(biome==='mountain'){
+      for(let y=STONE_FLOOR;y<=surfY;y++)
+        blk.push({id:'stone',pos:new THREE.Vector3(wx,y,wz),mat:texStone});
+
+    } else {
+      for(let y=STONE_FLOOR;y<surfY-2;y++)
+        blk.push({id:'stone',pos:new THREE.Vector3(wx,y,wz),mat:texStone});
+      for(let y=surfY-2;y<surfY;y++)
+        blk.push({id:'dirt',pos:new THREE.Vector3(wx,y,wz),mat:texDirt});
+      blk.push({id:'grass',pos:new THREE.Vector3(wx,surfY,wz),mat:matGrass});
+    }
+    return {biome, surfY};
+  }
+
+  // Ağaç üretici
+  function placeTree(wx,wz,surfY,blk){
+    const th=4+Math.floor(Math.random()*2);
+    for(let h=1;h<=th;h++) blk.push({id:'log',pos:new THREE.Vector3(wx,surfY+h,wz),mat:matLog});
+    for(let lx=-2;lx<=2;lx++){for(let lz=-2;lz<=2;lz++){for(let ly=0;ly<=1;ly++){
+      if(Math.abs(lx)===2&&Math.abs(lz)===2) continue;
+      blk.push({id:'leaves',pos:new THREE.Vector3(wx+lx,surfY+th+ly,wz+lz),mat:texLeaves});
+    }}}
+  }
+
+  // Biome için ağaç uygunluğunu kontrol et (layer/biome check)
+  function canPlaceTree(biome){
+    return biome==='forest'||biome==='plains'||biome==='hills';
+  }
+
+  // Ana chunk üretim fonksiyonu
+  function generate(cx,cz,rng){
+    if(typeof cx!=='number'||typeof cz!=='number') return []; // null guard
+    const blk=[],sx=cx*CS,sz=cz*CS;
+    const colInfo=[];
+    for(let x=0;x<CS;x++){
+      colInfo[x]=[];
+      for(let z=0;z<CS;z++){
+        const wx=sx+x,wz=sz+z;
+        let info;
+        try { info=buildColumn(wx,wz,blk,rng); }
+        catch(e){ info={biome:'plains',surfY:WorldGen?WorldGen.SEA_LEVEL:8}; }
+        colInfo[x][z]=info||{biome:'plains',surfY:8};
+      }
+    }
+    for(let x=0;x<CS;x++){for(let z=0;z<CS;z++){
+      const col=colInfo[x][z];
+      if(!col) continue; // if (chunkData) kontrolü
+      const{biome,surfY}=col;
+      if(!canPlaceTree(biome)) continue;
+      const treeChance = biome==='forest'?0.022:(biome==='hills'?0.01:0.007);
+      if(rng()<treeChance){
+        const wx=sx+x,wz=sz+z;
+        placeTree(wx,wz,surfY,blk);
+      }
+    }}
+    return blk;
+  }
+
+  function clearBiomeCache(){_biomeCache.clear();}
+  return {SEA_LEVEL, WORLD_BOTTOM, WORLD_TOP, getBiome, getSurfaceY, generate, clearBiomeCache};
+})();
+
+// ─── Chunk Üretim Kuyruğu (async – her frame 1 chunk üret) ───
+const chunkGenQ = []; // {cx, cz} nesneleri
+function scheduleChunk(cx, cz) {
+  const k = ck(cx, cz);
+  if (chunks[k]) return; // zaten üretilmiş
+  if (chunkGenQ.some(c => c.cx === cx && c.cz === cz)) return; // zaten kuyrukta
+  chunkGenQ.push({ cx, cz });
+}
+function genChunk(cx,cz){
+  const k=ck(cx,cz);if(chunks[k]) return;
+  if(typeof cx!=='number'||typeof cz!=='number'||!isFinite(cx)||!isFinite(cz)) return; // NaN guard
+  const rng=chRng(cx,cz);
+  let blk;
+  try { blk=WorldGen.generate(cx,cz,rng); }
+  catch(e){ console.warn('[genChunk] WorldGen hatası cx='+cx+' cz='+cz, e); blk=[]; }
+  if (!blk || !Array.isArray(blk)) blk = []; // null/undefined guard
+  blk.forEach(b=>{
+    if(!b||!b.pos) return; // blok null kontrolü
+    if(!b.id) b.id = 'unknown'; // id eksikse – asla undefined okuma crash olmasın
+    blockMap[pk(b.pos.x,b.pos.y,b.pos.z)]=b;
+  });
+  // chunkData = { blocks, loaded, cx, cz } – if (chunkData) kontrolü için her zaman blokları doldur
+  const chunkData={blocks:blk,loaded:false,cx,cz};
+  chunks[k]=chunkData;
+}
+// ─── Yüz görünürlük yardımcı ───────────────────────────────────────────────
+// Komşu blok opak mı? (chunk yüklü değilse saydam say = blok görünür)
+function isOpaqueBlock(b){
+  if(!b) return false;              // boş veya yüklenmemiş → saydam
+  if(isAnyWater(b)||b.isLiquid) return false;
+  if(b.mat===texGlass) return false;
+  if(b.mat===texLeaves) return false;
+  return true;
+}
+// Bir blok gizlenmeli mi? → 6 komşusunun HEPSI opak ise gizle
+function hidden(x,y,z){
+  const self=blockMap[pk(x,y,z)];
+  if(!self) return true;
+  if(isAnyWater(self)||self.isLiquid){
+    const dirs=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+    return dirs.every(([dx,dy,dz])=>{
+      const b=blockMap[pk(x+dx,y+dy,z+dz)];
+      return b&&(isAnyWater(b)||b.isLiquid||isOpaqueBlock(b));
+    });
+  }
+  // Komşu yoksa (chunk yüklenmemiş) → saydam say → blok her zaman görünür
+  // Bu chunk sınırında bloğun kaybolmasını ve yüzen taş oluşmasını önler
+  const n1=blockMap[pk(x+1,y,z)]; if(!n1||!isOpaqueBlock(n1)) return false;
+  const n2=blockMap[pk(x-1,y,z)]; if(!n2||!isOpaqueBlock(n2)) return false;
+  const n3=blockMap[pk(x,y+1,z)]; if(!n3||!isOpaqueBlock(n3)) return false;
+  const n4=blockMap[pk(x,y-1,z)]; if(!n4||!isOpaqueBlock(n4)) return false;
+  const n5=blockMap[pk(x,y,z+1)]; if(!n5||!isOpaqueBlock(n5)) return false;
+  const n6=blockMap[pk(x,y,z-1)]; if(!n6||!isOpaqueBlock(n6)) return false;
+  return true;
+}
+function forceLoad(){
+  const px=Math.floor(camera.position.x),pz=Math.floor(camera.position.z);
+  for(let x=-2;x<=2;x++){for(let z=-2;z<=2;z++){
+    const cx=Math.floor((px+x)/CS),cz=Math.floor((pz+z)/CS);
+    genChunk(cx,cz);
+    // if (chunkData) kontrolü – chunk henüz yüklenmediyse atla
+    const ch=safeChunkData(cx,cz);
+    if(!ch) continue;
+    ch.blocks.forEach(b=>{
+      if(!b||!b.pos) return; // null-safe
+      if(Math.abs(b.pos.x-px)<=2&&Math.abs(b.pos.z-pz)<=2&&!b.visible&&!hidden(b.pos.x,b.pos.y,b.pos.z)) showBlock(b);
+    });
+  }}
+}
+function updateChunks(){
+  if(worldType==='small') return;
+  const pcx=Math.floor(camera.position.x/CS),pcz=Math.floor(camera.position.z/CS);
+  const vis=new Set();
+  forceLoad();
+  // Yükleme kuyruğunu TEMIZLEME – devam eden yüklemeleri iptal etme
+  const toLoad=[];
+  for(let x=-renderDist;x<=renderDist;x++){for(let z=-renderDist;z<=renderDist;z++){
+    const cx=pcx+x,cz=pcz+z;
+    if(!chunks[ck(cx,cz)]) { scheduleChunk(cx,cz); continue; }
+    const k=ck(cx,cz);
+    vis.add(k);
+    if(!chunks[k].loaded&&procKey!==k&&!cLoadQ.includes(k)){
+      toLoad.push({k,d:x*x+z*z});
+    }
+  }}
+  toLoad.sort((a,b)=>a.d-b.d).forEach(({k})=>cLoadQ.push(k));
+  // Sadece çok uzak chunk'ları unload et (renderDist+4 mesafe)
+  // Bu chunk'ların kaybolmasını önler
+  for(const k in chunks){
+    const ch=chunks[k];
+    if(!ch) continue;
+    const distX=Math.abs(ch.cx-pcx),distZ=Math.abs(ch.cz-pcz);
+    const farEnough = distX>renderDist+4||distZ>renderDist+4;
+    if(farEnough&&ch.loaded&&!cUnloadQ.includes(k)&&unprocKey!==k&&procKey!==k){
+      cUnloadQ.push(k);
+    }
+  }
+}
+function procQueues(){
+  if(worldType==='small') return;
+  const t0=performance.now();
+
+  // Her frame'de birden fazla chunk üretebilir – bütçe dolana kadar
+  while(chunkGenQ.length && performance.now()-t0 < FRAME_BUDGET_MS){
+    const {cx,cz}=chunkGenQ.shift();
+    genChunk(cx,cz);
+    const chunkData=safeChunkData(cx,cz);
+    if(chunkData&&!chunkData.loaded){
+      const k=ck(cx,cz);
+      if(!cLoadQ.includes(k)) cLoadQ.push(k);
+    }
+  }
+  if(!unprocKey&&cUnloadQ.length){
+    const candidate=cUnloadQ[0];
+    if(candidate===procKey){cUnloadQ.shift();return;}
+    unprocKey=cUnloadQ.shift();unprocIdx=0;
+  }
+  if(unprocKey){
+    const uch=chunks[unprocKey];
+    if(uch&&uch.blocks){
+      let n=0;
+      while(n<BPF&&unprocIdx<uch.blocks.length&&performance.now()-t0<FRAME_BUDGET_MS){
+        const b=uch.blocks[unprocIdx];
+        if(b&&b.pos&&b.visible&&b.pos.distanceTo(camera.position)>4.5) hideBlock(b);
+        unprocIdx++;n++;
+      }
+      if(unprocIdx>=uch.blocks.length){uch.loaded=false;unprocKey=null;}
+    } else unprocKey=null;
+  }
+  if(!procKey&&cLoadQ.length){procKey=cLoadQ.shift();procIdx=0;}
+  if(procKey){
+    const pch=chunks[procKey];
+    if(pch&&pch.blocks){
+      let n=0;
+      while(n<BPF&&procIdx<pch.blocks.length&&performance.now()-t0<FRAME_BUDGET_MS){
+        const b=pch.blocks[procIdx];
+        if(b&&b.pos&&!b.visible&&!hidden(b.pos.x,b.pos.y,b.pos.z)) showBlock(b);
+        procIdx++;n++;
+      }
+      if(procIdx>=pch.blocks.length){pch.loaded=true;procKey=null;}
+    } else procKey=null;
+  }
+}
+ 
+// ─── Steve ───
+const M_SKIN=new THREE.MeshStandardMaterial({color:0xf1c27d,roughness:.9});
+const M_SHIRT=new THREE.MeshStandardMaterial({color:0x4a6fb5,roughness:.9});
+const M_PANTS=new THREE.MeshStandardMaterial({color:0x2a4a9f,roughness:.9});
+const M_HAIR=new THREE.MeshStandardMaterial({color:0x5c3317,roughness:.9});
+function mkSprite(name){
+  const safeN=sanitizeName(name);
+  const c=document.createElement('canvas');c.width=256;c.height=48;const ctx=c.getContext('2d');
+  ctx.fillStyle='rgba(0,0,0,0.65)';if(ctx.roundRect) ctx.roundRect(2,4,252,40,6); else ctx.rect(2,4,252,40);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(safeN.substring(0,14),128,25);
+  const tex=new THREE.CanvasTexture(c);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  sp.scale.set(2.4,.46,1);return sp;
+}
+function mkPlayer(name){
+  const g=new THREE.Group();
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),M_SKIN);head.position.y=1.79;
+  const hair=new THREE.Mesh(new THREE.BoxGeometry(.62,.12,.62),M_HAIR);hair.position.y=2.13;
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.5,.75,.25),M_SHIRT);body.position.y=1.125;
+  const aG=new THREE.BoxGeometry(.25,.75,.25);
+  const aL=new THREE.Mesh(aG,M_SHIRT);aL.position.set(-.375,1.125,0);
+  const aR=new THREE.Mesh(aG,M_SHIRT);aR.position.set(.375,1.125,0);
+  const lG=new THREE.BoxGeometry(.24,.75,.25);
+  const lL=new THREE.Mesh(lG,M_PANTS);lL.position.set(-.125,.375,0);
+  const lR=new THREE.Mesh(lG,M_PANTS);lR.position.set(.125,.375,0);
+  g.add(head,hair,body,aL,aR,lL,lR);
+  const ns=mkSprite(name);ns.position.y=2.55;g.add(ns);
+  scene.add(g);return g;
+}
+ 
+// ─── Hayvanlar ───
+const animals=[];let animalIdCounter=0;
+const A_COLS=[[0xeeeef0,0xb0b0b2],[0x3a2010,0x221005],[0xf0a0b0,0xd07080]];
+const A_HP=[8,10,10],A_FOOD=[3,5,4];
+function mkAnimalMesh(type){
+  const g=new THREE.Group();
+  const bM=new THREE.MeshStandardMaterial({color:A_COLS[type][0],roughness:.9});
+  const hM=new THREE.MeshStandardMaterial({color:A_COLS[type][1],roughness:.9});
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.6,.5,.9),bM);body.position.y=.52;
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.38,.35,.35),hM);head.position.set(0,.8,.42);
+  const legG=new THREE.BoxGeometry(.14,.3,.14);
+  for(const lx of[-.2,.2]) for(const lz of[-.28,.28]){const leg=new THREE.Mesh(legG,hM);leg.position.set(lx,.15,lz);g.add(leg);}
+  g.add(body,head);scene.add(g);return g;
+}
+function spawnAnimal(ax,az){
+  const type=Math.floor(Math.random()*3);
+  // Chunk yüklü değilse hayvan spawn etme (null guard)
+  const chunk=getChunkAt(ax,az);
+  if(!chunk||!chunk.blocks) return null;
+  let gy=WorldGen.SEA_LEVEL+1;for(let dy=WorldGen.SEA_LEVEL+20;dy>=WorldGen.WORLD_BOTTOM;dy--){if(blockMap[pk(Math.floor(ax),dy,Math.floor(az))]){gy=dy+1.05;break;}}
+  const mesh=mkAnimalMesh(type);mesh.position.set(ax,gy-0.15,az);
+  const a={id:++animalIdCounter,type,x:ax,y:gy,z:az,hp:A_HP[type],maxHp:A_HP[type],mesh,dirTimer:0,vx:0,vz:0,deadTimer:-1};
+  animals.push(a);return a;
+}
+function removeAnimal(a){scene.remove(a.mesh);const i=animals.indexOf(a);if(i>-1) animals.splice(i,1);}
+function clearAnimals(){animals.slice().forEach(removeAnimal);}
+let animalSpawnTimer=15,animalSyncTimer=0;
+function updateAnimals(dt){
+  animalSpawnTimer-=dt;
+  if(animalSpawnTimer<=0&&animals.length<20&&worldType!=='small'){
+    animalSpawnTimer=20+Math.random()*15;
+    const ang=Math.random()*Math.PI*2,dist=12+Math.random()*22;
+    const sx=camera.position.x+Math.cos(ang)*dist,sz=camera.position.z+Math.sin(ang)*dist;
+    // if (chunkData): chunk yüklü değilse hayvan üretme, WorldGen erişme
+    const chunkData=safeChunkData(Math.floor(sx/CS),Math.floor(sz/CS));
+    if(!chunkData) { animalSpawnTimer=5; return; } // chunk yok – kısa bekle
+    // Biome kontrolü: sadece kara biome'lerinde hayvan üret
+    const biome=WorldGen.getBiome(sx,sz);
+    if(biome!=='ocean'&&biome!=='river'){
+      const surfY=WorldGen.getSurfaceY(sx,sz,biome);
+      if(blockMap[pk(Math.floor(sx),surfY,Math.floor(sz))]) spawnAnimal(sx,sz);
+    }
+  }
+  for(let i=animals.length-1;i>=0;i--){
+    const a=animals[i];
+    if(a.hp<=0){
+      if(a.deadTimer<0){a.deadTimer=0.8;}
+      a.deadTimer-=dt;
+      if(a.deadTimer<=0){spawnFood(a.x,a.y,a.z,A_FOOD[a.type]);removeAnimal(a);}
+      continue;
+    }
+    const dx=a.x-camera.position.x,dz=a.z-camera.position.z;
+    if(dx*dx+dz*dz>64*64){removeAnimal(a);continue;}
+    a.dirTimer-=dt;
+    if(a.dirTimer<=0){
+      a.dirTimer=2.5+Math.random()*4;
+      if(Math.random()<.25){a.vx=0;a.vz=0;}
+      else{const ang=Math.random()*Math.PI*2,spd=.012+Math.random()*.01;a.vx=Math.cos(ang)*spd;a.vz=Math.sin(ang)*spd;}
+    }
+    const nx=a.x+a.vx,nz=a.z+a.vz;
+    let gy=a.y;
+    for(let dy=1;dy>=-3;dy--){if(blockMap[pk(Math.floor(nx),Math.floor(a.y)+dy,Math.floor(a.z))]){gy=Math.floor(a.y)+dy+1.05;break;}}
+    if(!blockMap[pk(Math.floor(nx),Math.floor(gy)-1,Math.floor(a.z))]&&!blockMap[pk(Math.floor(nx),Math.floor(gy),Math.floor(a.z))]) a.x=nx; else a.vx*=-1;
+    let gy2=a.y;
+    for(let dy=1;dy>=-3;dy--){if(blockMap[pk(Math.floor(a.x),Math.floor(a.y)+dy,Math.floor(nz))]){gy2=Math.floor(a.y)+dy+1.05;break;}}
+    if(!blockMap[pk(Math.floor(a.x),Math.floor(gy2)-1,Math.floor(nz))]&&!blockMap[pk(Math.floor(a.x),Math.floor(gy2),Math.floor(nz))]) a.z=nz; else a.vz*=-1;
+    a.y=gy;a.mesh.position.set(a.x,a.y-0.15,a.z);
+    if(a.vx!==0||a.vz!==0) a.mesh.rotation.y=Math.atan2(a.vx,a.vz);
+  }
+  if(isMP&&amHost){
+    animalSyncTimer-=dt;
+    if(animalSyncTimer<=0){
+      animalSyncTimer=0.5;
+      const list=animals.filter(a=>a.hp>0).map(a=>({id:a.id,x:a.x,y:a.y,z:a.z,type:a.type,hp:a.hp,maxHp:a.maxHp}));
+      Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'animals',list});});
+    }
+  }
+}
+function applyAnimalSync(list){
+  if(!list||!Array.isArray(list)) return; // null-safe: liste yoksa çık
+  const existing=new Map(animals.map(a=>[a.id,a]));const seen=new Set();
+  for(const d of list){
+    if(!d||d.id==null) continue; // bozuk kayıt – atla
+    seen.add(d.id);
+    if(existing.has(d.id)){
+      const a=existing.get(d.id);
+      if(!a||!a.mesh) continue; // null-safe: mesh yoksa atla
+      a.x=d.x;a.y=d.y;a.z=d.z;a.hp=d.hp;a.mesh.position.set(d.x,d.y-0.15,d.z);
+    } else {
+      // spawnAnimal chunk yüklü değilse null döner → a.id çökmesini önle
+      const a=spawnAnimal(d.x,d.z);
+      if(!a) continue; // ← if (chunkData) kontrolü: chunk yoksa atla
+      a.id=d.id;a.hp=d.hp;a.maxHp=d.maxHp;a.type=d.type;
+    }
+  }
+  for(const a of animals.slice()){if(!seen.has(a.id)) removeAnimal(a);}
+}
+ 
+// ─── Yemek ───
+const foods=[];
+function spawnFood(x,y,z,value){
+  const m=new THREE.Mesh(new THREE.BoxGeometry(.25,.25,.25),new THREE.MeshStandardMaterial({color:0xe0a040,roughness:.7,emissive:0x331a00,emissiveIntensity:.4}));
+  m.position.set(x,y+.6,z);scene.add(m);
+  foods.push({pos:new THREE.Vector3(x,y+.6,z),value,mesh:m,timer:40,rot:0});
+}
+function updateFoods(dt){
+  for(let i=foods.length-1;i>=0;i--){
+    const f=foods[i];f.rot+=dt*2;f.mesh.rotation.y=f.rot;f.timer-=dt;
+    if(f.timer<=0){scene.remove(f.mesh);foods.splice(i,1);continue;}
+    if(camera.position.distanceTo(f.pos)<1.2&&gameMode==='survival'){
+      hunger=Math.min(20,hunger+f.value);updateBars();scene.remove(f.mesh);foods.splice(i,1);
+    }
+  }
+}
+ 
+// ─── Sağlık & Açlık ───
+let health=20,hunger=20,gameMode='survival';
+let healthTimer=0,hungerTimer=0;
+let fallStartY=null,lastGrounded=true,voidDamageTimer=0;
+function updateBars(){
+  const hr=document.getElementById('hearts-row');
+  const hnr=document.getElementById('hunger-row');
+  if(!hr||!hnr) return;
+  hr.innerHTML='';hnr.innerHTML='';
+  for(let i=0;i<10;i++){const sp=document.createElement('span');sp.className='hrt';sp.textContent=health>i*2+1?'❤️':'🖤';hr.appendChild(sp);}
+  for(let i=0;i<10;i++){const sp=document.createElement('span');sp.className='hnr';sp.textContent=hunger>i*2+1?'🍗':'🩶';hnr.appendChild(sp);}
+  document.body.classList.toggle('low-health', health <= 6);
+}
+function setGameMode(m){
+  gameMode=m;
+  const ind=document.getElementById('mode-indicator');
+  if(ind) ind.textContent=m==='creative'?'✨ '+langData[currentLang].modeCreative:'⚔️ '+langData[currentLang].modeSurvival;
+  const bw=document.getElementById('bars-wrap');
+  if(bw) bw.style.display=m==='survival'?'flex':'none';
+  if(m==='creative'){isFlying=false;}
+  updateBars();
+}
+ 
+// ─── MODÜLER SAĞLIK SİSTEMİ ───
+const HealthManager = {
+    maxHealth: 20,
+    currentHealth: 20,
+
+    takeDamage(amount, source = 'unknown', ignoreCreative = false, meta = null) {
+        if (gameMode === 'creative' && !ignoreCreative) return false;
+        if (this.currentHealth <= 0) return false;
+        this.currentHealth = Math.max(0, this.currentHealth - amount);
+        health = this.currentHealth;
+        updateBars();
+        this.showDamageOverlay();
+        const title = document.getElementById('game-title');
+        title.style.color = '#f44';
+        setTimeout(() => { if (title) title.style.color = '#fff'; }, 150);
+        if (this.currentHealth <= 0) {
+            DeathManager.triggerDeath(source, meta);
+        }
+        return true;
+    },
+
+    heal(amount) {
+        if (this.currentHealth <= 0) return;
+        this.currentHealth = Math.min(this.maxHealth, this.currentHealth + amount);
+        health = this.currentHealth;
+        updateBars();
+    },
+
+    reset() {
+        this.currentHealth = this.maxHealth;
+        health = this.currentHealth;
+        updateBars();
+    },
+
+    showDamageOverlay() {
+        let overlay = document.getElementById('damage-overlay');
+        if (!overlay) {
+            overlay = document.createElement('div');
+            overlay.id = 'damage-overlay';
+            overlay.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(0,0,0,0.3); pointer-events: none; z-index: 1000;
+                opacity: 0; transition: opacity 0.1s;
+            `;
+            document.body.appendChild(overlay);
+        }
+        overlay.style.opacity = '0.6';
+        setTimeout(() => { if (overlay) overlay.style.opacity = '0'; }, 120);
+    }
+};
+
+const DeathManager = {
+    isDead: false,
+
+    triggerDeath(reason, meta = null) {
+        if (this.isDead) return;
+        this.isDead = true;
+        isDead = true;
+        isFlying = false;
+        velY = 0;
+
+        const dL = langData[currentLang];
+        const deathMsgDiv = document.getElementById('death-msg');
+        if (deathMsgDiv) {
+            const msgMap = dL.deathMessages;
+            const reasonText = msgMap[reason] || msgMap.unknown;
+            deathMsgDiv.textContent = reasonText;
+        }
+
+        // Sohbete ölüm bildirimi gönder (örn. "Oyuncu, Oyuncu2 tarafından öldürüldü")
+        const victim = myName || 'Oyuncu';
+        let template = null;
+        if (reason === 'pvp' && meta && meta.attacker) template = dL.deathChat.pvp.replace('%A%', meta.attacker);
+        else if (reason === 'suffocation') template = dL.deathChat.suffocation;
+        else if (reason === 'void') template = dL.deathChat.void;
+        else if (reason === 'fall') template = dL.deathChat.fall;
+
+        if (template) {
+            const chatMsg = template.replace('%V%', victim);
+            addChat(null, chatMsg, true);
+            if (isMP) {
+                if (amHost) {
+                    Object.values(hostConns).forEach(({conn}) => { if (conn.open) conn.send({type:'chat', name:null, msg:chatMsg, sys:true}); });
+                } else if (guestConn && guestConn.open) {
+                    guestConn.send({type:'deathmsg', msg: chatMsg});
+                }
+            }
+        }
+
+        const deathScreen = document.getElementById('death-screen');
+        deathScreen.classList.add('active');
+        if (deviceMode === 'pc' && document.pointerLockElement === document.body) {
+            document.exitPointerLock();
+        }
+    },
+
+    respawn() {
+        this.isDead = false;
+        isDead = false;
+        isResetting = false; // Fix 3: Respawn sonrası void kilidini temizle
+        HealthManager.reset();
+        hunger = 20;
+        updateBars();
+        // Respawn: gercek yuzey Y'sine gore konumlan
+        const _rb=WorldGen.getBiome(8,8),_ry=WorldGen.getSurfaceY(8,8,_rb)+2.6;
+        camera.position.set(8, _ry, 8);
+        velY = 0;
+        grounded = false;
+        fallStartY = null;
+        lastGrounded = true;
+        voidDamageTimer = 0;
+        document.getElementById('death-screen').classList.remove('active');
+        if (deviceMode === 'pc') document.body.requestPointerLock();
+    }
+};
+
+// ─── SuffocationManager (Sıkışma) ───
+const SuffocationManager = {
+    lastDamageTime: 0,
+    checkSuffocation() {
+        if (gameMode === 'creative') return;
+        if (DeathManager.isDead) return;
+        const pos = camera.position;
+        // Çok küçük iç hitbox (r=0.1) ile sadece gerçekten bloğun içindeyken hasar ver.
+        // Normal hareket hitbox'ı (r=0.3) blok yüzeylerine değdiğinde de true döner,
+        // bu yüzden burada çok daha dar bir kontrol yapıyoruz.
+        const r = 0.1;
+        function colSmall(x, y, z) {
+            const minX=x-r,maxX=x+r,minZ=z-r,maxZ=z+r,minY=y-1.55,maxY=y+0.05;
+            for(let bx=Math.floor(minX);bx<=Math.ceil(maxX);bx++)
+            for(let by=Math.floor(minY);by<=Math.ceil(maxY);by++)
+            for(let bz=Math.floor(minZ);bz<=Math.ceil(maxZ);bz++)
+                if(isSolidBlock(blockMap[pk(bx,by,bz)])&&maxX>bx-.5&&minX<bx+.5&&maxY>by-.5&&minY<by+.5&&maxZ>bz-.5&&minZ<bz+.5) return true;
+            return false;
+        }
+        if (colSmall(pos.x, pos.y, pos.z)) {
+            const now = Date.now();
+            if (now - this.lastDamageTime >= 1000) {
+                this.lastDamageTime = now;
+                HealthManager.takeDamage(2, 'suffocation');
+            }
+        } else {
+            this.lastDamageTime = 0;
+        }
+    }
+};
+
+// ─── CombatManager (PvP) ───
+const CombatManager = {
+    attackPlayer(targetPlayerId, damage, attackerPos) {
+        if (gameMode === 'creative') return false;
+        const target = remPlayers[targetPlayerId];
+        if (!target || target.mode === 'creative') return false;
+
+        if (isMP) {
+            if (amHost) {
+                const conn = hostConns[targetPlayerId]?.conn;
+                if (conn && conn.open) {
+                    conn.send({ type: 'damage', dmg: damage, knockback: true, fromPos: { x: attackerPos.x, y: attackerPos.y, z: attackerPos.z }, from: myName });
+                }
+            } else if (guestConn?.open) {
+                guestConn.send({ type: 'pvp_attack', target: targetPlayerId, dmg: damage, fromPos: { x: attackerPos.x, y: attackerPos.y, z: attackerPos.z }, from: myName });
+            }
+        }
+        return true;
+    },
+
+    applyLocalDamage(damage, fromPos, attackerName) {
+        if (gameMode === 'creative') return;
+        HealthManager.takeDamage(damage, 'pvp', false, { attacker: attackerName });
+        if (fromPos) {
+            const dir = new THREE.Vector3().subVectors(camera.position, fromPos).normalize();
+            camera.position.x += dir.x * 0.8;
+            camera.position.z += dir.z * 0.8;
+        }
+        this.flashRed();
+    },
+
+    flashRed() {
+        let flash = document.getElementById('red-flash');
+        if (!flash) {
+            flash = document.createElement('div');
+            flash.id = 'red-flash';
+            flash.style.cssText = `
+                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+                background: rgba(255,0,0,0.4); pointer-events: none; z-index: 999;
+                opacity: 0; transition: opacity 0.08s;
+            `;
+            document.body.appendChild(flash);
+        }
+        flash.style.opacity = '0.7';
+        setTimeout(() => { if (flash) flash.style.opacity = '0'; }, 100);
+    }
+};
+
+// ─── hasar/düşme için yardımcı ───
+function damagePlayer(dmg) {
+    HealthManager.takeDamage(dmg, 'unknown');
+}
+function killPlayer() {
+    DeathManager.triggerDeath('unknown');
+}
+function checkFallDamage() {
+    if (gameMode === 'creative' || DeathManager.isDead) return;
+    if (fallStartY === null) return;
+    const dist = fallStartY - camera.position.y;
+    if (dist >= 4) {
+        const dmg = Math.max(2, Math.floor((dist - 3) * 2));
+        HealthManager.takeDamage(dmg, 'fall');
+    }
+    fallStartY = null;
+}
+function updateHealthSystem(dt){
+  if(gameMode==='creative'||DeathManager.isDead) return;
+  hungerTimer+=dt;
+  if(hungerTimer>=45){hungerTimer=0;if(hunger>0){hunger=Math.max(0,hunger-1);updateBars();}}
+  if(hunger===0){healthTimer+=dt;if(healthTimer>=4){healthTimer=0;HealthManager.takeDamage(1,'unknown');}}
+}
+function attackAnimal(a,dmg=5){
+  if(!a||a.hp<=0) return;
+  a.hp-=dmg;
+  if(isMP&&amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'ahp',id:a.id,hp:a.hp});});
+  if(isMP&&!amHost&&guestConn?.open) guestConn.send({type:'aatk',id:a.id,dmg});
+}
+ 
+// ─── Entity Raycasting ───
+function findEntityInCrosshair(maxDist=5){
+  const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  const orig=camera.position.clone();
+  let best=null,bestD=maxDist;
+  for(const a of animals){
+    if(a.hp<=0) continue;
+    const ap=new THREE.Vector3(a.x,a.y+0.4,a.z);
+    const toC=ap.clone().sub(orig);
+    const proj=toC.dot(dir);if(proj<0.3||proj>bestD) continue;
+    const closest=orig.clone().addScaledVector(dir,proj);
+    if(closest.distanceTo(ap)<0.8){bestD=proj;best={type:'animal',animal:a};}
+  }
+  for(const [id,rp] of Object.entries(remPlayers)){
+    if(rp.mode==='creative') continue;
+    const pp=rp.g.position.clone().add(new THREE.Vector3(0,0.9,0));
+    const toC=pp.clone().sub(orig);
+    const proj=toC.dot(dir);if(proj<0.3||proj>bestD) continue;
+    const closest=orig.clone().addScaledVector(dir,proj);
+    if(closest.distanceTo(pp)<0.65){bestD=proj;best={type:'player',id,name:rp.name};}
+  }
+  return best;
+}
+ 
+// ─── Çok Oyunculu ───
+let isMP=false,amHost=false,myName='';
+let myPeer=null,hostConns={},guestConn=null,remPlayers={},bcTimer=null;
+let opPlayers=new Set(),myOp=false,bannedPlayers=new Set();
+const connTokens=new Map();
+function genCode(){return Array.from({length:4},()=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[~~(Math.random()*26)]).join('');}
+function autoDevice(){return('ontouchstart' in window||navigator.maxTouchPoints>0)?'mobile':'pc';}
+function sendBlock(data){
+  if(!checkRate('block',10)) return;
+  if(!isMP) return;
+  if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(data);});
+  else if(guestConn?.open) guestConn.send(data);
+}
+function sendToAll(data){if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(data);});else if(guestConn?.open) guestConn.send(data);}
+ 
+function applyBlockSync(data){
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater];
+  if(data.action==='break'){
+    const {bx,by,bz}=data;
+    const bd=blockMap[pk(bx,by,bz)];if(!bd) return;
+    if(bd.unbreakable||bd.isWater) return;
+    hideBlock(bd);
+    delete blockMap[pk(bx,by,bz)];
+    const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+    refreshNbr(bx,by,bz);instancesDirty=true;
+  }
+  else if(data.action==='place'){
+    const {bx,by,bz,slot:s}=data;
+    const occ=blockMap[pk(bx,by,bz)];
+    const safeSlot=Math.max(0,Math.min(9,parseInt(s)||0));
+    if(occ){
+      if(safeSlot!==9&&(isAnyWater(occ)||occ.isLiquid)) clearBlockAt(bx,by,bz);
+      else return;
+    }
+    const blockIds=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water'];
+    let bd;
+    if(safeSlot===9){
+      bd={id:'water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:8,visible:false};
+    } else {
+      bd={id:blockIds[safeSlot]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[safeSlot]||texWood,visible:false};
+    }
+    blockMap[pk(bx,by,bz)]=bd;
+    const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
+    showBlock(bd);refreshNbr(bx,by,bz);instancesDirty=true;
+    if(safeSlot===9) waterPendingSet.add(pk(bx,by,bz));
+  }
+}
+ 
+function addRP(id,name,x,y,z,ry,mode='survival'){if(remPlayers[id]) return;const g=mkPlayer(name);g.position.set(x,y-1.6,z);g.rotation.y=ry;remPlayers[id]={g,name,mode};}
+function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.6,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
+function remRP(id){if(remPlayers[id]){scene.remove(remPlayers[id].g);delete remPlayers[id];}}
+ 
+let chatHideTimer=null;
+function showChatLog(){
+  const c=document.getElementById('chat-container');
+  if(deviceMode&&!isChatOpen){
+    c.style.display='flex';
+    c.style.opacity='1';
+    c.style.transition='';
+    if(chatHideTimer) clearTimeout(chatHideTimer);
+    chatHideTimer=setTimeout(()=>{
+      if(!isChatOpen){
+        c.style.transition='opacity 1.2s ease';
+        c.style.opacity='0';
+        setTimeout(()=>{if(!isChatOpen) c.style.display='none';c.style.opacity='1';c.style.transition='';},1200);
+      }
+    },7000);
+  }
+}
+function addChat(name,msg,sys=false,cls=''){
+  const log=document.getElementById('chat-log');
+  const d=document.createElement('div');
+  d.className='chat-msg'+(sys?' sys':'')+(cls?' '+cls:'');
+  if(sys){
+    d.textContent=msg;
+  } else {
+    const safeName=sanitizeName(name||'?');
+    const safeMsg=msg?String(msg).substring(0,200):'';
+    d.textContent=`<${safeName}>: ${safeMsg}`;
+  }
+  log.appendChild(d);while(log.children.length>40) log.removeChild(log.firstChild);
+  log.scrollTop=log.scrollHeight;
+  showChatLog();
+}
+ 
+function grantOpHost(name){
+  const d=langData[currentLang];
+  opPlayers.add(name);
+  addChat(null,d.srvPrefix+name+d.srvOpGranted,true,'srv');
+  Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'op',target:name,val:true});});
+}
+function revokeOpHost(name){
+  const d=langData[currentLang];
+  opPlayers.delete(name);
+  addChat(null,d.srvPrefix+name+d.srvOpRevoked,true,'srv');
+  Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'op',target:name,val:false});});
+}
+function kickPlayerHost(name,fromName=null){
+  const d=langData[currentLang];
+  const entry=Object.entries(hostConns).find(([,p])=>p.name===name);
+  if(!entry){addChat(null,d.srvNoPlayer+name,true,'warn');return;}
+  const [pid,p]=entry;
+  if(fromName!==null&&opPlayers.has(name)){addChat(null,d.srvNoCantKickOp,true,'warn');return;}
+  const kickerName=fromName||myName;
+  p.conn.send({type:'kicked',by:kickerName});
+  setTimeout(()=>{try{p.conn.close();}catch(e){}},250);
+  connTokens.delete(pid);
+  remRP(pid);delete hostConns[pid];
+  const srv=d.srvPrefix+name+d.srvKicked;
+  addChat(null,srv,true,'srv');
+  Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});});
+}
+function banPlayerHost(name,fromName=null){
+  const d=langData[currentLang];
+  if(fromName!==null&&opPlayers.has(name)){addChat(null,d.srvNoCantBanOp,true,'warn');return;}
+  bannedPlayers.add(name);
+  const bannerName=fromName||myName;
+  const entry=Object.entries(hostConns).find(([,p])=>p.name===name);
+  if(!entry){addChat(null,d.srvNoPlayer+name,true,'warn');return;}
+  const [pid,p]=entry;
+  p.conn.send({type:'banned',by:bannerName});
+  setTimeout(()=>{try{p.conn.close();}catch(e){}},250);
+  connTokens.delete(pid);
+  remRP(pid);delete hostConns[pid];
+  const srv=d.srvPrefix+name+d.srvBanned;
+  addChat(null,srv,true,'srv');
+  Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});});
+}
+ 
+function processCmd(raw){
+  const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
+  const d=langData[currentLang];
+  if(cmd==='mode'||cmd==='gamemode'){
+    if(!cheatsEnabled&&!myOp){addChat(null,d.srvNoCheat,true,'warn');return;}
+    if(isMP&&!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const arg=(parts[1]||'').toLowerCase();
+    const nm=(arg==='c'||arg==='creative')?'creative':(arg==='s'||arg==='survival')?'survival':null;
+    if(!nm){addChat(null,d.srvUsageMode,true);return;}
+    if(!isMP){setGameMode(nm);addChat(null,d.srvModeChanged+nm,true);return;}
+    if(amHost){setGameMode(nm);sendToAll({type:'modechange',target:myName,mode:nm,from:myName});addChat(null,d.srvModeChanged+nm,true);}
+    else{guestConn.send({type:'modereq',target:myName,mode:nm,from:myName});}
+    return;
+  }
+  if(cmd==='op'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const target=parts[1];if(!target){addChat(null,d.srvUsageOp,true);return;}
+    if(amHost) grantOpHost(target); else guestConn.send({type:'cmd',cmd:'op',target,from:myName});return;
+  }
+  if(cmd==='unop'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
+    const target=parts[1];if(!target){addChat(null,d.srvUsageUnop,true);return;}
+    revokeOpHost(target);return;
+  }
+  if(cmd==='kick'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const target=parts.slice(1).join(' ');if(!target){addChat(null,d.srvUsageKick,true);return;}
+    if(amHost) kickPlayerHost(target); else guestConn.send({type:'cmd',cmd:'kick',target,from:myName});return;
+  }
+  if(cmd==='ban'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const target=parts.slice(1).join(' ');if(!target){addChat(null,d.srvUsageBan,true);return;}
+    if(amHost) banPlayerHost(target); else guestConn.send({type:'cmd',cmd:'ban',target,from:myName});return;
+  }
+  if(cmd==='unban'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
+    const target=parts.slice(1).join(' ');bannedPlayers.delete(target);addChat(null,d.srvPrefix+target+d.srvUnbanned,true,'srv');return;
+  }
+  if(cmd==='cheats'){
+    if(!isMP){addChat(null,d.srvCheatsSpOnly,true,'srv');return;}
+    if(!amHost){addChat(null,d.srvCheatsHostOnly,true,'warn');return;}
+    const arg=(parts[1]||'').toLowerCase();
+    if(arg==='on'){cheatsEnabled=true;addChat(null,d.srvCheatsOn,true,'srv');
+      if(isMP&&amHost) Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.srvCheatsOn,sys:true,cls:'srv'});});
+    } else if(arg==='off'){cheatsEnabled=false;addChat(null,d.srvCheatsOff,true,'srv');
+      if(isMP&&amHost) Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.srvCheatsOff,sys:true,cls:'srv'});});
+    } else {addChat(null,d.srvUsageCheats,true);}
+    return;
+  }
+  if(cmd==='kill'){
+    const arg=(parts[1]||'').trim();
+    if(!isMP){
+      if(arg===''||arg==='@p'||arg===myName){
+        HealthManager.takeDamage(999,'unknown',true);addChat(null,d.killDeathMsg,true,'warn');
+      } else {
+        addChat(null,d.srvKillNoPlayer+arg,true,'warn');
+      }
+      return;
+    }
+    if(arg==='@a'){
+      if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+      if(amHost){
+        HealthManager.takeDamage(999,'unknown',true);
+        Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'kill_cmd',arg:'@a'});});
+        addChat(null,d.killAllMsg,true,'srv');
+        Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.killAllMsg,sys:true,cls:'srv'});});
+      } else {
+        guestConn.send({type:'cmd',cmd:'kill',arg:'@a',from:myName});
+      }
+      return;
+    }
+    const target=arg===''||arg==='@p'?myName:arg;
+    if(amHost){
+      if(target===myName){
+        HealthManager.takeDamage(999,'unknown',true);addChat(null,d.killDeathMsg,true,'warn');
+        Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.killDeathMsg,sys:true,cls:'warn'});});
+      } else {
+        const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+        if(tEntry){
+          tEntry[1].conn.send({type:'kill_cmd',arg:'named'});
+          addChat(null,d.killDeathMsg,true,'warn');
+          Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.killDeathMsg,sys:true,cls:'warn'});});
+        } else {addChat(null,d.srvKillNoPlayer+target,true,'warn');}
+      }
+    } else {
+      guestConn.send({type:'cmd',cmd:'kill',arg:target,from:myName});
+    }
+    return;
+  }
+  if(cmd==='friend'){
+    const target=parts.slice(1).join(' ');
+    if(!target){addChat(null,d.srvFriendUsage,true);return;}
+    if(myUsername.startsWith('Guest_')){addChat(null,d.srvFriendGuest,true,'warn');return;}
+    if(target===myUsername){addChat(null,d.srvFriendSelf,true,'warn');return;}
+    window.parent.postMessage({type:'friendRequest',from:myUsername,to:target},'*');
+    return;
+  }
+  addChat(null,d.srvUnknownCmd+cmd,true,'warn');
+}
+ 
+function cleanupMP(){
+  if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
+  Object.values(remPlayers).forEach(p=>scene.remove(p.g));remPlayers={};
+  connTokens.clear();
+  if(guestConn){try{guestConn.close();}catch(e){}guestConn=null;}
+  Object.values(hostConns).forEach(({conn})=>{try{conn.close();}catch(e){}});hostConns={};
+  if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}
+  isMP=false;amHost=false;opPlayers.clear();myOp=false;
+}
+function goToMainMenu(){
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
+  cleanupMP();isPaused=false;DeathManager.isDead=false;deviceMode=null;isFlying=false;isCrouching=false;spaceDown=false;
+  document.getElementById('pause-overlay').classList.remove('active');
+  document.getElementById('death-screen').classList.remove('active');
+  document.getElementById('ban-screen').classList.remove('active');
+  document.getElementById('kick-screen').classList.remove('active');
+  ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv']
+   .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  const mo=document.getElementById('menu-overlay');
+  mo.style.display='flex';
+  mo.style.pointerEvents='auto';
+  mo.style.zIndex='1000';
+  showScreen('screen-main');
+}
+function hideGameHUD(){
+  ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv']
+   .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
+  document.getElementById('pause-overlay').classList.remove('active');
+  document.getElementById('death-screen').classList.remove('active');
+  document.getElementById('chat-input-row').style.display='none';
+}
+function showBanScreen(byName){
+  cleanupMP();hideGameHUD();
+  const d=langData[currentLang];
+  document.getElementById('ban-title').textContent=d.banScreenTitle;
+  document.getElementById('ban-by').textContent=sanitizeName(byName)+d.banByText;
+  document.getElementById('btn-ban-menu').textContent=d.backToMenuBtn;
+  document.getElementById('ban-screen').classList.add('active');
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
+  deviceMode=null;DeathManager.isDead=false;isPaused=false;isChatOpen=false;
+}
+function showKickScreen(byName){
+  cleanupMP();hideGameHUD();
+  const d=langData[currentLang];
+  document.getElementById('kick-title').textContent=d.kickScreenTitle;
+  document.getElementById('kick-by').textContent=sanitizeName(byName)+d.kickByText;
+  document.getElementById('btn-kick-menu').textContent=d.backToMenuBtn;
+  document.getElementById('kick-screen').classList.add('active');
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
+  deviceMode=null;DeathManager.isDead=false;isPaused=false;isChatOpen=false;
+}
+document.getElementById('btn-ban-menu').addEventListener('click',goToMainMenu);
+document.getElementById('btn-kick-menu').addEventListener('click',goToMainMenu);
+function startBC(){
+  if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
+  bcTimer=setInterval(()=>{
+    if(!deviceMode||!isMP) return;
+    const p={type:'pos',x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,mode:gameMode};
+    if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({...p,id:'host'});});
+    else if(guestConn?.open) guestConn.send(p);
+  },100);
+}
+ 
+// Host
+document.getElementById('btn-do-host').addEventListener('click',()=>{
+  if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}
+  const name=sanitizeName(myUsername||'Oyuncu');
+  myName=name;
+  const codeEl=document.getElementById('host-code-display'),code=codeEl.textContent;
+  const st=document.getElementById('host-status');st.textContent='Bağlantı kuruluyor...';
+  document.getElementById('btn-do-host').disabled=true;
+  myPeer=new Peer('lgnd'+code.toLowerCase(),{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}});
+  myPeer.on('open',()=>{
+    worldSeed=(Math.random()*2147483647)|0||42317;
+    st.textContent='Oda hazır!';isMP=true;amHost=true;hostConns={};connTokens.clear();
+    myPeer.on('connection',conn=>{
+      conn.on('open',()=>{
+        conn.on('data',data=>{
+          const pid=conn.peer;
+          if(data.type==='join'){
+            const safeName=sanitizeName(data.name||'Player');
+            if(bannedPlayers.has(safeName)){conn.send({type:'banned',msg:'Bu sunucudan banlandınız.'});setTimeout(()=>{try{conn.close();}catch(e){}},200);return;}
+            if(hostConns[pid]){return;}
+            connTokens.set(pid,safeName);
+            hostConns[pid]={conn,name:safeName,x:8,y:2.1,z:8,ry:0};
+            const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y}];
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry});});
+            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName)});
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName});});
+            addRP(pid,safeName,8,2.1,8,0);addChat(null,safeName+langData[currentLang].sysJoin,true);
+          } else if(data.type==='pos'){
+            if(!connTokens.has(pid)) return;
+            if(hostConns[pid]) Object.assign(hostConns[pid],{x:data.x,y:data.y,z:data.z,ry:data.ry,mode:data.mode||'survival'});
+            updRP(pid,data.x,data.y,data.z,data.ry,data.mode);
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pos',id:pid,x:data.x,y:data.y,z:data.z,ry:data.ry,mode:data.mode});});
+          } else if(data.type==='block'){
+            if(!connTokens.has(pid)) return;
+            applyBlockSync(data);
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send(data);});
+          }
+          else if(data.type==='chat'){
+            if(!connTokens.has(pid)) return;
+            if(!checkRate('chat_'+pid,3)){
+              conn.send({type:'chat',name:null,msg:langData[currentLang].rateLimitMsg,sys:true,cls:'warn'});return;
+            }
+            const nm=connTokens.get(pid)||'?';
+            const safeMsg=String(data.msg||'').substring(0,200);
+            addChat(nm,safeMsg);
+            Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:nm,msg:safeMsg});});
+          }
+          else if(data.type==='aatk'){if(!connTokens.has(pid)) return;const a=animals.find(x=>x.id===data.id);if(a) attackAnimal(a,Math.min(data.dmg,20));}
+          else if(data.type==='modereq'){
+            if(!connTokens.has(pid)) return;
+            const from=connTokens.get(pid);
+            if(!opPlayers.has(from)){conn.send({type:'chat',name:null,msg:langData[currentLang].srvNoPerms,sys:true,cls:'warn'});return;}
+            if(!cheatsEnabled&&!opPlayers.has(from)){conn.send({type:'chat',name:null,msg:langData[currentLang].srvNoCheat,sys:true,cls:'warn'});return;}
+            conn.send({type:'modechange',target:data.target,mode:data.mode});
+          }
+          else if(data.type==='damage'){
+            if(!connTokens.has(pid)) return;
+            const {target,dmg}=data;
+            const safeDmg=Math.min(Math.max(0,parseInt(dmg)||0),20);
+            const fromToken=connTokens.get(pid);
+            if(target==='host'){HealthManager.takeDamage(safeDmg,'pvp',false,{attacker:fromToken});}
+            else if(hostConns[target]&&hostConns[target].mode!=='creative'&&hostConns[target].conn.open){
+              hostConns[target].conn.send({type:'damage',dmg:safeDmg,from:fromToken});
+            }
+          }
+          else if(data.type==='cmd'){
+            if(!connTokens.has(pid)) return;
+            const from=connTokens.get(pid);
+            if(!opPlayers.has(from)) return;
+            const {cmd,target}=data;
+            if(cmd==='op') grantOpHost(sanitizeName(target));
+            else if(cmd==='kick') kickPlayerHost(sanitizeName(target),from);
+            else if(cmd==='ban') banPlayerHost(sanitizeName(target),from);
+            else if(cmd==='kill'){
+              // kill komutu host tarafında işlenir
+              const d=langData[currentLang];
+              const arg=data.arg||'';
+              if(arg==='@a'){
+                // Herkesi öldür
+                HealthManager.takeDamage(999,'unknown',true);
+                Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'kill_cmd',arg:'@a'});});
+                const allKillMsg=d.killAllMsg;
+                addChat(null,allKillMsg,true,'srv');
+                Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:allKillMsg,sys:true,cls:'srv'});});
+              } else if(arg==='@p'||arg===''||arg===fromToken){
+                // Komutu yazan guest'i öldür
+                const senderConn=Object.entries(hostConns).find(([,p])=>p.name===fromToken);
+                if(senderConn) senderConn[1].conn.send({type:'kill_cmd',arg:'@p'});
+              } else {
+                // İsme göre öldür
+                if(arg===myName){
+                  HealthManager.takeDamage(999,'unknown',true);
+                  addChat(null,d.killDeathMsg,true,'warn');
+                  Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.killDeathMsg,sys:true,cls:'warn'});});
+                } else {
+                  const tEntry=Object.entries(hostConns).find(([,p])=>p.name===arg);
+                  if(tEntry){
+                    tEntry[1].conn.send({type:'kill_cmd',arg:'named'});
+                    addChat(null,d.killDeathMsg,true,'warn');
+                    Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:null,msg:d.killDeathMsg,sys:true,cls:'warn'});});
+                  } else {
+                    conn.send({type:'chat',name:null,msg:d.srvKillNoPlayer+arg,sys:true,cls:'warn'});
+                  }
+                }
+              }
+            }
+          }
+          else if(data.type==='pvp_attack'){
+            if(!connTokens.has(pid)) return;
+            const fromToken=connTokens.get(pid);
+            if(data.target==='host'){
+              if(gameMode!=='creative'){
+                const fp=data.fromPos?new THREE.Vector3(data.fromPos.x,data.fromPos.y,data.fromPos.z):null;
+                CombatManager.applyLocalDamage(data.dmg,fp,fromToken);
+              }
+            } else {
+              const targetConn = hostConns[data.target]?.conn;
+              if(targetConn && targetConn.open) {
+                  targetConn.send({ type: 'damage', dmg: data.dmg, knockback: true, fromPos: data.fromPos, from: fromToken });
+              }
+            }
+          }
+          else if(data.type==='deathmsg'){
+            if(!connTokens.has(pid)) return;
+            const dmsg=String(data.msg||'').substring(0,200);
+            addChat(null,dmsg,true);
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'chat',name:null,msg:dmsg,sys:true});});
+          }
+        });
+        conn.on('close',()=>{
+          const pid=conn.peer,nm=connTokens.get(pid)||hostConns[pid]?.name||'Oyuncu';
+          connTokens.delete(pid);
+          remRP(pid);delete hostConns[pid];
+          addChat(null,nm+langData[currentLang].sysLeft,true);
+          Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name:nm});});
+        });
+      });
+    });
+    startGame(autoDevice(),mpHostWorld,true,mpGameMode,cheatsEnabled);
+  });
+  myPeer.on('error',err=>{
+    document.getElementById('btn-do-host').disabled=false;
+    if(err.type==='unavailable-id'){const nc=genCode();codeEl.textContent=nc;st.textContent='Şifre kullanımda, yeni: '+nc;}
+    else st.textContent='Hata: '+err.type;
+    if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}
+  });
+});
+ 
+// Join
+document.getElementById('btn-do-join').addEventListener('click',()=>{
+  if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;guestConn=null;}
+  const name=sanitizeName(myUsername||'Oyuncu');
+  const code=document.getElementById('join-code-input').value.trim().toUpperCase();
+  if(code.length!==4){document.getElementById('join-status').textContent='4 harfli şifre!';return;}
+  myName=name;const st=document.getElementById('join-status');st.textContent='Bağlanılıyor...';
+  document.getElementById('btn-do-join').disabled=true;
+  myPeer=new Peer({debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}});
+  let _joinTimeout=null;
+  myPeer.on('open',()=>{
+    guestConn=myPeer.connect('lgnd'+code.toLowerCase(),{reliable:true,serialization:'json'});
+    _joinTimeout=setTimeout(()=>{
+      if(!guestConn||guestConn.open===false){
+        st.textContent='Zaman asimi - oda bulunamadi veya baglanamadi';
+        document.getElementById('btn-do-join').disabled=false;
+        if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}guestConn=null;
+      }
+    },12000);
+    guestConn.on('open',()=>{if(_joinTimeout){clearTimeout(_joinTimeout);_joinTimeout=null;}guestConn.send({type:'join',name:myName});});
+    guestConn.on('data',data=>{
+      if(data.type==='welcome'){
+        st.textContent='Bağlandı!';isMP=true;amHost=false;worldSeed=data.seed||0;
+        myOp=data.isOp||false;
+        data.players.forEach(p=>{
+          if(p.id==='host'||p.id===myPeer.id) return;
+          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival');
+        });
+        startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
+      } else if(data.type==='pos'){
+        if(data.id&&data.id!==myPeer.id&&data.id!=='host') updRP(data.id,data.x,data.y,data.z,data.ry,data.mode);
+      }
+      else if(data.type==='damage'){
+        if(data.knockback && data.fromPos) CombatManager.applyLocalDamage(data.dmg, new THREE.Vector3(data.fromPos.x, data.fromPos.y, data.fromPos.z), data.from);
+        else if(gameMode!=='creative') HealthManager.takeDamage(Math.min(20,Math.max(0,parseInt(data.dmg)||0)), 'pvp', false, { attacker: data.from });
+      }
+      else if(data.type==='block') applyBlockSync(data);
+      else if(data.type==='chat'){
+        if(data.sys) addChat(null,String(data.msg||'').substring(0,200),true,data.cls||'');
+        else addChat(sanitizeName(data.name||'?'),String(data.msg||'').substring(0,200),false,data.cls||'');
+      }
+      else if(data.type==='pjoin'){
+        if(data.id===myPeer.id) return;
+        addRP(data.id,sanitizeName(data.name),8,2.1,8,0);
+        addChat(null,sanitizeName(data.name)+langData[currentLang].sysJoin,true);
+      }
+      else if(data.type==='pleave'){remRP(data.id);addChat(null,(sanitizeName(data.name)||'?')+langData[currentLang].sysLeft,true);}
+      else if(data.type==='animals') applyAnimalSync(data.list);
+      else if(data.type==='ahp'){const a=animals.find(x=>x.id===data.id);if(a) a.hp=data.hp;}
+      else if(data.type==='adead'){const a=animals.find(x=>x.id===data.id);if(a){spawnFood(a.x,a.y,a.z,A_FOOD[a.type]);removeAnimal(a);}}
+      else if(data.type==='op'){const dL=langData[currentLang];if(data.target===myName) myOp=data.val;addChat(null,dL.srvPrefix+sanitizeName(data.target)+(data.val?dL.srvOpBecame:dL.srvOpLost)+'.',true,'srv');}
+      else if(data.type==='modechange'){const dL=langData[currentLang];if(data.target===myName){setGameMode(data.mode);addChat(null,dL.srvModeChanged+data.mode,true);}}
+      else if(data.type==='kill_cmd'){
+        HealthManager.takeDamage(999,'unknown',true);
+      }
+      else if(data.type==='kicked'){showKickScreen(sanitizeName(data.by)||'Sunucu');}
+      else if(data.type==='banned'){showBanScreen(sanitizeName(data.by)||'Sunucu');}
+      else if(data.type==='pvp_attack') {
+        if(data.target === myPeer.id) {
+            CombatManager.applyLocalDamage(data.dmg, new THREE.Vector3(data.fromPos.x, data.fromPos.y, data.fromPos.z));
+        }
+      }
+    });
+    guestConn.on('close',()=>addChat(null,langData[currentLang].sysDisc,true));
+    guestConn.on('error',()=>{
+      if(document.getElementById('join-status')) st.textContent='Bağlantı hatası';
+      document.getElementById('btn-do-join').disabled=false;
+    });
+  });
+  myPeer.on('error',err=>{
+    st.textContent=err.type==='peer-unavailable'?'Oda bulunamadı!':'Hata: '+err.type;
+    document.getElementById('btn-do-join').disabled=false;
+    if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}guestConn=null;
+  });
+});
+ 
+// ─── Fizik ───
+camera.position.set(8,WorldGen.SEA_LEVEL+3.1,8);camera.rotation.order='YXZ';
+let velY=0;
+let isResetting=false; // Fix 3: Void ışınlanma kilidi
+const GRAV=.0034,JUMP=.088,SPD=.052,FLY_SPD=.075,MFALL=.45;
+// ─── Sıvı (su) fiziği sabitleri ───
+const WATER_GRAV=GRAV*0.45;    // su içinde yerçekimi normalin %45'ine düşürülür
+const WATER_MOVE_MULT=0.5;     // su içinde yatay hareket hızı
+const WATER_VEL_DAMP=0.9;      // dikey hızı her karede söndüren su direnci
+const WATER_BUOYANCY=0.028;    // zıplama: her frame eklenen yukarı kuvvet (azaltıldı – ani fırlatma önlenir)
+const WATER_MAX_RISE=0.042;    // maksimum yukarı çıkış hızı (azaltıldı – 0.07'den 0.042'ye)
+const WATER_SINK_CAP=-0.06;    // boşta batış hızı alt sınırı
+const WATER_DOWN_SPD=0.05;     // çömelerek dalış hızı
+let wasSwimming=false;          // su çıkış hızı fırlatmasını önlemek için bayrak
+let grounded=false,deviceMode=null;
+const mv={f:false,b:false,l:false,r:false};
+let jx=0,jy=0,jActive=false,jTid=null;
+let lon=0,lat=0;
+const RC=new THREE.Raycaster();
+let slot=0;
+let isFlying=false,isCrouching=false,spaceDown=false,lastSpaceTime=0;
+
+// ─── Kırma İlerleme Sistemi (Survival) ───
+let breakProgress=0,breakTarget=null,isBreaking=false;
+const BLOCK_HARDNESS={'grass':0.6,'dirt':0.5,'stone':1.5,'planks':0.8,'log':1.2,'cobblestone':2.0,'glass':0.3,'leaves':0.2,'sand':0.5,'default':1.0};
+function getHardness(bd){
+  if(!bd) return 1.0;
+  const mk=getMatKey(bd.mat)||'default';
+  return BLOCK_HARDNESS[mk]||BLOCK_HARDNESS['default'];
+}
+function updateBreakOverlay(){
+  const overlay=document.getElementById('break-overlay');
+  const cvs=document.getElementById('break-canvas');
+  if(!overlay||!cvs) return;
+  if(!isBreaking||!breakTarget||gameMode!=='survival'){overlay.style.display='none';return;}
+  // Hedef bloğun ekran koordinatlarına project et
+  const bv=new THREE.Vector3(breakTarget.x,breakTarget.y,breakTarget.z);
+  bv.project(camera);
+  const sx=(bv.x*0.5+0.5)*window.innerWidth;
+  const sy=(-bv.y*0.5+0.5)*window.innerHeight;
+  const blockScreenSize=Math.max(30,Math.min(120,window.innerHeight/8));
+  overlay.style.display='block';
+  overlay.style.left=(sx-blockScreenSize/2)+'px';
+  overlay.style.top=(sy-blockScreenSize/2)+'px';
+  overlay.style.width=blockScreenSize+'px';
+  overlay.style.height=blockScreenSize+'px';
+  // Çatlak dokusu çiz
+  const ctx=cvs.getContext('2d');
+  ctx.clearRect(0,0,64,64);
+  const stages=Math.floor(breakProgress*8); // 0-8 aşama
+  ctx.strokeStyle='rgba(0,0,0,0.85)';
+  ctx.lineWidth=1.5;
+  // Her aşamada daha fazla çatlak
+  for(let i=0;i<stages;i++){
+    const seed=(i+1)*137;
+    const x1=(seed*17)%64,y1=(seed*31)%64;
+    const x2=(seed*53)%64,y2=(seed*71)%64;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
+    if(i>3){const x3=(seed*89)%64,y3=(seed*97)%64;ctx.lineTo(x3,y3);}
+    ctx.stroke();
+  }
+}
+function startBreaking(){if(gameMode==='creative') return;isBreaking=true;}
+function stopBreaking(){
+  isBreaking=false;breakProgress=0;breakTarget=null;
+  const overlay=document.getElementById('break-overlay');
+  if(overlay) overlay.style.display='none';
+}
+function tickBreaking(dt){
+  if(!isBreaking||gameMode!=='survival') return;
+  const _inWater=inWater(camera.position.x,camera.position.y,camera.position.z);
+  const h=getHit(0,0,true,_inWater);
+  if(!h.length||h[0].distance>=5){stopBreaking();return;}
+  const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
+  if(!bd||bd.unbreakable||bd.isWater){stopBreaking();return;}
+  // Hedef değiştiyse progress sıfırla
+  const tKey=pk(bx,by,bz);
+  if(!breakTarget||pk(breakTarget.x,breakTarget.y,breakTarget.z)!==tKey){
+    breakProgress=0;breakTarget={x:bx,y:by,z:bz};
+  }
+  breakProgress+=dt/getHardness(bd);
+  updateBreakOverlay();
+  if(breakProgress>=1){
+    breakB(0,0,true);
+    stopBreaking();
+  }
+}
+ 
+// ─── Oyunu Başlat ───
+function resetWorld(){
+  for(const k in iMeshes) scene.remove(iMeshes[k]);
+  iMeshes={};
+  if(waterMesh){scene.remove(waterMesh);waterMesh.geometry.dispose();waterMesh=null;}
+  waterDirty=false;
+  waterPendingSet.clear();
+  for(const mk in visiblePositions) visiblePositions[mk]=new Map();
+  instancesDirty=false;
+  Object.keys(chunks).forEach(k=>delete chunks[k]);
+  Object.keys(blockMap).forEach(k=>delete blockMap[k]);
+  procKey=null;procIdx=0;unprocKey=null;unprocIdx=0;cLoadQ.length=0;cUnloadQ.length=0;
+  chunkGenQ.length=0; // async chunk kuyruğunu temizle
+  stopBreaking(); // kırma durumunu sıfırla
+  clearAnimals();foods.forEach(f=>scene.remove(f.mesh));foods.length=0;
+  animalSpawnTimer=15;animalSyncTimer=0;
+  isResetting=false;
+  const log=document.getElementById('chat-log');while(log.firstChild) log.removeChild(log.firstChild);
+}
+function startGame(device,world,mp=false,gm='survival',cheats=true){
+  resetWorld();
+  deviceMode=device;worldType=world;cheatsEnabled=cheats;DeathManager.isDead=false;
+  if(device==='mobile'){const el=document.documentElement;if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();}
+  document.getElementById('menu-overlay').style.display='none';
+  // Fix 2: Oyun başlarken menü katmanı dokunmatik girdi almayacak
+  document.getElementById('menu-overlay').style.pointerEvents='none';
+  document.getElementById('death-screen').classList.remove('active');
+  ['game-title','hotbar','mode-indicator'].forEach(id=>document.getElementById(id).style.display='block');
+  document.getElementById('hotbar').style.display='flex';
+  document.getElementById('game-title').textContent=langData[currentLang].gameTitle;
+  initHotbar();
+  if(device==='pc'){document.getElementById('crosshair').style.display='flex';setupPC();}
+  else{
+    document.getElementById('joystick-container').style.display='flex';
+    document.getElementById('mobile-jump-container').style.display='flex';
+    document.getElementById('mobile-pause-btn').style.display='block';
+    document.getElementById('btn-mobile-inv').style.display='flex';
+    setupMobile();
+  }
+  document.getElementById('chat-container').style.display='none';
+  if(device==='pc') document.getElementById('chat-hint').style.display='block';
+  else document.getElementById('btn-mobile-chat').style.display='flex';
+  if(mp){
+    startBC();
+  }
+  document.getElementById('btn-do-host').disabled=false;
+  document.getElementById('btn-do-join').disabled=false;
+  setGameMode(gm);
+  isPaused = false;
+DeathManager.isDead = false;
+isChatOpen = false;
+if (device === 'pc') {
+    // Pointer lock otomatik değil, tıklamayla alınacak
+    document.body.requestPointerLock = document.body.requestPointerLock || document.body.mozRequestPointerLock;
+}
+  HealthManager.reset();
+  hunger=20;fallStartY=null;lastGrounded=true;voidDamageTimer=0;updateBars();
+  isFlying=false;isCrouching=false;velY=0;spaceDown=false;
+  // SP: her yeni oyunda farklı seed; MP join: host'tan gelir (zaten set edildi)
+  if(!isMP) worldSeed=(Math.random()*2147483647)|0||42317;
+  WorldGen.clearBiomeCache(); // seed değişti, önbelleği temizle
+  initImatKeys();
+
+  // Spawn noktasinin gercek yuzey yuksekligini hesapla
+  function getSpawnY(wx,wz){
+    let bx=wx,bz=wz;
+    let biome=WorldGen.getBiome(bx,bz);
+    // Okyanus/nehirde spawn etme, yakina kac
+    for(let tries=0;tries<24&&(biome==='ocean'||biome==='river');tries++){
+      bx+=4;bz+=4;biome=WorldGen.getBiome(bx,bz);
+    }
+    const sy=WorldGen.getSurfaceY(bx,bz,biome);
+    return{x:bx,y:sy+2.6,z:bz};
+  }
+
+  if(world==='small'){
+    for(let cx=0;cx<=3;cx++) for(let cz=0;cz<=3;cz++) genChunk(cx,cz);
+    for(let cx=0;cx<=3;cx++){for(let cz=0;cz<=3;cz++){
+      const ch=chunks[ck(cx,cz)];if(!ch) continue;
+      ch.blocks.forEach(b=>{if(!hidden(b.pos.x,b.pos.y,b.pos.z)) showBlock(b);});ch.loaded=true;
+    }}
+    rebuildInstancedMeshes();instancesDirty=false;
+    rebuildWaterMesh();waterDirty=false;
+    const spS=getSpawnY(8,8); // FIX: spS artık doğru tanımlanıyor
+    camera.position.set(spS.x,spS.y,spS.z);
+  } else {
+    // Once spawn chunk'i uret, sonra gercek Y'yi hesapla
+    genChunk(0,0);
+    const spI=getSpawnY(8,8);
+    camera.position.set(spI.x,spI.y,spI.z);
+    updateChunks();
+  }
+}
+function selSlot(i){slot=i;document.querySelectorAll('.hotbar-slot').forEach((s,j)=>s.classList.toggle('active',j===i));}
+document.querySelectorAll('.hotbar-slot').forEach(s=>{
+  s.addEventListener('touchstart',e=>{e.stopPropagation();selSlot(+s.dataset.index);},{passive:true});
+  s.addEventListener('click',e=>{if(deviceMode==='pc'){e.stopPropagation();selSlot(+s.dataset.index);}});
+});
+ 
+// ─── Raycaster ───
+function getHit(cx,cy,isc,skipWater=false){
+  let orig,dir;
+  if(isc){dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);orig=camera.position.clone();}
+  else{const m=new THREE.Vector2((cx/window.innerWidth)*2-1,-(cy/window.innerHeight)*2+1);RC.setFromCamera(m,camera);orig=RC.ray.origin.clone();dir=RC.ray.direction.clone();}
+  return castRayBlocks(orig,dir,skipWater);
+}
+function breakB(x,y,isc){
+  // Su içindeyken (swimming) su bloklarını atlayarak alttaki katı bloğa ulaş
+  const _inWater=inWater(camera.position.x,camera.position.y,camera.position.z);
+  const h=getHit(x,y,isc,_inWater);if(!h.length||h[0].distance>=5) return;
+  const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
+  if(bd.unbreakable||bd.isWater) return; // suyu kırma
+  hideBlock(bd);
+  delete blockMap[pk(bx,by,bz)];
+  const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+  refreshNbr(bx,by,bz);instancesDirty=true;sendBlock({type:'block',action:'break',bx,by,bz});
+  // Blok kırılınca boşalan hücreye komşu su akabilir
+  // Kural: üstten su varsa direkt doldur; yataydan en az 2 su komşusu varsa doldur
+  const HORIZ=[[1,0,0],[-1,0,0],[0,0,1],[0,0,-1]];
+  const aboveNb=blockMap[pk(bx,by+1,bz)];
+  const aboveIsWater=aboveNb&&(isAnyWater(aboveNb)||aboveNb.isLiquid);
+  // Komşu suları pending'e ekle (simülasyonu tetikle)
+  const CA_6=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+  for(const [dx,dy,dz] of CA_6){
+    const nb=blockMap[pk(bx+dx,by+dy,bz+dz)];
+    if(nb&&(isAnyWater(nb)||nb.isLiquid)){waterPendingSet.add(pk(bx+dx,by+dy,bz+dz));waterDirty=true;}
+  }
+  // Yatay su komşularını say
+  let horizWaterCount=0,bestLevel=0;
+  for(const [dx,,dz] of HORIZ){
+    const nb=blockMap[pk(bx+dx,by,bz+dz)];
+    if(nb&&(isAnyWater(nb)||nb.isLiquid)){
+      horizWaterCount++;
+      const lvl=nb.waterLevel??8;
+      if(lvl>bestLevel) bestLevel=lvl;
+    }
+  }
+  const shouldFill = aboveIsWater || horizWaterCount>=2;
+  if(shouldFill){
+    const fillLevel = aboveIsWater ? (aboveNb.waterLevel??8) : Math.max(1,bestLevel-1);
+    const k2=pk(bx,by,bz);
+    if(!blockMap[k2]){
+      const bd2={id:'flowing_water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:fillLevel,isSource:false,visible:false};
+      blockMap[k2]=bd2;
+      const ch2=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch2) ch2.blocks.push(bd2);
+      showBlock(bd2);refreshNbr(bx,by,bz);
+      waterPendingSet.add(k2);waterDirty=true;
+    }
+  }
+}
+function colPlace(bx,by,bz){
+  const px=camera.position.x,py=camera.position.y,pz=camera.position.z,r=.3;
+  if(by<py-1.62) return false;
+  if(px+r>bx-.5&&px-r<bx+.5&&py+.1>by-.5&&py-1.6<by+.5&&pz+r>bz-.5&&pz-r<bz+.5) return true;
+  for(const rp of Object.values(remPlayers)){
+    const g=rp.g.position;const rx=g.x,ry=g.y+0.8,rz=g.z;
+    if(Math.abs(bx-rx)<.7&&Math.abs(by-ry)<1.1&&Math.abs(bz-rz)<.7) return true;
+  }
+  return false;
+}
+// Verilen konumdaki bloğu (varsa) güvenli şekilde temizler – su bloğunun yerine
+// katı blok konulabilmesi için kullanılır (artık su "yerleştirilebilir/değiştirilebilir" kabul edilir).
+function clearBlockAt(bx,by,bz){
+  const k=pk(bx,by,bz);
+  const existing=blockMap[k];
+  if(!existing) return;
+  const wasWater=isAnyWater(existing);
+  const wasSource=existing.isSource;
+  hideBlock(existing);
+  delete blockMap[k];
+  const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];
+  if(ch) ch.blocks=ch.blocks.filter(b=>
+    !(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+  waterPendingSet.delete(k);
+  if(wasWater){
+    if(wasSource){
+      // Kaynak silindi: BFS ile bağlı tüm akan suları CA kuralına göre temizle
+      drainConnectedWater(bx,by,bz);
+    } else {
+      // Akan su silindi: komşuları beslenme açısından yeniden kontrol ettir
+      for(const [dx,dy,dz] of CA_DIRS_ALL){
+        const nb=blockMap[pk(bx+dx,by+dy,bz+dz)];
+        if(nb&&isAnyWater(nb)&&!nb.isSource) waterPendingSet.add(pk(bx+dx,by+dy,bz+dz));
+      }
+    }
+  }
+}
+function placeB(x,y,isc){
+  const h=getHit(x,y,isc);if(!h.length||h[0].distance>=5) return;
+  const {blockPos:{x:hbx,y:hby,z:hbz},face:{normal:n},bd:hitBd}=h[0];
+  const actualBlock=hotbarSlots[slot];
+  // Su "değiştirilebilir" sayılır: katı blok yerleştirirken doğrudan baktığın su bloğunun
+  // İÇİNE/yerine koyulur (artık komşuya kaydırılmıyor) – suya blok koyma engeli kaldırıldı.
+  // Ama su bloğu yerleştirirken (slot=9): su üstüne su koyma engeli – normal yüz yönünde yerleştir
+  const replacingWater = actualBlock!==9 && !!(hitBd&&(isAnyWater(hitBd)||hitBd.isLiquid));
+  const bx = replacingWater ? hbx : hbx+Math.round(n.x);
+  const by = replacingWater ? hby : hby+Math.round(n.y);
+  const bz = replacingWater ? hbz : hbz+Math.round(n.z);
+  if(colPlace(bx,by,bz)) return;
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater];
+  const ids=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water'];
+  const k=pk(bx,by,bz);
+  if(actualBlock===9){
+    // Su kaynağı yerleştir
+    const existingAtK=blockMap[k];
+    // Hedef hücrede zaten bir blok var mı?
+    if(existingAtK){
+      if(isAnyWater(existingAtK)||existingAtK.isLiquid){
+        const lvl=existingAtK.waterLevel??8;
+        if(lvl<8){
+          // Eksik su → tam su kaynağına dönüştür
+          existingAtK.waterLevel=8;
+          existingAtK.isSource=true;
+          waterDirty=true;
+          waterPendingSet.add(k);
+        }
+        // Tam su ise hiçbir şey yapma
+        return;
+      }
+      return; // Başka katı blok varsa da koyma
+    }
+    // Hedef hücre boş ama bakılan yüz bir su bloğunun üstüyse (n.y=1):
+    // altındaki blok tam su ise üstüne yeni su ekleme — zaten dolup taşacak
+    const belowK=pk(bx,by-1,bz);
+    const belowBd=blockMap[belowK];
+    if(belowBd&&(isAnyWater(belowBd)||belowBd.isLiquid)){
+      const belowLvl=belowBd.waterLevel??8;
+      if(belowLvl>=8&&belowBd.isSource){
+        // Altı tam kaynak su → üstü zaten kaynaktan doluyor, yeni blok gereksiz
+        return;
+      }
+      // Altı eksik su → bu konuma kaynak koy, eksik suyu doldur
+      belowBd.waterLevel=8;
+      belowBd.isSource=true;
+      waterDirty=true;
+      waterPendingSet.add(belowK);
+      return;
+    }
+    const bd={id:'water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:8,isSource:true,visible:false};
+    blockMap[k]=bd;
+    const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
+    showBlock(bd);refreshNbr(bx,by,bz);waterPendingSet.add(k);
+    sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
+    return;
+  }
+  // Hedef hücrede su varsa önce temizle (su yerine katı blok koyulabilsin)
+  if(blockMap[k]&&(isAnyWater(blockMap[k])||blockMap[k].isLiquid)) clearBlockAt(bx,by,bz);
+  const bd={id:ids[actualBlock]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[actualBlock]||texWood,visible:false};
+  blockMap[k]=bd;
+  const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
+  showBlock(bd);refreshNbr(bx,by,bz);instancesDirty=true;sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
+}
+function doLeftClick(x,y,isc){
+  if(DeathManager.isDead) return;
+  const entity=findEntityInCrosshair(5);
+  if(entity){
+    if(entity.type==='animal') attackAnimal(entity.animal,5);
+    else if(entity.type==='player'&&gameMode==='survival'){
+      const damage = 2 + Math.floor(Math.random() * 2);
+      CombatManager.attackPlayer(entity.id, damage, camera.position.clone());
+      CombatManager.flashRed();
+    }
+    const t=document.getElementById('game-title');t.style.color='#fa0';setTimeout(()=>{if(t) t.style.color='#fff';},110);
+  } else {
+    const t=document.getElementById('game-title');t.style.color='#f44';setTimeout(()=>{if(t) t.style.color='#fff';},110);
+  }
+}
+ 
+// ─── Çarpışma ───
+// Bir bloğun fiziksel olarak "katı" (solid/collidable) sayılıp sayılmayacağını belirler.
+// Su (isWater) ve genel olarak işaretlenmiş sıvılar (isLiquid) "trigger/liquid" kabul edilir:
+// oyuncu içlerinden geçebilir, üstlerinde yürüyemez ve içlerinde "katı blok" gibi takılmaz.
+function isSolidBlock(bd){
+  if(!bd) return false;
+  if(isAnyWater(bd)||bd.isLiquid) return false; // su -> solid DEĞİL, trigger/liquid
+  return true;
+}
+function col(px,py,pz){
+  const r=.3,minX=px-r,maxX=px+r,minZ=pz-r,maxZ=pz+r,minY=py-1.6,maxY=py+.1;
+  // epsilon: köşe geçişlerinde sahte bariyer oluşmasını önler
+  const eps=0.001;
+  for(let bx=Math.floor(minX);bx<=Math.floor(maxX)+1;bx++){for(let by=Math.floor(minY);by<=Math.floor(maxY)+1;by++){for(let bz=Math.floor(minZ);bz<=Math.floor(maxZ)+1;bz++){
+    const bd=blockMap[pk(bx,by,bz)];
+    if(isSolidBlock(bd)&&maxX>bx-.5+eps&&minX<bx+.5-eps&&maxY>by-.5+eps&&minY<by+.5-eps&&maxZ>bz-.5+eps&&minZ<bz+.5-eps) return true;
+  }}}return false;
+}
+// Oyuncunun hitbox'ının temas ettiği tüm XZ bloklarını döndür (köşe geçişleri için)
+function _waterXZBlocks(px,pz){
+  const r=0.20; // Sadece merkeze yakın — yanından geçerken yanlış swimming tetiklemesin
+  const x0=Math.floor(px-r),x1=Math.floor(px+r);
+  const z0=Math.floor(pz-r),z1=Math.floor(pz+r);
+  const pairs=[];
+  for(let bx=x0;bx<=x1;bx++) for(let bz=z0;bz<=z1;bz++) pairs.push([bx,bz]);
+  return pairs;
+}
+// Su içinde mi? – köşe geçişlerinde 4 bloğa kadar kontrol eder
+function inWater(px,py,pz){
+  const xzList=_waterXZBlocks(px,pz);
+  for(const [bx,bz] of xzList){
+    const bKnee =blockMap[pk(bx,Math.floor(py-1.0),bz)];
+    const bChest=blockMap[pk(bx,Math.floor(py-0.6),bz)];
+    const bHead =blockMap[pk(bx,Math.floor(py),    bz)];
+    if(isAnyWater(bKnee)||isAnyWater(bChest)||isAnyWater(bHead)) return true;
+  }
+  return false;
+}
+// Su yüzeyinin üstünde mi? (zemin su bloğuna oturmayı engelle)
+function onWaterSurface(px,py,pz){
+  const xzList=_waterXZBlocks(px,pz);
+  for(const [bx,bz] of xzList){
+    const bBelow =blockMap[pk(bx,Math.floor(py-1.65),bz)];
+    const bBelow2=blockMap[pk(bx,Math.floor(py-1.80),bz)];
+    if(isAnyWater(bBelow)||isAnyWater(bBelow2)) return true;
+  }
+  return false;
+}
+// Kameranın göz seviyesi bir su bloğunun içinde mi? (köşe dahil)
+// Düzeltme: Akan suyun gerçek görsel yüksekliği (waterLevel'e göre topY) hesaba katılır.
+// Düşük seviyeli akan su (şelale kenarı gibi) bloğun üst yüzeyinden daha aşağıda bitebilir;
+// göz o suyun üstündeyse mavi efekt tetiklenmemeli.
+function eyeInWater(px,py,pz){
+  const xzList=_waterXZBlocks(px,pz);
+  for(const [bx,bz] of xzList){
+    // Göz seviyesi (py) ve biraz aşağısı (py-0.15) için kontrol
+    for(const checkY of [py, py-0.15]){
+      const by=Math.floor(checkY);
+      const bd=blockMap[pk(bx,by,bz)];
+      if(!isAnyWater(bd)) continue;
+      // Suyun gerçek üst yüzeyi: level>=8 veya üstünde su varsa tam dolu (by+0.5),
+      // yoksa level/8 oranında kısmi yükseklik
+      const lvl=Math.max(1,Math.min(8,bd.waterLevel!=null?bd.waterLevel:8));
+      const aboveK=pk(bx,by+1,bz);
+      const aboveIsWater=!!(blockMap[aboveK]&&isAnyWater(blockMap[aboveK]));
+      const topWorldY = (aboveIsWater||lvl>=8) ? (by+0.5) : (by-0.5+(lvl/8));
+      // Göz suyun gerçek üst yüzeyinin altındaysa efekt tetikle
+      if(checkY <= topWorldY) return true;
+    }
+  }
+  return false;
+}
+ 
+// ─── Chat ───
+let isChatOpen=false;
+function openChat(){
+  if(isChatOpen) return;
+  isChatOpen=true;
+  if(chatHideTimer){clearTimeout(chatHideTimer);chatHideTimer=null;}
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
+  document.getElementById('chat-input-row').style.display='block';
+  document.getElementById('chat-container').style.display='flex';
+  document.getElementById('chat-log').style.display='flex';
+  setTimeout(()=>document.getElementById('chat-input').focus(),30);
+}
+function closeChat(send){
+  if(!isChatOpen) return;
+  const inp=document.getElementById('chat-input');
+  if(send&&inp.value.trim()){
+    const msg=inp.value.trim().substring(0,200);
+    if(!checkRate('mychat',3)){addChat(null,langData[currentLang].rateLimitMsg,true,'warn');inp.value='';isChatOpen=false;document.getElementById('chat-input-row').style.display='none';if(deviceMode==='pc'&&!isPaused) document.body.requestPointerLock();return;}
+    if(msg.startsWith('/')){processCmd(msg.slice(1));}
+    else if(isMP){addChat(myName,msg);if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'chat',msg});});else if(guestConn?.open) guestConn.send({type:'chat',msg});}
+  }
+  inp.value='';isChatOpen=false;
+  document.getElementById('chat-input-row').style.display='none';
+  // Chat kapanınca 7 sn timer'ı yeniden başlat
+  showChatLog();
+  if(deviceMode==='pc'&&!isPaused) document.body.requestPointerLock();
+}
+document.getElementById('chat-input').addEventListener('keydown',e=>{
+  e.stopPropagation();
+  if(e.key==='Enter'){e.preventDefault();closeChat(true);}
+  else if(e.key==='Escape'){e.preventDefault();closeChat(false);}
+});
+document.getElementById('btn-mobile-chat').addEventListener('click',e=>{e.stopPropagation();if(isChatOpen) closeChat(false); else openChat();});
+
+// ─── Yeniden Doğma ───
+document.getElementById('btn-respawn').addEventListener('click',e=>{
+  e.preventDefault();e.stopPropagation();
+  DeathManager.respawn();
+});
+ 
+// ─── PC Kontrolleri ───
+let pcDone=false;
+function setupPC(){
+  if(pcDone) return;pcDone=true;
+  document.body.addEventListener('click', () => {
+    // Fix 1: pointerLock yalnızca dokunmatik olmayan PC cihazlarında istenir
+    const isTouchDev = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+    if (deviceMode === 'pc' && !isTouchDev && !isChatOpen && !isPaused && !DeathManager.isDead && !invOpen) {
+        document.body.requestPointerLock();
+    }
+});
+  document.addEventListener('mousemove',e=>{
+    if(document.pointerLockElement!==document.body) return;
+    lon-=e.movementX*.0012*sensitivity;lat-=e.movementY*.0012*sensitivity;
+    lat=Math.max(-Math.PI/2.2,Math.min(Math.PI/2.2,lat));
+    camera.rotation.y=lon;camera.rotation.x=lat;
+  });
+  window.addEventListener('keydown',e=>{
+    if(isChatOpen) return;
+    if (isPaused || DeathManager.isDead) return;
+    if(e.code==='KeyP'){if(isPaused) closePauseMenu(); else if(!invOpen) openPauseMenu();return;}
+    if(e.code==='KeyE'){if(invOpen) closeInv(); else if(!isPaused) openInv();return;}
+    if(e.code==='Escape'){
+      if(isChatOpen){closeChat(false);return;}
+      if(invOpen){closeInv();return;}
+      if(isPaused){closePauseMenu();return;}
+    }
+    if(e.code==='Enter'){openChat();return;}
+    if(isPaused||DeathManager.isDead||invOpen) return;
+    if(e.code==='KeyW'||e.code==='ArrowUp') mv.f=true;
+    if(e.code==='KeyS'||e.code==='ArrowDown') mv.b=true;
+    if(e.code==='KeyA'||e.code==='ArrowLeft') mv.l=true;
+    if(e.code==='KeyD'||e.code==='ArrowRight') mv.r=true;
+    if(e.code==='ControlLeft'||e.code==='ControlRight'||e.code==='KeyC') isCrouching=true;
+    if(e.code==='Space'){
+      e.preventDefault();spaceDown=true;
+      const now=Date.now(),dbl=(now-lastSpaceTime)<350;lastSpaceTime=now;
+      if(isFlying){if(dbl){isFlying=false;velY=0;}}
+      else{
+        const swimNow=inWater(camera.position.x,camera.position.y,camera.position.z);
+        if(swimNow){/* suda: spaceDown=true, buoyancy fiziği loop'ta işlenir – ani fırlama yok */}
+        else if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}
+        else if(grounded){velY=JUMP;grounded=false;}
+      }
+    }
+    for(let i=0;i<9;i++) if(e.code===`Digit${i+1}`) selSlot(i);
+  });
+  window.addEventListener('keyup',e=>{
+    if(e.code==='KeyW'||e.code==='ArrowUp') mv.f=false;
+    if(e.code==='KeyS'||e.code==='ArrowDown') mv.b=false;
+    if(e.code==='KeyA'||e.code==='ArrowLeft') mv.l=false;
+    if(e.code==='KeyD'||e.code==='ArrowRight') mv.r=false;
+    if(e.code==='ControlLeft'||e.code==='ControlRight'||e.code==='KeyC') isCrouching=false;
+    if(e.code==='Space') spaceDown=false;
+  });
+  let pt=null,ps=0;
+  window.addEventListener('mousedown',e=>{
+    if(document.pointerLockElement!==document.body||DeathManager.isDead) return;
+    if(e.button===0){
+      if(gameMode==='survival'){
+        startBreaking(); // Survival: basılı tut = kır
+      } else {
+        // Creative: anında kır
+        ps=Date.now();pt=setTimeout(()=>{breakB(0,0,true);ps=0;},300);
+      }
+    }
+    else if(e.button===2) placeB(0,0,true);
+  });
+  window.addEventListener('mouseup',e=>{
+    if(e.button===0){
+      if(gameMode==='survival'){
+        stopBreaking();
+        doLeftClick(0,0,true); // kısa tıklama = saldırı
+      } else {
+        clearTimeout(pt);if(ps>0&&Date.now()-ps<300) doLeftClick(0,0,true);
+      }
+    }
+  });
+  window.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('wheel',e=>{if(deviceMode==='pc'){slot=(slot+(e.deltaY>0?1:-1)+9)%9;selSlot(slot);}});
+}
+ 
+// ─── Mobil Kontroller ───
+let mobDone=false;
+function setupMobile(){
+  if(mobDone) return;mobDone=true;
+  const jC=document.getElementById('joystick-container'),jT=document.getElementById('joystick-thumb');
+  const mr=window.innerWidth<=768?36:46;
+  jC.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();if(jActive) return;const t=e.changedTouches[0];jActive=true;jTid=t.identifier;mvJ(t);},{passive:false});
+  function mvJ(t){const r=jC.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=t.clientX-cx,dy=t.clientY-cy;const d=Math.sqrt(dx*dx+dy*dy);if(d>mr){dx=dx/d*mr;dy=dy/d*mr;}jT.style.transform=`translate(${dx}px,${dy}px)`;jx=dx/mr;jy=dy/mr;}
+  let mLastJump=0;
+  document.getElementById('btn-mobile-jump').addEventListener('touchstart',e=>{
+    e.preventDefault();e.stopPropagation();if(DeathManager.isDead) return;
+    spaceDown=true; // PC'deki Space davranışıyla aynı: suda yüzerken buoyancy için de gerekli
+    const now=Date.now(),dbl=(now-mLastJump)<350;mLastJump=now;
+    const swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
+    if(isFlying){if(dbl){isFlying=false;velY=0;}}
+    else if(swimming){/* suda sadece buoyancy - velY=JUMP yok */}
+    else{if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}else if(grounded){velY=JUMP;grounded=false;}}
+  },{passive:false});
+  document.getElementById('btn-mobile-jump').addEventListener('touchend',e=>{e.preventDefault();spaceDown=false;},{passive:false});
+  document.getElementById('btn-mobile-crouch').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();isCrouching=!isCrouching;},{passive:false});
+  let aT={},lkId=null,sx=0,sy=0;
+  window.addEventListener('touchstart',e=>{
+    if(deviceMode!=='mobile') return;
+    // Fix 2: Menü açıkken oyunun tüm dokunmatik girdilerini engelle
+    if(document.getElementById('menu-overlay').style.display!=='none') return;
+    for(let i=0;i<e.changedTouches.length;i++){
+      const t=e.changedTouches[i];
+      if(t.target.closest('#joystick-container')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#pause-overlay')||t.target.closest('#btn-mobile-chat')||t.target.closest('#chat-input-row')||t.target.closest('#death-screen')||t.target.closest('#btn-mobile-inv')||t.target.closest('#inv-overlay')) continue;
+      const id=t.identifier;
+      aT[id]={sx:t.clientX,sy:t.clientY,mv:false,to:setTimeout(()=>{if(aT[id]&&!aT[id].mv){breakB(aT[id].sx,aT[id].sy,false);delete aT[id];}},300)};
+      if(lkId===null){lkId=id;sx=t.clientX;sy=t.clientY;}
+    }
+  },{passive:false});
+  window.addEventListener('touchmove',e=>{
+    if(deviceMode!=='mobile') return;
+    // Fix 2: Menü açıkken oyunun dokunmatik hareketlerini engelle
+    if(document.getElementById('menu-overlay').style.display!=='none') return;
+    for(let i=0;i<e.touches.length;i++){
+      const t=e.touches[i],id=t.identifier;
+      if(id===jTid&&jActive){mvJ(t);continue;}
+      if(aT[id]){const dx=t.clientX-aT[id].sx,dy=t.clientY-aT[id].sy;if(Math.abs(dx)>7||Math.abs(dy)>7){aT[id].mv=true;clearTimeout(aT[id].to);}}
+      if(id===lkId){const dx=t.clientX-sx,dy=t.clientY-sy;lon-=dx*.0038*sensitivity;lat-=dy*.0038*sensitivity;lat=Math.max(-Math.PI/2.2,Math.min(Math.PI/2.2,lat));camera.rotation.y=lon;camera.rotation.x=lat;sx=t.clientX;sy=t.clientY;}
+    }
+  },{passive:false});
+  window.addEventListener('touchend',e=>{
+    if(deviceMode!=='mobile') return;
+    // Fix 2: Menü açıkken touchend işlemlerini de engelle
+    if(document.getElementById('menu-overlay').style.display!=='none') return;
+    for(let i=0;i<e.changedTouches.length;i++){
+      const t=e.changedTouches[i],id=t.identifier;
+      if(id===jTid){jActive=false;jTid=null;jx=0;jy=0;jT.style.transform='translate(0px,0px)';}
+      if(aT[id]){
+        clearTimeout(aT[id].to);
+        if(!aT[id].mv){
+          const entity=findEntityInCrosshair(5);
+          if(entity&&gameMode==='survival'){
+            if(entity.type==='animal') attackAnimal(entity.animal,5);
+            else if(entity.type==='player'&&isMP){
+              const dmg=2+Math.floor(Math.random()*2);
+              CombatManager.attackPlayer(entity.id,dmg,camera.position.clone());
+              CombatManager.flashRed();
+            }
+            const t2=document.getElementById('game-title');t2.style.color='#fa0';setTimeout(()=>{if(t2) t2.style.color='#fff';},110);
+          } else {
+            placeB(aT[id].sx,aT[id].sy,false);
+          }
+        }
+        delete aT[id];
+      }
+      if(id===lkId) lkId=null;
+    }
+  });
+}
+ 
+// ─── Render Döngüsü ───
+let lastCX=0,lastCZ=0,lastT=performance.now();
+// FPS: instancesDirty rebuild'i throttle et – her 3 frame'de bir
+let _dirtyThrottle=0;
+function animate(){
+  requestAnimationFrame(animate);
+  if(!deviceMode){renderer.render(scene,camera);return;}
+  const now=performance.now(),dt=Math.min((now-lastT)/1000,.05);lastT=now;
+  procQueues(); // Her frame chunk işle
+  if(instancesDirty){_dirtyThrottle++;if(_dirtyThrottle>=3){rebuildInstancedMeshes();instancesDirty=false;_dirtyThrottle=0;}}
+  if(waterDirty){rebuildWaterMesh();waterDirty=false;}
+  if(!isPaused&&!isChatOpen&&!DeathManager.isDead){
+    updateAnimals(dt);updateFoods(dt);updateHealthSystem(dt);
+    updateWater(dt);
+    SuffocationManager.checkSuffocation();
+    if(isBreaking&&deviceMode==='pc') tickBreaking(dt);
+    const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+    const sV=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+    fV.y=0;fV.normalize();sV.y=0;sV.normalize();
+    const spd=isFlying?FLY_SPD:(isCrouching?SPD*.55:SPD);
+    const mV=new THREE.Vector3();
+    if(deviceMode==='pc'){if(mv.f) mV.addScaledVector(fV,spd);if(mv.b) mV.addScaledVector(fV,-spd);if(mv.l) mV.addScaledVector(sV,-spd);if(mv.r) mV.addScaledVector(sV,spd);}
+    else if(jActive){mV.addScaledVector(fV,-jy*spd);mV.addScaledVector(sV,jx*spd);}
+    if(isFlying){
+      velY=0;
+      const flyUp=.09,flyDn=.09;
+      if(spaceDown){const ny=camera.position.y+flyUp;if(!col(camera.position.x,ny,camera.position.z)) camera.position.y=ny;}
+      if(isCrouching){const ny=camera.position.y-flyDn;if(!col(camera.position.x,ny,camera.position.z)) camera.position.y=ny;}
+      if(mV.lengthSq()>0){
+        const nx=camera.position.x+mV.x;if(!col(nx,camera.position.y,camera.position.z)) camera.position.x=nx;
+        const nz=camera.position.z+mV.z;if(!col(camera.position.x,camera.position.y,nz)) camera.position.z=nz;
+      }
+      if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>8||Math.abs(camera.position.z-lastCZ)>8)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
+    } else {
+      const swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
+      const moveSpd=swimming?spd*WATER_MOVE_MULT:spd; // su içinde sürtünme nedeniyle daha yavaş hareket
+      const curMV=swimming?new THREE.Vector3(mV.x*moveSpd/spd,mV.y,mV.z*moveSpd/spd):mV;
+      if(curMV.lengthSq()>0){
+        const st=8,stepX=curMV.x/st,stepZ=curMV.z/st;
+        for(let s=0;s<st;s++){
+          const oldX=camera.position.x,oldZ=camera.position.z;
+          // ── X hareketi ──
+          camera.position.x+=stepX;
+          if(col(camera.position.x,camera.position.y,camera.position.z)){
+            if(grounded&&!col(camera.position.x,camera.position.y+0.5,camera.position.z)&&!col(camera.position.x,camera.position.y+0.9,camera.position.z)){
+              camera.position.y+=0.5;
+              if(col(camera.position.x,camera.position.y,camera.position.z)){camera.position.y-=0.5;camera.position.x=oldX;}
+            } else {
+              // Köşe kaydırma: sadece Z yönünde biraz it, köşe bariyerini aş
+              camera.position.x=oldX;
+              const slideZ=stepZ!==0?Math.sign(stepZ)*0.003:( stepX>0?-0.003:0.003 );
+              if(!col(camera.position.x,camera.position.y,camera.position.z+slideZ)) camera.position.z+=slideZ;
+            }
+          }
+          if(isCrouching&&grounded&&!swimming){const bBelow=blockMap[pk(Math.floor(camera.position.x),Math.floor(camera.position.y-1.72),Math.floor(camera.position.z))];if(!bBelow) camera.position.x=oldX;}
+          // ── Z hareketi ──
+          camera.position.z+=stepZ;
+          if(col(camera.position.x,camera.position.y,camera.position.z)){
+            if(grounded&&!col(camera.position.x,camera.position.y+0.5,camera.position.z)&&!col(camera.position.x,camera.position.y+0.9,camera.position.z)){
+              camera.position.y+=0.5;
+              if(col(camera.position.x,camera.position.y,camera.position.z)){camera.position.y-=0.5;camera.position.z=oldZ;}
+            } else {
+              // Köşe kaydırma: sadece X yönünde biraz it
+              camera.position.z=oldZ;
+              const slideX=stepX!==0?Math.sign(stepX)*0.003:( stepZ>0?-0.003:0.003 );
+              if(!col(camera.position.x+slideX,camera.position.y,camera.position.z)) camera.position.x+=slideX;
+            }
+          }
+          if(isCrouching&&grounded&&!swimming){const bBelow=blockMap[pk(Math.floor(camera.position.x),Math.floor(camera.position.y-1.72),Math.floor(camera.position.z))];if(!bBelow) camera.position.z=oldZ;}
+        }
+        if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>8||Math.abs(camera.position.z-lastCZ)>8)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
+      }
+      if(swimming){
+        // Suda yüzme: su direnci + azaltılmış yerçekimi
+        velY*=WATER_VEL_DAMP;
+        if(spaceDown)        velY=Math.min(velY+WATER_BUOYANCY, WATER_MAX_RISE);
+        else if(isCrouching) velY=Math.max(velY-WATER_DOWN_SPD,-0.05);
+        else                 velY=Math.max(velY-WATER_GRAV,WATER_SINK_CAP);
+        camera.position.y+=velY;
+        grounded=false; fallStartY=null;
+        // Suyun dibindeki katı bloğa gömülmeyi engelle
+        const wFloor=Math.floor((camera.position.y-1.6)+.01);
+        const bdFloor=blockMap[pk(Math.floor(camera.position.x),wFloor,Math.floor(camera.position.z))];
+        if(isSolidBlock(bdFloor)){
+          const restY=wFloor+.5+1.6;
+          if(camera.position.y<restY){camera.position.y=restY;velY=Math.max(velY,0);}
+        }
+        wasSwimming=true;
+      } else {
+        // Su çıkışı: wasSwimming bayrağı varsa ani fırlama olmasın
+        if(wasSwimming){
+          // Su çıkış hızını sınırla – WATER_MAX_RISE'ın biraz üstü yeterli
+          velY=Math.min(velY, WATER_MAX_RISE + 0.01);
+        }
+        wasSwimming=false;
+        velY=Math.max(velY-GRAV,-MFALL);camera.position.y+=velY;
+        const prevGrounded=grounded;
+        // Zemin tespiti: hem 0.05 hem 0.01 ile kontrol et (daha güvenilir)
+        const onGround=col(camera.position.x,camera.position.y-0.05,camera.position.z)
+                     ||col(camera.position.x,camera.position.y-0.01,camera.position.z);
+        if(onGround){
+          if(velY<=0){grounded=true;if(!prevGrounded) checkFallDamage();velY=0;
+            const by=Math.floor((camera.position.y-1.6)+.01);const cy=by+.5+1.6;
+            if(camera.position.y<cy) camera.position.y=cy;
+          }
+        } else grounded=false;
+        if(velY>0&&col(camera.position.x,camera.position.y+.05,camera.position.z)) velY=0;
+        if(!grounded&&velY<0&&fallStartY===null) fallStartY=camera.position.y;
+      }
+    }
+  }
+// void kontrolü: isFlying dahil her durumda çalışır
+// -100: zemin bloklarının altında ~108 blok boşluk → uzun düşüş süresi
+if (camera.position.y < -100) {
+    if (gameMode === 'creative') {
+        if (!isResetting) {
+            isResetting = true;
+            velY = 0;
+            const _vb=WorldGen.getBiome(8,8),_vy=WorldGen.getSurfaceY(8,8,_vb)+2.6;
+            camera.position.set(8, _vy, 8);
+            setTimeout(()=>{ isResetting=false; }, 1000);
+        }
+    } else {
+        voidDamageTimer += dt;
+        if (voidDamageTimer >= 1) {
+            voidDamageTimer = 0;
+            HealthManager.takeDamage(8, 'void');
+        }
+    }
+} else {
+    voidDamageTimer = 0;
+}
+  // Su altı efekti: kameranın göz seviyesi bir su bloğunun içindeyse
+  // -> 3D su mesh'ini gizle (üst üste binen şeffaf yüzeylerin "garip" desen yapmasını önler)
+  // -> ekran kenarında mavi vignette overlay göster
+  const _eyeInWater=eyeInWater(camera.position.x,camera.position.y,camera.position.z);
+  const _swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
+  if(waterMesh) waterMesh.visible=!_eyeInWater;
+  const _wv=document.getElementById('water-vignette');
+  if(_wv) _wv.style.opacity=_eyeInWater?'1':'0';
+  renderer.render(scene,camera);
+}
+ 
+window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
+window.addEventListener('beforeunload',()=>cleanupMP());
+setLanguage('tr');
+animate();
+</script>
+</body>
+</html>
