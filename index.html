@@ -198,13 +198,6 @@
         }
 
         /* Butonlar */
-        .btn-container {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
         .btn {
             display: inline-block;
             padding: 12px 30px;
@@ -277,6 +270,125 @@
         .gallery-item p { padding: 15px; font-size: 0.9rem; text-align: center; }
 
         footer { background-color: #1f2833; text-align: center; padding: 20px; font-size: 0.9rem; color: #c5c6c7; border-top: 1px solid rgba(102, 252, 241, 0.1); }
+
+        /* ========================================== */
+        /* 🧪 DENEYSEL MOD BUTONU VE MODALI           */
+        /* ========================================== */
+        .btn-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .experimental-btn {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #8e44ad;
+            color: #fff;
+            border: 2px solid #8e44ad;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 12px rgba(142, 68, 173, 0.5);
+            letter-spacing: 1px;
+        }
+
+        .experimental-btn:hover {
+            background-color: #9b59b6;
+            box-shadow: 0 0 25px rgba(142, 68, 173, 0.9), 0 0 50px rgba(142, 68, 173, 0.4);
+            transform: translateY(-3px);
+            border-color: #c39bd3;
+        }
+
+        /* DENEYSEL MOD UYARI MODALI */
+        #experimentalModal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100vw; height: 100vh;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 50000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .experimental-modal-box {
+            background-color: rgba(0, 0, 0, 0.9);
+            border-radius: 12px;
+            border: 1.5px solid #8e44ad;
+            box-shadow:
+                0 0 20px rgba(142, 68, 173, 0.8),
+                0 0 50px rgba(142, 68, 173, 0.4),
+                0 0 90px rgba(142, 68, 173, 0.15);
+            padding: 35px 30px 30px 30px;
+            max-width: 480px;
+            width: 100%;
+            text-align: center;
+            position: relative;
+            animation: expModalAppear 0.3s ease;
+        }
+
+        @keyframes expModalAppear {
+            from { opacity: 0; transform: scale(0.9); }
+            to   { opacity: 1; transform: scale(1); }
+        }
+
+        .experimental-modal-box .exp-warning-title {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #ff2222;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            margin-bottom: 18px;
+            text-shadow: 0 0 10px rgba(255, 34, 34, 0.6);
+        }
+
+        .experimental-modal-box .exp-warning-desc {
+            font-size: 0.95rem;
+            color: #c5c6c7;
+            line-height: 1.75;
+            margin-bottom: 28px;
+            text-align: left;
+        }
+
+        .exp-continue-btn {
+            background-color: #8e44ad;
+            color: #fff;
+            border: 2px solid #8e44ad;
+            padding: 12px 35px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(142, 68, 173, 0.6);
+        }
+
+        .exp-continue-btn:hover {
+            background-color: #9b59b6;
+            box-shadow: 0 0 30px rgba(142, 68, 173, 1), 0 0 60px rgba(142, 68, 173, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .exp-close-btn {
+            position: absolute;
+            top: 12px; right: 16px;
+            color: #aaa;
+            font-size: 1.6rem;
+            cursor: pointer;
+            background: none;
+            border: none;
+            line-height: 1;
+            transition: color 0.2s;
+        }
+
+        .exp-close-btn:hover { color: #fff; }
 
         /* HESAP SİSTEMİ PANELI */
         .account-overlay {
@@ -418,9 +530,6 @@
 
     </style>
 
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
 </head>
 <body>
 
@@ -556,6 +665,20 @@
     </div>
 </div>
 
+    <!-- ========================================== -->
+    <!-- 🧪 DENEYSEL MOD UYARI MODALI               -->
+    <!-- ========================================== -->
+    <div id="experimentalModal" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.85); z-index:50000; justify-content:center; align-items:center; padding:20px;">
+        <div class="experimental-modal-box">
+            <button class="exp-close-btn" onclick="closeExperimentalModal()">&times;</button>
+            <div class="exp-warning-title" id="exp-modal-title">⚠ WARNING!!!</div>
+            <p class="exp-warning-desc" id="exp-modal-desc">
+                This mode contains experimental features of the game that are still in development. Unexpected bugs or performance issues may occur in the physics engine, water spreading, and chunk system. This version is an independent test environment from the main game; your progress is not guaranteed.
+            </p>
+            <button class="exp-continue-btn" id="exp-continue-btn" onclick="continueExperimental()">Continue</button>
+        </div>
+    </div>
+
     <div class="game-overlay" id="gameOverlay">
         <div class="game-container">
             <button class="close-game-btn" onclick="closeGame()" id="btn-close-game">X Close Game</button>
@@ -585,6 +708,7 @@
         <p id="hero-subtitle">Get Ready to Explore an Unique World!</p>
         <div class="btn-container">
             <button class="btn btn-primary" id="btn-download" onclick="openGame()">Play Game</button>
+            <button class="experimental-btn" id="btn-experimental" onclick="openExperimentalModal()"><span id="btn-experimental-text">Play Experimental Mode</span></button>
             <a href="https://discord.gg/pC4d2hcv8D" target="_blank" class="btn btn-secondary" id="btn-discord">Join Discord Community</a>
         </div>
     </header>
@@ -609,10 +733,20 @@
         <p id="footer-text">&copy; 2026 Legends Game. All Rights Reserved.</p>
     </footer>
 
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+
     <script>
        // ==========================================
         // 🔥 FIREBASE YAPILANDIRMASI 🔥
         // ==========================================
+
+        // Global değişkenler
+        let isGuest = false;
+        let num1, num2;
+        let auth, database;
+
         const firebaseConfig = {
             apiKey: "AIzaSyAG6FsNjMgIXIGQmmmHC6GWjWuzNVDq5KM",
             authDomain: "play-legends.firebaseapp.com",
@@ -624,9 +758,13 @@
             databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
         };
 
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const database = firebase.database();
+        try {
+            firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            database = firebase.database();
+        } catch(e) {
+            console.error("Firebase başlatılamadı:", e);
+        }
 
         // 🛡️ GÜVENLİK AYARLARI VE YASAKLI İSİMLER
         const ADMIN_EMAIL = "omerasaf243458@gmail.com"; 
@@ -662,6 +800,10 @@
                 textNoAccount: "Don't have an account? <span class='auth-link' onclick='switchAuth(\"register\")'>Register</span>",
                 textHaveAccount: "Already have an account? <span class='auth-link' onclick='switchAuth(\"login\")'>Login</span>",
                 errPassMatch: "Passwords do not match!", errCaptcha: "Incorrect captcha answer!", errLoginFail: "Invalid email or password!", msgRegSuccess: "Account created! Logging in...",
+              btnExperimental: "Play Experimental Mode",
+              expModalTitle: "⚠ WARNING!!!",
+              expModalDesc: "This mode contains experimental features of the game that are still in development. Unexpected bugs or performance issues may occur in the physics engine, water spreading, and chunk system. This version is an independent test environment from the main game; your progress is not guaranteed.",
+              expContinueBtn: "Continue",
               menuFriends: "👥 My Friends",
         friendsTitle: "👥 Friendship System",
         tabSearch: "Search Friends",
@@ -707,6 +849,10 @@
                 textNoAccount: "Hesabın yok mu? <span class='auth-link' onclick='switchAuth(\"register\")'>Kaydol</span>",
                 textHaveAccount: "Zaten hesabın var mı? <span class='auth-link' onclick='switchAuth(\"login\")'>Giriş Yap</span>",
                 errPassMatch: "Şifreler birbiriyle eşleşmiyor!", errCaptcha: "Bot doğrulaması hatalı!", errLoginFail: "Hatalı e-posta veya şifre!", msgRegSuccess: "Hesap başarıyla açıldı! Giriş yapılıyor...",
+              btnExperimental: "Deneysel Modu Oyna",
+              expModalTitle: "⚠ UYARI!!!",
+              expModalDesc: "Bu mod, oyunun henüz geliştirme aşamasında olan deneysel özelliklerini içerir. Fizik motoru, su yayılımı ve chunk sisteminde beklenmedik hatalar veya performans kayıpları yaşanabilir. Bu sürüm ana oyundan bağımsız bir test alanıdır, ilerlemeniz garanti edilmez.",
+              expContinueBtn: "Devam Et",
               menuFriends: "👥 Arkadaşlarım",
         friendsTitle: "👥 Arkadaşlık Sistemi",
         tabSearch: "Arkadaş Ara",
@@ -731,9 +877,6 @@
             }
         };
 
-        let isGuest = false;
-        let num1, num2;
-
         function setLanguage(lang) {
 document.documentElement.lang = lang;            
           document.getElementById('btn-en').classList.toggle('active', lang === 'en');
@@ -757,6 +900,12 @@ document.documentElement.lang = lang;
           // setLanguage fonksiyonunun en altına eklenecekler:
 if(document.getElementById('m-friends')) document.getElementById('m-friends').innerText = translations[lang].menuFriends;
 if(document.getElementById('friendsModalTitle')) document.getElementById('friendsModalTitle').innerText = translations[lang].friendsTitle;
+
+            // Deneysel mod dil güncellemeleri
+            if(document.getElementById('btn-experimental-text')) document.getElementById('btn-experimental-text').innerText = translations[lang].btnExperimental;
+            if(document.getElementById('exp-modal-title')) document.getElementById('exp-modal-title').innerText = translations[lang].expModalTitle;
+            if(document.getElementById('exp-modal-desc')) document.getElementById('exp-modal-desc').innerText = translations[lang].expModalDesc;
+            if(document.getElementById('exp-continue-btn')) document.getElementById('exp-continue-btn').innerText = translations[lang].expContinueBtn;
         }
 // Arkadaşlık Modalı Açma Kontrolü (Dil Destekli)
 function openFriendsModal() {
@@ -1389,6 +1538,18 @@ function renderRanksList() {
             auth.signOut().then(() => { location.reload(); });
         }
 
+        function openExperimentalModal() {
+            document.getElementById('experimentalModal').style.display = 'flex';
+        }
+
+        function closeExperimentalModal() {
+            document.getElementById('experimentalModal').style.display = 'none';
+        }
+
+        function continueExperimental() {
+            alert('Sürüm bulunamadı! / Version not found!');
+        }
+
         function openGame() {
             const playerName = document.getElementById('navProfileName').innerText;
             const overlay = document.getElementById('gameOverlay');
@@ -1413,35 +1574,6 @@ function renderRanksList() {
             document.getElementById('gameOverlay').style.display = 'none';
             document.getElementById('gameFrame').src = ''; 
         }
-        // --- AUTH DURUM TAKİBİ (ÇÖKME KORUMALI) ---
-        auth.createUserWithEmailAndPassword(email, password)
-    .then((userCredential) => {
-        const user = userCredential.user;
-        
-        // 1. Önce kullanıcının profilindeki displayName (Kullanıcı Adı) kısmını güncelliyoruz
-        return user.updateProfile({
-            displayName: username
-        }).then(() => {
-            // Profil güncellemesi BAŞARIYLA BİTTİKTEN SONRA veritabanına yazıyoruz
-            return database.ref('users/' + user.uid).set({
-                username: username, // Artık null değil, kesinlikle girilen isim yazılacak
-                email: email,
-                role: "player",
-                status: "online",
-                createdAt: Date.now()
-            });
-        });
-    })
-    .then(() => {
-        alert("Account created successfully!");
-        // Kayıt başarılı olunca overlay'i kapatabilirsiniz
-        document.getElementById('accountOverlay').style.display = 'none';
-    })
-    .catch((error) => {
-        console.error("Kayıt hatası:", error);
-        alert(error.message);
-    });
-
         setLanguage('en');
     </script>
 </body>
