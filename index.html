@@ -390,6 +390,28 @@
 
         .exp-close-btn:hover { color: #fff; }
 
+        /* ========================================== */
+        /* 🕯️ GİZLİ HAYDUT İKONU (.rogue-icon)        */
+        /* ========================================== */
+        .rogue-icon {
+            display: block;
+            width: fit-content;
+            margin: 40px auto 0 auto;
+            padding: 4px 10px;
+            opacity: 0.12;
+            color: #ff0000;
+            font-size: 0.65rem;
+            font-family: monospace;
+            cursor: pointer;
+            transition: opacity 0.3s ease;
+            user-select: none;
+            text-align: center;
+        }
+
+        .rogue-icon:hover {
+            opacity: 0.5;
+        }
+
         /* HESAP SİSTEMİ PANELI */
         .account-overlay {
             position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
@@ -726,6 +748,7 @@
                     <p id="img-desc-2">Advanced Hotbar and Inventory System</p>
                 </div>
             </div>
+            <div class="rogue-icon" id="rogue-icon-text" onclick="triggerHiddenGame()" title="">Don't click here</div>
         </section>
     </div>
 
@@ -804,6 +827,7 @@
               expModalTitle: "⚠ WARNING!!!",
               expModalDesc: "This mode contains experimental features of the game that are still in development. Unexpected bugs or performance issues may occur in the physics engine, water spreading, and chunk system. This version is an independent test environment from the main game; your progress is not guaranteed.",
               expContinueBtn: "Continue",
+              rogueText: "Don't click here",
               menuFriends: "👥 My Friends",
         friendsTitle: "👥 Friendship System",
         tabSearch: "Search Friends",
@@ -853,6 +877,7 @@
               expModalTitle: "⚠ UYARI!!!",
               expModalDesc: "Bu mod, oyunun henüz geliştirme aşamasında olan deneysel özelliklerini içerir. Fizik motoru, su yayılımı ve chunk sisteminde beklenmedik hatalar veya performans kayıpları yaşanabilir. Bu sürüm ana oyundan bağımsız bir test alanıdır, ilerlemeniz garanti edilmez.",
               expContinueBtn: "Devam Et",
+              rogueText: "Buraya tıklama",
               menuFriends: "👥 Arkadaşlarım",
         friendsTitle: "👥 Arkadaşlık Sistemi",
         tabSearch: "Arkadaş Ara",
@@ -906,6 +931,7 @@ if(document.getElementById('friendsModalTitle')) document.getElementById('friend
             if(document.getElementById('exp-modal-title')) document.getElementById('exp-modal-title').innerText = translations[lang].expModalTitle;
             if(document.getElementById('exp-modal-desc')) document.getElementById('exp-modal-desc').innerText = translations[lang].expModalDesc;
             if(document.getElementById('exp-continue-btn')) document.getElementById('exp-continue-btn').innerText = translations[lang].expContinueBtn;
+            if(document.getElementById('rogue-icon-text')) document.getElementById('rogue-icon-text').innerText = translations[lang].rogueText;
         }
 // Arkadaşlık Modalı Açma Kontrolü (Dil Destekli)
 function openFriendsModal() {
@@ -1536,6 +1562,32 @@ function renderRanksList() {
 
         function handleSignOut() {
             auth.signOut().then(() => { location.reload(); });
+        }
+
+        function triggerHiddenGame() {
+            fetch('gameexe.html', { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = 'gameexe.html';
+                    } else {
+                        showCorruptedError();
+                    }
+                })
+                .catch(() => {
+                    showCorruptedError();
+                });
+        }
+
+        function showCorruptedError() {
+            document.title = "ERROR";
+            const msg =
+                "FATAL ERROR 0xC0000005\n\n" +
+                "memory could not be read.\n" +
+                "core_process.exe has stopped responding.\n\n" +
+                "...they are still watching...\n\n" +
+                "[ data corrupted // file not found ]";
+            alert(msg);
+            setTimeout(() => { document.title = "Play Legends - Official Website"; }, 4000);
         }
 
         function openExperimentalModal() {
