@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Corrupdet v-0.1 - Null Null </title>
+<title>Legends Corrupted v-0.2 - Null Null </title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
 body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:monospace}
@@ -64,6 +64,19 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
   radial-gradient(ellipse at center, rgba(40,110,200,0) 45%, rgba(30,90,180,.35) 78%, rgba(15,55,120,.65) 100%),
   linear-gradient(rgba(40,120,220,.18), rgba(40,120,220,.18));
   box-shadow:inset 0 0 140px 40px rgba(20,80,170,.55);}
+#prison-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:16;opacity:0;transition:opacity .6s ease;background:radial-gradient(ellipse at center, rgba(0,0,0,0) 35%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.88) 85%, rgba(0,0,0,0.96) 100%);box-shadow:inset 0 0 120px 30px rgba(0,0,0,0.7);}
+#prison-vignette.active{animation:prison-pulse 4s ease-in-out infinite;}
+@keyframes prison-pulse{0%,100%{box-shadow:inset 0 0 120px 30px rgba(0,0,0,0.7);}50%{box-shadow:inset 0 0 160px 60px rgba(0,0,0,0.85);}}
+/* Portal Bloğu Partikülleri */
+#portal-particles{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:12;overflow:hidden;display:none;}
+.portal-particle{position:absolute;border-radius:50%;animation:portal-float linear infinite;opacity:0;}
+@keyframes portal-float{
+  0%{opacity:0;transform:translateY(0) scale(0.3);}
+  15%{opacity:1;}
+  85%{opacity:0.6;}
+  100%{opacity:0;transform:translateY(-60px) scale(1.2);}
+}
+#portal-tp-flash{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:200;background:#000;opacity:0;display:none;transition:none;}
 #joystick-container{position:absolute;bottom:35px;left:45px;width:120px;height:120px;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.25);border-radius:50%;display:none;justify-content:center;align-items:center;z-index:10;touch-action:none;}
 #joystick-thumb{width:50px;height:50px;background:rgba(255,255,255,.92);border-radius:50%;position:absolute;box-shadow:0 4px 10px rgba(0,0,0,.3);}
 #mobile-jump-container{position:absolute;bottom:35px;right:45px;display:none;z-index:10;flex-direction:column;gap:8px;align-items:flex-end;}
@@ -88,7 +101,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .pause-setting input[type=range]{width:50%;accent-color:#75a7ff;}
 .pause-setting span.val{color:#75a7ff;font-weight:bold;min-width:20px;text-align:right;}
 #chat-container{position:absolute;bottom:90px;left:10px;width:300px;max-width:calc(100vw - 20px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
-#chat-log{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;}
+#chat-log{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;justify-content:flex-end;}
 #chat-log::-webkit-scrollbar{display:none;}
 .chat-msg{color:#fff;font-size:12px;font-family:monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
 .chat-msg.sys{color:#acd4ff;}
@@ -176,14 +189,15 @@ body.low-health::after {
 <div id="menu-overlay">
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
-    <div class="game-logo" id="txt-title">LEGENDS CORRUPDET</div>
-    <div class="game-version">v-0.1 - Null Null</div>
+    <div class="game-logo" id="txt-title">LEGENDS CORRUPTED</div>
+    <div class="game-version">v-0.2 - Null Null</div>
+    <div id="hx-mp-error"></div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-settings"></button>
   </div>
   <div class="menu-screen" id="screen-settings">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-settings-title">AYARLAR</div>
     <div class="device-cards">
       <div class="device-card" id="btn-settings-pc"><div class="dc-icon">🖥️</div><div class="dc-title" id="txt-settings-pc-btn">PC AYARLARI</div></div>
@@ -192,7 +206,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-settings"></button>
   </div>
   <div class="menu-screen" id="screen-pc-settings">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-pc-settings-title">PC AYARLARI</div>
     <div class="setting-row">
       <span class="setting-label" id="txt-sens-pc-label">Hassasiyet</span>
@@ -220,7 +234,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-pc-settings"></button>
   </div>
   <div class="menu-screen" id="screen-mobile-settings">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-mobile-settings-title">MOBİL AYARLAR</div>
     <div class="setting-row">
       <span class="setting-label" id="txt-sens-m-label">Hassasiyet</span>
@@ -235,7 +249,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-mobile-settings"></button>
   </div>
   <div class="menu-screen" id="screen-device">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-device-title">CİHAZ SEÇİMİ</div>
     <div class="device-cards">
       <div class="device-card" id="btn-pc"><div class="dc-icon">🖥️</div><div class="dc-title" id="txt-pc-btn">BİLGİSAYAR</div></div>
@@ -244,7 +258,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-device"></button>
   </div>
   <div class="menu-screen" id="screen-world">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-world-title">DÜNYA SEÇİMİ</div>
     <div class="world-cards">
       <div class="world-card" id="btn-world-infinite"><div class="wc-icon">🌍</div><div class="wc-title" id="txt-w-inf-title">SONSUZ DÜNYA</div><div class="wc-desc" id="txt-w-inf-desc">Sınırsız keşif</div></div>
@@ -263,7 +277,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-world"></button>
   </div>
   <div class="menu-screen" id="screen-multiplayer">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-mp-title">ÇOK OYUNCULU</div>
     <div class="mp-cards">
       <div class="mp-card" id="btn-mp-join"><div class="mc-icon">🔗</div><div class="mc-title" id="txt-mp-join">KATIL</div></div>
@@ -273,7 +287,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-mp"></button>
   </div>
   <div class="menu-screen" id="screen-join">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-join-title">ODAYA KATIL</div>
     <input class="menu-input" id="join-code-input" maxlength="4" autocomplete="off" spellcheck="false">
     <button class="mbtn primary" id="btn-do-join"></button>
@@ -281,7 +295,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-join"></button>
   </div>
   <div class="menu-screen" id="screen-host">
-    <div class="game-logo">LEGENDS CORRUPDET</div>
+    <div class="game-logo">LEGENDS CORRUPTED</div>
     <div class="screen-title" id="txt-host-title">ODA KUR</div>
     <div class="sub-title">DÜNYA</div>
     <div class="mini-cards">
@@ -310,6 +324,9 @@ body.low-health::after {
 <div id="crosshair">+</div>
 <div id="mode-indicator"></div>
 <div id="water-vignette"></div>
+<div id="prison-vignette"></div>
+<div id="portal-particles"></div>
+<div id="portal-tp-flash"></div>
 <div id="bars-wrap">
   <div class="bar-row" id="hearts-row"></div>
   <div class="bar-row" id="hunger-row"></div>
@@ -366,7 +383,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v-0.1</div>
+    <div id="pause-version">v-0.2</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <div class="pause-setting">
       <span id="txt-rd-label">Görüş Mesafesi</span>
@@ -420,11 +437,11 @@ function checkRate(key,maxPerSec,windowMs=1000){
  
 // ─── i18n ───
 const langData={
-  tr:{title:'LEGENDS CORRUPDET',singleplayer:'TEK OYUNCU',multiplayer:'ÇOK OYUNCU',settings:'AYARLAR',
+  tr:{title:'LEGENDS CORRUPTED',singleplayer:'TEK OYUNCU',multiplayer:'ÇOK OYUNCU',settings:'AYARLAR',
       deviceTitle:'CİHAZ SEÇİMİ',pcBtn:'BİLGİSAYAR',mobileBtn:'MOBİL',worldTitle:'DÜNYA SEÇİMİ',
       wInfTitle:'SONSUZ DÜNYA',wInfDesc:'Sınırsız keşif, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Corrupdet v-0.1',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Corrupted v-0.2',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
@@ -463,11 +480,11 @@ const langData={
       srvCheatsOn:'[Sunucu]: Hileler açıldı!',srvCheatsOff:'[Sunucu]: Hileler kapatıldı!',srvUsageCheats:'Kullanım: /cheats on veya /cheats off',srvCheatsHostOnly:'[Sunucu]: Hileler sadece yönetici tarafından değiştirilebilir!',
       srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
       srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!'},
-  en:{title:'LEGENDS CORRUPDET',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
+  en:{title:'LEGENDS CORRUPTED',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
       wInfTitle:'INFINITE WORLD',wInfDesc:'Endless exploration',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends corrupt v-0.1',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Corrupted v-0.2',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
@@ -636,7 +653,7 @@ document.getElementById('btn-world-infinite').addEventListener('click',()=>start
 document.getElementById('btn-world-small').addEventListener('click',()=>startGame(selectedDevice,'small',false,spGameMode,spCheatsEnabled));
 document.getElementById('sp-mode-survival').addEventListener('click',()=>{spGameMode='survival';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-survival');});
 document.getElementById('sp-mode-creative').addEventListener('click',()=>{spGameMode='creative';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-creative');});
-document.getElementById('btn-multiplayer').addEventListener('click',()=>showScreen('screen-multiplayer'));
+document.getElementById('btn-multiplayer').addEventListener('click',()=>{ if(window.HorrorEngine&&window.HorrorEngine.blockMultiplayer) window.HorrorEngine.blockMultiplayer(); });
 document.getElementById('btn-back-mp').addEventListener('click',()=>showScreen('screen-main'));
 document.getElementById('btn-mp-join').addEventListener('click',()=>showScreen('screen-join'));
 document.getElementById('btn-mp-host').addEventListener('click',()=>{document.getElementById('host-code-display').textContent=genCode();document.getElementById('host-status').textContent='';showScreen('screen-host');});
@@ -686,8 +703,30 @@ function genTex(t){
     else if(t==='glass'){alpha=.25;r=195;g=230;b=255;if(x===0||x===15||y===0||y===15||((x===y||x===y+1)&&x>2&&x<11)){alpha=.85;r=255;g=255;b=255;}}
     else if(t==='leaves'){r=40;g=105;b=32;if((x+y)%2===0){r=30;g=85;b=22;}}
     else if(t==='sand'){r=218;g=199;b=145;if((x*y)%4===0){r-=12;g-=10;b-=8;}}
+    else if(t==='brick'){
+      // Minecraft brick: 4x2 tuğla deseni, koyu derz çizgileri
+      const bCol=[[178,72,46],[192,80,50],[165,65,42]];
+      const bIdx=(x+y)%3;r=bCol[bIdx][0];g=bCol[bIdx][1];b=bCol[bIdx][2];
+      // Yatay derz çizgileri: y=0,1,8,9
+      if(y===0||y===1||y===8||y===9){r=90;g=90;b=85;n=0;}
+      // Dikey derz çizgileri: farklı satırlarda offset
+      const rowPhase=y<8?0:4;
+      if(x===rowPhase||x===rowPhase+1){r=90;g=90;b=85;n=0;}
+      if((rowPhase===0&&(x===8||x===9))||(rowPhase===4&&(x===12||x===13))){r=90;g=90;b=85;n=0;}
+    }
+    else if(t==='bedrock'){
+      // Minecraft bedrock: koyu gri zemin, siyah/açık gri yamalar
+      const hash=(x*17+y*31+x*y*7)%64;
+      if(hash<10){r=10;g=10;b=10;}         // siyah leke
+      else if(hash<18){r=90;g=90;b=90;}    // açık gri yama
+      else if(hash<26){r=35;g=35;b=35;}    // orta koyu
+      else if(hash<34){r=70;g=68;b=68;}    // açık gri
+      else{r=52;g=52;b=52;}                // ana koyu gri
+      // köşe efektleri
+      if((x===0||x===15||y===0||y===15)&&hash%3===0){r=Math.max(0,r-20);g=Math.max(0,g-20);b=Math.max(0,b-20);}
+    }
     r=Math.max(0,Math.min(255,r+n));g=Math.max(0,Math.min(255,g+n));b=Math.max(0,Math.min(255,b+n));
-    ctx.fillStyle=t==='glass'?`rgba(${~~r},${~~g},${~~b},${alpha})`:`rgb(${~~r},${~~g},${~~b})`;
+    ctx.fillStyle=(t==='glass')?`rgba(${~~r},${~~g},${~~b},${alpha})`:(t==='bedrock'&&(r===15||r===20||r===40))?`rgb(${~~r},${~~g},${~~b})`:`rgb(${~~r},${~~g},${~~b})`;
     ctx.fillRect(x,y,1,1);
   }}
   rawTexC[t]=c;
@@ -696,7 +735,25 @@ function genTex(t){
   return new THREE.MeshStandardMaterial({map:tex,roughness:.95,transparent:t==='glass'});
 }
 const texGT=genTex('grass_top'),texGS=genTex('grass_side'),texDirt=genTex('dirt'),texWood=genTex('oak_planks'),texStone=genTex('stone');
-const texLS=genTex('log_side'),texLT=genTex('log_top'),texCob=genTex('cobblestone'),texGlass=genTex('glass'),texLeaves=genTex('leaves'),texSand=genTex('sand');
+const texLS=genTex('log_side'),texLT=genTex('log_top'),texCob=genTex('cobblestone'),texGlass=genTex('glass'),texLeaves=genTex('leaves'),texSand=genTex('sand'),texBrick=genTex('brick'),texBedrock=genTex('bedrock');
+
+// Portal Bloğu Texture – simsiyah, çok ince mor kenar parlaması
+const texPortal=(()=>{
+  const c=document.createElement('canvas');c.width=16;c.height=16;
+  const ctx=c.getContext('2d');
+  // Tamamen siyah zemin
+  ctx.fillStyle='#000000';ctx.fillRect(0,0,16,16);
+  // Çok ince koyu desen (neredeyse görünmez, sadece derinlik hissi)
+  for(let x=0;x<16;x++){for(let y=0;y<16;y++){
+    const h=((x*3+y*7)^(x*y*2))%32;
+    if(h<3){ctx.fillStyle='#050005';ctx.fillRect(x,y,1,1);}
+    else if(h<5){ctx.fillStyle='#030003';ctx.fillRect(x,y,1,1);}
+  }}
+  // Sadece 1px mor kenar çizgisi
+  ctx.strokeStyle='rgba(100,0,180,0.5)';ctx.lineWidth=1;ctx.strokeRect(0.5,0.5,15,15);
+  const tex=new THREE.CanvasTexture(c);tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
+  return new THREE.MeshStandardMaterial({map:tex,roughness:0.05,metalness:0.1,emissive:new THREE.Color(0x0a0015),emissiveIntensity:0.3});
+})();
 // Su önizleme dokuları (envanter/hotbar için)
 rawTexC['water_top']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(120,210,255,0.35)';for(let i=0;i<4;i++){ctx.fillRect(i%2===0?0:8,i*4,8,2);}return c;})();
 rawTexC['water_side']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#155a8a';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(80,170,230,0.3)';for(let i=0;i<4;i++){ctx.fillRect(0,i*4,16,2);}return c;})();
@@ -1014,12 +1071,12 @@ function updateWater(dt){
 // ─── InstancedMesh Sistemi ───
 const BLOCK_GEO=new THREE.BoxGeometry(1,1,1);
 const DUMMY_OBJ=new THREE.Object3D();
-const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null};
+const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null,brick:null,bedrock:null,portal:null};
 let iMeshes={};
 let instancesDirty=false;
-const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map()};
-function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;}
-function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';return 'planks';}
+const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map(),brick:new Map(),bedrock:new Map(),portal:new Map()};
+function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;IMAT_KEYS.brick=texBrick;IMAT_KEYS.bedrock=texBedrock;IMAT_KEYS.portal=texPortal;}
+function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';if(mat===texBrick) return 'brick';if(mat===texBedrock) return 'bedrock';if(mat===texPortal) return 'portal';return 'planks';}
 function rebuildInstancedMeshes(){
   for(const k in iMeshes) scene.remove(iMeshes[k]);
   iMeshes={};
@@ -1038,10 +1095,11 @@ function rebuildInstancedMeshes(){
       if(positions[i].y<minY) minY=positions[i].y;if(positions[i].y>maxY) maxY=positions[i].y;
       if(positions[i].z<minZ) minZ=positions[i].z;if(positions[i].z>maxZ) maxZ=positions[i].z;
     }
-    // Bounding sphere hesapla – frustum culling'in doğru çalışması için
-    const cx=(minX+maxX)/2,cy=(minY+maxY)/2,cz=(minZ+maxZ)/2;
-    const r=Math.sqrt(((maxX-minX)/2)**2+((maxY-minY)/2)**2+((maxZ-minZ)/2)**2)+1;
-    mesh.geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3(cx,cy,cz),r);
+    // Bounding sphere'i geometry'ye degil mesh'e ata (paylasilan geometry bozulmasın)
+    const bcx=(minX+maxX)/2,bcy=(minY+maxY)/2,bcz=(minZ+maxZ)/2;
+    const br=Math.sqrt(((maxX-minX)/2)**2+((maxY-minY)/2)**2+((maxZ-minZ)/2)**2)+2;
+    mesh.geometry = mesh.geometry.clone();
+    mesh.geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3(bcx,bcy,bcz),br);
     mesh.instanceMatrix.needsUpdate=true;
     scene.add(mesh);iMeshes[mk]=mesh;
   }
@@ -1394,6 +1452,16 @@ const WorldGen = (function(){
         blk.push({id:'dirt',pos:new THREE.Vector3(wx,y,wz),mat:texDirt});
       blk.push({id:'grass',pos:new THREE.Vector3(wx,surfY,wz),mat:matGrass});
     }
+    
+    // ANOMALI BLOKLAR - rastgele bedrock ve brick
+    const anomalyRoll = rng();
+    if(anomalyRoll < 0.0008){  // 0.08% - brick anomali
+      blk.push({id:'brick',pos:new THREE.Vector3(wx,surfY+1,wz),mat:texBrick});
+    }
+    if(anomalyRoll < 0.0003){  // 0.03% - bedrock anomali
+      blk.push({id:'bedrock',pos:new THREE.Vector3(wx,surfY+2,wz),mat:texBedrock,unbreakable:true});
+    }
+
     return {biome, surfY};
   }
 
@@ -1438,6 +1506,46 @@ const WorldGen = (function(){
         placeTree(wx,wz,surfY,blk);
       }
     }}
+    // PORTAL BLOĞU – chunk başına max 1 tane
+    // Sadece en yakın 1 chunk (cx,cz 0,0) hariç her yerde çıkabilir
+    const isVeryNearSpawn = (cx === 0 && cz === 0);
+    if(!isVeryNearSpawn && rng() < 0.45){  // %45 ihtimal — her 2-3 chunk'ta bir
+      const px2 = 1 + Math.floor(rng() * (CS-2));
+      const pz2 = 1 + Math.floor(rng() * (CS-2));
+      const pcol = colInfo[px2]?.[pz2];
+      if(pcol && pcol.biome !== 'ocean' && pcol.biome !== 'river'){
+        blk.push({id:'portal',pos:new THREE.Vector3(sx+px2, pcol.surfY+1, sz+pz2),mat:texPortal,unbreakable:true,isPortal:true});
+      }
+    }
+    // Bedrock hac yapilari - chunk basina deterministik tohum ile
+    // Spawn bolgesindeki chunk'lari (cx=0,cz=0 civrindaki 3x3) hac'tan muaf tut
+    const isSpawnChunk = (cx >= -1 && cx <= 1 && cz >= -1 && cz <= 1);
+    const crossSeed = (Math.abs(cx * 73856093) ^ Math.abs(cz * 19349663)) % 1000;
+    if(!isSpawnChunk && crossSeed < 80){  // %8 ihtimal - her 12-13 chunk'tan birinde
+      const hcx = sx + Math.floor(CS/2);
+      const hcz = sz + Math.floor(CS/2);
+      const midCol = colInfo[Math.floor(CS/2)]?.[Math.floor(CS/2)];
+      if(midCol){
+        const hSurf = midCol.surfY;
+        const armLen = 4 + (crossSeed % 3); // 4-6 blok kol
+        const pillarH = 3 + (crossSeed % 3); // 3-5 blok yukseklik
+
+        // Yatay kol - X ekseni
+        for(let i=-armLen;i<=armLen;i++){
+          blk.push({id:'bedrock',pos:new THREE.Vector3(hcx+i,hSurf+1,hcz),mat:texBedrock,unbreakable:true});
+        }
+        // Yatay kol - Z ekseni
+        for(let i=-armLen;i<=armLen;i++){
+          if(i===0) continue; // merkez zaten X'te var
+          blk.push({id:'bedrock',pos:new THREE.Vector3(hcx,hSurf+1,hcz+i),mat:texBedrock,unbreakable:true});
+        }
+        // Dikey sutun - merkez
+        for(let h=0;h<=pillarH;h++){
+          if(h===1) continue; // yatay kolla cakisma
+          blk.push({id:'bedrock',pos:new THREE.Vector3(hcx,hSurf+h,hcz),mat:texBedrock,unbreakable:true});
+        }
+      }
+    }
     return blk;
   }
 
@@ -2086,8 +2194,10 @@ function addChat(name,msg,sys=false,cls=''){
     const safeMsg=msg?String(msg).substring(0,200):'';
     d.textContent=`<${safeName}>: ${safeMsg}`;
   }
-  log.appendChild(d);while(log.children.length>40) log.removeChild(log.firstChild);
-  log.scrollTop=log.scrollHeight;
+  log.appendChild(d);
+  while(log.children.length>40) log.removeChild(log.firstChild);
+  // Scroll en alta — requestAnimationFrame ile DOM güncellendikten sonra
+  requestAnimationFrame(()=>{ log.scrollTop = log.scrollHeight; });
   showChatLog();
 }
  
@@ -2139,6 +2249,7 @@ function processCmd(raw){
   const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
   const d=langData[currentLang];
   if(cmd==='mode'||cmd==='gamemode'){
+    if(inPrisonRoom){addChat(null,'[Server]: Bu komut şu anda kullanılamaz.',true,'warn');return;}
     if(!cheatsEnabled&&!myOp){addChat(null,d.srvNoCheat,true,'warn');return;}
     if(isMP&&!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
     const arg=(parts[1]||'').toLowerCase();
@@ -2190,6 +2301,7 @@ function processCmd(raw){
     return;
   }
   if(cmd==='kill'){
+    if(inPrisonRoom){addChat(null,'[Server]: Bu komut şu anda kullanılamaz.',true,'warn');return;}
     const arg=(parts[1]||'').trim();
     if(!isMP){
       if(arg===''||arg==='@p'||arg===myName){
@@ -2617,7 +2729,299 @@ function tickBreaking(dt){
   }
 }
  
-// ─── Oyunu Başlat ───
+// ─── HAPISHANE ODASI SİSTEMİ ─────────────────────────────────────────────────
+let inPrisonRoom = false;
+const PRISON_COOLDOWN_MIN = 300;
+const PRISON_COOLDOWN_MAX = 600;
+let nextPrisonTime = PRISON_COOLDOWN_MIN + Math.random() * (PRISON_COOLDOWN_MAX - PRISON_COOLDOWN_MIN);
+let prisonTimer = 0;
+
+const PRISON_Y = 50;
+const PRISON_CX = 2000;
+const PRISON_CZ = 2000;
+
+// ─── Portal Partikülleri ───────────────────────────────────────────
+let _portalParticleEl = null;
+let _portalParticleTimer = 0;
+let _portalScreenX = -999, _portalScreenY = -999;
+const _portalColors = ['#aa44ff','#7700ee','#cc88ff','#4400cc','#ff88ff','#220066'];
+
+function _initPortalParticles(){
+  if(_portalParticleEl) return;
+  _portalParticleEl = document.getElementById('portal-particles');
+  if(!_portalParticleEl) return;
+  _portalParticleEl.innerHTML='';
+  for(let i=0;i<18;i++){
+    const p=document.createElement('div');
+    p.className='portal-particle';
+    const sz=4+Math.random()*6;
+    const col=_portalColors[Math.floor(Math.random()*_portalColors.length)];
+    p.style.cssText=`width:${sz}px;height:${sz}px;background:${col};box-shadow:0 0 ${sz*2}px ${col};left:${Math.random()*100}%;top:${Math.random()*100}%;animation-duration:${0.8+Math.random()*1.2}s;animation-delay:${Math.random()*1.5}s;`;
+    _portalParticleEl.appendChild(p);
+  }
+}
+
+function _showPortalParticles(sx, sy){
+  if(!_portalParticleEl){ _initPortalParticles(); }
+  if(!_portalParticleEl) return;
+  _portalParticleEl.style.display='block';
+  // Ekranda portal bloğunun etrafına yoğunlaştır
+  const px=Math.round(sx*100/window.innerWidth);
+  const py=Math.round(sy*100/window.innerHeight);
+  Array.from(_portalParticleEl.children).forEach((p,i)=>{
+    const spread=20;
+    const ox=(Math.random()-0.5)*spread*2;
+    const oy=(Math.random()-0.5)*spread*2;
+    p.style.left=`${Math.max(0,Math.min(95,px+ox))}%`;
+    p.style.top=`${Math.max(5,Math.min(90,py+oy))}%`;
+  });
+}
+
+function _hidePortalParticles(){
+  if(_portalParticleEl) _portalParticleEl.style.display='none';
+}
+
+function _doPortalFlash(cb){
+  const el=document.getElementById('portal-tp-flash');
+  if(!el){if(cb)cb();return;}
+  el.style.display='block';el.style.transition='none';el.style.opacity='1';
+  setTimeout(()=>{
+    el.style.transition='opacity 0.6s ease';el.style.opacity='0';
+    setTimeout(()=>{el.style.display='none';if(cb)cb();},650);
+  },180);
+}
+
+// ─── Portal Bloğu Dokunma Kontrolü ───────────────────────────────
+let _portalCooldown = 0;   // > 0: bekleme (tekrar tetiklenmeyi önle)
+let _portalContactTime = 0; // portal üzerinde geçirilen süre
+let _nearPortal = false;
+
+function checkPortalTouch(dt){
+  // Bekleme süresi varsa sayaç azalt ve çık
+  if(_portalCooldown > 0){ _portalCooldown -= dt; _nearPortal = false; _hidePortalParticles(); return; }
+  if(inPrisonRoom) return;
+
+  const px = camera.position.x, py = camera.position.y, pz = camera.position.z;
+  let found = null;
+  let bestDist = 1.5;
+  for(let bx = Math.floor(px)-1; bx <= Math.floor(px)+1; bx++){
+    for(let by = Math.floor(py-1.6); by <= Math.floor(py)+1; by++){
+      for(let bz = Math.floor(pz)-1; bz <= Math.floor(pz)+1; bz++){
+        const bd = blockMap[pk(bx,by,bz)];
+        if(bd && bd.isPortal){
+          const dx=px-bx, dy=(py-0.8)-by, dz=pz-bz;
+          const dist = Math.sqrt(dx*dx + dy*dy*0.5 + dz*dz);
+          if(dist < bestDist){ bestDist = dist; found = {bx,by,bz,bd}; }
+        }
+      }
+    }
+  }
+
+  if(found){
+    if(!_nearPortal){
+      _nearPortal = true;
+      _portalContactTime = 0;
+      const worldPos = new THREE.Vector3(found.bx, found.by, found.bz);
+      const screenPos = worldPos.clone().project(camera);
+      const sx = (screenPos.x+1)/2*window.innerWidth;
+      const sy = (-screenPos.y+1)/2*window.innerHeight;
+      _showPortalParticles(sx, sy);
+      addChat(null, '...', true, 'warn');
+    }
+    _portalContactTime += dt;
+    // 0.6 saniye temas süresinden sonra ışınla
+    if(_portalContactTime >= 0.6){
+      _nearPortal = false;
+      _portalContactTime = 0;
+      _portalCooldown = 10; // 10 saniye tekrar tetiklenmesin
+      _hidePortalParticles();
+      _doPortalFlash(() => teleportToPrison());
+    }
+  } else {
+    if(_nearPortal){ _nearPortal = false; _portalContactTime = 0; _hidePortalParticles(); }
+  }
+}
+
+// ── Tünel Sabitleri ──────────────────────────────────────────────────────────
+// Kare döngü: 4 koridor, her biri LOOP_SIZE blok. Köşelerden birbirine bağlı.
+// Ana X koridoru: Z=PRISON_CZ, X: CX-HALF → CX+HALF
+// Arka X koridoru: Z=PRISON_CZ+LOOP_Z, X: CX-HALF → CX+HALF
+// Sol Z koridoru: X=PRISON_CX-HALF, Z: CZ → CZ+LOOP_Z
+// Sağ Z koridoru: X=PRISON_CX+HALF, Z: CZ → CZ+LOOP_Z
+const LOOP_HALF = 40;   // kare yarı kenar uzunluğu (blok)
+const LOOP_Z    = 80;   // kare Z derinliği
+
+// Boşluklar: her koridorda eşit aralıklı
+const GAP_INTERVAL = 18;
+const GAP_WIDTH    = 2;
+
+function isPrisonGap(i) {
+  const mod = ((i % GAP_INTERVAL) + GAP_INTERVAL) % GAP_INTERVAL;
+  return mod < GAP_WIDTH;
+}
+
+function buildTunnelSegment(axis, fixedCoord, start, end) {
+  for (let i = start; i <= end; i++) {
+    const wx = axis === 'x' ? PRISON_CX + i : PRISON_CX + fixedCoord;
+    const wz = axis === 'x' ? PRISON_CZ + fixedCoord : PRISON_CZ + i;
+    const isGap = isPrisonGap(i);
+    if (!isGap) {
+      const k = pk(wx, PRISON_Y, wz);
+      if (!blockMap[k]) blockMap[k] = {id:'brick',pos:new THREE.Vector3(wx,PRISON_Y,wz),mat:texBrick,unbreakable:true,visible:false};
+    }
+    for (let h = 0; h < 4; h++) {
+      const y = PRISON_Y + h;
+      if (axis === 'x') {
+        for (const dz of [-1, 1]) {
+          const k = pk(wx, y, wz+dz);
+          if (!blockMap[k]) blockMap[k] = {id:'brick',pos:new THREE.Vector3(wx,y,wz+dz),mat:texBrick,unbreakable:true,visible:false};
+        }
+      } else {
+        for (const dx of [-1, 1]) {
+          const k = pk(wx+dx, y, wz);
+          if (!blockMap[k]) blockMap[k] = {id:'brick',pos:new THREE.Vector3(wx+dx,y,wz),mat:texBrick,unbreakable:true,visible:false};
+        }
+      }
+    }
+    const kCeil = pk(wx, PRISON_Y+4, wz);
+    if (!blockMap[kCeil]) blockMap[kCeil] = {id:'brick',pos:new THREE.Vector3(wx,PRISON_Y+4,wz),mat:texBrick,unbreakable:true,visible:false};
+  }
+}
+
+// Tünel köşesini aç (iki koridorun kesişim noktasında duvarları kaldır)
+function openCorner(cx, cz) {
+  for (let h = 0; h < 4; h++) {
+    for (const dx of [-1,0,1]) for (const dz of [-1,0,1]) {
+      const k = pk(PRISON_CX+cx+dx, PRISON_Y+h, PRISON_CZ+cz+dz);
+      if (blockMap[k]) delete blockMap[k];
+    }
+  }
+}
+
+function forceShowBlock(bd) {
+  if (!bd || isAnyWater(bd)) return;
+  const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+  const k=pk(bx,by,bz), mk=getMatKey(bd.mat);
+  if (!visiblePositions[mk]) return;
+  visiblePositions[mk].set(k,bd.pos); bd.visible=true; instancesDirty=true;
+}
+
+function showPrisonBlocks(axis, fixedCoord, start, end) {
+  for (let i = start; i <= end; i++) {
+    const wx = axis==='x' ? PRISON_CX+i : PRISON_CX+fixedCoord;
+    const wz = axis==='x' ? PRISON_CZ+fixedCoord : PRISON_CZ+i;
+    const ks = [];
+    if (axis==='x') {
+      ks.push(pk(wx,PRISON_Y,wz), pk(wx,PRISON_Y+4,wz));
+      for (let h=0;h<4;h++) { ks.push(pk(wx,PRISON_Y+h,wz-1)); ks.push(pk(wx,PRISON_Y+h,wz+1)); }
+    } else {
+      ks.push(pk(wx,PRISON_Y,wz), pk(wx,PRISON_Y+4,wz));
+      for (let h=0;h<4;h++) { ks.push(pk(wx-1,PRISON_Y+h,wz)); ks.push(pk(wx+1,PRISON_Y+h,wz)); }
+    }
+    for (const k of ks) { const bd=blockMap[k]; if(bd) forceShowBlock(bd); }
+  }
+}
+
+const TUNNEL_LEN = LOOP_HALF; // takma ad
+
+function buildPrisonRoom() {
+  // Ön koridor (Z=0):      X: -LOOP_HALF → +LOOP_HALF
+  buildTunnelSegment('x', 0,       -LOOP_HALF, LOOP_HALF);
+  // Arka koridor (Z=LOOP_Z): X: -LOOP_HALF → +LOOP_HALF
+  buildTunnelSegment('x', LOOP_Z,  -LOOP_HALF, LOOP_HALF);
+  // Sol koridor (X=-LOOP_HALF): Z: 0 → LOOP_Z
+  buildTunnelSegment('z', -LOOP_HALF, 0, LOOP_Z);
+  // Sağ koridor (X=+LOOP_HALF): Z: 0 → LOOP_Z
+  buildTunnelSegment('z',  LOOP_HALF, 0, LOOP_Z);
+
+  // 4 köşeyi aç
+  openCorner(-LOOP_HALF, 0);
+  openCorner( LOOP_HALF, 0);
+  openCorner(-LOOP_HALF, LOOP_Z);
+  openCorner( LOOP_HALF, LOOP_Z);
+
+  instancesDirty = true;
+}
+
+// Oyuncu tünel dışına çıkarsa (döngüyü aşarsa) karşı tarafa ışınla
+function checkPrisonLoop() {
+  if (!inPrisonRoom) return;
+  const px=camera.position.x, pz=camera.position.z;
+  const relX = px - PRISON_CX, relZ = pz - PRISON_CZ;
+  // X ekseni döngüsü
+  if (relX < -LOOP_HALF - 2) camera.position.x = PRISON_CX + LOOP_HALF - 2;
+  else if (relX > LOOP_HALF + 2) camera.position.x = PRISON_CX - LOOP_HALF + 2;
+  // Z ekseni döngüsü
+  if (relZ < -2) camera.position.z = PRISON_CZ + LOOP_Z - 2;
+  else if (relZ > LOOP_Z + 2) camera.position.z = PRISON_CZ + 2;
+}
+
+
+function setPrisonVignette(on) {
+  const el = document.getElementById('prison-vignette');
+  if (!el) return;
+  if (on) {
+    el.style.opacity = '1';
+    el.classList.add('active');
+    // Atmosferi siyaha al, körlük sisi
+    scene.background = new THREE.Color(0x000000);
+    scene.fog = new THREE.FogExp2(0x000000, 0.12); // uzağı görmez ama yakını görür
+  } else {
+    el.style.opacity = '0';
+    el.classList.remove('active');
+    // Normal atmosfere dön
+    scene.background = new THREE.Color(0x75a7ff);
+    scene.fog = new THREE.FogExp2(0x75a7ff, 0.045);
+  }
+}
+
+function teleportToPrison() {
+  if (inPrisonRoom) return;
+  buildPrisonRoom();
+  // Tüm 4 koridoru görünür yap
+  showPrisonBlocks('x', 0,       -LOOP_HALF, LOOP_HALF);
+  showPrisonBlocks('x', LOOP_Z,  -LOOP_HALF, LOOP_HALF);
+  showPrisonBlocks('z', -LOOP_HALF, 0, LOOP_Z);
+  showPrisonBlocks('z',  LOOP_HALF, 0, LOOP_Z);
+  rebuildInstancedMeshes();
+  instancesDirty = false;
+  // Ön koridorun ortasına spawn et (boşluktan uzakta)
+  camera.position.set(PRISON_CX + 10, PRISON_Y + 1.8, PRISON_CZ);
+  velY = 0;
+  inPrisonRoom = true;
+  if (gameMode !== 'survival') setGameMode('survival');
+  setPrisonVignette(true);
+  addChat(null, '...', true, 'warn');
+}
+
+function checkPrisonEscape() {
+  if (!inPrisonRoom) return;
+  const py = camera.position.y;
+  // Yeterince düştükten sonra çık (boşluktan uzun süre düşmesi lazım)
+  if (py < PRISON_Y - 25) {
+    inPrisonRoom = false;
+    setPrisonVignette(false);
+    const bx = 8, bz = 8;
+    const bio = WorldGen.getBiome(bx, bz);
+    const sy = WorldGen.getSurfaceY(bx, bz, bio) + 2.6;
+    camera.position.set(bx, sy, bz);
+    velY = 0;
+    nextPrisonTime = PRISON_COOLDOWN_MIN + Math.random() * (PRISON_COOLDOWN_MAX - PRISON_COOLDOWN_MIN);
+    prisonTimer = 0;
+    addChat(null, 'Geri döndün.', true, 'sys');
+  }
+}
+
+function updatePrisonSystem(dt) {
+  if (!deviceMode) return;
+  checkPortalTouch(dt);
+  if (inPrisonRoom) {
+    if (gameMode !== 'survival') setGameMode('survival');
+    checkPrisonLoop();   // sonsuz döngü: dışa çıkarsa karşı tarafa ışınla
+    checkPrisonEscape();
+  }
+}
+
 function resetWorld(){
   for(const k in iMeshes) scene.remove(iMeshes[k]);
   iMeshes={};
@@ -2634,6 +3038,8 @@ function resetWorld(){
   clearAnimals();foods.forEach(f=>scene.remove(f.mesh));foods.length=0;
   animalSpawnTimer=15;animalSyncTimer=0;
   isResetting=false;
+  inPrisonRoom=false; prisonTimer=0; setPrisonVignette(false);
+  nextPrisonTime=PRISON_COOLDOWN_MIN+Math.random()*(PRISON_COOLDOWN_MAX-PRISON_COOLDOWN_MIN);
   const log=document.getElementById('chat-log');while(log.firstChild) log.removeChild(log.firstChild);
 }
 function startGame(device,world,mp=false,gm='survival',cheats=true){
@@ -2703,11 +3109,26 @@ if (device === 'pc') {
     const spS=getSpawnY(8,8); // FIX: spS artık doğru tanımlanıyor
     camera.position.set(spS.x,spS.y,spS.z);
   } else {
-    // Once spawn chunk'i uret, sonra gercek Y'yi hesapla
     genChunk(0,0);
     const spI=getSpawnY(8,8);
     camera.position.set(spI.x,spI.y,spI.z);
+    lastCX=camera.position.x;
+    lastCZ=camera.position.z;
     updateChunks();
+    setTimeout(()=>{ if(worldType==='infinite') updateChunks(); }, 100);
+    setTimeout(()=>{ if(worldType==='infinite') updateChunks(); }, 600);
+    // Spawn'a yakın garanti portal: (1,1) chunk'ına yerleştir
+    setTimeout(()=>{
+      genChunk(1,0); genChunk(0,1); genChunk(1,1); genChunk(-1,0); genChunk(0,-1);
+      // (1,0) chunk'ında garanti portal
+      const bio=WorldGen.getBiome(20,8);
+      const sy=WorldGen.getSurfaceY(20,8,bio);
+      const pk2=pk(20,sy+1,8);
+      if(!blockMap[pk2]){
+        const bd={id:'portal',pos:new THREE.Vector3(20,sy+1,8),mat:texPortal,unbreakable:true,isPortal:true};
+        blockMap[pk2]=bd; showBlock(bd); instancesDirty=true;
+      }
+    }, 300);
   }
 }
 function selSlot(i){slot=i;document.querySelectorAll('.hotbar-slot').forEach((s,j)=>s.classList.toggle('active',j===i));}
@@ -2891,7 +3312,8 @@ function doLeftClick(x,y,isc){
 // oyuncu içlerinden geçebilir, üstlerinde yürüyemez ve içlerinde "katı blok" gibi takılmaz.
 function isSolidBlock(bd){
   if(!bd) return false;
-  if(isAnyWater(bd)||bd.isLiquid) return false; // su -> solid DEĞİL, trigger/liquid
+  if(isAnyWater(bd)||bd.isLiquid) return false; // su -> solid DEĞİL
+  if(bd.isPortal) return false; // portal -> solid DEĞİL, geçilebilir trigger
   return true;
 }
 function col(px,py,pz){
@@ -3168,6 +3590,7 @@ function animate(){
   if(!isPaused&&!isChatOpen&&!DeathManager.isDead){
     updateAnimals(dt);updateFoods(dt);updateHealthSystem(dt);
     updateWater(dt);
+    updatePrisonSystem(dt);
     SuffocationManager.checkSuffocation();
     if(isBreaking&&deviceMode==='pc') tickBreaking(dt);
     const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
@@ -3186,7 +3609,7 @@ function animate(){
         const nx=camera.position.x+mV.x;if(!col(nx,camera.position.y,camera.position.z)) camera.position.x=nx;
         const nz=camera.position.z+mV.z;if(!col(camera.position.x,camera.position.y,nz)) camera.position.z=nz;
       }
-      if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>8||Math.abs(camera.position.z-lastCZ)>8)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
+      if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>4||Math.abs(camera.position.z-lastCZ)>4)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
     } else {
       const swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
       const moveSpd=swimming?spd*WATER_MOVE_MULT:spd; // su içinde sürtünme nedeniyle daha yavaş hareket
@@ -3224,7 +3647,7 @@ function animate(){
           }
           if(isCrouching&&grounded&&!swimming){const bBelow=blockMap[pk(Math.floor(camera.position.x),Math.floor(camera.position.y-1.72),Math.floor(camera.position.z))];if(!bBelow) camera.position.z=oldZ;}
         }
-        if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>8||Math.abs(camera.position.z-lastCZ)>8)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
+        if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>4||Math.abs(camera.position.z-lastCZ)>4)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
       }
       if(swimming){
         // Suda yüzme: su direnci + azaltılmış yerçekimi
@@ -3333,12 +3756,52 @@ animate();
 
 /* "Bozulmuş" sistem mesajları için chat-log ile aynı stil ailesinde ek sınıf */
 .chat-msg.hx-corrupt{color:#ff3b3b;text-shadow:0 0 6px rgba(255,30,30,.8),1px 1px #000;font-weight:bold;letter-spacing:0.5px;}
-.chat-msg.hx-watch{color:#9b6bff;text-shadow:0 0 6px rgba(140,80,255,.7),1px 1px #000;}
+/* hx-watch (mor sistem yazıları) kasıtlı olarak kaldırıldı — artık kullanılmıyor */
 
 /* Hafif ekran statiği (ambient unease) — çok düşük opaklık, sürekli değil */
 #hx-static-pulse{position:fixed;top:0;left:0;width:100%;height:100%;z-index:99980;pointer-events:none;display:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.03) 0px,transparent 1px,transparent 2px);opacity:0;}
 #hx-static-pulse.hx-show{display:block;animation:hxStaticPulse 0.4s ease-in-out;}
 @keyframes hxStaticPulse{0%{opacity:0;}40%{opacity:.5;}100%{opacity:0;}}
+
+/* Gizemli kullanıcı mesajları (<?>:) — tamamen beyaz, monospace, renklendirme yok */
+.chat-msg.hx-stranger{
+  color:#ffffff;
+  font-family:'Courier New', Courier, monospace;
+  text-shadow:1px 1px 2px rgba(0,0,0,.7);
+  font-weight:normal;
+  letter-spacing:0.3px;
+}
+
+/* Renk ters çevirme (invert) efekti için yumuşak geçiş */
+body.hx-inverted{
+  filter: invert(1);
+  transition: filter 0.25s ease-in-out;
+}
+
+/* Çok oyunculu engelleme hata mesajı — kırmızı, glitch/titrek font */
+#hx-mp-error{
+  display:none;
+  color:#ff2a2a;
+  font-family:'Courier New', Courier, monospace;
+  font-weight:bold;
+  font-size:13px;
+  text-align:center;
+  margin:6px 0 10px 0;
+  padding:8px 10px;
+  border:1px solid rgba(255,40,40,.5);
+  background:rgba(40,0,0,.35);
+  text-shadow:0 0 6px rgba(255,0,0,.9),1px 1px #000;
+  letter-spacing:0.5px;
+}
+#hx-mp-error.hx-show{display:block;animation:hxMpGlitch 0.18s steps(2,end) 4;}
+@keyframes hxMpGlitch{
+  0%{transform:translate(0,0);opacity:1;filter:none;}
+  20%{transform:translate(-2px,1px);opacity:.7;filter:invert(0.15) hue-rotate(20deg);}
+  40%{transform:translate(2px,-1px);opacity:1;filter:none;}
+  60%{transform:translate(-1px,-1px);opacity:.8;filter:invert(0.1);}
+  80%{transform:translate(1px,1px);opacity:1;filter:none;}
+  100%{transform:translate(0,0);opacity:1;filter:none;}
+}
 </style>
 
 <div id="hx-glitch-overlay"></div>
@@ -3416,6 +3879,19 @@ const CONFIG = {
   fakeSystemMsgMinSec: 20,
   fakeSystemMsgMaxSec: 75,
 
+  invertMinSec: 40,
+  invertMaxSec: 150,
+
+  // Void Shadow (gizemli siyah karakter)
+  voidShadowMinSec: 60,     // spawn aralığı min
+  voidShadowMaxSec: 180,    // spawn aralığı max
+  voidShadowSpawnDistMin: 15,
+  voidShadowSpawnDistMax: 20,
+  voidShadowVanishTriggerDist: 4,   // bu mesafeye girince "yok olma" ihtimali değerlendirilir
+  voidShadowChaseSpeed: 9,          // oyuncuya doğru koşma hızı (birim/sn)
+  voidShadowCatchDist: 1.1,         // bu mesafede oyuncuya "değmiş" sayılır
+  voidShadowLifetimeMaxSec: 25,     // hiçbir şey olmazsa bu süre sonunda kendiliğinden kaybolur
+
   useRealIP: true,
   enableConsoleNoise: true,
   enableEarlyTrigger: true,
@@ -3436,27 +3912,36 @@ function hxDetectLang(){
 
 const HX_STRINGS = {
   tr: {
-    sysErrors: [
-      '[SYSTEM ERROR] 0x0FA2 — bellek bütünlüğü doğrulanamadı',
-      '[SYSTEM ERROR] render thread yanıt vermiyor...',
-      '[SYSTEM ERROR] çekirdek modülü beklenmedik şekilde sonlandı',
-      '[SYSTEM ERROR] dosya bütünlüğü uyuşmazlığı: world.dat',
-      '[SYSTEM ERROR] ses sürücüsü zaman aşımına uğradı',
-    ],
+    sysErrors: [],
     watching: [
       '[WATCHING]',
-      '[WATCHING] ...seni görüyorum.',
-      '[WATCHING] hareket etme.',
-      '[WATCHING] arkana bakma.',
-      '[WATCHING] hala oradasın, değil mi?',
+      '[WATCHING] ...I can see you.',
+      '[WATCHING] don\'t move.',
+      '[WATCHING] don\'t look behind you.',
+      '[WATCHING] you\'re still there, aren\'t you?',
     ],
-    ipPrefix: '[PLAYER_IP: ',
+    ipPrefix: '<?>: hmm... ',
     miscGlitch: [
       '[????????????]',
       '01001000 01001001',
       '[CONNECTION UNSTABLE]',
       '[YOU ARE NOT ALONE]',
       '[do not close this window]',
+    ],
+    stranger: [
+      'I can see you.',
+      'You can\'t escape from here.',
+      'don\'t look behind you.',
+      'you\'re still there, aren\'t you?',
+      'the game is not over.',
+      'can you hear me?',
+    ],
+    strangerIPPrefix: 'hmm... ',
+    multiplayerError: '[ERROR 0x80040102]: Connection to the Void failed. Multiplayer mode is corrupted.',
+    voidShadowVanish: [
+      'it... is gone.',
+      'it stopped watching you... for now.',
+      'it returned to the darkness.',
     ],
   },
   en: {
@@ -3474,7 +3959,7 @@ const HX_STRINGS = {
       '[WATCHING] don\'t look behind you.',
       '[WATCHING] you\'re still there, aren\'t you?',
     ],
-    ipPrefix: '[PLAYER_IP: ',
+    ipPrefix: '<?>: hmm... ',
     miscGlitch: [
       '[????????????]',
       '01001000 01001001',
@@ -3482,10 +3967,161 @@ const HX_STRINGS = {
       '[YOU ARE NOT ALONE]',
       '[do not close this window]',
     ],
+    stranger: [
+      'I can see you.',
+      'You can\'t escape from here.',
+      'don\'t look behind you.',
+      'you\'re still there, aren\'t you?',
+      'the game isn\'t over.',
+      'can you hear me?',
+    ],
+    strangerIPPrefix: 'hmm... ',
+    multiplayerError: '[ERROR 0x80040102]: Connection to the Void failed. Multiplayer mode is corrupted.',
+    voidShadowVanish: [
+      'it... is gone.',
+      'it stopped watching you... for now.',
+      'it returned to the darkness.',
+    ],
   }
 };
 
 function hxL(){ return HX_STRINGS[hxDetectLang()] || HX_STRINGS.tr; }
+
+/* ────────────────────────────────────────────────────────────────
+   SEZAR ŞİFRELEME FONKSİYONU
+   ──────────────────────────────────────────────────────────────── */
+function hxCaesarCipher(text, shift = 3) {
+  return text.split('').map(char => {
+    if (/[a-z]/i.test(char)) {
+      const code = char.charCodeAt(0);
+      const isUpper = code <= 90;
+      const base = isUpper ? 65 : 97;
+      return String.fromCharCode((code - base + shift) % 26 + base);
+    }
+    return char;
+  }).join('');
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SEZAR ŞİFRELEMESİ İLE GİZEMLİ MESAJLAR
+   ──────────────────────────────────────────────────────────────── */
+const HX_ENCRYPTED_MESSAGES = [
+  { original: 'do you see me?', shift: 3 },
+  { original: 'who are you?', shift: 4 },
+  { original: 'can you hear this?', shift: 5 },
+  { original: 'i am watching', shift: 3 },
+  { original: 'turn around now', shift: 4 },
+  { original: 'you should leave', shift: 3 },
+  { original: 'this is not a game', shift: 5 },
+  { original: 'help me', shift: 3 },
+  { original: 'why do you stay?', shift: 4 },
+  { original: 'tick tock', shift: 3 },
+];
+
+function hxGenerateEncryptedMessage() {
+  const msg = HX_ENCRYPTED_MESSAGES[Math.floor(Math.random() * HX_ENCRYPTED_MESSAGES.length)];
+  const encrypted = hxCaesarCipher(msg.original, msg.shift);
+  return `<?>: ${encrypted}`;
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SEZAR ŞİFRELEMESİ MESAJ ÇIẞIŞI FONKSİYONU
+   ──────────────────────────────────────────────────────────────── */
+function hxScheduleEncryptedMessages() {
+  setTimeout(() => {
+    const encrypted = hxGenerateEncryptedMessage();
+    hxPushStrangerMessage(encrypted);
+    hxScheduleEncryptedMessages();
+  }, hxRandRange(25000, 90000)); // 25 - 90 saniye arası
+}
+
+/* ────────────────────────────────────────────────────────────────
+   SESİN KESILMESİ - SİLENT MOMENTS
+   ──────────────────────────────────────────────────────────────── */
+let hxSilentMomentActive = false;
+
+function hxTriggerSilentMoment() {
+  if (hxSilentMomentActive || !HxAudio._ambientGain || !HxAudio.ctx) return;
+  
+  hxSilentMomentActive = true;
+  
+  const originalVolume = HxAudio._ambientGain.gain.value;
+  HxAudio._ambientGain.gain.setValueAtTime(originalVolume, HxAudio.ctx.currentTime);
+  HxAudio._ambientGain.gain.linearRampToValueAtTime(0, HxAudio.ctx.currentTime + 0.3);
+  
+  // 1 dakika sessiz, sonra geri aç
+  setTimeout(() => {
+    if (HxAudio._ambientGain && HxAudio.ctx) {
+      HxAudio._ambientGain.gain.setValueAtTime(0, HxAudio.ctx.currentTime);
+      HxAudio._ambientGain.gain.linearRampToValueAtTime(originalVolume, HxAudio.ctx.currentTime + 0.5);
+    }
+    hxSilentMomentActive = false;
+  }, 60000);
+}
+
+function hxScheduleSilentMoments() {
+  setTimeout(() => {
+    hxTriggerSilentMoment();
+    hxScheduleSilentMoments();
+  }, hxRandRange(90000, 240000)); // 1.5 - 4 dakika arası
+}
+
+/* ────────────────────────────────────────────────────────────────
+   VOID SHADOW SPAWN RATE ARTIŞI
+   ──────────────────────────────────────────────────────────────── */
+function hxEnhancedVoidShadowSchedule() {
+  // Spawn aralığını belirgin şekilde azalt (40-50% daha sık)
+  const minSec = CONFIG.voidShadowMinSec * 0.4;  
+  const maxSec = CONFIG.voidShadowMaxSec * 0.5;  
+  
+  setTimeout(() => {
+    if (typeof VoidShadow !== 'undefined') {
+      VoidShadow.spawn();
+    }
+    hxEnhancedVoidShadowSchedule();
+  }, hxRandRange(minSec, maxSec));
+}
+
+/* ────────────────────────────────────────────────────────────────
+   ANOMALI BLOKLAR (BRICK VE BEDROCK)
+   ──────────────────────────────────────────────────────────────── */
+const ANOMALY_BLOCKS = {
+  anomalyBrickRate: 0.0008,   // Brick anomali olasılığı
+  anomalyBedrockRate: 0.0003, // Bedrock anomali olasılığı
+  bedrockCrossRate: 0.00008,  // Bedrock haç yapısı olasılığı
+};
+
+function hxCheckAnomalySpawn(x, y, z) {
+  const rand = Math.random();
+  
+  if (rand < ANOMALY_BLOCKS.anomalyBrickRate) {
+    return { type: 'brick', x, y, z };
+  }
+  if (rand < ANOMALY_BLOCKS.anomalyBrickRate + ANOMALY_BLOCKS.anomalyBedrockRate) {
+    return { type: 'bedrock', x, y, z };
+  }
+  if (rand < ANOMALY_BLOCKS.anomalyBrickRate + ANOMALY_BLOCKS.anomalyBedrockRate + ANOMALY_BLOCKS.bedrockCrossRate) {
+    return { type: 'bedrockCross', x, y, z };
+  }
+  
+  return null;
+}
+
+function hxPlaceBedrockCross(centerX, centerZ, height = 5) {
+  const pattern = [];
+  
+  // Dikey çizgi (X ekseni)
+  for (let i = -height; i <= height; i++) {
+    pattern.push({ x: centerX + i, z: centerZ, y: 0 });
+  }
+  
+  // Yatay çizgi (Z ekseni)
+  for (let i = -height; i <= height; i++) {
+    pattern.push({ x: centerX, z: centerZ + i, y: 0 });
+  }
+  
+  return pattern;
+}
 
 /* ────────────────────────────────────────────────────────────────
    AUDIO YÖNETİMİ — Web Audio API ile procedural ses üretimi
@@ -3673,6 +4309,94 @@ const HxAudio = {
       ag.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.15);
       ag.gain.linearRampToValueAtTime(CONFIG.ambientVolume * 0.6, ctx.currentTime + 3.5);
     }
+  },
+
+  /* ---- Void Shadow jumpscare: çarpık "gülme" + alarm tonu ---- */
+  playLaughAlarm(){
+    if(!this._ensureCtx()) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+    const gain = ctx.createGain();
+    gain.gain.setValueAtTime(CONFIG.jumpscareVolume, now);
+    gain.connect(ctx.destination);
+
+    // "Gülme" hissi: hızlı, dalgalanan, distorted bir ton dizisi (haha-haha gibi titreşen amplitude)
+    const laugh = ctx.createOscillator();
+    laugh.type = 'square';
+    laugh.frequency.setValueAtTime(180, now);
+    laugh.frequency.linearRampToValueAtTime(140, now + 2.2);
+    const laughGain = ctx.createGain();
+    laughGain.gain.setValueAtTime(0, now);
+    // amplitude modülasyonu ile "haha" titreşimi
+    for(let i=0;i<9;i++){
+      const t = now + i*0.22;
+      laughGain.gain.setValueAtTime(0.35, t);
+      laughGain.gain.linearRampToValueAtTime(0.02, t+0.12);
+    }
+    laugh.connect(laughGain);
+    laughGain.connect(gain);
+    laugh.start(now);
+    laugh.stop(now+2.4);
+
+    // Alarm tonu: iki frekans arası hızlı geçiş (klasik alarm "wee-woo")
+    const alarm = ctx.createOscillator();
+    alarm.type = 'sawtooth';
+    const alarmGain = ctx.createGain();
+    alarmGain.gain.value = 0.3;
+    alarm.connect(alarmGain);
+    alarmGain.connect(gain);
+    for(let i=0;i<6;i++){
+      const t = now + i*0.35;
+      alarm.frequency.setValueAtTime(700, t);
+      alarm.frequency.linearRampToValueAtTime(1100, t+0.17);
+      alarm.frequency.linearRampToValueAtTime(700, t+0.35);
+    }
+    alarm.start(now);
+    alarm.stop(now+2.4);
+
+    gain.gain.linearRampToValueAtTime(0, now + 2.6);
+
+    if(this._ambientGain){
+      const ag = this._ambientGain;
+      ag.gain.setValueAtTime(ag.gain.value, now);
+      ag.gain.linearRampToValueAtTime(0, now + 0.15);
+      ag.gain.linearRampToValueAtTime(CONFIG.ambientVolume * 0.6, now + 3.5);
+    }
+  },
+
+  /* ---- Void Shadow yok oluş sesi: yankılı/korkunç (echo benzeri delay) ---- */
+  playVanishEcho(){
+    if(!this._ensureCtx()) return;
+    const ctx = this.ctx;
+    const now = ctx.currentTime;
+
+    const dry = ctx.createGain(); dry.gain.value = 0.6;
+    dry.connect(ctx.destination);
+
+    // basit feedback delay = yankı hissi
+    const delay = ctx.createDelay(1.0);
+    delay.delayTime.value = 0.18;
+    const feedback = ctx.createGain();
+    feedback.gain.value = 0.55;
+    const wetGain = ctx.createGain();
+    wetGain.gain.value = 0.5;
+    delay.connect(feedback);
+    feedback.connect(delay);
+    delay.connect(wetGain);
+    wetGain.connect(ctx.destination);
+
+    const osc = ctx.createOscillator();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(500, now);
+    osc.frequency.exponentialRampToValueAtTime(60, now + 1.4);
+    const oGain = ctx.createGain();
+    oGain.gain.setValueAtTime(0.5, now);
+    oGain.gain.exponentialRampToValueAtTime(0.001, now + 1.5);
+    osc.connect(oGain);
+    oGain.connect(dry);
+    oGain.connect(delay);
+    osc.start(now);
+    osc.stop(now + 1.6);
   }
 };
 
@@ -3696,6 +4420,30 @@ function hxPushChatMessage(text, cls){
   }
 }
 
+/* Gizemli "<?>:" kullanıcısının mesajlarını beyaz/monospace olarak basar.
+   Chat kutusu kapalıysa bile zorla görünür yapar, böylece oyuncu mesajı
+   anında fark eder. */
+function hxPushStrangerMessage(text){
+  hxPushChatMessage('<?>: ' + text, 'hx-stranger');
+  try{
+    const container = document.getElementById('chat-container');
+    if(container && container.style.display==='none'){
+      container.style.display='flex';
+      const log = document.getElementById('chat-log');
+      if(log) log.style.display='flex';
+      // Oyuncu hiçbir şey yazmadıysa (chat-input açık değilse) birkaç
+      // saniye sonra otomatik olarak tekrar gizle — normal oyun akışını
+      // bozmadan sadece "anlık fark ettirme" amacı taşır.
+      clearTimeout(window._hxChatAutoHideTimer);
+      window._hxChatAutoHideTimer = setTimeout(()=>{
+        if(typeof isChatOpen!=='undefined' && !isChatOpen){
+          container.style.display='none';
+        }
+      }, 6000);
+    }
+  }catch(e){}
+}
+
 /* IP gösterimi: dış sunucudan SADECE kendi genel IP'sini çekip
    tekrar SADECE kendi ekranında gösterir. Hiçbir yere kayıt/iletim yapılmaz. */
 let _hxCachedIP = null;
@@ -3710,10 +4458,16 @@ async function hxGetDisplayIP(){
     return _hxCachedIP;
   }
   try{
-    const res = await fetch('https://api.ipify.org?format=json');
+    // internet yavaşlığı/CORS hatası durumunda sonsuza dek beklemesin —
+    // 2.5 sn içinde cevap gelmezse otomatik olarak sahte yerel IP'ye düşer
+    const controller = new AbortController();
+    const timeoutId = setTimeout(()=>controller.abort(), 2500);
+    const res = await fetch('https://api.ipify.org?format=json', {signal: controller.signal});
+    clearTimeout(timeoutId);
     const data = await res.json();
     _hxCachedIP = data.ip || hxFakeIP();
   }catch(e){
+    // fetch başarısız (CORS, timeout, ağ hatası vb.) — simülasyon kesintisiz devam etsin
     _hxCachedIP = hxFakeIP();
   }
   return _hxCachedIP;
@@ -3722,19 +4476,44 @@ async function hxGetDisplayIP(){
 async function hxEmitFakeSystemMessage(){
   const L = hxL();
   const roll = Math.random();
-  if(roll < 0.35){
+  if(roll < 0.45){
     const msg = L.sysErrors[Math.floor(Math.random()*L.sysErrors.length)];
     hxPushChatMessage(msg, 'hx-corrupt');
-  } else if(roll < 0.7){
-    const msg = L.watching[Math.floor(Math.random()*L.watching.length)];
-    hxPushChatMessage(msg, 'hx-watch');
-  } else if(roll < 0.9){
+  } else if(roll < 0.75){
     const ip = await hxGetDisplayIP();
     hxPushChatMessage(L.ipPrefix + ip + ']', 'hx-corrupt');
   } else {
     const msg = L.miscGlitch[Math.floor(Math.random()*L.miscGlitch.length)];
-    hxPushChatMessage(msg, 'hx-watch');
+    hxPushChatMessage(msg, 'hx-corrupt');
   }
+}
+
+/* Gizemli kullanıcının rastgele mesajı: bazen düz cümle, bazen IP gösterimi */
+async function hxEmitStrangerMessage(){
+  const L = hxL();
+  const msg = L.stranger[Math.floor(Math.random()*L.stranger.length)];
+  hxPushStrangerMessage(msg);
+}
+
+/* ────────────────────────────────────────────────────────────────
+/* ────────────────────────────────────────────────────────────────
+   ÇOK OYUNCULU ENGELLEYİCİ
+   'Çok Oyunculu' butonuna basıldığında oyun kesinlikle açılmaz.
+   alert() yerine, menünün üstüne kırmızı/glitch'li bir hata kutusu
+   gösterilir.
+   ──────────────────────────────────────────────────────────────── */
+function hxBlockMultiplayer(){
+  const L = hxL();
+  const box = document.getElementById('hx-mp-error');
+  if(!box) return;
+  box.textContent = L.multiplayerError;
+  box.classList.remove('hx-show');
+  // reflow zorla — animasyonun her tıklamada yeniden tetiklenmesi için
+  void box.offsetWidth;
+  box.classList.add('hx-show');
+
+  // Aynı anda chat-log varsa oraya da kırmızı bir kayıt düşsün
+  hxPushChatMessage(L.multiplayerError, 'hx-corrupt');
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -3773,6 +4552,35 @@ function hxTriggerTypeB(){
 }
 
 /* ────────────────────────────────────────────────────────────────
+   RENK TERS ÇEVİRME (INVERT) EFEKTİ
+   2-10 saniye arası rastgele süreyle tüm ekranı invert eder, sonra
+   eski haline döndürür. document.body'yi hedefler (özel bir
+   #game-container bulunamazsa otomatik fallback).
+   ──────────────────────────────────────────────────────────────── */
+let _hxInvertActive = false;
+function hxTriggerInvertEffect(){
+  if(_hxInvertActive) return; // üst üste binmesin
+  const target = document.getElementById('game-container') || document.body;
+  if(!target) return;
+
+  _hxInvertActive = true;
+  target.classList.add('hx-inverted');
+
+  const durationMs = (2 + Math.random()*8) * 1000; // 2-10 sn
+  setTimeout(()=>{
+    target.classList.remove('hx-inverted');
+    _hxInvertActive = false;
+  }, durationMs);
+}
+
+function hxScheduleInvertEffect(){
+  setTimeout(()=>{
+    hxTriggerInvertEffect();
+    hxScheduleInvertEffect();
+  }, hxRandRange(CONFIG.invertMinSec, CONFIG.invertMaxSec));
+}
+
+/* ────────────────────────────────────────────────────────────────
    RASTGELE ZAMANLAYICILAR
    Her tetikleyici kendini bir sonraki rastgele zaman için yeniden
    kurar — bu yüzden oyuncu asla deseni öngöremez. Oyunun başında
@@ -3806,9 +4614,175 @@ function hxScheduleJumpscareB(){
 
 function hxScheduleFakeSystemMessages(){
   setTimeout(()=>{
-    hxEmitFakeSystemMessage();
+    // IP adresi SADECE her 2 saatte bir (7200 saniye) çıksın
+    hxEmitStrangerMessage();      // <?>: formatlı gizemli kullanıcı mesajları
     hxScheduleFakeSystemMessages();
   }, hxRandRange(CONFIG.fakeSystemMsgMinSec, CONFIG.fakeSystemMsgMaxSec));
+}
+
+// IP adresini ayrı schedule'da her 2 saatte bir çıkart
+function hxScheduleIPMessage(){
+  setTimeout(()=>{
+    const L = hxL();
+    hxGetDisplayIP().then(ip => {
+      hxPushStrangerMessage(L.ipPrefix + ip);
+    });
+    hxScheduleIPMessage();
+  }, 7200000); // 2 saat = 7200000 ms
+}
+
+/* ────────────────────────────────────────────────────────────────
+   THE VOID SHADOW — gizemli siyah karakter
+   Steve benzeri bir model (mevcut mkPlayer() ile aynı oranlar),
+   tamamen düz siyah MeshBasicMaterial. Oyuncudan bağımsız, kendi
+   requestAnimationFrame döngüsünde çalışır; ana oyun motoruna hiç
+   dokunmaz, sadece global `scene`/`camera`/`col()` değişkenlerini
+   okur.
+   ──────────────────────────────────────────────────────────────── */
+const VoidShadow = {
+  group: null,
+  active: false,
+  mode: null,           // 'vanish' | 'chase'
+  spawnTime: 0,
+  lastFrameTime: 0,
+
+  _blackMat(){
+    if(!this._mat) this._mat = new THREE.MeshBasicMaterial({color:0x000000});
+    return this._mat;
+  },
+
+  // mkPlayer() ile aynı oranlarda, ama tamamen siyah ve isimsiz
+  build(){
+    const m = this._blackMat();
+    const g = new THREE.Group();
+    const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),m);head.position.y=1.79;
+    const body=new THREE.Mesh(new THREE.BoxGeometry(.5,.75,.25),m);body.position.y=1.125;
+    const aG=new THREE.BoxGeometry(.25,.75,.25);
+    const aL=new THREE.Mesh(aG,m);aL.position.set(-.375,1.125,0);
+    const aR=new THREE.Mesh(aG,m);aR.position.set(.375,1.125,0);
+    const lG=new THREE.BoxGeometry(.24,.75,.25);
+    const lL=new THREE.Mesh(lG,m);lL.position.set(-.125,.375,0);
+    const lR=new THREE.Mesh(lG,m);lR.position.set(.125,.375,0);
+    g.add(head,body,aL,aR,lL,lR);
+    return g;
+  },
+
+  isGameActive(){
+    try{
+      return !!deviceMode && !isPaused && !isChatOpen && !DeathManager.isDead;
+    }catch(e){ return false; }
+  },
+
+  spawn(){
+    if(this.active) return;
+    if(!this.isGameActive()) return;
+    if(typeof scene==='undefined' || typeof camera==='undefined') return;
+
+    const ang = Math.random()*Math.PI*2;
+    const dist = CONFIG.voidShadowSpawnDistMin + Math.random()*(CONFIG.voidShadowSpawnDistMax-CONFIG.voidShadowSpawnDistMin);
+    const sx = camera.position.x + Math.cos(ang)*dist;
+    const sz = camera.position.z + Math.sin(ang)*dist;
+    // Oyuncuyla yaklaşık aynı yükseklikte beliriyor (zemini aramaya gerek yok,
+    // "ansızın beliren gizemli varlık" hissi için doğrudan göz hizasında)
+    const sy = camera.position.y - 1.6;
+
+    this.group = this.build();
+    this.group.position.set(sx, sy, sz);
+    this.group.lookAt(camera.position.x, sy+1.0, camera.position.z);
+    scene.add(this.group);
+
+    this.active = true;
+    this.mode = Math.random() < 0.5 ? 'vanish' : 'chase';
+    this.spawnTime = performance.now();
+    this.lastFrameTime = performance.now();
+
+    if(CONFIG.enableConsoleNoise){
+      console.log('%c[????] entity_spawned: void_shadow', 'color:#666;');
+    }
+    this._loop();
+  },
+
+  despawn(){
+    if(this.group && typeof scene!=='undefined'){
+      scene.remove(this.group);
+    }
+    this.group = null;
+    this.active = false;
+    this.mode = null;
+  },
+
+  _loop(){
+    if(!this.active) return;
+    requestAnimationFrame(()=>this._loop());
+
+    const now = performance.now();
+    const dt = Math.min((now-this.lastFrameTime)/1000, .1);
+    this.lastFrameTime = now;
+
+    // Oyun duraklatıldıysa / chat açıksa / öldüyse: dondur ama despawn etme
+    if(!this.isGameActive()) return;
+    if(!this.group) return;
+
+    const elapsed = (now - this.spawnTime)/1000;
+    if(elapsed > CONFIG.voidShadowLifetimeMaxSec){
+      this.despawn();
+      return;
+    }
+
+    const dx = camera.position.x - this.group.position.x;
+    const dz = camera.position.z - this.group.position.z;
+    const dist = Math.sqrt(dx*dx+dz*dz);
+
+    if(this.mode === 'vanish'){
+      // her zaman karaktere bakar (hafif ürkütücü takip hissi)
+      this.group.lookAt(camera.position.x, this.group.position.y+1.0, camera.position.z);
+      if(dist < CONFIG.voidShadowVanishTriggerDist){
+        this._doVanish();
+      }
+    } else if(this.mode === 'chase'){
+      // bloklardan geçerek doğrudan oyuncuya doğru hızla koşar
+      if(dist > 0.0001){
+        const nx = dx/dist, nz = dz/dist;
+        const step = CONFIG.voidShadowChaseSpeed * dt;
+        this.group.position.x += nx*step;
+        this.group.position.z += nz*step;
+        this.group.position.y += (camera.position.y-1.6 - this.group.position.y) * Math.min(1, dt*3);
+        this.group.lookAt(camera.position.x, this.group.position.y+1.0, camera.position.z);
+      }
+      if(dist < CONFIG.voidShadowCatchDist){
+        this._doCatch();
+      }
+    }
+  },
+
+  _doVanish(){
+    const L = hxL();
+    HxAudio.playVanishEcho();
+    const msg = L.voidShadowVanish[Math.floor(Math.random()*L.voidShadowVanish.length)];
+    hxPushStrangerMessage(msg);
+    this.despawn();
+  },
+
+  _doCatch(){
+    // Tip B'ye benzer tam ekran jumpscare + gülme/alarm sesi
+    const overlay = document.getElementById('hx-jumpscare-overlay');
+    const img = document.getElementById('hx-jumpscare-img');
+    if(overlay && img){
+      img.src = CONFIG.jumpscareImageSrc;
+      overlay.classList.add('hx-show');
+      setTimeout(()=>{ overlay.classList.remove('hx-show'); }, CONFIG.jumpscareTypeBDurationMs);
+    }
+    HxAudio.playLaughAlarm();
+    if(typeof hxTriggerInvertEffect==='function') hxTriggerInvertEffect();
+    this.despawn();
+  }
+};
+
+function hxScheduleVoidShadow(){
+  setTimeout(()=>{
+    VoidShadow.spawn();
+    hxScheduleVoidShadow();
+  }, hxRandRange(CONFIG.voidShadowMinSec, CONFIG.voidShadowMaxSec));
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -3821,6 +4795,15 @@ function hxInit(){
   hxScheduleJumpscareA();
   hxScheduleJumpscareB();
   hxScheduleFakeSystemMessages();
+  hxScheduleIPMessage();          // IP mesajını 2 saatte 1 çıkart
+  hxScheduleInvertEffect();
+  
+  // Void Shadow - SADECE enhanced schedule kullan (daha sık görülsün)
+  hxEnhancedVoidShadowSchedule(); // Spawn oranı 40-50% arttı
+  
+  // Yeni özellikler
+  hxScheduleEncryptedMessages();     // Sezar şifrelemesi ile gizemli mesajlar
+  hxScheduleSilentMoments();         // Sessiz anlar
 
   if(CONFIG.enableConsoleNoise){
     console.log('%c[SYSTEM] connection established...', 'color:#888;');
@@ -3838,6 +4821,11 @@ window.HorrorEngine = {
   triggerTypeA: hxTriggerTypeA,
   triggerTypeB: hxTriggerTypeB,
   emitFakeSystemMessage: hxEmitFakeSystemMessage,
+  emitStrangerMessage: hxEmitStrangerMessage,
+  triggerInvertEffect: hxTriggerInvertEffect,
+  blockMultiplayer: hxBlockMultiplayer,
+  spawnVoidShadow: ()=>VoidShadow.spawn(),
+  despawnVoidShadow: ()=>VoidShadow.despawn(),
   playHorrorLayer: ()=>HxAudio.playHorrorLayer(),
   config: CONFIG,
 };
