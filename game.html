@@ -390,14 +390,52 @@ function sanitizeText(t){
 }
  
 let myUsername='Guest_'+(Math.floor(1000+Math.random()*9000));
+let playerRank=null;       // Web sitesinden gelen ham rütbe adı (örn: "Owner / Developer")
+let playerRankColor='#ffffff'; // Web sitesinden gelen rütbe rengi (hex)
+
+// ─── 🎖️ Rütbe Etiketi Biçimlendirme ───
+// Kurallar:
+//  - Owner / Developer -> [OWNER]
+//  - Admin / Developer -> [ADMIN/DEV]
+//  - Developer         -> [DEV]
+//  - Diğer tüm rütbeler -> büyük harf + köşeli parantez, örn [ADMIN], [MOD], [HELPER]
+//  - Rütbesi olmayan / Guest -> null (hiçbir tag gösterilmez)
+const RANK_ABBREVIATIONS={
+  'Owner / Developer':'OWNER',
+  'Admin / Developer':'ADMIN/DEV',
+  'Developer':'DEV'
+};
+function formatRankTag(rank){
+  if(!rank||typeof rank!=='string') return null;
+  const trimmed=rank.trim();
+  if(!trimmed||trimmed.toLowerCase()==='guest'||trimmed.toLowerCase()==='player') return null;
+  const abbr=RANK_ABBREVIATIONS[trimmed]||trimmed.toUpperCase();
+  return '['+abbr+']';
+}
+// Fallback renk haritası: P2P üzerinden bağlanan diğer oyuncuların rengi bir nedenle
+// gelmezse (eski istemci vb.) yine de doğru renk gösterilebilsin diye site ile birebir aynı tablo.
+const RANK_COLOR_FALLBACK={
+  'Owner / Developer':'#ff4d4d','Admin / Developer':'#ff4d4d','Developer':'#660000',
+  'Admin':'#0049ff','Mod':'#ffeb3b','Helper':'#66fcf1','YouTube':'#e91e63','Twitch':'#6441a5',
+  'Tiktoker':'#00f2fe','TikToker':'#00f2fe','MVP':'#9c27b0','VIP':'#ff9800','Champion':'#ffd700',
+  'Veteran':'#4caf50','Beta Tester':'#9e9e9e'
+};
+function resolveRankColor(rank,color){
+  if(color&&/^#[0-9a-fA-F]{3,8}$/.test(color)) return color;
+  if(rank&&RANK_COLOR_FALLBACK[rank]) return RANK_COLOR_FALLBACK[rank];
+  return '#ffffff';
+}
  
 window.addEventListener('message',function(event){
   if(event.data&&event.data.type==='SET_USERNAME'){
     const incoming=event.data.username;
     if(!incoming||incoming==='Not Logged In'||incoming==='Giriş Yapılmadı'||incoming==='Giriş Yapilmadi'){
       myUsername='Guest_'+(Math.floor(1000+Math.random()*9000));
+      playerRank=null;playerRankColor='#ffffff';
     } else {
       myUsername=sanitizeName(incoming);
+      playerRank=(event.data.role&&typeof event.data.role==='string')?event.data.role.trim().substring(0,32):null;
+      playerRankColor=resolveRankColor(playerRank,event.data.rankColor);
     }
   }
   if(event.data&&event.data.type==='friendResult'){
@@ -1594,16 +1632,50 @@ const M_SKIN=new THREE.MeshStandardMaterial({color:0xf1c27d,roughness:.9});
 const M_SHIRT=new THREE.MeshStandardMaterial({color:0x4a6fb5,roughness:.9});
 const M_PANTS=new THREE.MeshStandardMaterial({color:0x2a4a9f,roughness:.9});
 const M_HAIR=new THREE.MeshStandardMaterial({color:0x5c3317,roughness:.9});
-function mkSprite(name){
-  const safeN=sanitizeName(name);
-  const c=document.createElement('canvas');c.width=256;c.height=48;const ctx=c.getContext('2d');
-  ctx.fillStyle='rgba(0,0,0,0.65)';if(ctx.roundRect) ctx.roundRect(2,4,252,40,6); else ctx.rect(2,4,252,40);ctx.fill();
-  ctx.fillStyle='#fff';ctx.font='bold 22px monospace';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(safeN.substring(0,14),128,25);
+// rank: ham rütbe adı (örn "Owner / Developer") veya null/undefined -> formatRankTag ile [TAG] üretilir
+// rankColor: rütbenin hex rengi (tag bu renkte basılır, isim her zaman beyaz kalır)
+function mkSprite(name,rank,rankColor){
+  const safeN=sanitizeName(name).substring(0,14);
+  const tag=formatRankTag(rank);
+  const color=tag?resolveRankColor(rank,rankColor):'#ffffff';
+
+  // Genişliği içeriğe göre ölçmek için geçici context
+  const measure=document.createElement('canvas').getContext('2d');
+  measure.font='bold 22px monospace';
+  const tagW=tag?measure.measureText(tag+' ').width:0;
+  const nameW=measure.measureText(safeN).width;
+  const padding=24;
+  const cW=Math.max(160,Math.min(380,Math.ceil(tagW+nameW+padding*2)));
+  const cH=48;
+
+  const c=document.createElement('canvas');c.width=cW;c.height=cH;const ctx=c.getContext('2d');
+  // Minecraft tarzı: tam şeffaf olmayan, yarı saydam siyah şerit (arkadaki dünya hafifçe görünür)
+  ctx.fillStyle="rgba(0, 0, 0, 0.45)";
+  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
+  else {ctx.fillRect(2,4,cW-4,cH-8);}
+
+  ctx.font='bold 22px monospace';ctx.textBaseline='middle';
+  const totalW=tagW+nameW;
+  let x=(cW-totalW)/2;
+  const yMid=cH/2-1;
+  if(tag){
+    ctx.textAlign='left';
+    ctx.fillStyle=color;
+    ctx.fillText(tag+' ',x,yMid);
+    x+=tagW;
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle='#fff';
+  ctx.fillText(safeN,x,yMid);
+
   const tex=new THREE.CanvasTexture(c);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
-  sp.scale.set(2.4,.46,1);return sp;
+  // Genişliği canvas oranına göre ölçekle, yükseklik sabit kalsın (Sprite her zaman kameraya bakar)
+  const baseH=.46;
+  sp.scale.set(2.4*(cW/256),baseH,1);
+  return sp;
 }
-function mkPlayer(name){
+function mkPlayer(name,rank,rankColor){
   const g=new THREE.Group();
   const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),M_SKIN);head.position.y=1.79;
   const hair=new THREE.Mesh(new THREE.BoxGeometry(.62,.12,.62),M_HAIR);hair.position.y=2.13;
@@ -1615,7 +1687,7 @@ function mkPlayer(name){
   const lL=new THREE.Mesh(lG,M_PANTS);lL.position.set(-.125,.375,0);
   const lR=new THREE.Mesh(lG,M_PANTS);lR.position.set(.125,.375,0);
   g.add(head,hair,body,aL,aR,lL,lR);
-  const ns=mkSprite(name);ns.position.y=2.55;g.add(ns);
+  const ns=mkSprite(name,rank,rankColor);ns.position.y=2.3;g.add(ns);
   scene.add(g);return g;
 }
  
@@ -2054,7 +2126,7 @@ function applyBlockSync(data){
   }
 }
  
-function addRP(id,name,x,y,z,ry,mode='survival'){if(remPlayers[id]) return;const g=mkPlayer(name);g.position.set(x,y-1.6,z);g.rotation.y=ry;remPlayers[id]={g,name,mode};}
+function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.6,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
 function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.6,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
 function remRP(id){if(remPlayers[id]){scene.remove(remPlayers[id].g);delete remPlayers[id];}}
  
@@ -2075,7 +2147,7 @@ function showChatLog(){
     },7000);
   }
 }
-function addChat(name,msg,sys=false,cls=''){
+function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
   const log=document.getElementById('chat-log');
   const d=document.createElement('div');
   d.className='chat-msg'+(sys?' sys':'')+(cls?' '+cls:'');
@@ -2084,7 +2156,15 @@ function addChat(name,msg,sys=false,cls=''){
   } else {
     const safeName=sanitizeName(name||'?');
     const safeMsg=msg?String(msg).substring(0,200):'';
-    d.textContent=`<${safeName}>: ${safeMsg}`;
+    const tag=formatRankTag(rank);
+    if(tag){
+      const tagSpan=document.createElement('span');
+      tagSpan.style.color=resolveRankColor(rank,rankColor);
+      tagSpan.style.fontWeight='bold';
+      tagSpan.textContent=tag+' ';
+      d.appendChild(tagSpan);
+    }
+    d.appendChild(document.createTextNode(`${safeName}: ${safeMsg}`));
   }
   log.appendChild(d);while(log.children.length>40) log.removeChild(log.firstChild);
   log.scrollTop=log.scrollHeight;
@@ -2323,15 +2403,17 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
           const pid=conn.peer;
           if(data.type==='join'){
             const safeName=sanitizeName(data.name||'Player');
+            const safeRank=(data.rank&&typeof data.rank==='string')?data.rank.substring(0,32):null;
+            const safeRankColor=resolveRankColor(safeRank,data.rankColor);
             if(bannedPlayers.has(safeName)){conn.send({type:'banned',msg:'Bu sunucudan banlandınız.'});setTimeout(()=>{try{conn.close();}catch(e){}},200);return;}
             if(hostConns[pid]){return;}
             connTokens.set(pid,safeName);
-            hostConns[pid]={conn,name:safeName,x:8,y:2.1,z:8,ry:0};
-            const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y}];
-            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry});});
+            hostConns[pid]={conn,name:safeName,x:8,y:2.1,z:8,ry:0,rank:safeRank,rankColor:safeRankColor};
+            const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,rank:playerRank,rankColor:playerRankColor}];
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry,rank:p.rank,rankColor:p.rankColor});});
             conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName)});
-            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName});});
-            addRP(pid,safeName,8,2.1,8,0);addChat(null,safeName+langData[currentLang].sysJoin,true);
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName,rank:safeRank,rankColor:safeRankColor});});
+            addRP(pid,safeName,8,2.1,8,0,'survival',safeRank,safeRankColor);addChat(null,safeName+langData[currentLang].sysJoin,true);
           } else if(data.type==='pos'){
             if(!connTokens.has(pid)) return;
             if(hostConns[pid]) Object.assign(hostConns[pid],{x:data.x,y:data.y,z:data.z,ry:data.ry,mode:data.mode||'survival'});
@@ -2348,9 +2430,11 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
               conn.send({type:'chat',name:null,msg:langData[currentLang].rateLimitMsg,sys:true,cls:'warn'});return;
             }
             const nm=connTokens.get(pid)||'?';
+            const nmRank=hostConns[pid]?.rank||null;
+            const nmRankColor=hostConns[pid]?.rankColor||null;
             const safeMsg=String(data.msg||'').substring(0,200);
-            addChat(nm,safeMsg);
-            Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:nm,msg:safeMsg});});
+            addChat(nm,safeMsg,false,'',nmRank,nmRankColor);
+            Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});});
           }
           else if(data.type==='aatk'){if(!connTokens.has(pid)) return;const a=animals.find(x=>x.id===data.id);if(a) attackAnimal(a,Math.min(data.dmg,20));}
           else if(data.type==='modereq'){
@@ -2472,14 +2556,14 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}guestConn=null;
       }
     },12000);
-    guestConn.on('open',()=>{if(_joinTimeout){clearTimeout(_joinTimeout);_joinTimeout=null;}guestConn.send({type:'join',name:myName});});
+    guestConn.on('open',()=>{if(_joinTimeout){clearTimeout(_joinTimeout);_joinTimeout=null;}guestConn.send({type:'join',name:myName,rank:playerRank,rankColor:playerRankColor});});
     guestConn.on('data',data=>{
       if(data.type==='welcome'){
         st.textContent='Bağlandı!';isMP=true;amHost=false;worldSeed=data.seed||0;
         myOp=data.isOp||false;
         data.players.forEach(p=>{
           if(p.id==='host'||p.id===myPeer.id) return;
-          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival');
+          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
         });
         startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
       } else if(data.type==='pos'){
@@ -2492,11 +2576,11 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       else if(data.type==='block') applyBlockSync(data);
       else if(data.type==='chat'){
         if(data.sys) addChat(null,String(data.msg||'').substring(0,200),true,data.cls||'');
-        else addChat(sanitizeName(data.name||'?'),String(data.msg||'').substring(0,200),false,data.cls||'');
+        else addChat(sanitizeName(data.name||'?'),String(data.msg||'').substring(0,200),false,data.cls||'',data.rank||null,data.rankColor||null);
       }
       else if(data.type==='pjoin'){
         if(data.id===myPeer.id) return;
-        addRP(data.id,sanitizeName(data.name),8,2.1,8,0);
+        addRP(data.id,sanitizeName(data.name),8,2.1,8,0,'survival',data.rank||null,data.rankColor||null);
         addChat(null,sanitizeName(data.name)+langData[currentLang].sysJoin,true);
       }
       else if(data.type==='pleave'){remRP(data.id);addChat(null,(sanitizeName(data.name)||'?')+langData[currentLang].sysLeft,true);}
@@ -2977,7 +3061,7 @@ function closeChat(send){
     const msg=inp.value.trim().substring(0,200);
     if(!checkRate('mychat',3)){addChat(null,langData[currentLang].rateLimitMsg,true,'warn');inp.value='';isChatOpen=false;document.getElementById('chat-input-row').style.display='none';if(deviceMode==='pc'&&!isPaused) document.body.requestPointerLock();return;}
     if(msg.startsWith('/')){processCmd(msg.slice(1));}
-    else if(isMP){addChat(myName,msg);if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'chat',msg});});else if(guestConn?.open) guestConn.send({type:'chat',msg});}
+    else if(isMP){addChat(myName,msg,false,'',playerRank,playerRankColor);if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'chat',name:myName,msg,rank:playerRank,rankColor:playerRankColor});});else if(guestConn?.open) guestConn.send({type:'chat',msg});}
   }
   inp.value='';isChatOpen=false;
   document.getElementById('chat-input-row').style.display='none';
