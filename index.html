@@ -1786,8 +1786,13 @@ function removeFriend(friendUid) {
                             </div>`;
                     }
 
+                    const showPasswordEditBtn = viewerIsOwner && !isTopRank && !userData.password;
+                    const passwordEditBtnHtml = showPasswordEditBtn
+                        ? `<button class="btn-edit-pass" style="font-size:0.68rem; padding:2px 8px; margin-left:6px; background:#1f2833; color:#66fcf1; border:1px solid #66fcf1; border-radius:5px; cursor:pointer;" onclick="setUserPasswordManually('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}')">${(lang === 'en') ? '✏️ Set' : '✏️ Belirle'}</button>`
+                        : '';
+
                     const passwordRowHtml = viewerIsOwner
-                        ? `<br><span style="font-size:0.72rem; color:#888;">🔑 ${(lang === 'en') ? 'Password' : 'Şifre'}: ${userPassword}</span>`
+                        ? `<br><span style="font-size:0.72rem; color:#888;">🔑 ${(lang === 'en') ? 'Password' : 'Şifre'}: ${userPassword}${passwordEditBtnHtml}</span>`
                         : '';
 
                     item.innerHTML = `
@@ -1809,6 +1814,35 @@ function removeFriend(friendUid) {
             }).catch((error) => {
                 console.error('loadUsersForAdmin hata:', error);
                 container.innerHTML = `<p style="text-align:center; padding:20px; color:#ff4d4d; font-weight:bold;">❌ ${(lang === 'en') ? 'ACCESS DENIED: Security rules rejected the request.' : 'ERİŞİM ENGELLENDİ: Güvenlik Duvarı Reddetti!'}</p>`;
+            });
+        }
+
+        // ✏️ Eski kullanıcılar için (password alanı eksik olanlar) Owner/Developer'ın elle şifre kaydı girmesini sağlayan fonksiyon
+        function setUserPasswordManually(uid, username) {
+            const lang = getActiveLang();
+            const myRole = window.currentUserRole || 'Player';
+
+            // 🔒 Güvenlik katmanı: bu işlemi sadece Owner/Developer yapabilir
+            if (myRole !== 'Owner / Developer') {
+                alert(lang === 'en' ? 'Only Owner / Developer can do this.' : 'Bu işlemi sadece Owner / Developer yapabilir.');
+                return;
+            }
+
+            const promptMsg = (lang === 'en')
+                ? `Enter the known password for "${username}":`
+                : `"${username}" için bilinen şifreyi gir:`;
+
+            const newPassword = prompt(promptMsg);
+            if (!newPassword) return;
+
+            database.ref('users/' + uid).update({ password: newPassword }).then(() => {
+                loadUsersForAdmin();
+            }).catch((err) => {
+                console.error('Şifre kaydetme hatası:', err);
+                const code = err && err.code ? err.code : 'unknown';
+                alert(lang === 'en'
+                    ? `Failed to save password.\n\nError: ${code}`
+                    : `Şifre kaydedilemedi.\n\nHata: ${code}`);
             });
         }
 
