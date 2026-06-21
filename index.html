@@ -1657,7 +1657,7 @@ function removeFriend(friendUid) {
         }
 
         // Birbirini banlayamayacak korumalı rütbeler (sadece Owner / Developer bunları banlayabilir)
-        const PROTECTED_BAN_ROLES = ['Helper', 'Mod', 'Admin', 'Developer', 'Admin / Developer'];
+        const PROTECTED_BAN_ROLES = ['Helper', 'Mod', 'Admin', 'Developer', 'Admin / Developer', 'Owner / Developer'];
 
         function loadUsersForAdmin() {
             const container = document.getElementById('adminUsersContainer');
