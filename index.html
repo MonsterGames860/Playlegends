@@ -1469,8 +1469,8 @@ function removeFriend(friendUid) {
                 return;
             }
 
-            // 2. Veritabanından rütbe kontrolü
-            database.ref('users/' + user.uid).once('value', (snapshot) => {
+            // 2. Veritabanından rütbe kontrolü (canlı dinleme: rol sonradan değişirse anında güncellenir)
+            database.ref('users/' + user.uid).on('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
                     window.currentUserRole = userData.role || 'Player';
@@ -1718,6 +1718,8 @@ function removeFriend(friendUid) {
                     // 🔒 GİZLİLİK KONTROLÜ: Şifreler SADECE panele bakan kişi Owner/Developer ise gösterilir.
                     // Owner/Developer rütbesindeki hedef kullanıcının kendi şifre/e-postası ise herkesten (admin panelinden bakan dahil) gizlenir.
                     const isTopRank = (currentRole === 'Owner / Developer');
+                    // İçerik üreticisi rütbeleri (hesap çalınmasını önlemek için e-postaları sadece Owner/Developer görebilir)
+                    const isContentCreatorRank = (currentRole === 'YouTube' || currentRole === 'Twitch' || currentRole === 'TikToker' || currentRole === 'Tiktoker');
                     const viewerIsOwner = (myRole === 'Owner / Developer');
 
                     let userEmail = userData.email || 'N/A';
@@ -1727,7 +1729,12 @@ function removeFriend(friendUid) {
                         // En üst rütbenin bilgisi admin panelinde bile asla gösterilmez
                         userEmail = '***';
                         userPassword = '***';
-                    } else if (viewerIsOwner) {
+                    } else if (isContentCreatorRank && !viewerIsOwner) {
+                        // İçerik üreticisi rütbelerinin e-postası sadece Owner/Developer dışındakilerden gizlenir
+                        userEmail = '***';
+                    }
+
+                    if (!isTopRank && viewerIsOwner) {
                         // Sadece panele bakan kişi Owner/Developer ise diğer kullanıcıların şifresi görünür
                         userPassword = userData.password || '—';
                     }
