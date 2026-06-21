@@ -1683,37 +1683,9 @@ function removeFriend(friendUid) {
                     item.dataset.username = (userData.username || '').toLowerCase();
                     item.dataset.email = (userData.email || '').toLowerCase();
 
-                    // Rütbeye göre dinamik renk belirleme sistemi
-                    let roleColor = '#ffffff'; // Varsayılan: Beyaz (Player)
+                    // Rütbeye göre dinamik renk belirleme sistemi (tek kaynaktan: getRankColor)
                     const currentRole = userData.role || 'Player';
-
-                    if (currentRole === 'Owner / Developer' || currentRole === 'Admin / Developer') {
-                        roleColor = '#ff4d4d';
-                    } else if (currentRole === 'Developer') {
-                        roleColor = '#660000';
-                    } else if (currentRole === 'Admin') {
-                        roleColor = '#0049ff';
-                    } else if (currentRole === 'Mod') {
-                        roleColor = '#ffeb3b';
-                    } else if (currentRole === 'Helper') {
-                        roleColor = '#66fcf1';
-                    } else if (currentRole === 'YouTube') {
-                        roleColor = '#e91e63';
-                    } else if (currentRole === 'Twitch') {
-                        roleColor = '#6441a5';
-                    } else if (currentRole === 'TikToker') {
-                        roleColor = '#00f2fe';
-                    } else if (currentRole === 'VIP') {
-                        roleColor = '#ff9800';
-                    } else if (currentRole === 'MVP') {
-                        roleColor = '#9c27b0';
-                    } else if (currentRole === 'Champion') {
-                        roleColor = '#ffd700';
-                    } else if (currentRole === 'Veteran') {
-                        roleColor = '#4caf50';
-                    } else if (currentRole === 'Beta Tester') {
-                        roleColor = '#9e9e9e';
-                    }
+                    let roleColor = (currentRole === 'Player') ? '#ffffff' : getRankColor(currentRole);
 
                     // 🔒 GİZLİLİK KONTROLÜ: Şifreler SADECE panele bakan kişi Owner/Developer ise gösterilir.
                     // Owner/Developer rütbesindeki hedef kullanıcının kendi şifre/e-postası ise herkesten (admin panelinden bakan dahil) gizlenir.
@@ -2253,12 +2225,39 @@ function renderRanksList() {
             alert('Sürüm bulunamadı! / Version not found!');
         }
 
+        // 🎖️ Rütbe -> Renk eşleme fonksiyonu (admin panelindeki ile aynı kaynaktan, tek noktadan yönetim)
+        function getRankColor(role) {
+            const map = {
+                'Owner / Developer': '#ff4d4d',
+                'Admin / Developer': '#ff4d4d',
+                'Developer': '#660000',
+                'Admin': '#0049ff',
+                'Mod': '#ffeb3b',
+                'Helper': '#66fcf1',
+                'YouTube': '#e91e63',
+                'Twitch': '#6441a5',
+                'Tiktoker': '#00f2fe',
+                'TikToker': '#00f2fe',
+                'MVP': '#9c27b0',
+                'VIP': '#ff9800',
+                'Champion': '#ffd700',
+                'Veteran': '#4caf50',
+                'Beta Tester': '#9e9e9e'
+            };
+            return map[role] || '#ffffff';
+        }
+
         function openGame() {
             if (blockIfBanned()) return;
             const playerName = document.getElementById('navProfileName').innerText;
             const overlay = document.getElementById('gameOverlay');
             const iframe = document.getElementById('gameFrame');
-            
+            // Misafir (Guest) veya rütbesiz oyuncularda rütbe gönderilmez -> oyun tarafında tag gösterilmez
+            const playerRole = (!isGuest && window.currentUserRole && window.currentUserRole !== 'Player')
+                ? window.currentUserRole
+                : null;
+            const playerRoleColor = playerRole ? getRankColor(playerRole) : null;
+
             overlay.style.display = 'block';
             iframe.src = 'game.html';
 
@@ -2266,7 +2265,9 @@ function renderRanksList() {
                 try {
                     iframe.contentWindow.postMessage({
                         type: 'SET_USERNAME',
-                        username: playerName
+                        username: playerName,
+                        role: playerRole,
+                        rankColor: playerRoleColor
                     }, '*');
                 } catch (e) {
                     console.error("İsim gönderilemedi, iframe henüz hazır değil.");
