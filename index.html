@@ -814,30 +814,30 @@
     <div class="sub-modal" id="adminBanSetupModal">
         <div class="sub-modal-content">
             <span class="close-sub" onclick="closeSubModal('adminBanSetupModal')">&times;</span>
-            <h3>🔨 Ban Ayarları / Ban Settings</h3>
+            <h3 id="banModalTitle">🔨 Ban Settings</h3>
             <span id="banTargetName">-</span>
 
-            <label class="ban-field-label" for="banDurationUnit">Süre Birimi / Duration Unit</label>
+            <label class="ban-field-label" id="banDurationUnitLabel" for="banDurationUnit">Duration Unit</label>
             <select id="banDurationUnit" onchange="handleBanDurationUnitChange()">
-                <option value="second">Saniye / Second</option>
-                <option value="minute">Dakika / Minute</option>
-                <option value="hour">Saat / Hour</option>
-                <option value="day">Gün / Day</option>
-                <option value="week">Hafta / Week</option>
-                <option value="year">Yıl / Year</option>
-                <option value="permanent">Sonsuz / Permanent</option>
+                <option value="second" id="banOptSecond">Second</option>
+                <option value="minute" id="banOptMinute">Minute</option>
+                <option value="hour" id="banOptHour">Hour</option>
+                <option value="day" id="banOptDay">Day</option>
+                <option value="week" id="banOptWeek">Week</option>
+                <option value="year" id="banOptYear">Year</option>
+                <option value="permanent" id="banOptPermanent">Permanent</option>
             </select>
 
-            <input type="number" id="banDurationValue" min="1" value="1" placeholder="Süre Miktarı / Duration Amount">
+            <input type="number" id="banDurationValue" min="1" value="1" placeholder="Duration Amount">
 
-            <label class="ban-field-label" id="banReasonPrimaryLabel" for="banReasonPrimary">Türkçe Ban Sebebi</label>
-            <textarea id="banReasonPrimary" placeholder="Banlanma sebebini yazın..."></textarea>
+            <label class="ban-field-label" id="banReasonPrimaryLabel" for="banReasonPrimary">Ban Reason</label>
+            <textarea id="banReasonPrimary" placeholder="Write the ban reason..."></textarea>
 
-            <span class="ban-toggle-link" id="banToggleOtherLangBtn" onclick="toggleOtherLangField()">+ Diğer dili de ekle / Add the other language too</span>
+            <span class="ban-toggle-link" id="banToggleOtherLangBtn" onclick="toggleOtherLangField()">+ Add the other language too</span>
 
             <div id="banReasonSecondaryWrapper" style="display:none;">
-                <label class="ban-field-label" id="banReasonSecondaryLabel" for="banReasonSecondary">English Ban Reason</label>
-                <textarea id="banReasonSecondary" placeholder="Write the ban reason in English..."></textarea>
+                <label class="ban-field-label" id="banReasonSecondaryLabel" for="banReasonSecondary">Ban Reason</label>
+                <textarea id="banReasonSecondary" placeholder="Write the ban reason..."></textarea>
             </div>
 
             <!-- Eski TR/EN inputları geriye dönük uyumluluk için gizli tutuluyor; submitBan() bunları dolduruyor -->
@@ -845,11 +845,12 @@
             <input type="hidden" id="banReasonEN">
 
             <div class="ban-modal-actions">
-                <button class="btn btn-cancel" onclick="closeSubModal('adminBanSetupModal')">İptal / Cancel</button>
-                <button class="btn" style="background-color:#ff4d4d; color:#fff;" onclick="submitBan()" id="banSubmitBtn">Raporla / Report</button>
+                <button class="btn btn-cancel" id="banCancelBtn" onclick="closeSubModal('adminBanSetupModal')">Cancel</button>
+                <button class="btn" style="background-color:#ff4d4d; color:#fff;" onclick="submitBan()" id="banSubmitBtn">Report</button>
             </div>
         </div>
     </div>
+
 
     <div id="bannedUserOverlay">
         <div class="banned-overlay-box">
@@ -1652,6 +1653,7 @@ function removeFriend(friendUid) {
             if (searchInput) searchInput.value = '';
             const myUid = auth.currentUser ? auth.currentUser.uid : null;
             const myRole = window.currentUserRole || 'Player';
+            const lang = getActiveLang();
             
             database.ref('users').once('value', (snapshot) => {
                 container.innerHTML = '';
@@ -1715,11 +1717,13 @@ function removeFriend(friendUid) {
 
                     let banBtnHtml;
                     if (isSelf) {
-                        banBtnHtml = `<span style="font-size:0.7rem; color:#888; font-style:italic;">— Sen / You —</span>`;
+                        banBtnHtml = `<span style="font-size:0.7rem; color:#888; font-style:italic;">${(lang === 'en') ? '— You —' : '— Sen —'}</span>`;
                     } else if (isBanned) {
                         banBtnHtml = `<button class="btn-unban" onclick="confirmUnbanUser('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}')">Unban</button>`;
                     } else if (hierarchyBlocked) {
-                        banBtnHtml = `<span style="font-size:0.7rem; color:#888;" title="Bu rütbe sadece Owner / Developer tarafından banlanabilir.">🛡️ Korumalı</span>`;
+                        const protectedTitle = (lang === 'en') ? 'This rank can only be banned by Owner / Developer.' : 'Bu rütbe sadece Owner / Developer tarafından banlanabilir.';
+                        const protectedLabel = (lang === 'en') ? '🛡️ Protected' : '🛡️ Korumalı';
+                        banBtnHtml = `<span style="font-size:0.7rem; color:#888;" title="${protectedTitle}">${protectedLabel}</span>`;
                     } else {
                         banBtnHtml = `<button class="btn-ban" onclick="openBanSetupModal('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}', '${currentRole.replace(/'/g, "\\'")}')">Ban</button>`;
                     }
@@ -1784,6 +1788,27 @@ function removeFriend(friendUid) {
             return translated;
         }
 
+        // Ban kurulum modalının tüm metinlerini aktif site diline göre dolduran fonksiyon
+        function applyBanModalLanguage(lang) {
+            const isEn = (lang === 'en');
+
+            document.getElementById('banModalTitle').innerText = isEn ? '🔨 Ban Settings' : '🔨 Ban Ayarları';
+            document.getElementById('banDurationUnitLabel').innerText = isEn ? 'Duration Unit' : 'Süre Birimi';
+
+            document.getElementById('banOptSecond').innerText = isEn ? 'Second' : 'Saniye';
+            document.getElementById('banOptMinute').innerText = isEn ? 'Minute' : 'Dakika';
+            document.getElementById('banOptHour').innerText = isEn ? 'Hour' : 'Saat';
+            document.getElementById('banOptDay').innerText = isEn ? 'Day' : 'Gün';
+            document.getElementById('banOptWeek').innerText = isEn ? 'Week' : 'Hafta';
+            document.getElementById('banOptYear').innerText = isEn ? 'Year' : 'Yıl';
+            document.getElementById('banOptPermanent').innerText = isEn ? 'Permanent' : 'Sonsuz';
+
+            document.getElementById('banDurationValue').placeholder = isEn ? 'Duration Amount' : 'Süre Miktarı';
+
+            document.getElementById('banCancelBtn').innerText = isEn ? 'Cancel' : 'İptal';
+            document.getElementById('banSubmitBtn').innerText = isEn ? 'Report' : 'Raporla';
+        }
+
         // Ban kurulum modalını açan ve hedef kullanıcıyı hazırlayan fonksiyon
         let banTargetUid = null;
         function openBanSetupModal(uid, username, targetRole) {
@@ -1807,14 +1832,18 @@ function removeFriend(friendUid) {
 
             banTargetUid = uid;
 
+            applyBanModalLanguage(lang);
+
             document.getElementById('banTargetName').innerText = username;
             document.getElementById('banDurationUnit').value = 'minute';
             document.getElementById('banDurationValue').value = 1;
             document.getElementById('banDurationValue').style.display = 'block';
 
             // Aktif dile göre tek görünür alanı ayarla
-            document.getElementById('banReasonPrimaryLabel').innerText = (lang === 'en') ? 'English Ban Reason' : 'Türkçe Ban Sebebi';
-            document.getElementById('banReasonPrimary').placeholder = (lang === 'en') ? 'Write the ban reason in English...' : 'Banlanma sebebini Türkçe olarak yazın...';
+            const reasonLabel = (lang === 'en') ? 'Ban Reason' : 'Ban Sebebi';
+            const reasonPlaceholder = (lang === 'en') ? 'Write the ban reason...' : 'Banlanma sebebini yazın...';
+            document.getElementById('banReasonPrimaryLabel').innerText = reasonLabel;
+            document.getElementById('banReasonPrimary').placeholder = reasonPlaceholder;
             document.getElementById('banReasonPrimary').value = '';
             document.getElementById('banReasonPrimary').dataset.lang = (lang === 'en') ? 'en' : 'tr';
 
@@ -1822,13 +1851,12 @@ function removeFriend(friendUid) {
             document.getElementById('banReasonSecondaryWrapper').style.display = 'none';
             document.getElementById('banReasonSecondary').value = '';
             const secondaryLang = (lang === 'en') ? 'tr' : 'en';
-            document.getElementById('banReasonSecondaryLabel').innerText = (secondaryLang === 'en') ? 'English Ban Reason' : 'Türkçe Ban Sebebi';
-            document.getElementById('banReasonSecondary').placeholder = (secondaryLang === 'en') ? 'Write the ban reason in English...' : 'Banlanma sebebini Türkçe olarak yazın...';
+            document.getElementById('banReasonSecondaryLabel').innerText = reasonLabel;
+            document.getElementById('banReasonSecondary').placeholder = reasonPlaceholder;
             document.getElementById('banReasonSecondary').dataset.lang = secondaryLang;
-            document.getElementById('banToggleOtherLangBtn').innerText = (lang === 'en') ? '+ Türkçeyi de ekle / Add Turkish too' : '+ Diğer dili de ekle / Add the other language too';
+            document.getElementById('banToggleOtherLangBtn').innerText = (lang === 'en') ? '+ Add Turkish too' : '+ İngilizceyi de ekle';
 
             document.getElementById('banSubmitBtn').disabled = false;
-            document.getElementById('banSubmitBtn').innerText = 'Raporla / Report';
 
             document.getElementById('adminBanSetupModal').style.display = 'flex';
         }
@@ -1892,9 +1920,12 @@ function removeFriend(friendUid) {
             document.getElementById('banReasonEN').value = reasonEN;
 
             submitBtn.disabled = false;
-            submitBtn.innerText = 'Raporla / Report';
+            submitBtn.innerText = (lang === 'en') ? 'Report' : 'Raporla';
 
-            alert('⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN);
+            const placeholderMsg = (lang === 'en')
+                ? '⏳ This feature will be completed in the next phase (Firebase integration).\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN
+                : '⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN;
+            alert(placeholderMsg);
         }
 
         // Unban butonuna basılınca: ban sebebini gösterip onay isteyen fonksiyon
@@ -1926,7 +1957,10 @@ function removeFriend(friendUid) {
         }
 
         function unbanUser(uid) {
-            alert('⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.');
+            const lang = getActiveLang();
+            alert(lang === 'en'
+                ? '⏳ This feature will be completed in the next phase (Firebase integration).'
+                : '⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.');
         }
 
       // Rütbeler menüsünü açıp kapatan fonksiyon
