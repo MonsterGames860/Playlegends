@@ -1715,13 +1715,21 @@ function removeFriend(friendUid) {
                         roleColor = '#9e9e9e';
                     }
 
-                    // 🔒 GİZLİLİK KONTROLÜ: en üst rütbenin e-postası ve şifresi admin panelinde bile *** ile gizlenir
+                    // 🔒 GİZLİLİK KONTROLÜ: Şifreler SADECE panele bakan kişi Owner/Developer ise gösterilir.
+                    // Owner/Developer rütbesindeki hedef kullanıcının kendi şifre/e-postası ise herkesten (admin panelinden bakan dahil) gizlenir.
                     const isTopRank = (currentRole === 'Owner / Developer');
+                    const viewerIsOwner = (myRole === 'Owner / Developer');
+
                     let userEmail = userData.email || 'N/A';
-                    let userPassword = userData.password || '—';
+                    let userPassword = '———'; // Varsayılan: gizli
+
                     if (isTopRank) {
+                        // En üst rütbenin bilgisi admin panelinde bile asla gösterilmez
                         userEmail = '***';
                         userPassword = '***';
+                    } else if (viewerIsOwner) {
+                        // Sadece panele bakan kişi Owner/Developer ise diğer kullanıcıların şifresi görünür
+                        userPassword = userData.password || '—';
                     }
 
                     // isBanned alanını hem yeni (isBanned) hem eski (ban.active) formatla uyumlu oku
@@ -1771,10 +1779,14 @@ function removeFriend(friendUid) {
                             </div>`;
                     }
 
+                    const passwordRowHtml = viewerIsOwner
+                        ? `<br><span style="font-size:0.72rem; color:#888;">🔑 ${(lang === 'en') ? 'Password' : 'Şifre'}: ${userPassword}</span>`
+                        : '';
+
                     item.innerHTML = `
                         <div>
                             <strong>${userData.username || 'N/A'}</strong> (${userEmail})
-                            <br><span style="font-size:0.72rem; color:#888;">🔑 ${(lang === 'en') ? 'Password' : 'Şifre'}: ${userPassword}</span>
+                            ${passwordRowHtml}
                             ${isBanned ? `<br><span style="color:#ff4d4d; font-size:0.75rem; font-weight:bold;">🔒 ${(lang === 'en') ? 'BANNED' : 'BANLI'}</span>` : ''}
                             ${banInfoHtml}
                         </div>
@@ -2013,7 +2025,11 @@ function removeFriend(friendUid) {
                 loadUsersForAdmin();
             } catch (err) {
                 console.error('Ban yazma hatası:', err);
-                alert(lang === 'en' ? 'Failed to write ban to database.' : 'Ban veritabanına yazılamadı.');
+                const code = err && err.code ? err.code : 'unknown';
+                const detail = lang === 'en'
+                    ? `Failed to write ban to database.\n\nError: ${code}\n${err && err.message ? err.message : ''}\n\nThis is almost always caused by Firebase Realtime Database Security Rules blocking the write — check that admin roles have write access to /users/{uid}.`
+                    : `Ban veritabanına yazılamadı.\n\nHata: ${code}\n${err && err.message ? err.message : ''}\n\nBu hata neredeyse her zaman Firebase Realtime Database Güvenlik Kuralları'nın yazmayı engellemesinden kaynaklanır — admin rütbelerinin /users/{uid} yoluna yazma izni olduğunu kontrol et.`;
+                alert(detail);
             } finally {
                 submitBtn.disabled = false;
             }
@@ -2058,7 +2074,10 @@ function removeFriend(friendUid) {
                 loadUsersForAdmin();
             }).catch((err) => {
                 console.error('Unban hatası:', err);
-                alert(lang === 'en' ? 'Failed to remove ban.' : 'Ban kaldırılamadı.');
+                const code = err && err.code ? err.code : 'unknown';
+                alert(lang === 'en'
+                    ? `Failed to remove ban.\n\nError: ${code}`
+                    : `Ban kaldırılamadı.\n\nHata: ${code}`);
             });
         }
 
