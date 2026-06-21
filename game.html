@@ -94,6 +94,18 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .chat-msg.sys{color:#acd4ff;}
 .chat-msg.srv{color:#2effdc;}
 .chat-msg.warn{color:#ffbb44;}
+.rank-tag{position:relative;display:inline-block;overflow:hidden;}
+.rank-tag.rank-sweep::after{
+  content:'';position:absolute;top:0;left:-150%;width:60%;height:100%;
+  background:linear-gradient(100deg,rgba(255,255,255,0) 0%,rgba(255,255,255,0) 35%,rgba(255,255,255,.95) 50%,rgba(255,255,255,0) 65%,rgba(255,255,255,0) 100%);
+  animation:rankSweep 2.6s ease-in-out infinite;pointer-events:none;mix-blend-mode:screen;
+}
+@keyframes rankSweep{
+  0%{left:-150%;}
+  35%{left:-150%;}
+  70%{left:150%;}
+  100%{left:150%;}
+}
 #chat-input-row{display:none;margin-top:4px;pointer-events:all;}
 #chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
 #chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
@@ -1690,8 +1702,12 @@ function mkSprite(name,rank,rankColor){
   const yMid=cH/2-1;
   if(tag){
     ctx.textAlign='left';
+    ctx.shadowColor=color;
+    ctx.shadowBlur=10;
     ctx.fillStyle=color;
     ctx.fillText(tag+' ',x,yMid);
+    ctx.fillText(tag+' ',x,yMid); // glow'u belirginleştirmek için iki kez çiz
+    ctx.shadowBlur=0;
     x+=tagW;
   }
   ctx.textAlign='left';
@@ -2188,11 +2204,15 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
     const safeMsg=msg?String(msg).substring(0,200):'';
     const tag=formatRankTag(rank);
     if(tag){
+      const color=resolveRankColor(rank,rankColor);
       const tagSpan=document.createElement('span');
-      tagSpan.style.color=resolveRankColor(rank,rankColor);
+      tagSpan.className='rank-tag'+(canUseShout(rank)?' rank-sweep':'');
+      tagSpan.style.color=color;
       tagSpan.style.fontWeight='bold';
-      tagSpan.textContent=tag+' ';
+      tagSpan.style.textShadow='0 0 5px '+color+',0 0 9px '+color;
+      tagSpan.textContent=tag;
       d.appendChild(tagSpan);
+      d.appendChild(document.createTextNode(' '));
     }
     d.appendChild(document.createTextNode(`${safeName}: ${safeMsg}`));
   }
@@ -2208,6 +2228,7 @@ function addShoutChat(name,msg,rank,rankColor){
   const safeName=sanitizeName(name||'?');
   const safeMsg=msg?String(msg).substring(0,200):'';
   const shoutSpan=document.createElement('span');
+  shoutSpan.className='rank-tag rank-sweep';
   shoutSpan.style.color='#40e0d0';
   shoutSpan.style.fontWeight='bold';
   shoutSpan.style.textShadow='0 0 6px rgba(64,224,208,.9),0 0 12px rgba(64,224,208,.6)';
@@ -2215,10 +2236,12 @@ function addShoutChat(name,msg,rank,rankColor){
   d.appendChild(shoutSpan);
   const tag=formatRankTag(rank);
   if(tag){
+    const color=resolveRankColor(rank,rankColor);
     const tagSpan=document.createElement('span');
-    tagSpan.style.color=resolveRankColor(rank,rankColor);
+    tagSpan.className='rank-tag'+(canUseShout(rank)?' rank-sweep':'');
+    tagSpan.style.color=color;
     tagSpan.style.fontWeight='bold';
-    tagSpan.style.textShadow='0 0 5px '+resolveRankColor(rank,rankColor);
+    tagSpan.style.textShadow='0 0 5px '+color+',0 0 9px '+color;
     tagSpan.textContent=tag;
     d.appendChild(tagSpan);
   }
