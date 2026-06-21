@@ -429,6 +429,16 @@ function resolveRankColor(rank,color){
   if(rank&&RANK_COLOR_FALLBACK[rank]) return RANK_COLOR_FALLBACK[rank];
   return '#ffffff';
 }
+// ─── 📢 /shout komutu için izinli rütbeler ───
+// Twitch ve üzeri: Twitch, YouTube, Beta Tester, Helper, Mod, Admin, Dev, Admin/Dev, Owner
+const SHOUT_ALLOWED_RANKS=new Set([
+  'twitch','youtube','beta tester','helper','mod','admin','dev','developer',
+  'admin/dev','admin / dev','admin / developer','owner','owner / developer','owner/dev','owner/developer'
+]);
+function canUseShout(rank){
+  if(!rank||typeof rank!=='string') return false;
+  return SHOUT_ALLOWED_RANKS.has(rank.trim().toLowerCase());
+}
  
 window.addEventListener('message',function(event){
   if(event.data&&event.data.type==='SET_USERNAME'){
@@ -505,6 +515,7 @@ const langData={
       srvCheatsOn:'[Sunucu]: Hileler açıldı!',srvCheatsOff:'[Sunucu]: Hileler kapatıldı!',srvUsageCheats:'Kullanım: /cheats on veya /cheats off',srvCheatsHostOnly:'[Sunucu]: Hileler sadece yönetici tarafından değiştirilebilir!',
       srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
       srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!',
+      srvShoutNoPerm:'Bu komut Twitch ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
       camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)'},
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
@@ -549,6 +560,7 @@ const langData={
       srvCheatsOn:'[Server]: Cheats enabled!',srvCheatsOff:'[Server]: Cheats disabled!',srvUsageCheats:'Usage: /cheats on or /cheats off',srvCheatsHostOnly:'[Server]: Only the host can change cheats!',
       srvMpOnlyCmd:'[Server]: This command can only be used in multiplayer',
       srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!',
+      srvShoutNoPerm:'This command is for Twitch rank and above',srvUsageShout:'Usage: /shout <message>',
       camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)'}
 };
 let currentLang='en';
@@ -1065,13 +1077,23 @@ const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:ne
 function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;}
 function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';return 'planks';}
 function rebuildInstancedMeshes(){
-  for(const k in iMeshes) scene.remove(iMeshes[k]);
+  for(const k in iMeshes){
+    scene.remove(iMeshes[k]);
+    // Önceki mesh'in klonlanmış geometrisini bellekten temizle (BLOCK_GEO'nun kendisi değil)
+    if(iMeshes[k].geometry&&iMeshes[k].geometry!==BLOCK_GEO) iMeshes[k].geometry.dispose();
+  }
   iMeshes={};
   for(const mk in visiblePositions){
     const posMap=visiblePositions[mk];if(!posMap.size) continue;
     const positions=Array.from(posMap.values());
     const mat=IMAT_KEYS[mk];
-    const mesh=new THREE.InstancedMesh(BLOCK_GEO,mat,positions.length);
+    // ÖNEMLİ: Her InstancedMesh kendi geometri KLONUNU kullanmalı.
+    // BLOCK_GEO tüm blok türleri arasında paylaşılıyordu; geometry.boundingSphere
+    // paylaşılan geometriye yazılınca hepsi birbirini eziyordu ve bu da
+    // belirli kamera açılarında bazı chunk'ların yanlışlıkla frustum-culled
+    // olup (görünmez/işlenmemiş gibi) kaybolmasına sebep oluyordu.
+    const geo=BLOCK_GEO.clone();
+    const mesh=new THREE.InstancedMesh(geo,mat,positions.length);
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     // FPS: Frustum Culling – görüş dışı instance'lar atlansın
     mesh.frustumCulled=true;
@@ -1082,10 +1104,10 @@ function rebuildInstancedMeshes(){
       if(positions[i].y<minY) minY=positions[i].y;if(positions[i].y>maxY) maxY=positions[i].y;
       if(positions[i].z<minZ) minZ=positions[i].z;if(positions[i].z>maxZ) maxZ=positions[i].z;
     }
-    // Bounding sphere hesapla – frustum culling'in doğru çalışması için
+    // Bounding sphere hesapla – kendi geometri klonumuza yazıyoruz, artık güvenli
     const cx=(minX+maxX)/2,cy=(minY+maxY)/2,cz=(minZ+maxZ)/2;
     const r=Math.sqrt(((maxX-minX)/2)**2+((maxY-minY)/2)**2+((maxZ-minZ)/2)**2)+1;
-    mesh.geometry.boundingSphere=new THREE.Sphere(new THREE.Vector3(cx,cy,cz),r);
+    geo.boundingSphere=new THREE.Sphere(new THREE.Vector3(cx,cy,cz),r);
     mesh.instanceMatrix.needsUpdate=true;
     scene.add(mesh);iMeshes[mk]=mesh;
   }
@@ -1193,6 +1215,7 @@ function closeInv(){
 document.getElementById('inv-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('inv-overlay')) closeInv();});
 document.getElementById('btn-mobile-inv').addEventListener('click',e=>{e.stopPropagation();if(invOpen) closeInv(); else openInv();});
 document.getElementById('btn-mobile-cam').addEventListener('click',e=>{e.stopPropagation();cycleCameraMode();});
+document.getElementById('btn-mobile-cam').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();cycleCameraMode();},{passive:false});
  
 // ─── Face Culling ───
 const FACES=[
@@ -2178,6 +2201,32 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
   showChatLog();
 }
  
+function addShoutChat(name,msg,rank,rankColor){
+  const log=document.getElementById('chat-log');
+  const d=document.createElement('div');
+  d.className='chat-msg shout-msg';
+  const safeName=sanitizeName(name||'?');
+  const safeMsg=msg?String(msg).substring(0,200):'';
+  const shoutSpan=document.createElement('span');
+  shoutSpan.style.color='#40e0d0';
+  shoutSpan.style.fontWeight='bold';
+  shoutSpan.style.textShadow='0 0 6px rgba(64,224,208,.9),0 0 12px rgba(64,224,208,.6)';
+  shoutSpan.textContent='[SHOUT]';
+  d.appendChild(shoutSpan);
+  const tag=formatRankTag(rank);
+  if(tag){
+    const tagSpan=document.createElement('span');
+    tagSpan.style.color=resolveRankColor(rank,rankColor);
+    tagSpan.style.fontWeight='bold';
+    tagSpan.style.textShadow='0 0 5px '+resolveRankColor(rank,rankColor);
+    tagSpan.textContent=tag;
+    d.appendChild(tagSpan);
+  }
+  d.appendChild(document.createTextNode(` ${safeName}: ${safeMsg}`));
+  log.appendChild(d);while(log.children.length>40) log.removeChild(log.firstChild);
+  log.scrollTop=log.scrollHeight;
+  showChatLog();
+}
 function grantOpHost(name){
   const d=langData[currentLang];
   opPlayers.add(name);
@@ -2324,6 +2373,23 @@ function processCmd(raw){
     window.parent.postMessage({type:'friendRequest',from:myUsername,to:target},'*');
     return;
   }
+  if(cmd==='shout'){
+    if(!canUseShout(playerRank)){addChat(null,d.srvShoutNoPerm,true,'warn');return;}
+    const msg=parts.slice(1).join(' ').trim();
+    if(!msg){addChat(null,d.srvUsageShout,true);return;}
+    const safeMsg=msg.substring(0,200);
+    if(!isMP){
+      addShoutChat(myUsername,safeMsg,playerRank,playerRankColor);
+      return;
+    }
+    if(amHost){
+      addShoutChat(myName,safeMsg,playerRank,playerRankColor);
+      Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'shout',name:myName,msg:safeMsg,rank:playerRank,rankColor:playerRankColor});});
+    } else if(guestConn?.open){
+      guestConn.send({type:'shout',msg:safeMsg});
+    }
+    return;
+  }
   addChat(null,d.srvUnknownCmd+cmd,true,'warn');
 }
  
@@ -2442,6 +2508,19 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             const safeMsg=String(data.msg||'').substring(0,200);
             addChat(nm,safeMsg,false,'',nmRank,nmRankColor);
             Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});});
+          }
+          else if(data.type==='shout'){
+            if(!connTokens.has(pid)) return;
+            const nm=connTokens.get(pid)||'?';
+            const nmRank=hostConns[pid]?.rank||null;
+            const nmRankColor=hostConns[pid]?.rankColor||null;
+            if(!canUseShout(nmRank)){conn.send({type:'chat',name:null,msg:langData[currentLang].srvShoutNoPerm,sys:true,cls:'warn'});return;}
+            if(!checkRate('shout_'+pid,2)){
+              conn.send({type:'chat',name:null,msg:langData[currentLang].rateLimitMsg,sys:true,cls:'warn'});return;
+            }
+            const safeMsg=String(data.msg||'').substring(0,200);
+            addShoutChat(nm,safeMsg,nmRank,nmRankColor);
+            Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'shout',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});});
           }
           else if(data.type==='aatk'){if(!connTokens.has(pid)) return;const a=animals.find(x=>x.id===data.id);if(a) attackAnimal(a,Math.min(data.dmg,20));}
           else if(data.type==='modereq'){
@@ -2584,6 +2663,9 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       else if(data.type==='chat'){
         if(data.sys) addChat(null,String(data.msg||'').substring(0,200),true,data.cls||'');
         else addChat(sanitizeName(data.name||'?'),String(data.msg||'').substring(0,200),false,data.cls||'',data.rank||null,data.rankColor||null);
+      }
+      else if(data.type==='shout'){
+        addShoutChat(sanitizeName(data.name||'?'),String(data.msg||'').substring(0,200),data.rank||null,data.rankColor||null);
       }
       else if(data.type==='pjoin'){
         if(data.id===myPeer.id) return;
@@ -3141,6 +3223,7 @@ function closeChat(send){
     if(!checkRate('mychat',3)){addChat(null,langData[currentLang].rateLimitMsg,true,'warn');inp.value='';isChatOpen=false;document.getElementById('chat-input-row').style.display='none';if(deviceMode==='pc'&&!isPaused) document.body.requestPointerLock();return;}
     if(msg.startsWith('/')){processCmd(msg.slice(1));}
     else if(isMP){addChat(myName,msg,false,'',playerRank,playerRankColor);if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'chat',name:myName,msg,rank:playerRank,rankColor:playerRankColor});});else if(guestConn?.open) guestConn.send({type:'chat',msg});}
+    else{addChat(myUsername,msg,false,'',playerRank,playerRankColor);}
   }
   inp.value='';isChatOpen=false;
   document.getElementById('chat-input-row').style.display='none';
@@ -3271,7 +3354,7 @@ function setupMobile(){
     if(document.getElementById('menu-overlay').style.display!=='none') return;
     for(let i=0;i<e.changedTouches.length;i++){
       const t=e.changedTouches[i];
-      if(t.target.closest('#joystick-container')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#pause-overlay')||t.target.closest('#btn-mobile-chat')||t.target.closest('#chat-input-row')||t.target.closest('#death-screen')||t.target.closest('#btn-mobile-inv')||t.target.closest('#inv-overlay')) continue;
+      if(t.target.closest('#joystick-container')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#pause-overlay')||t.target.closest('#btn-mobile-chat')||t.target.closest('#chat-input-row')||t.target.closest('#death-screen')||t.target.closest('#btn-mobile-inv')||t.target.closest('#inv-overlay')||t.target.closest('#btn-mobile-cam')||t.target.closest('#btn-mobile-crouch')) continue;
       const id=t.identifier;
       aT[id]={sx:t.clientX,sy:t.clientY,mv:false,to:setTimeout(()=>{if(aT[id]&&!aT[id].mv){breakB(aT[id].sx,aT[id].sy,false);delete aT[id];}},300)};
       if(lkId===null){lkId=id;sx=t.clientX;sy=t.clientY;}
