@@ -651,6 +651,22 @@
             border-color: #ff4d4d;
         }
 
+        .ban-toggle-link {
+            display: inline-block;
+            margin-top: 10px;
+            font-size: 0.78rem;
+            color: #66fcf1;
+            cursor: pointer;
+            text-decoration: underline;
+            user-select: none;
+        }
+        .ban-toggle-link:hover { color: #45f3ff; }
+
+        #banSubmitBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .ban-modal-actions {
             display: flex;
             gap: 10px;
@@ -814,15 +830,23 @@
 
             <input type="number" id="banDurationValue" min="1" value="1" placeholder="Süre Miktarı / Duration Amount">
 
-            <label class="ban-field-label" for="banReasonTR">Türkçe Ban Sebebi</label>
-            <textarea id="banReasonTR" placeholder="Banlanma sebebini Türkçe olarak yazın..."></textarea>
+            <label class="ban-field-label" id="banReasonPrimaryLabel" for="banReasonPrimary">Türkçe Ban Sebebi</label>
+            <textarea id="banReasonPrimary" placeholder="Banlanma sebebini yazın..."></textarea>
 
-            <label class="ban-field-label" for="banReasonEN">English Ban Reason</label>
-            <textarea id="banReasonEN" placeholder="Write the ban reason in English..."></textarea>
+            <span class="ban-toggle-link" id="banToggleOtherLangBtn" onclick="toggleOtherLangField()">+ Diğer dili de ekle / Add the other language too</span>
+
+            <div id="banReasonSecondaryWrapper" style="display:none;">
+                <label class="ban-field-label" id="banReasonSecondaryLabel" for="banReasonSecondary">English Ban Reason</label>
+                <textarea id="banReasonSecondary" placeholder="Write the ban reason in English..."></textarea>
+            </div>
+
+            <!-- Eski TR/EN inputları geriye dönük uyumluluk için gizli tutuluyor; submitBan() bunları dolduruyor -->
+            <input type="hidden" id="banReasonTR">
+            <input type="hidden" id="banReasonEN">
 
             <div class="ban-modal-actions">
                 <button class="btn btn-cancel" onclick="closeSubModal('adminBanSetupModal')">İptal / Cancel</button>
-                <button class="btn" style="background-color:#ff4d4d; color:#fff;" onclick="submitBan()">Raporla / Report</button>
+                <button class="btn" style="background-color:#ff4d4d; color:#fff;" onclick="submitBan()" id="banSubmitBtn">Raporla / Report</button>
             </div>
         </div>
     </div>
@@ -1709,17 +1733,71 @@ function removeFriend(friendUid) {
             });
         }
 
+        // ========================================== 
+        // 🌐 BAN SİSTEMİ - ÇOK DİLLİ DESTEK & GOOGLE TRANSLATE
+        // ==========================================
+        // NOT: Buraya kendi Google Cloud Translation API anahtarını gireceksin.
+        // Anahtar boş bırakılırsa, çeviri başarısız olur ve sistem otomatik
+        // olarak "ham metni iki dile de aynen kopyalama" yedeğine düşer.
+        const GOOGLE_TRANSLATE_API_KEY = ""; // <-- BURAYA API KEY'İNİ YAPIŞTIR
+
+        // Aktif site dilini garanti şekilde okuyan yardımcı fonksiyon
+        function getActiveLang() {
+            return document.documentElement.lang || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'tr');
+        }
+
+        // Google Translate API ile metni çeviren fonksiyon (TR<->EN)
+        async function translateText(text, targetLang) {
+            if (!GOOGLE_TRANSLATE_API_KEY) {
+                throw new Error('NO_API_KEY');
+            }
+            const url = `https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_API_KEY}`;
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ q: text, target: targetLang, format: 'text' })
+            });
+            if (!response.ok) throw new Error('TRANSLATE_API_ERROR');
+            const data = await response.json();
+            return data.data.translations[0].translatedText;
+        }
+
         // Ban kurulum modalını açan ve hedef kullanıcıyı hazırlayan fonksiyon
         let banTargetUid = null;
         function openBanSetupModal(uid, username) {
             banTargetUid = uid;
+            const lang = getActiveLang();
+
             document.getElementById('banTargetName').innerText = username;
             document.getElementById('banDurationUnit').value = 'minute';
             document.getElementById('banDurationValue').value = 1;
             document.getElementById('banDurationValue').style.display = 'block';
-            document.getElementById('banReasonTR').value = '';
-            document.getElementById('banReasonEN').value = '';
+
+            // Aktif dile göre tek görünür alanı ayarla
+            document.getElementById('banReasonPrimaryLabel').innerText = (lang === 'en') ? 'English Ban Reason' : 'Türkçe Ban Sebebi';
+            document.getElementById('banReasonPrimary').placeholder = (lang === 'en') ? 'Write the ban reason in English...' : 'Banlanma sebebini Türkçe olarak yazın...';
+            document.getElementById('banReasonPrimary').value = '';
+            document.getElementById('banReasonPrimary').dataset.lang = (lang === 'en') ? 'en' : 'tr';
+
+            // İkinci dil alanını sıfırla ve gizle (toggle kapalı başlasın)
+            document.getElementById('banReasonSecondaryWrapper').style.display = 'none';
+            document.getElementById('banReasonSecondary').value = '';
+            const secondaryLang = (lang === 'en') ? 'tr' : 'en';
+            document.getElementById('banReasonSecondaryLabel').innerText = (secondaryLang === 'en') ? 'English Ban Reason' : 'Türkçe Ban Sebebi';
+            document.getElementById('banReasonSecondary').placeholder = (secondaryLang === 'en') ? 'Write the ban reason in English...' : 'Banlanma sebebini Türkçe olarak yazın...';
+            document.getElementById('banReasonSecondary').dataset.lang = secondaryLang;
+            document.getElementById('banToggleOtherLangBtn').innerText = (lang === 'en') ? '+ Türkçeyi de ekle / Add Turkish too' : '+ Diğer dili de ekle / Add the other language too';
+
+            document.getElementById('banSubmitBtn').disabled = false;
+            document.getElementById('banSubmitBtn').innerText = 'Raporla / Report';
+
             document.getElementById('adminBanSetupModal').style.display = 'flex';
+        }
+
+        // "Diğer dili de ekle" linkine tıklanınca ikinci dil alanını aç/kapat
+        function toggleOtherLangField() {
+            const wrapper = document.getElementById('banReasonSecondaryWrapper');
+            wrapper.style.display = (wrapper.style.display === 'none') ? 'block' : 'none';
         }
 
         // Süre birimi "Sonsuz / Permanent" seçilince miktar inputunu gizleyen fonksiyon
@@ -1729,16 +1807,47 @@ function removeFriend(friendUid) {
             valueInput.style.display = (unit === 'permanent') ? 'none' : 'block';
         }
 
-        // NOT: submitBan() ve unbanUser() fonksiyonları bir sonraki aşamada
-        // (Firebase'e yazma / hiyerarşi kontrolü / çok dilli overlay tetikleme) eklenecek.
-        function submitBan() {
-            const reasonTR = document.getElementById('banReasonTR').value.trim();
-            const reasonEN = document.getElementById('banReasonEN').value.trim();
-            if (!reasonTR || !reasonEN) {
-                alert('Lütfen hem Türkçe hem de İngilizce ban sebebini doldurun. / Please fill in both the Turkish and English ban reasons.');
+        // NOT: Firebase'e gerçek ban yazma işlemi (hiyerarşi kontrolü dahil)
+        // bir sonraki aşamada eklenecek. Bu aşamada dil mantığı ve
+        // otomatik çeviri tamamlanmış durumda.
+        async function submitBan() {
+            const primaryText = document.getElementById('banReasonPrimary').value.trim();
+            const primaryLang = document.getElementById('banReasonPrimary').dataset.lang || 'tr';
+            const secondaryWrapperOpen = document.getElementById('banReasonSecondaryWrapper').style.display !== 'none';
+            const secondaryLang = document.getElementById('banReasonSecondary').dataset.lang || (primaryLang === 'tr' ? 'en' : 'tr');
+            let secondaryText = document.getElementById('banReasonSecondary').value.trim();
+
+            const lang = getActiveLang();
+            if (!primaryText) {
+                alert(lang === 'en' ? 'Please write the ban reason.' : 'Lütfen ban sebebini yazın.');
                 return;
             }
-            alert('⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.');
+
+            const submitBtn = document.getElementById('banSubmitBtn');
+            submitBtn.disabled = true;
+
+            // Eğer admin ikinci dili manuel doldurmadıysa, otomatik çeviri devreye girer
+            if (!secondaryText) {
+                submitBtn.innerText = (lang === 'en') ? 'Translating...' : 'Çevriliyor...';
+                try {
+                    secondaryText = await translateText(primaryText, secondaryLang);
+                } catch (err) {
+                    // API key yoksa ya da çeviri başarısız olursa: ham metni aynen kopyala (yedek davranış)
+                    console.warn('Çeviri başarısız, ham metin kopyalanıyor:', err.message);
+                    secondaryText = primaryText;
+                }
+            }
+
+            // Eski TR/EN gizli inputlarını dolduruyoruz (geriye dönük uyumluluk + ileride Firebase'e yazarken kullanılacak)
+            const reasonTR = (primaryLang === 'tr') ? primaryText : secondaryText;
+            const reasonEN = (primaryLang === 'en') ? primaryText : secondaryText;
+            document.getElementById('banReasonTR').value = reasonTR;
+            document.getElementById('banReasonEN').value = reasonEN;
+
+            submitBtn.disabled = false;
+            submitBtn.innerText = 'Raporla / Report';
+
+            alert('⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN);
         }
 
         function unbanUser(uid) {
