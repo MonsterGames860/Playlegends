@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Indev v1.3 - Perlin World </title>
+<title>Legends Indev v1.4 - Perlin World </title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
 body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:monospace}
@@ -136,6 +136,8 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .inv-hslot-name{font-size:7px;color:rgba(255,255,255,.55);margin-top:2px;text-align:center;}
 #inv-close-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:5px;font-family:monospace;}
 #btn-mobile-inv{position:absolute;bottom:164px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:14px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
+#btn-mobile-cam{position:absolute;top:12px;right:12px;width:44px;height:44px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:50%;color:#fff;font-size:19px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
+#btn-mobile-cam:active{background:rgba(102,252,241,.35);}
 body.low-health::after {
     content: '';
       position: fixed;
@@ -161,6 +163,7 @@ body.low-health::after {
   #chat-hint{bottom:55px;}
   #btn-mobile-chat{bottom:100px;right:25px;}
   #btn-mobile-inv{bottom:145px;right:25px;}
+  #btn-mobile-cam{top:8px;right:8px;width:38px;height:38px;font-size:16px;}
   #bars-wrap{bottom:76px;}
   #inv-grid{grid-template-columns:repeat(5,1fr);}
   #inv-hotbar-row{gap:3px;flex-wrap:wrap;}
@@ -177,7 +180,7 @@ body.low-health::after {
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
     <div class="game-logo" id="txt-title">LEGENDS INDEV</div>
-    <div class="game-version">v1.3 - Perlin World</div>
+    <div class="game-version">v1.4 - Perlin World</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-settings"></button>
@@ -333,6 +336,7 @@ body.low-health::after {
 <button id="mobile-pause-btn">&#9646;&#9646;</button>
 <div id="btn-mobile-chat">💬</div>
 <div id="btn-mobile-inv">🎒</div>
+<div id="btn-mobile-cam" title="Kamera Açısı">📷</div>
 <div id="chat-container">
   <div id="chat-log"></div>
   <div id="chat-input-row"><input id="chat-input" maxlength="200" autocomplete="off" spellcheck="false"></div>
@@ -366,7 +370,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v1.3</div>
+    <div id="pause-version">v1.4</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <div class="pause-setting">
       <span id="txt-rd-label">Görüş Mesafesi</span>
@@ -462,7 +466,7 @@ const langData={
       deviceTitle:'CİHAZ SEÇİMİ',pcBtn:'BİLGİSAYAR',mobileBtn:'MOBİL',worldTitle:'DÜNYA SEÇİMİ',
       wInfTitle:'SONSUZ DÜNYA',wInfDesc:'Sınırsız keşif, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.3',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.4',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
@@ -500,12 +504,13 @@ const langData={
       srvUsageKillCmd:'Kullanım: /kill | /kill @p | /kill @a | /kill <isim>',srvKillNoPlayer:'[Sunucu]: Oyuncu bulunamadı: ',
       srvCheatsOn:'[Sunucu]: Hileler açıldı!',srvCheatsOff:'[Sunucu]: Hileler kapatıldı!',srvUsageCheats:'Kullanım: /cheats on veya /cheats off',srvCheatsHostOnly:'[Sunucu]: Hileler sadece yönetici tarafından değiştirilebilir!',
       srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
-      srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!'},
+      srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!',
+      camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)'},
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
       wInfTitle:'INFINITE WORLD',wInfDesc:'Endless exploration',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.3',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.4',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
@@ -543,9 +548,10 @@ const langData={
       srvUsageKillCmd:'Usage: /kill | /kill @p | /kill @a | /kill <name>',srvKillNoPlayer:'[Server]: Player not found: ',
       srvCheatsOn:'[Server]: Cheats enabled!',srvCheatsOff:'[Server]: Cheats disabled!',srvUsageCheats:'Usage: /cheats on or /cheats off',srvCheatsHostOnly:'[Server]: Only the host can change cheats!',
       srvMpOnlyCmd:'[Server]: This command can only be used in multiplayer',
-      srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!'}
+      srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!',
+      camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)'}
 };
-let currentLang='tr';
+let currentLang='en';
 function setLanguage(l){
   currentLang=l;
   document.getElementById('lang-tr').classList.toggle('active',l==='tr');
@@ -638,7 +644,7 @@ document.getElementById('btn-quit').addEventListener('click',()=>{
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('death-screen').classList.remove('active');
   ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
-   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv']
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   const mo=document.getElementById('menu-overlay');
   mo.style.display='flex';
@@ -1186,6 +1192,7 @@ function closeInv(){
 }
 document.getElementById('inv-overlay').addEventListener('click',e=>{if(e.target===document.getElementById('inv-overlay')) closeInv();});
 document.getElementById('btn-mobile-inv').addEventListener('click',e=>{e.stopPropagation();if(invOpen) closeInv(); else openInv();});
+document.getElementById('btn-mobile-cam').addEventListener('click',e=>{e.stopPropagation();cycleCameraMode();});
  
 // ─── Face Culling ───
 const FACES=[
@@ -2337,7 +2344,7 @@ function goToMainMenu(){
   document.getElementById('ban-screen').classList.remove('active');
   document.getElementById('kick-screen').classList.remove('active');
   ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
-   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv']
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   const mo=document.getElementById('menu-overlay');
   mo.style.display='flex';
@@ -2347,7 +2354,7 @@ function goToMainMenu(){
 }
 function hideGameHUD(){
   ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
-   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv']
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('death-screen').classList.remove('active');
@@ -2635,6 +2642,75 @@ const RC=new THREE.Raycaster();
 let slot=0;
 let isFlying=false,isCrouching=false,spaceDown=false,lastSpaceTime=0;
 
+// ─── 🎥 Kamera Açısı Sistemi (1. Şahıs / 3. Şahıs Arka / 3. Şahıs Ön) ───
+// ÖNEMLİ: 'camera' nesnesi fizik/çarpışma/raycast/ağ senkronizasyonu için TEK kaynak olarak
+// olduğu gibi korunur ve hiçbir yerde taşınmaz. Bu sistem sadece RENDER anında kullanılan
+// ayrı bir 'renderCamera' ile çalışır; oyun mantığına dokunmaz.
+const CAMERA_MODES=['first','third-back','third-front'];
+let cameraMode='first';
+const renderCamera=new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,0.1,80);
+let selfModel=null; // 3. şahısta görünen kendi Steve modelimiz
+function ensureSelfModel(){
+  if(selfModel) return selfModel;
+  selfModel=mkPlayer(myUsername||myName||'Player',playerRank,playerRankColor);
+  selfModel.visible=false;
+  return selfModel;
+}
+function cycleCameraMode(){
+  const idx=CAMERA_MODES.indexOf(cameraMode);
+  cameraMode=CAMERA_MODES[(idx+1)%CAMERA_MODES.length];
+  const sm=ensureSelfModel();
+  sm.visible=(cameraMode!=='first');
+}
+// renderCamera'yı her karede gerçek 'camera' transformuna göre hesaplar; duvarlara gömülmeyi
+// önlemek için castRayBlocks ile basit bir geri-çekme (collision) kontrolü yapar.
+const _camFwd=new THREE.Vector3(),_camDesired=new THREE.Vector3();
+function updateRenderCamera(){
+  renderCamera.fov=camera.fov;renderCamera.aspect=camera.aspect;renderCamera.near=camera.near;renderCamera.far=camera.far;renderCamera.updateProjectionMatrix();
+  if(cameraMode==='first'){
+    renderCamera.position.copy(camera.position);
+    renderCamera.quaternion.copy(camera.quaternion);
+    if(selfModel) selfModel.visible=false;
+    return;
+  }
+  const back=(cameraMode==='third-back');
+  const dist=4.2;
+  _camFwd.set(0,0,-1).applyQuaternion(camera.quaternion);
+  if(back){
+    // Kameranın arkasına çekilir, oyuncuya bakar
+    const orig=camera.position.clone();
+    const dir=_camFwd.clone().multiplyScalar(-1);
+    let safeDist=dist;
+    const hit=castRayBlocks(orig,dir,true);
+    if(hit.length&&hit[0].distance<dist) safeDist=Math.max(0.6,hit[0].distance-0.25);
+    _camDesired.copy(camera.position).addScaledVector(dir,safeDist);
+    renderCamera.position.copy(_camDesired);
+    renderCamera.quaternion.copy(camera.quaternion);
+  } else {
+    // Ön taraftan oyuncuya bakar (oyuncu kameranın önünde durur).
+    // Yukarı/aşağı bakışın (pitch) da yansıması için kamera, oyuncunun bakış yönündeki
+    // dikey bileşeni de izler — sadece düz Y'de sabitlenmez.
+    const orig=camera.position.clone();
+    const dir=_camFwd.clone();
+    let safeDist=dist;
+    const hit=castRayBlocks(orig,dir,true);
+    if(hit.length&&hit[0].distance<dist) safeDist=Math.max(0.6,hit[0].distance-0.25);
+    _camDesired.copy(camera.position).addScaledVector(dir,safeDist);
+    renderCamera.position.copy(_camDesired);
+    // Yaw'ı 180° ters çevir (oyuncuya bakacak şekilde), pitch'i de ters çevirip uygula:
+    // oyuncu yukarı bakınca ön kamera biraz aşağıdan, aşağı bakınca biraz yukarıdan görür.
+    renderCamera.rotation.order='YXZ';
+    renderCamera.rotation.y=camera.rotation.y+Math.PI;
+    renderCamera.rotation.x=-camera.rotation.x;
+    renderCamera.rotation.z=0;
+  }
+  if(selfModel){
+    selfModel.visible=true;
+    selfModel.position.set(camera.position.x,camera.position.y-1.6,camera.position.z);
+    selfModel.rotation.y=camera.rotation.y;
+  }
+}
+
 // ─── Kırma İlerleme Sistemi (Survival) ───
 let breakProgress=0,breakTarget=null,isBreaking=false;
 const BLOCK_HARDNESS={'grass':0.6,'dirt':0.5,'stone':1.5,'planks':0.8,'log':1.2,'cobblestone':2.0,'glass':0.3,'leaves':0.2,'sand':0.5,'default':1.0};
@@ -2719,6 +2795,8 @@ function resetWorld(){
   animalSpawnTimer=15;animalSyncTimer=0;
   isResetting=false;
   const log=document.getElementById('chat-log');while(log.firstChild) log.removeChild(log.firstChild);
+  cameraMode='first';
+  if(selfModel) selfModel.visible=false;
 }
 function startGame(device,world,mp=false,gm='survival',cheats=true){
   resetWorld();
@@ -2738,6 +2816,7 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
     document.getElementById('mobile-jump-container').style.display='flex';
     document.getElementById('mobile-pause-btn').style.display='block';
     document.getElementById('btn-mobile-inv').style.display='flex';
+    document.getElementById('btn-mobile-cam').style.display='flex';
     setupMobile();
   }
   document.getElementById('chat-container').style.display='none';
@@ -3103,6 +3182,7 @@ function setupPC(){
     if(isChatOpen) return;
     if (isPaused || DeathManager.isDead) return;
     if(e.code==='KeyP'){if(isPaused) closePauseMenu(); else if(!invOpen) openPauseMenu();return;}
+    if(e.code==='F5'){e.preventDefault();cycleCameraMode();return;}
     if(e.code==='KeyE'){if(invOpen) closeInv(); else if(!isPaused) openInv();return;}
     if(e.code==='Escape'){
       if(isChatOpen){closeChat(false);return;}
@@ -3378,12 +3458,13 @@ if (camera.position.y < -100) {
   if(waterMesh) waterMesh.visible=!_eyeInWater;
   const _wv=document.getElementById('water-vignette');
   if(_wv) _wv.style.opacity=_eyeInWater?'1':'0';
-  renderer.render(scene,camera);
+  updateRenderCamera();
+  renderer.render(scene,renderCamera);
 }
  
 window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
 window.addEventListener('beforeunload',()=>cleanupMP());
-setLanguage('tr');
+setLanguage('en');
 animate();
 </script>
 </body>
