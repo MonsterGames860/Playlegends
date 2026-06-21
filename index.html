@@ -1450,6 +1450,7 @@ function removeFriend(friendUid) {
 
             // 1. Kurucu e-posta kontrolü
             if (user.email === ADMIN_EMAIL) {
+                window.currentUserRole = 'Owner / Developer';
                 database.ref('users/' + user.uid).update({
                     username: customUsername || user.displayName || "Legends_Player",
                     email: user.email,
@@ -1464,6 +1465,7 @@ function removeFriend(friendUid) {
             database.ref('users/' + user.uid).once('value', (snapshot) => {
                 if (snapshot.exists()) {
                     const userData = snapshot.val();
+                    window.currentUserRole = userData.role || 'Player';
                     
                     // Kullanıcının rütbesi listede varsa (Developer dahil) butonu göster
                     if (userData.role && authorizedRoles.includes(userData.role)) {
@@ -1472,6 +1474,7 @@ function removeFriend(friendUid) {
                         if (adminPanelBtn) adminPanelBtn.style.display = 'none';
                     }
                 } else {
+                    window.currentUserRole = 'Player';
                     // Yeni oyuncu kaydı
                     database.ref('users/' + user.uid).set({
                         username: customUsername || user.displayName || "Legends_Player",
@@ -1640,10 +1643,15 @@ function removeFriend(friendUid) {
             });
         }
 
+        // Birbirini banlayamayacak korumalı rütbeler (sadece Owner / Developer bunları banlayabilir)
+        const PROTECTED_BAN_ROLES = ['Helper', 'Mod', 'Admin', 'Developer', 'Admin / Developer'];
+
         function loadUsersForAdmin() {
             const container = document.getElementById('adminUsersContainer');
             const searchInput = document.getElementById('adminSearchInput');
             if (searchInput) searchInput.value = '';
+            const myUid = auth.currentUser ? auth.currentUser.uid : null;
+            const myRole = window.currentUserRole || 'Player';
             
             database.ref('users').once('value', (snapshot) => {
                 container.innerHTML = '';
@@ -1698,9 +1706,23 @@ function removeFriend(friendUid) {
                     }
 
                     const isBanned = userData.ban && userData.ban.active === true;
-                    const banBtnHtml = isBanned
-                        ? `<button class="btn-unban" onclick="unbanUser('${uid}')">Unban</button>`
-                        : `<button class="btn-ban" onclick="openBanSetupModal('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}')">Ban</button>`;
+                    const isSelf = (uid === myUid);
+
+                    // Hiyerarşi kontrolü: korumalı rütbeler birbirini banlayamaz; sadece Owner / Developer istisna
+                    const targetIsProtected = PROTECTED_BAN_ROLES.includes(currentRole);
+                    const iAmOwner = (myRole === 'Owner / Developer');
+                    const hierarchyBlocked = targetIsProtected && !iAmOwner;
+
+                    let banBtnHtml;
+                    if (isSelf) {
+                        banBtnHtml = `<span style="font-size:0.7rem; color:#888; font-style:italic;">— Sen / You —</span>`;
+                    } else if (isBanned) {
+                        banBtnHtml = `<button class="btn-unban" onclick="confirmUnbanUser('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}')">Unban</button>`;
+                    } else if (hierarchyBlocked) {
+                        banBtnHtml = `<span style="font-size:0.7rem; color:#888;" title="Bu rütbe sadece Owner / Developer tarafından banlanabilir.">🛡️ Korumalı</span>`;
+                    } else {
+                        banBtnHtml = `<button class="btn-ban" onclick="openBanSetupModal('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}', '${currentRole.replace(/'/g, "\\'")}')">Ban</button>`;
+                    }
 
                     item.innerHTML = `
                         <div>
@@ -1734,39 +1756,56 @@ function removeFriend(friendUid) {
         }
 
         // ========================================== 
-        // 🌐 BAN SİSTEMİ - ÇOK DİLLİ DESTEK & GOOGLE TRANSLATE
+        // 🌐 BAN SİSTEMİ - ÇOK DİLLİ DESTEK & OTOMATİK ÇEVİRİ (MyMemory API)
         // ==========================================
-        // NOT: Buraya kendi Google Cloud Translation API anahtarını gireceksin.
-        // Anahtar boş bırakılırsa, çeviri başarısız olur ve sistem otomatik
-        // olarak "ham metni iki dile de aynen kopyalama" yedeğine düşer.
-        const GOOGLE_TRANSLATE_API_KEY = ""; // <-- BURAYA API KEY'İNİ YAPIŞTIR
+        // NOT: MyMemory ücretsiz ve anahtarsız bir çeviri servisidir, kredi kartı
+        // gerektirmez. Günlük istek sınırı vardır (anonim kullanımda ~5000 kelime/gün).
+        // Çeviri başarısız olursa sistem otomatik olarak "ham metni iki dile de
+        // aynen kopyalama" yedeğine düşer, asla çökmez.
 
         // Aktif site dilini garanti şekilde okuyan yardımcı fonksiyon
         function getActiveLang() {
             return document.documentElement.lang || (typeof currentLanguage !== 'undefined' ? currentLanguage : 'tr');
         }
 
-        // Google Translate API ile metni çeviren fonksiyon (TR<->EN)
+        // MyMemory API ile metni çeviren fonksiyon (TR<->EN)
         async function translateText(text, targetLang) {
-            if (!GOOGLE_TRANSLATE_API_KEY) {
-                throw new Error('NO_API_KEY');
-            }
-            const url = `https://translation.googleapis.com/language/translate/v2?key=${GOOGLE_TRANSLATE_API_KEY}`;
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ q: text, target: targetLang, format: 'text' })
-            });
+            const sourceLang = (targetLang === 'en') ? 'tr' : 'en';
+            const langPair = `${sourceLang}|${targetLang}`;
+            const url = `https://api.mymemory.translated.net/get?q=${encodeURIComponent(text)}&langpair=${langPair}`;
+
+            const response = await fetch(url);
             if (!response.ok) throw new Error('TRANSLATE_API_ERROR');
             const data = await response.json();
-            return data.data.translations[0].translatedText;
+
+            const translated = data && data.responseData && data.responseData.translatedText;
+            if (!translated) throw new Error('TRANSLATE_EMPTY_RESPONSE');
+
+            return translated;
         }
 
         // Ban kurulum modalını açan ve hedef kullanıcıyı hazırlayan fonksiyon
         let banTargetUid = null;
-        function openBanSetupModal(uid, username) {
-            banTargetUid = uid;
+        function openBanSetupModal(uid, username, targetRole) {
             const lang = getActiveLang();
+            const myUid = auth.currentUser ? auth.currentUser.uid : null;
+            const myRole = window.currentUserRole || 'Player';
+
+            // 🔒 Güvenlik katmanı: kendi kendini banlama engeli
+            if (uid === myUid) {
+                alert(lang === 'en' ? 'You cannot ban yourself.' : 'Kendi kendini banlayamazsın.');
+                return;
+            }
+
+            // 🔒 Güvenlik katmanı: hiyerarşi koruması (sadece Owner / Developer korumalı rütbeleri banlayabilir)
+            if (targetRole && PROTECTED_BAN_ROLES.includes(targetRole) && myRole !== 'Owner / Developer') {
+                alert(lang === 'en'
+                    ? 'This rank can only be banned by Owner / Developer.'
+                    : 'Bu rütbe sadece Owner / Developer tarafından banlanabilir.');
+                return;
+            }
+
+            banTargetUid = uid;
 
             document.getElementById('banTargetName').innerText = username;
             document.getElementById('banDurationUnit').value = 'minute';
@@ -1807,17 +1846,25 @@ function removeFriend(friendUid) {
             valueInput.style.display = (unit === 'permanent') ? 'none' : 'block';
         }
 
-        // NOT: Firebase'e gerçek ban yazma işlemi (hiyerarşi kontrolü dahil)
-        // bir sonraki aşamada eklenecek. Bu aşamada dil mantığı ve
-        // otomatik çeviri tamamlanmış durumda.
+        // NOT: Firebase'e gerçek ban yazma işlemi bir sonraki aşamada eklenecek.
+        // Bu aşamada dil mantığı, otomatik çeviri ve hiyerarşi koruması tamamlanmış durumda.
         async function submitBan() {
+            const lang = getActiveLang();
+
+            // 🔒 Son güvenlik katmanı: modal her nasılsa hedef olmadan açılmış/değiştirilmişse işlemi durdur
+            const myUid = auth.currentUser ? auth.currentUser.uid : null;
+            if (!banTargetUid || banTargetUid === myUid) {
+                alert(lang === 'en' ? 'Invalid ban target.' : 'Geçersiz ban hedefi.');
+                closeSubModal('adminBanSetupModal');
+                return;
+            }
+
             const primaryText = document.getElementById('banReasonPrimary').value.trim();
             const primaryLang = document.getElementById('banReasonPrimary').dataset.lang || 'tr';
             const secondaryWrapperOpen = document.getElementById('banReasonSecondaryWrapper').style.display !== 'none';
             const secondaryLang = document.getElementById('banReasonSecondary').dataset.lang || (primaryLang === 'tr' ? 'en' : 'tr');
             let secondaryText = document.getElementById('banReasonSecondary').value.trim();
 
-            const lang = getActiveLang();
             if (!primaryText) {
                 alert(lang === 'en' ? 'Please write the ban reason.' : 'Lütfen ban sebebini yazın.');
                 return;
@@ -1832,7 +1879,7 @@ function removeFriend(friendUid) {
                 try {
                     secondaryText = await translateText(primaryText, secondaryLang);
                 } catch (err) {
-                    // API key yoksa ya da çeviri başarısız olursa: ham metni aynen kopyala (yedek davranış)
+                    // Çeviri servisi yanıt vermezse (limit, ağ hatası vb.): ham metni aynen kopyala (yedek davranış)
                     console.warn('Çeviri başarısız, ham metin kopyalanıyor:', err.message);
                     secondaryText = primaryText;
                 }
@@ -1848,6 +1895,34 @@ function removeFriend(friendUid) {
             submitBtn.innerText = 'Raporla / Report';
 
             alert('⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN);
+        }
+
+        // Unban butonuna basılınca: ban sebebini gösterip onay isteyen fonksiyon
+        function confirmUnbanUser(uid, username) {
+            const lang = getActiveLang();
+
+            database.ref('users/' + uid + '/ban').once('value', (snapshot) => {
+                const banData = snapshot.val() || {};
+                const reason = (lang === 'en')
+                    ? (banData.reasonEN || banData.reasonTR || '—')
+                    : (banData.reasonTR || banData.reasonEN || '—');
+
+                const confirmMsg = (lang === 'en')
+                    ? `Are you sure you want to unban "${username}"?\n\nBan reason:\n${reason}`
+                    : `"${username}" adlı kullanıcının banını kaldırmak istediğine emin misin?\n\nBan sebebi:\n${reason}`;
+
+                if (confirm(confirmMsg)) {
+                    unbanUser(uid);
+                }
+            }).catch(() => {
+                // Ban verisi okunamazsa yine de sebepsiz onay sorulabilir (yedek davranış)
+                const fallbackMsg = (lang === 'en')
+                    ? `Are you sure you want to unban "${username}"?`
+                    : `"${username}" adlı kullanıcının banını kaldırmak istediğine emin misin?`;
+                if (confirm(fallbackMsg)) {
+                    unbanUser(uid);
+                }
+            });
         }
 
         function unbanUser(uid) {
