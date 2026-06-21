@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Corrupted v-0.2 - Null Null </title>
+<title>Legends Corrupdet v-0.3 - Null Null </title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
 body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:monospace}
@@ -190,7 +190,7 @@ body.low-health::after {
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
     <div class="game-logo" id="txt-title">LEGENDS CORRUPTED</div>
-    <div class="game-version">v-0.2 - Null Null</div>
+    <div class="game-version">v-0.3 - Null Null</div>
     <div id="hx-mp-error"></div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
@@ -383,7 +383,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v-0.2</div>
+    <div id="pause-version">v-0.3</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <div class="pause-setting">
       <span id="txt-rd-label">Görüş Mesafesi</span>
@@ -441,7 +441,7 @@ const langData={
       deviceTitle:'CİHAZ SEÇİMİ',pcBtn:'BİLGİSAYAR',mobileBtn:'MOBİL',worldTitle:'DÜNYA SEÇİMİ',
       wInfTitle:'SONSUZ DÜNYA',wInfDesc:'Sınırsız keşif, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Corrupted v-0.2',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Corrupdet v-0.3',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
@@ -484,7 +484,7 @@ const langData={
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
       wInfTitle:'INFINITE WORLD',wInfDesc:'Endless exploration',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Corrupted v-0.2',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Corrupdet v-0.3',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
@@ -573,6 +573,11 @@ let isPaused=false,renderDist=3;
 // FPS: Render distance değişince fog ve kamera far plane'i güncelle
 function applyRenderDist(v){
   renderDist=v;
+  // Hapis/tünel diyarındayken sabit yoğun sis kullanılır — render distance
+  // ayarı buradaki görüş mesafesini artırmasın (chunk açılınca FOV genişlememeli).
+  if (typeof inPrisonRoom !== 'undefined' && inPrisonRoom) {
+    return;
+  }
   // Fog yoğunluğu: uzak görüş = az yoğun sis, yakın görüş = yoğun sis (FPS kazanır)
   scene.fog.density=0.055-v*0.004;
   // Far plane: render distance'a göre ayarla
@@ -2068,7 +2073,7 @@ function killPlayer() {
     DeathManager.triggerDeath('unknown');
 }
 function checkFallDamage() {
-    if (gameMode === 'creative' || DeathManager.isDead) return;
+    if (gameMode === 'creative' || DeathManager.isDead || inElsewhere) { fallStartY = null; return; }
     if (fallStartY === null) return;
     const dist = fallStartY - camera.position.y;
     if (dist >= 4) {
@@ -2731,6 +2736,7 @@ function tickBreaking(dt){
  
 // ─── HAPISHANE ODASI SİSTEMİ ─────────────────────────────────────────────────
 let inPrisonRoom = false;
+let inElsewhere = false; // "Elsewhere" diyarı
 const PRISON_COOLDOWN_MIN = 300;
 const PRISON_COOLDOWN_MAX = 600;
 let nextPrisonTime = PRISON_COOLDOWN_MIN + Math.random() * (PRISON_COOLDOWN_MAX - PRISON_COOLDOWN_MIN);
@@ -2842,60 +2848,37 @@ function checkPortalTouch(dt){
   }
 }
 
-// ── Tünel Sabitleri ──────────────────────────────────────────────────────────
-// Kare döngü: 4 koridor, her biri LOOP_SIZE blok. Köşelerden birbirine bağlı.
-// Ana X koridoru: Z=PRISON_CZ, X: CX-HALF → CX+HALF
-// Arka X koridoru: Z=PRISON_CZ+LOOP_Z, X: CX-HALF → CX+HALF
-// Sol Z koridoru: X=PRISON_CX-HALF, Z: CZ → CZ+LOOP_Z
-// Sağ Z koridoru: X=PRISON_CX+HALF, Z: CZ → CZ+LOOP_Z
-const LOOP_HALF = 40;   // kare yarı kenar uzunluğu (blok)
-const LOOP_Z    = 80;   // kare Z derinliği
+// ── Sonsuz Koridor Sistemi ───────────────────────────────────────────────────
+// Yapı: Dikdörtgen döngü koridorlar (her biri 1 blok geniş, 3 blok yüksek)
+// Koridor ağı: X ve Z eksenlerinde paralel koridorlar, her SPACING blokta bir
+// Duvarlar solid tuğla, koridor içi tamamen boş
+//
+// Örnek kesit (yukarıdan):
+//  W W W W W W W W
+//  W . W . W . W .    W=duvar, .=koridor
+//  W W W W W W W W
+//  W . W . W . W .
+//
+// Koridor = lx==0 VEYA lz==0 (modüler koordinatta)
+// Diğer her yer = duvar
 
-// Boşluklar: her koridorda eşit aralıklı
-const GAP_INTERVAL = 18;
-const GAP_WIDTH    = 2;
+const SPACING = 8; // koridorlar arası mesafe (blok)
 
-function isPrisonGap(i) {
-  const mod = ((i % GAP_INTERVAL) + GAP_INTERVAL) % GAP_INTERVAL;
-  return mod < GAP_WIDTH;
+function isCorridorTile(wx, wz) {
+  const lx = ((wx - PRISON_CX) % SPACING + SPACING) % SPACING;
+  const lz = ((wz - PRISON_CZ) % SPACING + SPACING) % SPACING;
+  // Koridor: x veya z ekseni (1 blok geniş çizgi)
+  return lx === 0 || lz === 0;
 }
 
-function buildTunnelSegment(axis, fixedCoord, start, end) {
-  for (let i = start; i <= end; i++) {
-    const wx = axis === 'x' ? PRISON_CX + i : PRISON_CX + fixedCoord;
-    const wz = axis === 'x' ? PRISON_CZ + fixedCoord : PRISON_CZ + i;
-    const isGap = isPrisonGap(i);
-    if (!isGap) {
-      const k = pk(wx, PRISON_Y, wz);
-      if (!blockMap[k]) blockMap[k] = {id:'brick',pos:new THREE.Vector3(wx,PRISON_Y,wz),mat:texBrick,unbreakable:true,visible:false};
-    }
-    for (let h = 0; h < 4; h++) {
-      const y = PRISON_Y + h;
-      if (axis === 'x') {
-        for (const dz of [-1, 1]) {
-          const k = pk(wx, y, wz+dz);
-          if (!blockMap[k]) blockMap[k] = {id:'brick',pos:new THREE.Vector3(wx,y,wz+dz),mat:texBrick,unbreakable:true,visible:false};
-        }
-      } else {
-        for (const dx of [-1, 1]) {
-          const k = pk(wx+dx, y, wz);
-          if (!blockMap[k]) blockMap[k] = {id:'brick',pos:new THREE.Vector3(wx+dx,y,wz),mat:texBrick,unbreakable:true,visible:false};
-        }
-      }
-    }
-    const kCeil = pk(wx, PRISON_Y+4, wz);
-    if (!blockMap[kCeil]) blockMap[kCeil] = {id:'brick',pos:new THREE.Vector3(wx,PRISON_Y+4,wz),mat:texBrick,unbreakable:true,visible:false};
-  }
-}
-
-// Tünel köşesini aç (iki koridorun kesişim noktasında duvarları kaldır)
-function openCorner(cx, cz) {
-  for (let h = 0; h < 4; h++) {
-    for (const dx of [-1,0,1]) for (const dz of [-1,0,1]) {
-      const k = pk(PRISON_CX+cx+dx, PRISON_Y+h, PRISON_CZ+cz+dz);
-      if (blockMap[k]) delete blockMap[k];
-    }
-  }
+function isPrisonGap(wx, wz) {
+  // Sadece koridor kesişimlerinde delik (hem lx==0 hem lz==0)
+  const lx = ((wx - PRISON_CX) % SPACING + SPACING) % SPACING;
+  const lz = ((wz - PRISON_CZ) % SPACING + SPACING) % SPACING;
+  // Her 3. kesişimde delik
+  const gx = ((Math.floor((wx - PRISON_CX) / SPACING)) % 3 + 3) % 3;
+  const gz = ((Math.floor((wz - PRISON_CZ) / SPACING)) % 3 + 3) % 3;
+  return lx === 0 && lz === 0 && gx === 0 && gz === 0;
 }
 
 function forceShowBlock(bd) {
@@ -2906,55 +2889,101 @@ function forceShowBlock(bd) {
   visiblePositions[mk].set(k,bd.pos); bd.visible=true; instancesDirty=true;
 }
 
-function showPrisonBlocks(axis, fixedCoord, start, end) {
-  for (let i = start; i <= end; i++) {
-    const wx = axis==='x' ? PRISON_CX+i : PRISON_CX+fixedCoord;
-    const wz = axis==='x' ? PRISON_CZ+fixedCoord : PRISON_CZ+i;
-    const ks = [];
-    if (axis==='x') {
-      ks.push(pk(wx,PRISON_Y,wz), pk(wx,PRISON_Y+4,wz));
-      for (let h=0;h<4;h++) { ks.push(pk(wx,PRISON_Y+h,wz-1)); ks.push(pk(wx,PRISON_Y+h,wz+1)); }
-    } else {
-      ks.push(pk(wx,PRISON_Y,wz), pk(wx,PRISON_Y+4,wz));
-      for (let h=0;h<4;h++) { ks.push(pk(wx-1,PRISON_Y+h,wz)); ks.push(pk(wx+1,PRISON_Y+h,wz)); }
-    }
-    for (const k of ks) { const bd=blockMap[k]; if(bd) forceShowBlock(bd); }
+function addPrisonBlock(wx, wy, wz) {
+  const k = pk(wx, wy, wz);
+  if (!blockMap[k]) {
+    const bd = {id:'brick',pos:new THREE.Vector3(wx,wy,wz),mat:texBrick,unbreakable:true,visible:false};
+    blockMap[k] = bd;
+    forceShowBlock(bd);
   }
 }
 
-const TUNNEL_LEN = LOOP_HALF; // takma ad
+function buildPrisonChunk(chunkX, chunkZ) {
+  const SIZE = 16;
+  const sx = PRISON_CX + chunkX * SIZE;
+  const sz = PRISON_CZ + chunkZ * SIZE;
 
-function buildPrisonRoom() {
-  // Ön koridor (Z=0):      X: -LOOP_HALF → +LOOP_HALF
-  buildTunnelSegment('x', 0,       -LOOP_HALF, LOOP_HALF);
-  // Arka koridor (Z=LOOP_Z): X: -LOOP_HALF → +LOOP_HALF
-  buildTunnelSegment('x', LOOP_Z,  -LOOP_HALF, LOOP_HALF);
-  // Sol koridor (X=-LOOP_HALF): Z: 0 → LOOP_Z
-  buildTunnelSegment('z', -LOOP_HALF, 0, LOOP_Z);
-  // Sağ koridor (X=+LOOP_HALF): Z: 0 → LOOP_Z
-  buildTunnelSegment('z',  LOOP_HALF, 0, LOOP_Z);
+  for (let dx = 0; dx < SIZE; dx++) {
+    for (let dz = 0; dz < SIZE; dz++) {
+      const wx = sx + dx, wz = sz + dz;
+      const corridor = isCorridorTile(wx, wz);
+      const gap = isPrisonGap(wx, wz);
 
-  // 4 köşeyi aç
-  openCorner(-LOOP_HALF, 0);
-  openCorner( LOOP_HALF, 0);
-  openCorner(-LOOP_HALF, LOOP_Z);
-  openCorner( LOOP_HALF, LOOP_Z);
+      if (!corridor) {
+        // DUVAR: solid tuğla sütun (zemin+3 yükseklik)
+        for (let h = 0; h < 5; h++) addPrisonBlock(wx, PRISON_Y+h, wz);
+      } else {
+        // KORİDOR: sadece zemin (gap değilse) + tavan
+        if (!gap) addPrisonBlock(wx, PRISON_Y, wz);       // zemin
+        addPrisonBlock(wx, PRISON_Y+4, wz);               // tavan
+        // Koridor içi (h=1,2) tamamen boş — duvar yok
+      }
+    }
+  }
+}
 
+function removePrisonChunk(chunkX, chunkZ) {
+  const SIZE = 16;
+  const sx = PRISON_CX + chunkX * SIZE;
+  const sz = PRISON_CZ + chunkZ * SIZE;
+  for (let dx = 0; dx < SIZE; dx++) {
+    for (let dz = 0; dz < SIZE; dz++) {
+      const wx = sx + dx, wz = sz + dz;
+      for (let h = 0; h < 6; h++) {
+        const k = pk(wx, PRISON_Y+h, wz);
+        const bd = blockMap[k];
+        if (bd && bd.unbreakable) {
+          const mk = getMatKey(bd.mat);
+          if (visiblePositions[mk]) visiblePositions[mk].delete(k);
+          delete blockMap[k];
+        }
+      }
+    }
+  }
   instancesDirty = true;
 }
 
-// Oyuncu tünel dışına çıkarsa (döngüyü aşarsa) karşı tarafa ışınla
-function checkPrisonLoop() {
+const prisonChunks = new Set();
+let lastPrisonCX = null, lastPrisonCZ = null;
+const PRISON_RENDER = 2;
+
+function updatePrisonChunks() {
   if (!inPrisonRoom) return;
-  const px=camera.position.x, pz=camera.position.z;
-  const relX = px - PRISON_CX, relZ = pz - PRISON_CZ;
-  // X ekseni döngüsü
-  if (relX < -LOOP_HALF - 2) camera.position.x = PRISON_CX + LOOP_HALF - 2;
-  else if (relX > LOOP_HALF + 2) camera.position.x = PRISON_CX - LOOP_HALF + 2;
-  // Z ekseni döngüsü
-  if (relZ < -2) camera.position.z = PRISON_CZ + LOOP_Z - 2;
-  else if (relZ > LOOP_Z + 2) camera.position.z = PRISON_CZ + 2;
+  const SIZE = 16;
+  const pcx = Math.floor((camera.position.x - PRISON_CX) / SIZE);
+  const pcz = Math.floor((camera.position.z - PRISON_CZ) / SIZE);
+  if (pcx === lastPrisonCX && pcz === lastPrisonCZ) return;
+  lastPrisonCX = pcx; lastPrisonCZ = pcz;
+
+  const needed = new Set();
+  for (let dx = -PRISON_RENDER; dx <= PRISON_RENDER; dx++)
+    for (let dz = -PRISON_RENDER; dz <= PRISON_RENDER; dz++)
+      needed.add((pcx+dx)+','+(pcz+dz));
+
+  for (const key of prisonChunks) {
+    if (!needed.has(key)) {
+      const [cx,cz] = key.split(',').map(Number);
+      removePrisonChunk(cx, cz);
+      prisonChunks.delete(key);
+    }
+  }
+  for (const key of needed) {
+    if (!prisonChunks.has(key)) {
+      const [cx,cz] = key.split(',').map(Number);
+      buildPrisonChunk(cx, cz);
+      prisonChunks.add(key);
+    }
+  }
+  instancesDirty = true;
 }
+
+function buildPrisonRoom() {
+  prisonChunks.clear();
+  lastPrisonCX = null; lastPrisonCZ = null;
+  updatePrisonChunks();
+}
+
+function checkPrisonLoop() {}
 
 
 function setPrisonVignette(on) {
@@ -2966,49 +2995,204 @@ function setPrisonVignette(on) {
     // Atmosferi siyaha al, körlük sisi
     scene.background = new THREE.Color(0x000000);
     scene.fog = new THREE.FogExp2(0x000000, 0.12); // uzağı görmez ama yakını görür
+    // Tünelde görüş mesafesi sabit kalsın — chunk açılınca görüş açısı genişlemesin
+    camera.far = 30;
+    camera.updateProjectionMatrix();
   } else {
     el.style.opacity = '0';
     el.classList.remove('active');
     // Normal atmosfere dön
     scene.background = new THREE.Color(0x75a7ff);
     scene.fog = new THREE.FogExp2(0x75a7ff, 0.045);
+    // Görüş mesafesini kullanıcının render distance ayarına göre geri yükle
+    camera.far = (typeof renderDist !== 'undefined' ? renderDist : 3) * 16 + 32;
+    camera.updateProjectionMatrix();
   }
 }
 
 function teleportToPrison() {
   if (inPrisonRoom) return;
-  buildPrisonRoom();
-  // Tüm 4 koridoru görünür yap
-  showPrisonBlocks('x', 0,       -LOOP_HALF, LOOP_HALF);
-  showPrisonBlocks('x', LOOP_Z,  -LOOP_HALF, LOOP_HALF);
-  showPrisonBlocks('z', -LOOP_HALF, 0, LOOP_Z);
-  showPrisonBlocks('z',  LOOP_HALF, 0, LOOP_Z);
-  rebuildInstancedMeshes();
-  instancesDirty = false;
-  // Ön koridorun ortasına spawn et (boşluktan uzakta)
-  camera.position.set(PRISON_CX + 10, PRISON_Y + 1.8, PRISON_CZ);
-  velY = 0;
   inPrisonRoom = true;
   if (gameMode !== 'survival') setGameMode('survival');
+  // Kooridorun ortasina spawn: PRISON_CX+5, PRISON_CZ+5 (duvardan uzak)
+  // Spawn: delikten (gx=0,gz=0) uzakta, baska bir kesisimde (SPACING*1)
+  camera.position.set(PRISON_CX + SPACING, PRISON_Y + 1.8, PRISON_CZ + SPACING);
+  velY = 0;
+  buildPrisonRoom(); // chunk streaming'i baslat
   setPrisonVignette(true);
   addChat(null, '...', true, 'warn');
+}
+
+// ── ELSEWHERE DİYARI ────────────────────────────────────────────────────────
+// Fotoğraftaki gibi: geniş yüksek yüzen adalar, açık gökyüzü, sakin ortam
+const EW_CX = 5000, EW_CZ = 5000, EW_Y = 80; // elsewhere koordinatları (referans/orta yükseklik)
+const EW_Y_VARIATION = 14; // adalar bu aralıkta farklı yüksekliklerde olur (+/-)
+const EW_CHUNKS = new Set();
+let lastEWCX = null, lastEWCZ = null;
+
+function ewIsland(sx, sz, islandY) {
+  // Yüzen ada: 20x20 taban, daha kalın gövde (8 kat toprak + 1 çimen)
+  const W = 20, H = 7;
+  for (let dx = 0; dx < W; dx++) for (let dz = 0; dz < W; dz++) {
+    const wx = sx + dx, wz = sz + dz;
+    for (let h = 0; h < H; h++) {
+      const k = pk(wx, islandY - h, wz);
+      if (!blockMap[k]) {
+        const mat = (h === 0) ? matGrass : texDirt;
+        const bd = {id: h===0?'grass':'dirt', pos: new THREE.Vector3(wx, islandY-h, wz), mat, unbreakable:false, visible:false};
+        blockMap[k] = bd; forceShowBlock(bd);
+      }
+    }
+  }
+}
+
+function ewTree(tx, tz, islandY) {
+  const ty = islandY + 1;
+  for (let th = 0; th < 4; th++) {
+    const k = pk(tx, ty+th, tz);
+    if (!blockMap[k]) { const bd={id:'log',pos:new THREE.Vector3(tx,ty+th,tz),mat:matLog,unbreakable:false,visible:false}; blockMap[k]=bd; forceShowBlock(bd); }
+  }
+  for (let lx=-2;lx<=2;lx++) for (let lz=-2;lz<=2;lz++) for (let ly=0;ly<3;ly++) {
+    if(Math.abs(lx)+Math.abs(lz)+ly>3) continue;
+    const lk=pk(tx+lx,ty+4+ly,tz+lz);
+    if(!blockMap[lk]){const bd={id:'leaves',pos:new THREE.Vector3(tx+lx,ty+4+ly,tz+lz),mat:texLeaves,unbreakable:false,visible:false};blockMap[lk]=bd;forceShowBlock(bd);}
+  }
+}
+
+// Basit küçük bir ev: ahşap duvarlar, cam pencere, çatı (cobblestone) ve kapı boşluğu
+function ewHouse(hx, hz, islandY) {
+  const W = 6, D = 6, HGT = 4; // genişlik, derinlik, duvar yüksekliği
+  const baseY = islandY + 1;
+  const place = (x,y,z,id,mat)=>{
+    const k = pk(x,y,z);
+    if(!blockMap[k]){ const bd={id,pos:new THREE.Vector3(x,y,z),mat,unbreakable:false,visible:false}; blockMap[k]=bd; forceShowBlock(bd); }
+  };
+  // Duvarlar
+  for (let y = 0; y < HGT; y++) {
+    for (let dx = 0; dx < W; dx++) {
+      for (let dz = 0; dz < D; dz++) {
+        const isEdge = (dx===0 || dx===W-1 || dz===0 || dz===D-1);
+        if (!isEdge) continue;
+        const wx = hx+dx, wz = hz+dz, wy = baseY+y;
+        // Kapı boşluğu: ön duvarın ortası (dz=0), y=0,1
+        const isDoor = (dz===0 && dx===Math.floor(W/2) && y<2);
+        if (isDoor) continue;
+        // Pencere: yan duvarlarda orta yükseklikte, ortada
+        const isWindow = (y===1) && ((dx===0 && dz===Math.floor(D/2)) || (dx===W-1 && dz===Math.floor(D/2)) || (dz===D-1 && dx===Math.floor(W/2)));
+        if (isWindow) { place(wx, wy, wz, 'glass', texGlass); continue; }
+        place(wx, wy, wz, 'wood', texWood);
+      }
+    }
+  }
+  // Zemin
+  for (let dx = 0; dx < W; dx++) for (let dz = 0; dz < D; dz++) place(hx+dx, baseY-1, hz+dz, 'wood', texWood);
+  // Çatı (basit düz cobblestone çatı, biraz taşmalı)
+  for (let dx = -1; dx <= W; dx++) for (let dz = -1; dz <= D; dz++) place(hx+dx, baseY+HGT, hz+dz, 'cobble', texCob);
+}
+
+function buildEWChunk(cx, cz) {
+  const SIZE = 28;
+  const sx = EW_CX + cx * SIZE, sz = EW_CZ + cz * SIZE;
+  // Spawn chunk (0,0): her zaman taban yükseklikte (EW_Y) güvenli bir ada olsun
+  if (cx === 0 && cz === 0) {
+    ewIsland(sx + 4, sz + 4, EW_Y);
+    ewTree(sx + 12, sz + 12, EW_Y);
+    instancesDirty = true;
+    return;
+  }
+  // Deterministic: her chunk %92 ihtimalle ada var (adalar arası boşluk az olsun)
+  const seed = (Math.abs(cx * 73856093) ^ Math.abs(cz * 19349663)) % 100;
+  if (seed < 92) {
+    // Ada pozisyonu chunk içinde rastgele ama sabit (28-20=8 aralığında kalsın)
+    const offX = (seed * 7) % 8;
+    const offZ = (seed * 11) % 8;
+    // Adanın yüksekliği de deterministic ama her ada farklı (yükseklik farkı için)
+    const ySeed = (Math.abs(cx * 12549497) ^ Math.abs(cz * 39638537)) % 100;
+    const islandY = EW_Y + Math.round(((ySeed / 99) * 2 - 1) * EW_Y_VARIATION);
+    ewIsland(sx + offX, sz + offZ, islandY);
+    // Ağaç ekle (ada üstüne)
+    if (seed % 3 === 0) {
+      ewTree(sx + offX + 8, sz + offZ + 8, islandY);
+    }
+    // Bazı adalara basit bir ev ekle (~%25 ihtimal, deterministic)
+    if (ySeed % 4 === 0) {
+      ewHouse(sx + offX + 2, sz + offZ + 2, islandY);
+    }
+  }
+  instancesDirty = true;
+}
+
+function removeEWChunk(cx, cz) {
+  const SIZE = 28;
+  const sx = EW_CX + cx * SIZE, sz = EW_CZ + cz * SIZE;
+  for (let dx = -2; dx < SIZE+2; dx++) for (let dz = -2; dz < SIZE+2; dz++)
+    for (let h = -(EW_Y_VARIATION+12); h <= (EW_Y_VARIATION+12); h++) {
+      const k = pk(sx+dx, EW_Y+h, sz+dz);
+      const bd = blockMap[k];
+      if (bd) { const mk=getMatKey(bd.mat); if(visiblePositions[mk]) visiblePositions[mk].delete(k); delete blockMap[k]; }
+    }
+  instancesDirty = true;
+}
+
+function updateEWChunks() {
+  if (!inElsewhere) return;
+  const SIZE = 28;
+  const pcx = Math.floor((camera.position.x - EW_CX) / SIZE);
+  const pcz = Math.floor((camera.position.z - EW_CZ) / SIZE);
+  if (pcx === lastEWCX && pcz === lastEWCZ) return;
+  lastEWCX = pcx; lastEWCZ = pcz;
+  const needed = new Set();
+  for (let dx=-3;dx<=3;dx++) for (let dz=-3;dz<=3;dz++) needed.add((pcx+dx)+','+(pcz+dz));
+  for (const key of EW_CHUNKS) { if(!needed.has(key)){const[cx,cz]=key.split(',').map(Number);removeEWChunk(cx,cz);EW_CHUNKS.delete(key);} }
+  for (const key of needed) { if(!EW_CHUNKS.has(key)){const[cx,cz]=key.split(',').map(Number);buildEWChunk(cx,cz);EW_CHUNKS.add(key);} }
+}
+
+function teleportToElsewhere() {
+  // Tünelden çıkınca buraya gel
+  inElsewhere = true;
+  inPrisonRoom = false;
+  setPrisonVignette(false);
+  // Gökyüzü açık mavi, sis az
+  scene.background = new THREE.Color(0x87CEEB);
+  scene.fog = new THREE.FogExp2(0x87CEEB, 0.018);
+  EW_CHUNKS.clear(); lastEWCX = null; lastEWCZ = null;
+  camera.position.set(EW_CX + 10, EW_Y + 2.6, EW_CZ + 10);
+  velY = 0; fallStartY = null;
+  if (gameMode !== 'survival') setGameMode('survival');
+  // Siyah adam / VoidShadow'ı temizle
+  if (typeof VoidShadow !== 'undefined') VoidShadow.despawn && VoidShadow.despawn();
+  // Cızırtılı static/noise katmanını burada sustur — Elsewhere sakin bir diyar
+  if (typeof HxAudio !== 'undefined' && HxAudio.setNoiseLayerEnabled) HxAudio.setNoiseLayerEnabled(false);
+  updateEWChunks();
+  addChat(null, 'Elsewhere...', true, 'sys');
+  // Geri dönüş için: EW_Y-10'a düşünce normal dünyaya
+}
+
+function checkElsewhereEscape() {
+  if (!inElsewhere) return;
+  updateEWChunks();
+  // Y çok düşerse (adadan düştüyse) normal dünyaya dön — Elsewhere'da hasar yok
+  if (camera.position.y < EW_Y - 30) {
+    inElsewhere = false;
+    scene.background = new THREE.Color(0x75a7ff);
+    scene.fog = new THREE.FogExp2(0x75a7ff, 0.045);
+    EW_CHUNKS.clear(); lastEWCX = null; lastEWCZ = null;
+    if (typeof HxAudio !== 'undefined' && HxAudio.setNoiseLayerEnabled) HxAudio.setNoiseLayerEnabled(true);
+    const bx=8,bz=8,bio=WorldGen.getBiome(bx,bz);
+    camera.position.set(bx, WorldGen.getSurfaceY(bx,bz,bio)+2.6, bz);
+    velY=0; fallStartY=null;
+    addChat(null,'Normal dünyaya döndün.', true, 'sys');
+  }
 }
 
 function checkPrisonEscape() {
   if (!inPrisonRoom) return;
   const py = camera.position.y;
-  // Yeterince düştükten sonra çık (boşluktan uzun süre düşmesi lazım)
   if (py < PRISON_Y - 25) {
-    inPrisonRoom = false;
-    setPrisonVignette(false);
-    const bx = 8, bz = 8;
-    const bio = WorldGen.getBiome(bx, bz);
-    const sy = WorldGen.getSurfaceY(bx, bz, bio) + 2.6;
-    camera.position.set(bx, sy, bz);
-    velY = 0;
+    // Tünelden çıkınca Elsewhere diyarına ışınlan
+    teleportToElsewhere();
     nextPrisonTime = PRISON_COOLDOWN_MIN + Math.random() * (PRISON_COOLDOWN_MAX - PRISON_COOLDOWN_MIN);
     prisonTimer = 0;
-    addChat(null, 'Geri döndün.', true, 'sys');
   }
 }
 
@@ -3017,8 +3201,11 @@ function updatePrisonSystem(dt) {
   checkPortalTouch(dt);
   if (inPrisonRoom) {
     if (gameMode !== 'survival') setGameMode('survival');
-    checkPrisonLoop();   // sonsuz döngü: dışa çıkarsa karşı tarafa ışınla
+    updatePrisonChunks();
     checkPrisonEscape();
+  }
+  if (inElsewhere) {
+    checkElsewhereEscape();
   }
 }
 
@@ -3038,7 +3225,9 @@ function resetWorld(){
   clearAnimals();foods.forEach(f=>scene.remove(f.mesh));foods.length=0;
   animalSpawnTimer=15;animalSyncTimer=0;
   isResetting=false;
-  inPrisonRoom=false; prisonTimer=0; setPrisonVignette(false);
+  inPrisonRoom=false; prisonTimer=0; setPrisonVignette(false); prisonChunks.clear(); lastPrisonCX=null; lastPrisonCZ=null;
+  inElsewhere=false; EW_CHUNKS.clear(); lastEWCX=null; lastEWCZ=null;
+  scene.background=new THREE.Color(0x75a7ff); scene.fog=new THREE.FogExp2(0x75a7ff,0.045);
   nextPrisonTime=PRISON_COOLDOWN_MIN+Math.random()*(PRISON_COOLDOWN_MAX-PRISON_COOLDOWN_MIN);
   const log=document.getElementById('chat-log');while(log.firstChild) log.removeChild(log.firstChild);
 }
@@ -3672,13 +3861,18 @@ function animate(){
           velY=Math.min(velY, WATER_MAX_RISE + 0.01);
         }
         wasSwimming=false;
-        velY=Math.max(velY-GRAV,-MFALL);camera.position.y+=velY;
+        // Elsewhere diyarı: hafif/ay yerçekimi hissi — düşüş daha yavaş ve hasarsız
+        const _grav = inElsewhere ? GRAV*0.35 : GRAV;
+        const _mfall = inElsewhere ? MFALL*0.4 : MFALL;
+        velY=Math.max(velY-_grav,-_mfall);camera.position.y+=velY;
         const prevGrounded=grounded;
         // Zemin tespiti: hem 0.05 hem 0.01 ile kontrol et (daha güvenilir)
         const onGround=col(camera.position.x,camera.position.y-0.05,camera.position.z)
                      ||col(camera.position.x,camera.position.y-0.01,camera.position.z);
         if(onGround){
-          if(velY<=0){grounded=true;if(!prevGrounded) checkFallDamage();velY=0;
+          if(velY<=0){grounded=true;if(!prevGrounded && !inElsewhere) checkFallDamage();
+            if(!prevGrounded && inElsewhere) fallStartY=null;
+            velY=0;
             const by=Math.floor((camera.position.y-1.6)+.01);const cy=by+.5+1.6;
             if(camera.position.y<cy) camera.position.y=cy;
           }
@@ -3875,6 +4069,11 @@ const CONFIG = {
   jumpscareTypeBMinSec: 90,
   jumpscareTypeBMaxSec: 280,
   jumpscareTypeBDurationMs: 2500,
+  voidShadowCatchJumpscareDurationMs: 600,
+  // Elsewhere diyarında: ani ama KISA jumpscare (uzun olmasın isteniyor)
+  elsewhereJumpscareDurationMs: 500,
+  elsewhereJumpscareMinSec: 35,
+  elsewhereJumpscareMaxSec: 90,
 
   fakeSystemMsgMinSec: 20,
   fakeSystemMsgMaxSec: 75,
@@ -4075,7 +4274,7 @@ function hxEnhancedVoidShadowSchedule() {
   const maxSec = CONFIG.voidShadowMaxSec * 0.5;  
   
   setTimeout(() => {
-    if (typeof VoidShadow !== 'undefined') {
+    if (typeof VoidShadow !== 'undefined' && !inElsewhere) {
       VoidShadow.spawn();
     }
     hxEnhancedVoidShadowSchedule();
@@ -4133,6 +4332,7 @@ const HxAudio = {
   _ambientNodes: [],
   _ambientActive: false,
   _ready: false,
+  _noiseLayerWanted: true,
 
   _ensureCtx(){
     if(!this.ctx){
@@ -4160,7 +4360,9 @@ const HxAudio = {
     const ctx = this.ctx;
     const masterGain = ctx.createGain();
     masterGain.gain.setValueAtTime(0, ctx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(CONFIG.ambientVolume * 0.6, ctx.currentTime + 3);
+    // Eğer Elsewhere'dayken veya istenmiyorsa ambient sessiz başlasın
+    const startTarget = this._noiseLayerWanted ? CONFIG.ambientVolume * 0.6 : 0;
+    masterGain.gain.linearRampToValueAtTime(startTarget, ctx.currentTime + 3);
     masterGain.connect(ctx.destination);
     this._ambientGain = masterGain;
 
@@ -4204,13 +4406,37 @@ const HxAudio = {
     noiseFilter.frequency.value = 300;
     noiseFilter.Q.value = 0.5;
     const noiseGain = ctx.createGain();
-    noiseGain.gain.value = 0.04;
+    noiseGain.gain.value = this._noiseLayerWanted ? 0.04 : 0;
     noise.connect(noiseFilter);
     noiseFilter.connect(noiseGain);
     noiseGain.connect(masterGain);
     noise.start();
 
     this._ambientNodes = [drone, drone2, lfo, noise];
+    this._noiseGainNode = noiseGain;
+    this._noiseBaseLevel = 0.04;
+  },
+
+  // Elsewhere/diyar gibi sakin alanlarda TÜM ambient ses katmanını (uğultu +
+  // titreşim + rüzgar/cızırtı) kapatır, normal dünyada tekrar açar.
+  // Ambient henüz başlamamışsa bile istek kaydedilir, başladığında uygulanır.
+  setNoiseLayerEnabled(on){
+    this._noiseLayerWanted = on;
+    if(!this.ctx) return;
+    const ctx = this.ctx;
+    // Tüm ambient sesi (drone + drone2 + noise) tek seferde kapat/aç —
+    // sadece bandpass noise değil, alçak uğultu katmanları da susturulsun.
+    if(this._ambientGain){
+      const target = on ? CONFIG.ambientVolume * 0.6 : 0;
+      this._ambientGain.gain.cancelScheduledValues(ctx.currentTime);
+      this._ambientGain.gain.setValueAtTime(this._ambientGain.gain.value, ctx.currentTime);
+      this._ambientGain.gain.linearRampToValueAtTime(target, ctx.currentTime + 0.6);
+    }
+    if(!this._noiseGainNode) return;
+    const target2 = on ? this._noiseBaseLevel : 0;
+    this._noiseGainNode.gain.cancelScheduledValues(ctx.currentTime);
+    this._noiseGainNode.gain.setValueAtTime(this._noiseGainNode.gain.value, ctx.currentTime);
+    this._noiseGainNode.gain.linearRampToValueAtTime(target2, ctx.currentTime + 0.6);
   },
 
   stopAmbient(){
@@ -4520,6 +4746,7 @@ function hxBlockMultiplayer(){
    JUMPSCARE SİSTEMİ
    ──────────────────────────────────────────────────────────────── */
 function hxTriggerTypeA(){
+  if(inElsewhere || inPrisonRoom) return;
   // Tip A: anlık (100ms) titreme/glitch, ses yok
   const el = document.getElementById('hx-glitch-overlay');
   if(!el) return;
@@ -4537,6 +4764,7 @@ function hxTriggerTypeA(){
 }
 
 function hxTriggerTypeB(){
+  if(inElsewhere || inPrisonRoom) return;
   // Tip B: jumpscare_scream.mp3 + 2 saniye tam ekran görsel
   const overlay = document.getElementById('hx-jumpscare-overlay');
   const img = document.getElementById('hx-jumpscare-img');
@@ -4549,6 +4777,28 @@ function hxTriggerTypeB(){
   setTimeout(()=>{
     overlay.classList.remove('hx-show');
   }, CONFIG.jumpscareTypeBDurationMs);
+}
+
+// Elsewhere diyarına özel: ani ama kısa jumpscare (uzun ekran görseli yok)
+function hxTriggerElsewhereJumpscare(){
+  if(!inElsewhere) return;
+  const overlay = document.getElementById('hx-jumpscare-overlay');
+  const img = document.getElementById('hx-jumpscare-img');
+  if(!overlay || !img) return;
+
+  img.src = CONFIG.jumpscareImageSrc;
+  overlay.classList.add('hx-show');
+  HxAudio.playScream();
+
+  setTimeout(()=>{
+    overlay.classList.remove('hx-show');
+  }, CONFIG.elsewhereJumpscareDurationMs);
+}
+
+function hxScheduleElsewhereJumpscare(){
+  // Kullanıcı isteği: Elsewhere diyarında artık HİÇ jumpscare çıkmasın.
+  // Zamanlayıcı devre dışı bırakıldı.
+  return;
 }
 
 /* ────────────────────────────────────────────────────────────────
@@ -4575,7 +4825,7 @@ function hxTriggerInvertEffect(){
 
 function hxScheduleInvertEffect(){
   setTimeout(()=>{
-    hxTriggerInvertEffect();
+    if(!inElsewhere) hxTriggerInvertEffect();
     hxScheduleInvertEffect();
   }, hxRandRange(CONFIG.invertMinSec, CONFIG.invertMaxSec));
 }
@@ -4593,7 +4843,7 @@ function hxRandRange(minSec, maxSec){
 
 function hxScheduleHorrorLayer(){
   setTimeout(()=>{
-    HxAudio.playHorrorLayer();
+    if(!inElsewhere && !inPrisonRoom) HxAudio.playHorrorLayer();
     hxScheduleHorrorLayer();
   }, hxRandRange(CONFIG.horrorLayerMinSec, CONFIG.horrorLayerMaxSec));
 }
@@ -4722,6 +4972,9 @@ const VoidShadow = {
     // Oyun duraklatıldıysa / chat açıksa / öldüyse: dondur ama despawn etme
     if(!this.isGameActive()) return;
     if(!this.group) return;
+    // Elsewhere diyarına geçildiyse (ör. yakalanmadan hemen önce) buradaki
+    // varlık derhal kaybolsun — Elsewhere'da bu jumpscare hiç olmamalı.
+    if(inElsewhere){ this.despawn(); return; }
 
     const elapsed = (now - this.spawnTime)/1000;
     if(elapsed > CONFIG.voidShadowLifetimeMaxSec){
@@ -4764,13 +5017,13 @@ const VoidShadow = {
   },
 
   _doCatch(){
-    // Tip B'ye benzer tam ekran jumpscare + gülme/alarm sesi
+    // Ani ve kısa jumpscare + gülme/alarm sesi
     const overlay = document.getElementById('hx-jumpscare-overlay');
     const img = document.getElementById('hx-jumpscare-img');
     if(overlay && img){
       img.src = CONFIG.jumpscareImageSrc;
       overlay.classList.add('hx-show');
-      setTimeout(()=>{ overlay.classList.remove('hx-show'); }, CONFIG.jumpscareTypeBDurationMs);
+      setTimeout(()=>{ overlay.classList.remove('hx-show'); }, CONFIG.voidShadowCatchJumpscareDurationMs);
     }
     HxAudio.playLaughAlarm();
     if(typeof hxTriggerInvertEffect==='function') hxTriggerInvertEffect();
@@ -4804,6 +5057,7 @@ function hxInit(){
   // Yeni özellikler
   hxScheduleEncryptedMessages();     // Sezar şifrelemesi ile gizemli mesajlar
   hxScheduleSilentMoments();         // Sessiz anlar
+  hxScheduleElsewhereJumpscare();    // Elsewhere diyarında ani-kısa jumpscare
 
   if(CONFIG.enableConsoleNoise){
     console.log('%c[SYSTEM] connection established...', 'color:#888;');
