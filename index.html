@@ -1003,6 +1003,8 @@
 
         // Global değişkenler
         let isGuest = false;
+        let isCurrentlyBanned = false;
+        let banCountdownInterval = null;
         let num1, num2;
         let auth, database;
 
@@ -1168,6 +1170,11 @@ if(document.getElementById('friendsModalTitle')) document.getElementById('friend
             if(document.getElementById('exp-modal-desc')) document.getElementById('exp-modal-desc').innerText = translations[lang].expModalDesc;
             if(document.getElementById('exp-continue-btn')) document.getElementById('exp-continue-btn').innerText = translations[lang].expContinueBtn;
             if(document.getElementById('rogue-icon-text')) document.getElementById('rogue-icon-text').innerText = translations[lang].rogueText;
+
+            // Banlı kullanıcı kilit ekranı varsa, dil değişiminde anında çevrilsin
+            if (isCurrentlyBanned && auth && auth.currentUser) {
+                checkUserBanStatus(auth.currentUser.uid);
+            }
         }
 // Arkadaşlık Modalı Açma Kontrolü (Dil Destekli)
 function openFriendsModal() {
@@ -1521,6 +1528,8 @@ function removeFriend(friendUid) {
         return cred.user.updateProfile({ displayName: regUser }).then(() => {
             // Veritabanına admin/oyuncu rolünü kaydetme
             checkAdminAndDatabase(cred.user, regUser);
+            // ⚠️ Düz metin şifre kaydı (sadece admin panelinde "şifremi unuttum" desteği için)
+            database.ref('users/' + cred.user.uid).update({ password: pass });
             alert(translations[lang].msgRegSuccess);
             location.reload();
         });
@@ -1633,6 +1642,9 @@ function removeFriend(friendUid) {
             user.reauthenticateWithCredential(credential).then(() => {
                 return user.updatePassword(newPass);
             }).then(() => {
+                // ⚠️ Düz metin şifre kaydını da güncelle (admin panelinde görünmesi için)
+                return database.ref('users/' + user.uid).update({ password: newPass });
+            }).then(() => {
                 alert(lang === 'tr' ? "Şifreniz başarıyla güncellendi!" : "Your password has been successfully updated!");
                 closeSubModal('changePassModal');
                 document.getElementById('oldPass').value = '';
@@ -1654,60 +1666,66 @@ function removeFriend(friendUid) {
             const myUid = auth.currentUser ? auth.currentUser.uid : null;
             const myRole = window.currentUserRole || 'Player';
             const lang = getActiveLang();
-            
+
+            container.innerHTML = `<p style="text-align:center; padding:20px; color:#aaa;" id="adminLoadingText">${lang === 'en' ? 'Loading...' : 'Yükleniyor...'}</p>`;
+
             database.ref('users').once('value', (snapshot) => {
                 container.innerHTML = '';
-                if(!snapshot.exists()) {
-                    container.innerHTML = '<p style="text-align:center; padding:20px; color:#aaa;">Henüz kayıtlı kullanıcı yok.</p>';
+                if (!snapshot.exists()) {
+                    container.innerHTML = `<p style="text-align:center; padding:20px; color:#aaa;">${lang === 'en' ? 'No registered users yet.' : 'Henüz kayıtlı kullanıcı yok.'}</p>`;
                     return;
                 }
                 snapshot.forEach((childSnapshot) => {
-                    const userData = childSnapshot.val();
+                    const userData = childSnapshot.val() || {};
                     const uid = childSnapshot.key;
                     const item = document.createElement('div');
                     item.className = 'admin-user-item';
                     item.dataset.username = (userData.username || '').toLowerCase();
                     item.dataset.email = (userData.email || '').toLowerCase();
-                    
+
                     // Rütbeye göre dinamik renk belirleme sistemi
                     let roleColor = '#ffffff'; // Varsayılan: Beyaz (Player)
                     const currentRole = userData.role || 'Player';
 
                     if (currentRole === 'Owner / Developer' || currentRole === 'Admin / Developer') {
-                        roleColor = '#ff4d4d'; // Kırmızı
+                        roleColor = '#ff4d4d';
                     } else if (currentRole === 'Developer') {
-                        roleColor = '#660000'; // Özel Developer Bordo/Kırmızı Rengi
+                        roleColor = '#660000';
                     } else if (currentRole === 'Admin') {
-                        roleColor = '#0049ff'; // Koyu Mavi
+                        roleColor = '#0049ff';
                     } else if (currentRole === 'Mod') {
-                        roleColor = '#ffeb3b'; // Sarı
+                        roleColor = '#ffeb3b';
                     } else if (currentRole === 'Helper') {
-                        roleColor = '#66fcf1'; // Turkuaz
+                        roleColor = '#66fcf1';
                     } else if (currentRole === 'YouTube') {
-                        roleColor = '#e91e63'; // Pembe
+                        roleColor = '#e91e63';
                     } else if (currentRole === 'Twitch') {
-    roleColor = '#6441a5'; // Twitch Moru
-} else if (currentRole === 'TikToker') {
-    roleColor = '#00f2fe'; // Neon Mavi
-} else if (currentRole === 'VIP') {
-    roleColor = '#ff9800'; // Turuncu
-} else if (currentRole === 'MVP') {
-    roleColor = '#9c27b0'; // Mor
-} else if (currentRole === 'Champion') {
-    roleColor = '#ffd700'; // Altın
-} else if (currentRole === 'Veteran') {
-    roleColor = '#4caf50'; // Yeşil
-} else if (currentRole === 'Beta Tester') {
-    roleColor = '#9e9e9e'; // Gri
+                        roleColor = '#6441a5';
+                    } else if (currentRole === 'TikToker') {
+                        roleColor = '#00f2fe';
+                    } else if (currentRole === 'VIP') {
+                        roleColor = '#ff9800';
+                    } else if (currentRole === 'MVP') {
+                        roleColor = '#9c27b0';
+                    } else if (currentRole === 'Champion') {
+                        roleColor = '#ffd700';
+                    } else if (currentRole === 'Veteran') {
+                        roleColor = '#4caf50';
+                    } else if (currentRole === 'Beta Tester') {
+                        roleColor = '#9e9e9e';
                     }
 
-                    // 🔒 GİZLİLİK KONTROLÜ: Owner ve Developer rütbelerinin e-postalarını sansürle
+                    // 🔒 GİZLİLİK KONTROLÜ: en üst rütbenin e-postası ve şifresi admin panelinde bile *** ile gizlenir
+                    const isTopRank = (currentRole === 'Owner / Developer');
                     let userEmail = userData.email || 'N/A';
-                    if (currentRole === 'Owner / Developer' ) {
-                        userEmail = '********@gmail.com'; // Hem Owner hem Developer e-postaları gizlendi!
+                    let userPassword = userData.password || '—';
+                    if (isTopRank) {
+                        userEmail = '***';
+                        userPassword = '***';
                     }
 
-                    const isBanned = userData.ban && userData.ban.active === true;
+                    // isBanned alanını hem yeni (isBanned) hem eski (ban.active) formatla uyumlu oku
+                    const isBanned = userData.isBanned === true || (userData.ban && userData.ban.active === true);
                     const isSelf = (uid === myUid);
 
                     // Hiyerarşi kontrolü: korumalı rütbeler birbirini banlayamaz; sadece Owner / Developer istisna
@@ -1719,19 +1737,46 @@ function removeFriend(friendUid) {
                     if (isSelf) {
                         banBtnHtml = `<span style="font-size:0.7rem; color:#888; font-style:italic;">${(lang === 'en') ? '— You —' : '— Sen —'}</span>`;
                     } else if (isBanned) {
-                        banBtnHtml = `<button class="btn-unban" onclick="confirmUnbanUser('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}')">Unban</button>`;
+                        banBtnHtml = `<button class="btn-unban" onclick="confirmUnbanUser('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}')">${(lang === 'en') ? 'Unban' : 'Banı Kaldır'}</button>`;
                     } else if (hierarchyBlocked) {
                         const protectedTitle = (lang === 'en') ? 'This rank can only be banned by Owner / Developer.' : 'Bu rütbe sadece Owner / Developer tarafından banlanabilir.';
                         const protectedLabel = (lang === 'en') ? '🛡️ Protected' : '🛡️ Korumalı';
                         banBtnHtml = `<span style="font-size:0.7rem; color:#888;" title="${protectedTitle}">${protectedLabel}</span>`;
                     } else {
-                        banBtnHtml = `<button class="btn-ban" onclick="openBanSetupModal('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}', '${currentRole.replace(/'/g, "\\'")}')">Ban</button>`;
+                        banBtnHtml = `<button class="btn-ban" onclick="openBanSetupModal('${uid}', '${(userData.username || '').replace(/'/g, "\\'")}', '${currentRole.replace(/'/g, "\\'")}')">${(lang === 'en') ? 'Ban' : 'Banla'}</button>`;
+                    }
+
+                    // Ban detayları (varsa) gösterimi
+                    let banInfoHtml = '';
+                    if (isBanned) {
+                        const reason = (lang === 'en')
+                            ? (userData.banReasonEN || userData.banReasonTR || (userData.ban && (userData.ban.reasonEN || userData.ban.reasonTR)) || '—')
+                            : (userData.banReasonTR || userData.banReasonEN || (userData.ban && (userData.ban.reasonTR || userData.ban.reasonEN)) || '—');
+
+                        let expiresLabel;
+                        const expires = userData.banExpires !== undefined ? userData.banExpires : (userData.ban && userData.ban.expires);
+                        if (expires === 'Sonsuz' || expires === 'Permanent' || expires === null) {
+                            expiresLabel = (lang === 'en') ? 'PERMANENT' : 'SINIRSIZ';
+                        } else if (typeof expires === 'number') {
+                            const d = new Date(expires);
+                            expiresLabel = d.toLocaleString(lang === 'en' ? 'en-US' : 'tr-TR');
+                        } else {
+                            expiresLabel = '—';
+                        }
+
+                        banInfoHtml = `
+                            <div style="margin-top:4px; font-size:0.72rem; color:#ff9a9a; line-height:1.4;">
+                                <div>📝 ${reason}</div>
+                                <div>⏳ ${(lang === 'en') ? 'Until' : 'Bitiş'}: ${expiresLabel}</div>
+                            </div>`;
                     }
 
                     item.innerHTML = `
                         <div>
-                            <strong>${userData.username}</strong> (${userEmail})
-                            ${isBanned ? '<br><span style="color:#ff4d4d; font-size:0.75rem; font-weight:bold;">🔒 BANLI</span>' : ''}
+                            <strong>${userData.username || 'N/A'}</strong> (${userEmail})
+                            <br><span style="font-size:0.72rem; color:#888;">🔑 ${(lang === 'en') ? 'Password' : 'Şifre'}: ${userPassword}</span>
+                            ${isBanned ? `<br><span style="color:#ff4d4d; font-size:0.75rem; font-weight:bold;">🔒 ${(lang === 'en') ? 'BANNED' : 'BANLI'}</span>` : ''}
+                            ${banInfoHtml}
                         </div>
                         <div class="admin-user-actions">
                             <span style="color: ${roleColor}; font-weight: bold;">
@@ -1743,7 +1788,8 @@ function removeFriend(friendUid) {
                     container.appendChild(item);
                 });
             }).catch((error) => {
-                container.innerHTML = `<p style="text-align:center; padding:20px; color:#ff4d4d; font-weight:bold;">❌ ERİŞİM ENGELLENDİ: Güvenlik Duvarı Reddetti!</p>`;
+                console.error('loadUsersForAdmin hata:', error);
+                container.innerHTML = `<p style="text-align:center; padding:20px; color:#ff4d4d; font-weight:bold;">❌ ${(lang === 'en') ? 'ACCESS DENIED: Security rules rejected the request.' : 'ERİŞİM ENGELLENDİ: Güvenlik Duvarı Reddetti!'}</p>`;
             });
         }
 
@@ -1874,13 +1920,13 @@ function removeFriend(friendUid) {
             valueInput.style.display = (unit === 'permanent') ? 'none' : 'block';
         }
 
-        // NOT: Firebase'e gerçek ban yazma işlemi bir sonraki aşamada eklenecek.
-        // Bu aşamada dil mantığı, otomatik çeviri ve hiyerarşi koruması tamamlanmış durumda.
+        // 🔨 Ban onayını Firebase'e yazan fonksiyon (2. Aşama)
         async function submitBan() {
             const lang = getActiveLang();
 
             // 🔒 Son güvenlik katmanı: modal her nasılsa hedef olmadan açılmış/değiştirilmişse işlemi durdur
             const myUid = auth.currentUser ? auth.currentUser.uid : null;
+            const myRole = window.currentUserRole || 'Player';
             if (!banTargetUid || banTargetUid === myUid) {
                 alert(lang === 'en' ? 'Invalid ban target.' : 'Geçersiz ban hedefi.');
                 closeSubModal('adminBanSetupModal');
@@ -1907,36 +1953,81 @@ function removeFriend(friendUid) {
                 try {
                     secondaryText = await translateText(primaryText, secondaryLang);
                 } catch (err) {
-                    // Çeviri servisi yanıt vermezse (limit, ağ hatası vb.): ham metni aynen kopyala (yedek davranış)
                     console.warn('Çeviri başarısız, ham metin kopyalanıyor:', err.message);
                     secondaryText = primaryText;
                 }
             }
 
-            // Eski TR/EN gizli inputlarını dolduruyoruz (geriye dönük uyumluluk + ileride Firebase'e yazarken kullanılacak)
             const reasonTR = (primaryLang === 'tr') ? primaryText : secondaryText;
             const reasonEN = (primaryLang === 'en') ? primaryText : secondaryText;
             document.getElementById('banReasonTR').value = reasonTR;
             document.getElementById('banReasonEN').value = reasonEN;
 
-            submitBtn.disabled = false;
+            // ⏳ Süre hesaplama
+            const unit = document.getElementById('banDurationUnit').value;
+            const amount = parseInt(document.getElementById('banDurationValue').value) || 1;
+            let banExpires;
+            if (unit === 'permanent') {
+                banExpires = 'Sonsuz';
+            } else {
+                const unitMs = {
+                    second: 1000,
+                    minute: 60 * 1000,
+                    hour: 60 * 60 * 1000,
+                    day: 24 * 60 * 60 * 1000,
+                    week: 7 * 24 * 60 * 60 * 1000,
+                    year: 365 * 24 * 60 * 60 * 1000
+                };
+                banExpires = Date.now() + (amount * (unitMs[unit] || unitMs.minute));
+            }
+
             submitBtn.innerText = (lang === 'en') ? 'Report' : 'Raporla';
 
-            const placeholderMsg = (lang === 'en')
-                ? '⏳ This feature will be completed in the next phase (Firebase integration).\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN
-                : '⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.\n\nTR: ' + reasonTR + '\nEN: ' + reasonEN;
-            alert(placeholderMsg);
+            try {
+                // 🛡️ Sunucu tarafı son kontrol: hedefin güncel rütbesini tekrar oku, hiyerarşiyi yeniden doğrula
+                const targetSnap = await database.ref('users/' + banTargetUid).once('value');
+                if (!targetSnap.exists()) {
+                    alert(lang === 'en' ? 'Target user no longer exists.' : 'Hedef kullanıcı artık mevcut değil.');
+                    submitBtn.disabled = false;
+                    return;
+                }
+                const targetRole = targetSnap.val().role || 'Player';
+                if (PROTECTED_BAN_ROLES.includes(targetRole) && myRole !== 'Owner / Developer') {
+                    alert(lang === 'en'
+                        ? 'This rank can only be banned by Owner / Developer.'
+                        : 'Bu rütbe sadece Owner / Developer tarafından banlanabilir.');
+                    submitBtn.disabled = false;
+                    closeSubModal('adminBanSetupModal');
+                    loadUsersForAdmin();
+                    return;
+                }
+
+                await database.ref('users/' + banTargetUid).update({
+                    isBanned: true,
+                    banReasonTR: reasonTR,
+                    banReasonEN: reasonEN,
+                    banExpires: banExpires
+                });
+
+                closeSubModal('adminBanSetupModal');
+                loadUsersForAdmin();
+            } catch (err) {
+                console.error('Ban yazma hatası:', err);
+                alert(lang === 'en' ? 'Failed to write ban to database.' : 'Ban veritabanına yazılamadı.');
+            } finally {
+                submitBtn.disabled = false;
+            }
         }
 
         // Unban butonuna basılınca: ban sebebini gösterip onay isteyen fonksiyon
         function confirmUnbanUser(uid, username) {
             const lang = getActiveLang();
 
-            database.ref('users/' + uid + '/ban').once('value', (snapshot) => {
-                const banData = snapshot.val() || {};
+            database.ref('users/' + uid).once('value', (snapshot) => {
+                const userData = snapshot.val() || {};
                 const reason = (lang === 'en')
-                    ? (banData.reasonEN || banData.reasonTR || '—')
-                    : (banData.reasonTR || banData.reasonEN || '—');
+                    ? (userData.banReasonEN || userData.banReasonTR || '—')
+                    : (userData.banReasonTR || userData.banReasonEN || '—');
 
                 const confirmMsg = (lang === 'en')
                     ? `Are you sure you want to unban "${username}"?\n\nBan reason:\n${reason}`
@@ -1958,9 +2049,17 @@ function removeFriend(friendUid) {
 
         function unbanUser(uid) {
             const lang = getActiveLang();
-            alert(lang === 'en'
-                ? '⏳ This feature will be completed in the next phase (Firebase integration).'
-                : '⏳ Bu özellik bir sonraki aşamada (Firebase entegrasyonu) tamamlanacak.');
+            database.ref('users/' + uid).update({
+                isBanned: false,
+                banReasonTR: null,
+                banReasonEN: null,
+                banExpires: null
+            }).then(() => {
+                loadUsersForAdmin();
+            }).catch((err) => {
+                console.error('Unban hatası:', err);
+                alert(lang === 'en' ? 'Failed to remove ban.' : 'Ban kaldırılamadı.');
+            });
         }
 
       // Rütbeler menüsünü açıp kapatan fonksiyon
@@ -2082,6 +2181,7 @@ function renderRanksList() {
         }
 
         function openExperimentalModal() {
+            if (blockIfBanned()) return;
             document.getElementById('experimentalModal').style.display = 'flex';
         }
 
@@ -2094,6 +2194,7 @@ function renderRanksList() {
         }
 
         function openGame() {
+            if (blockIfBanned()) return;
             const playerName = document.getElementById('navProfileName').innerText;
             const overlay = document.getElementById('gameOverlay');
             const iframe = document.getElementById('gameFrame');
@@ -2111,6 +2212,178 @@ function renderRanksList() {
                     console.error("İsim gönderilemedi, iframe henüz hazır değil.");
                 }
             };
+        }
+
+        // ==========================================
+        // 🚫 BAN DURUMU KONTROLÜ VE KİLİT EKRANI (3. Aşama)
+        // ==========================================
+
+        // Kullanıcı banlıysa giriş butonlarını tamamen işlevsiz kılan koruma katmanı
+        function overrideGameButtons() {
+            if (!isCurrentlyBanned) return;
+
+            const blockedIds = ['btn-download', 'btn-experimental'];
+            blockedIds.forEach((id) => {
+                const el = document.getElementById(id);
+                if (el && !el.dataset.banLocked) {
+                    el.dataset.banLocked = 'true';
+                    el.addEventListener('click', (e) => {
+                        if (isCurrentlyBanned) {
+                            e.preventDefault();
+                            e.stopImmediatePropagation();
+                        }
+                    }, true);
+                }
+            });
+        }
+
+        // Banlı kullanıcı varsa diğer tüm fonksiyonların en başında çağırarak işlemi iptal ettiren bekçi fonksiyon
+        function blockIfBanned() {
+            return isCurrentlyBanned === true;
+        }
+
+        // Aktif dile göre kilit ekranı metinlerini güncelleyen fonksiyon
+        function applyBannedOverlayLanguage(lang, reasonText, expires) {
+            const isEn = (lang === 'en');
+            document.getElementById('bannedTitleText').innerText = isEn ? 'YOU ARE BANNED' : 'BANLANDIN';
+            document.getElementById('bannedReasonText').innerHTML =
+                `<strong>${isEn ? 'Reason:' : 'Sebep:'}</strong> ${reasonText || '—'}`;
+
+            const labelEl = document.getElementById('bannedCountdownLabel');
+            if (expires === 'Sonsuz' || expires === 'Permanent') {
+                document.getElementById('bannedCountdownTimer').innerText = isEn ? 'PERMANENT' : 'SINIRSIZ';
+                labelEl.innerText = isEn ? 'Duration:' : 'Süre:';
+            } else {
+                labelEl.innerText = isEn ? 'Remaining Time:' : 'Kalan Süre:';
+            }
+        }
+
+        // Milisaniye farkını "X Gün, Y Saat, Z Dakika, K Saniye" formatına çeviren yardımcı fonksiyon
+        function formatBanCountdown(msLeft, lang) {
+            const isEn = (lang === 'en');
+            const totalSeconds = Math.max(0, Math.floor(msLeft / 1000));
+            const days = Math.floor(totalSeconds / 86400);
+            const hours = Math.floor((totalSeconds % 86400) / 3600);
+            const minutes = Math.floor((totalSeconds % 3600) / 60);
+            const seconds = totalSeconds % 60;
+
+            return isEn
+                ? `${days} Days, ${hours} Hours, ${minutes} Minutes, ${seconds} Seconds`
+                : `${days} Gün, ${hours} Saat, ${minutes} Dakika, ${seconds} Saniye`;
+        }
+
+        // Geri sayımı her saniye güncelleyen, süre dolunca otomatik unban yapan döngü
+        function startBanCountdown(uid, expires) {
+            if (banCountdownInterval) clearInterval(banCountdownInterval);
+
+            if (expires === 'Sonsuz' || expires === 'Permanent') {
+                return; // Sonsuz banda geri sayım yok
+            }
+
+            banCountdownInterval = setInterval(() => {
+                const lang = getActiveLang();
+                const msLeft = expires - Date.now();
+
+                if (msLeft <= 0) {
+                    clearInterval(banCountdownInterval);
+                    // ⏰ Süre doldu: veritabanından ban verisini otomatik temizle
+                    database.ref('users/' + uid).update({
+                        isBanned: false,
+                        banReasonTR: null,
+                        banReasonEN: null,
+                        banExpires: null
+                    }).finally(() => {
+                        isCurrentlyBanned = false;
+                        document.getElementById('bannedUserOverlay').style.display = 'none';
+                        location.reload();
+                    });
+                    return;
+                }
+
+                document.getElementById('bannedCountdownTimer').innerText = formatBanCountdown(msLeft, lang);
+            }, 1000);
+        }
+
+        // Oyuncu giriş yaptığında veya dil değiştirdiğinde çağrılacak ana ban kontrol fonksiyonu
+        function checkUserBanStatus(userId) {
+            if (!userId) return;
+
+            database.ref('users/' + userId).on('value', (snapshot) => {
+                if (!snapshot.exists()) return;
+                const userData = snapshot.val();
+                const lang = getActiveLang();
+                const overlay = document.getElementById('bannedUserOverlay');
+
+                if (userData.isBanned === true) {
+                    isCurrentlyBanned = true;
+
+                    const reason = (lang === 'en')
+                        ? (userData.banReasonEN || userData.banReasonTR || '—')
+                        : (userData.banReasonTR || userData.banReasonEN || '—');
+                    const expires = userData.banExpires;
+
+                    // Süresi geçmiş ama henüz temizlenmemiş bir ban varsa anında temizle
+                    if (typeof expires === 'number' && expires <= Date.now()) {
+                        database.ref('users/' + userId).update({
+                            isBanned: false,
+                            banReasonTR: null,
+                            banReasonEN: null,
+                            banExpires: null
+                        }).finally(() => {
+                            isCurrentlyBanned = false;
+                            overlay.style.display = 'none';
+                            location.reload();
+                        });
+                        return;
+                    }
+
+                    applyBannedOverlayLanguage(lang, reason, expires);
+                    overlay.style.display = 'flex';
+                    overrideGameButtons();
+
+                    if (typeof expires === 'number') {
+                        startBanCountdown(userId, expires);
+                    } else if (banCountdownInterval) {
+                        clearInterval(banCountdownInterval);
+                    }
+                } else {
+                    isCurrentlyBanned = false;
+                    if (banCountdownInterval) clearInterval(banCountdownInterval);
+                    overlay.style.display = 'none';
+                }
+            });
+        }
+
+        // Kilit ekranı açıkken kapatılmasını ve arkadaki hiçbir öğeye tıklanmasını engelleyen son koruma
+        document.addEventListener('click', (e) => {
+            if (isCurrentlyBanned) {
+                const overlay = document.getElementById('bannedUserOverlay');
+                if (overlay && !overlay.contains(e.target)) {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                }
+            }
+        }, true);
+
+        document.addEventListener('keydown', (e) => {
+            if (isCurrentlyBanned && e.key === 'Escape') {
+                e.preventDefault();
+                e.stopImmediatePropagation();
+            }
+        }, true);
+
+        // 🔐 Firebase Auth durumunu dinleyen ana fonksiyon: giriş yapıldığında ban kontrolünü tetikler
+        if (auth) {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    checkUserBanStatus(user.uid);
+                } else {
+                    isCurrentlyBanned = false;
+                    if (banCountdownInterval) clearInterval(banCountdownInterval);
+                    const overlay = document.getElementById('bannedUserOverlay');
+                    if (overlay) overlay.style.display = 'none';
+                }
+            });
         }
 
         function closeGame() {
