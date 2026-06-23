@@ -3,16 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Indev v1.4.1 - Perlin World </title>
+<title>Legends Indev v1.5 - Perlin World</title>
 <style>
+@import url('https://fonts.cdnfonts.com/css/minecraft-4');
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
-body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:monospace}
+body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:'Minecraft',monospace}
 #menu-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;}
 .menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px;max-height:95vh;overflow-y:auto;}
 .menu-screen.active{display:flex;}
 .game-logo{font-size:34px;font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:2px;margin-bottom:4px;}
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
-.mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
+.mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
 .mbtn:hover{filter:brightness(1.2);}
 .mbtn:active{border-top-color:#1a1a1a;border-left-color:#1a1a1a;border-bottom-color:#7a7a7a;border-right-color:#7a7a7a;filter:brightness(.9);}
 .mbtn:disabled,.mbtn.disabled{opacity:.4;cursor:not-allowed;filter:none!important;}
@@ -33,11 +34,11 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #lang-select{position:absolute;top:16px;right:20px;font-size:14px;font-weight:bold;color:#fff;z-index:1010;background:rgba(0,0,0,.4);padding:5px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.2);}
 .lang-opt{cursor:pointer;opacity:.4;padding:2px 5px;}
 .lang-opt.active{opacity:1;color:#75a7ff;}
-.menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
+.menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
 .menu-input::placeholder{letter-spacing:1px;color:rgba(255,255,255,.3);}
 .menu-input:focus{border-color:rgba(117,167,255,.6);}
 .name-input{letter-spacing:1px;text-align:left;font-size:13px;}
-.code-display{font-size:38px;font-weight:bold;letter-spacing:10px;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;margin:4px 0 2px;font-family:monospace;}
+.code-display{font-size:38px;font-weight:bold;letter-spacing:10px;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;margin:4px 0 2px;font-family:'Minecraft',monospace;}
 .code-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
 .mini-cards{display:flex;gap:8px;width:100%;margin:3px 0 5px;}
 .mini-card{flex:1;padding:8px 6px;background:linear-gradient(180deg,#1e2e3e,#121e2e);border:2px solid #2a3a4a;border-radius:5px;cursor:pointer;text-align:center;transition:border-color .15s;}
@@ -57,7 +58,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #game-title{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#fff;font-size:15px;font-weight:bold;text-shadow:2px 2px #000;z-index:10;pointer-events:none;display:none;}
 #crosshair{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);color:#fff;font-size:24px;font-weight:bold;display:none !important;justify-content:center;align-items:center;pointer-events:none;z-index:10;text-shadow:1px 1px #000;}
 #crosshair.show{display:flex !important;}
-#mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
+#mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
 #bars-wrap{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:3px;z-index:11;pointer-events:none;}
 .bar-row{display:flex;gap:2px;}
 .hrt,.hnr{font-size:13px;line-height:1;text-shadow:1px 1px #000;}
@@ -75,7 +76,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .hotbar-slot{width:50px;height:50px;background:rgba(255,255,255,.1);border:2px solid #aaa;border-radius:6px;overflow:hidden;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all .15s;}
 .hotbar-slot canvas{width:100%;height:100%;image-rendering:pixelated;}
 .hotbar-slot.active{border-color:#75a7ff;background:rgba(117,167,255,.3);box-shadow:0 0 10px #75a7ff;}
-#mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:monospace;cursor:pointer;letter-spacing:1px;}
+#mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:1px;}
 #error-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,40,40,.95);color:#fff;padding:20px;border-radius:12px;text-align:center;z-index:1100;border:2px solid #fff;display:none;}
 /* ─── Kırma Çatlak Overlay ─── */
 #break-overlay{position:absolute;pointer-events:none;z-index:30;display:none;border:2px solid rgba(0,0,0,0.6);box-sizing:border-box;}
@@ -91,7 +92,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #chat-container{position:absolute;bottom:90px;left:10px;width:300px;max-width:calc(100vw - 20px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
 #chat-log{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;}
 #chat-log::-webkit-scrollbar{display:none;}
-.chat-msg{color:#fff;font-size:12px;font-family:monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
+.chat-msg{color:#fff;font-size:12px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
 .chat-msg.sys{color:#acd4ff;}
 .chat-msg.srv{color:#2effdc;}
 .chat-msg.warn{color:#ffbb44;}
@@ -99,26 +100,26 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .rank-tag.rank-sweep{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-image:linear-gradient(105deg,var(--rtc,#fff) 0%,var(--rtc,#fff) 36%,#fff 44%,#fff 52%,var(--rtc,#fff) 60%,var(--rtc,#fff) 100%);background-size:280% 100%;background-position:200% 0;animation:rankSweep 5s linear infinite;filter:drop-shadow(0 0 5px var(--rtc,#fff));}
 @keyframes rankSweep{0%{background-position:200% 0;}30%{background-position:-30% 0;}30.001%{background-position:200% 0;}100%{background-position:200% 0;}}
 #chat-input-row{display:none;margin-top:4px;pointer-events:all;}
-#chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
-#chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
+#chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:'Minecraft',monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
+#chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
 #btn-mobile-chat{position:absolute;bottom:118px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:16px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #death-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(180,0,0,0.52);z-index:850;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding-top:18%;}
 #death-screen.active{display:flex;}
-#death-title{font-size:44px;font-weight:bold;color:#fff;text-shadow:0 0 24px rgba(255,0,0,.9),3px 3px #000;letter-spacing:5px;margin-bottom:12px;font-family:monospace;}
-#death-msg{font-size:18px;color:#fff;text-shadow:2px 2px #000;margin-bottom:28px;background:rgba(0,0,0,0.5);padding:6px 20px;border-radius:30px;font-family:monospace;}
-#btn-respawn{padding:14px 32px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:16px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;letter-spacing:2px;}
+#death-title{font-size:44px;font-weight:bold;color:#fff;text-shadow:0 0 24px rgba(255,0,0,.9),3px 3px #000;letter-spacing:5px;margin-bottom:12px;font-family:'Minecraft',monospace;}
+#death-msg{font-size:18px;color:#fff;text-shadow:2px 2px #000;margin-bottom:28px;background:rgba(0,0,0,0.5);padding:6px 20px;border-radius:30px;font-family:'Minecraft',monospace;}
+#btn-respawn{padding:14px 32px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:16px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:2px;}
 #btn-respawn:hover{filter:brightness(1.2);}
 #ban-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(60,0,0,0.95);z-index:960;display:none;flex-direction:column;justify-content:center;align-items:center;}
 #ban-screen.active{display:flex;}
-#ban-title{font-size:36px;font-weight:bold;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:monospace;text-align:center;padding:0 20px;}
-#ban-by{font-size:14px;color:rgba(255,190,190,.75);text-shadow:1px 1px #000;font-family:monospace;margin-bottom:28px;}
-#btn-ban-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#ban-title{font-size:36px;font-weight:bold;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:'Minecraft',monospace;text-align:center;padding:0 20px;}
+#ban-by{font-size:14px;color:rgba(255,190,190,.75);text-shadow:1px 1px #000;font-family:'Minecraft',monospace;margin-bottom:28px;}
+#btn-ban-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-ban-menu:hover{filter:brightness(1.2);}
 #kick-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(20,20,60,0.95);z-index:960;display:none;flex-direction:column;justify-content:center;align-items:center;}
 #kick-screen.active{display:flex;}
-#kick-title{font-size:36px;font-weight:bold;color:#ffaa44;text-shadow:0 0 30px rgba(255,160,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:monospace;text-align:center;padding:0 20px;}
-#kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:monospace;margin-bottom:28px;}
-#btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#kick-title{font-size:36px;font-weight:bold;color:#ffaa44;text-shadow:0 0 30px rgba(255,160,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:'Minecraft',monospace;text-align:center;padding:0 20px;}
+#kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:'Minecraft',monospace;margin-bottom:28px;}
+#btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-kick-menu:hover{filter:brightness(1.2);}
 #inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:800;color:#fff;}
 #inv-overlay.active{display:flex;}
@@ -131,14 +132,14 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .inv-item.selected{border-color:#75a7ff;background:rgba(117,167,255,.18);}
 .inv-item canvas{width:40px;height:40px;image-rendering:pixelated;}
 .inv-item-name{font-size:7px;color:rgba(255,255,255,.6);margin-top:2px;text-align:center;line-height:1.1;}
-#inv-hint{font-size:8px;color:rgba(255,255,255,.32);letter-spacing:.5px;text-align:center;margin:4px 0 8px;font-family:monospace;}
+#inv-hint{font-size:8px;color:rgba(255,255,255,.32);letter-spacing:.5px;text-align:center;margin:4px 0 8px;font-family:'Minecraft',monospace;}
 #inv-hotbar-row{display:flex;gap:4px;width:100%;justify-content:center;margin-bottom:5px;}
 .inv-hslot{display:flex;flex-direction:column;align-items:center;padding:4px 2px 3px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);border-radius:5px;cursor:pointer;flex:1;max-width:58px;transition:border-color .1s;}
 .inv-hslot:hover{border-color:rgba(117,167,255,.5);}
 .inv-hslot canvas{width:38px;height:38px;image-rendering:pixelated;}
 .inv-hslot-num{font-size:8px;color:rgba(255,255,255,.38);margin-bottom:1px;}
 .inv-hslot-name{font-size:7px;color:rgba(255,255,255,.55);margin-top:2px;text-align:center;}
-#inv-close-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:5px;font-family:monospace;}
+#inv-close-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:5px;font-family:'Minecraft',monospace;}
 #btn-mobile-inv{position:absolute;bottom:164px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:14px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #btn-mobile-cam{position:absolute;top:12px;right:12px;width:44px;height:44px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:50%;color:#fff;font-size:19px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #btn-mobile-cam:active{background:rgba(102,252,241,.35);}
@@ -184,7 +185,7 @@ body.low-health::after {
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
     <div class="game-logo" id="txt-title">LEGENDS INDEV</div>
-    <div class="game-version">v1.4.1 - Perlin World</div>
+    <div class="game-version">v1.5 - Perlin World</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-skin-menu"></button>
@@ -211,6 +212,11 @@ body.low-health::after {
       <span class="setting-label" id="txt-fov-pc-label">Görüş Açısı (FOV)</span>
       <input type="range" id="fov-pc-slider" min="50" max="120" value="70">
       <span class="setting-value" id="fov-pc-val">70</span>
+    </div>
+    <div class="setting-row">
+      <span class="setting-label" id="txt-rd-pc-label">Görüş Mesafesi</span>
+      <input type="range" id="rd-pc-slider" min="1" max="6" value="3" step="1">
+      <span class="setting-value" id="rd-pc-val">3</span>
     </div>
     <div class="sub-title" id="txt-keybinds">TUŞ ATAMALARI</div>
     <div class="kb-list">
@@ -240,6 +246,11 @@ body.low-health::after {
       <input type="range" id="fov-m-slider" min="50" max="120" value="70">
       <span class="setting-value" id="fov-m-val">70</span>
     </div>
+    <div class="setting-row">
+      <span class="setting-label" id="txt-rd-m-label">Görüş Mesafesi</span>
+      <input type="range" id="rd-m-slider" min="1" max="6" value="3" step="1">
+      <span class="setting-value" id="rd-m-val">3</span>
+    </div>
     <button class="mbtn back" id="btn-back-mobile-settings"></button>
   </div>
   <div class="menu-screen" id="screen-device">
@@ -255,13 +266,15 @@ body.low-health::after {
     <div class="game-logo">LEGENDS INDEV</div>
     <div class="screen-title" id="txt-world-title">DÜNYA SEÇİMİ</div>
     <div class="world-cards">
-      <div class="world-card" id="btn-world-infinite"><div class="wc-icon">🌍</div><div class="wc-title" id="txt-w-inf-title">SONSUZ DÜNYA</div><div class="wc-desc" id="txt-w-inf-desc">Sınırsız keşif</div></div>
+      <div class="world-card" id="btn-world-infinite"><div class="wc-icon">🌍</div><div class="wc-title" id="txt-w-inf-title">NORMAL DÜNYA</div><div class="wc-desc" id="txt-w-inf-desc">Perlin Noise arazi</div></div>
+      <div class="world-card" id="btn-world-flat"><div class="wc-icon">🟫</div><div class="wc-title" id="txt-w-flat-title">DÜZ DÜNYA</div><div class="wc-desc" id="txt-w-flat-desc">Tamamen düz zemin</div></div>
       <div class="world-card" id="btn-world-small"><div class="wc-icon">🏝️</div><div class="wc-title" id="txt-w-sm-title">KÜÇÜK DÜNYA</div><div class="wc-desc" id="txt-w-sm-desc">Hafif ve hızlı</div></div>
     </div>
     <div class="sub-title">OYUN MODU</div>
     <div class="mini-cards">
       <div class="mini-card sel" id="sp-mode-survival"><div class="mc2-icon">⚔️</div><div class="mc2-title" id="txt-sp-surv">HAY. KALMA</div></div>
       <div class="mini-card" id="sp-mode-creative"><div class="mc2-icon">✨</div><div class="mc2-title" id="txt-sp-crea">YARATICI</div></div>
+      <div class="mini-card" id="sp-mode-adventure"><div class="mc2-icon">🗺️</div><div class="mc2-title" id="txt-sp-adv">MACERA</div></div>
     </div>
     <div class="sub-title" id="txt-sp-cheats-label">HİLELER</div>
     <div class="mini-cards">
@@ -293,13 +306,15 @@ body.low-health::after {
     <div class="screen-title" id="txt-host-title">ODA KUR</div>
     <div class="sub-title">DÜNYA</div>
     <div class="mini-cards">
-      <div class="mini-card sel" id="wmc-infinite"><div class="mc2-icon">🌍</div><div class="mc2-title" id="txt-wmc-inf">SONSUZ</div></div>
+      <div class="mini-card sel" id="wmc-infinite"><div class="mc2-icon">🌍</div><div class="mc2-title" id="txt-wmc-inf">NORMAL</div></div>
+      <div class="mini-card" id="wmc-flat"><div class="mc2-icon">🟫</div><div class="mc2-title" id="txt-wmc-flat">DÜZ</div></div>
       <div class="mini-card" id="wmc-small"><div class="mc2-icon">🏝️</div><div class="mc2-title" id="txt-wmc-sm">KÜÇÜK</div></div>
     </div>
     <div class="sub-title">OYUN MODU</div>
     <div class="mini-cards">
       <div class="mini-card sel" id="gmc-survival"><div class="mc2-icon">⚔️</div><div class="mc2-title" id="txt-gmc-surv">HAY. KALMA</div></div>
       <div class="mini-card" id="gmc-creative"><div class="mc2-icon">✨</div><div class="mc2-title" id="txt-gmc-crea">YARATICI</div></div>
+      <div class="mini-card" id="gmc-adventure"><div class="mc2-icon">🗺️</div><div class="mc2-title" id="txt-gmc-adv">MACERA</div></div>
     </div>
     <div class="sub-title">HİLELER</div>
     <div class="mini-cards">
@@ -329,7 +344,7 @@ body.low-health::after {
           <span id="txt-skin-upload-hint">📁 Minecraft skin PNG yükle</span><br>
           <span id="txt-skin-upload-size" style="color:rgba(255,255,255,.35);">64×64 veya 64×32 piksel</span>
         </div>
-        <label id="skin-file-label" style="width:100%;padding:11px 14px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:13px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;display:block;">
+        <label id="skin-file-label" style="width:100%;padding:11px 14px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;display:block;">
           <span id="txt-skin-choose">📂 DOSYA SEÇ</span>
           <input type="file" id="skin-file-input" accept="image/png" style="display:none;">
         </label>
@@ -412,11 +427,6 @@ body.low-health::after {
     <div id="pause-title">OYUN MENÜSÜ</div>
     <div id="pause-version">v1.4.1</div>
     <button class="mbtn primary" id="btn-resume"></button>
-    <div class="pause-setting">
-      <span id="txt-rd-label">Görüş Mesafesi</span>
-      <input type="range" id="pause-rd-slider" min="1" max="6" value="3" step="1">
-      <span class="val" id="pause-rd-val">3</span>
-    </div>
     <button class="mbtn" id="btn-pause-settings"></button>
     <button class="mbtn quit-btn" id="btn-quit"></button>
   </div>
@@ -535,28 +545,29 @@ function checkRate(key,maxPerSec,windowMs=1000){
 const langData={
   tr:{title:'LEGENDS INDEV',singleplayer:'TEK OYUNCU',multiplayer:'ÇOK OYUNCU',settings:'AYARLAR',
       deviceTitle:'CİHAZ SEÇİMİ',pcBtn:'BİLGİSAYAR',mobileBtn:'MOBİL',worldTitle:'DÜNYA SEÇİMİ',
-      wInfTitle:'SONSUZ DÜNYA',wInfDesc:'Sınırsız keşif, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',back:'← GERİ',
+      wInfTitle:'NORMAL DÜNYA',wInfDesc:'Perlin Noise arazi, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',
+      wFlatTitle:'DÜZ DÜNYA',wFlatDesc:'Tamamen düz zemin',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.4.1',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.5',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
-      codeLabel:'ODA ŞİFRESİ',wmcInf:'SONSUZ',wmcSm:'KÜÇÜK',gmcSurv:'HAY. KALMA',gmcCrea:'YARATICI',
+      codeLabel:'ODA ŞİFRESİ',wmcInf:'NORMAL',wmcFlat:'DÜZ',wmcSm:'KÜÇÜK',gmcSurv:'HAY. KALMA',gmcCrea:'YARATICI',gmcAdv:'MACERA',
       chatHint:'⌨  Enter → Sohbet',chatPh:'Mesajınızı yazın...',
       sysJoin:' odaya katıldı',sysLeft:' ayrıldı',sysDisc:'Bağlantı kesildi',
-      modeCreative:'Yaratıcı Mod',modeSurvival:'Hayatta Kalma',rdLabel:'Görüş Mesafesi',
-      spSurv:'HAY. KALMA',spCrea:'YARATICI',crouchBtn:'ÇÖMEL',cheatsLabel:'HİLELER',cheatOff:'KAPALI',cheatOn:'AÇIK',
+      modeCreative:'Yaratıcı Mod',modeSurvival:'Hayatta Kalma',modeAdventure:'Macera Modu',rdLabel:'Görüş Mesafesi',rdPcLabel:'Görüş Mesafesi',rdMLabel:'Görüş Mesafesi',
+      spSurv:'HAY. KALMA',spCrea:'YARATICI',spAdv:'MACERA',crouchBtn:'ÇÖMEL',cheatsLabel:'HİLELER',cheatOff:'KAPALI',cheatOn:'AÇIK',
       deathTitle:'Öldün!',respawnBtn:'Yeniden Doğ',pauseSettings:'AYARLAR',
       mpBrowse:'GÖZ AT',
       invTitle:'ENVANTER',invBlocks:'BLOKLAR',invHint:'HOTBAR – ATAMAK İÇİN BLOK SEÇ, SONRA SLOTA TIKLA',invClose:'[E] kapat',
-      bkNames:['Tahta','Çimen','Toprak','Taş','Odun','Karaktas','Cam','Yaprak','Kum','Su'],
+      bkNames:['Tahta','Çimen','Toprak','Taş','Odun','Karaktas','Cam','Yaprak','Kum','Su','Kaya Dibi'],
       settingsPcBtn:'PC AYARLARI',settingsMobileBtn:'MOBİL AYARLAR',
       pcSettingsTitle:'PC AYARLARI',mobileSettingsTitle:'MOBİL AYARLAR',
       sensLabel:'Hassasiyet',fovLabel:'Görüş Açısı (FOV)',keybindsTitle:'TUŞ ATAMALARI',
       kbForward:'İleri',kbBack:'Geri',kbLeft:'Sol',kbRight:'Sağ',kbJump:'Zıpla',
       kbSlot:'Slot Seç',kbBreak:'Blok Kır',kbPlace:'Blok Koy',kbChat:'Sohbet',kbPause:'Duraklat',
       srvPrefix:'[Sunucu]: ',srvNoCheat:'[Sunucu]: Hileler kapalı!',srvNoPerms:'[Sunucu]: Yetkiniz yok!',
-      srvHostOnly:'[Sunucu]: Sadece yönetici!',srvUsageMode:'Kullanım: /mode c veya /mode s',
+      srvHostOnly:'[Sunucu]: Sadece yönetici!',srvUsageMode:'Kullanım: /mode c, /mode s veya /mode a',
       srvUsageOp:'Kullanım: /op <isim>',srvUsageUnop:'Kullanım: /unop <isim>',
       srvUsageKick:'Kullanım: /kick <isim>',srvUsageBan:'Kullanım: /ban <isim>',
       srvNoPlayer:'[Sunucu]: Oyuncu bulunamadı: ',srvNoCantKickOp:'[Sunucu]: Operatörleri atamazsınız!',
@@ -588,28 +599,29 @@ const langData={
       skinGuestHint:'Hesap sahibiyseniz siteye giriş yapın.'},
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
-      wInfTitle:'INFINITE WORLD',wInfDesc:'Endless exploration',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',back:'← BACK',
+      wInfTitle:'NORMAL WORLD',wInfDesc:'Perlin Noise terrain',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',
+      wFlatTitle:'FLAT WORLD',wFlatDesc:'Completely flat terrain',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.4.1',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.5',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
-      codeLabel:'ROOM CODE',wmcInf:'INFINITE',wmcSm:'SMALL',gmcSurv:'SURVIVAL',gmcCrea:'CREATIVE',
+      codeLabel:'ROOM CODE',wmcInf:'NORMAL',wmcFlat:'FLAT',wmcSm:'SMALL',gmcSurv:'SURVIVAL',gmcCrea:'CREATIVE',gmcAdv:'ADVENTURE',
       chatHint:'⌨  Enter → Chat',chatPh:'Type a message...',
       sysJoin:' joined',sysLeft:' left',sysDisc:'Connection lost',
-      modeCreative:'Creative Mode',modeSurvival:'Survival Mode',rdLabel:'Render Distance',
-      spSurv:'SURVIVAL',spCrea:'CREATIVE',crouchBtn:'CROUCH',cheatsLabel:'CHEATS',cheatOff:'OFF',cheatOn:'ON',
+      modeCreative:'Creative Mode',modeSurvival:'Survival Mode',modeAdventure:'Adventure Mode',rdLabel:'Render Distance',rdPcLabel:'Render Distance',rdMLabel:'Render Distance',
+      spSurv:'SURVIVAL',spCrea:'CREATIVE',spAdv:'ADVENTURE',crouchBtn:'CROUCH',cheatsLabel:'CHEATS',cheatOff:'OFF',cheatOn:'ON',
       deathTitle:'You Died!',respawnBtn:'Respawn',pauseSettings:'SETTINGS',
       mpBrowse:'BROWSE',
       invTitle:'INVENTORY',invBlocks:'BLOCKS',invHint:'HOTBAR – SELECT A BLOCK, THEN CLICK A SLOT TO ASSIGN',invClose:'[E] close',
-      bkNames:['Planks','Grass','Dirt','Stone','Log','Cobblestone','Glass','Leaves','Sand','Water'],
+      bkNames:['Planks','Grass','Dirt','Stone','Log','Cobblestone','Glass','Leaves','Sand','Water','Bedrock'],
       settingsPcBtn:'PC SETTINGS',settingsMobileBtn:'MOBILE SETTINGS',
       pcSettingsTitle:'PC SETTINGS',mobileSettingsTitle:'MOBILE SETTINGS',
       sensLabel:'Sensitivity',fovLabel:'Field of View (FOV)',keybindsTitle:'KEY BINDINGS',
       kbForward:'Forward',kbBack:'Back',kbLeft:'Left',kbRight:'Right',kbJump:'Jump',
       kbSlot:'Select Slot',kbBreak:'Break Block',kbPlace:'Place Block',kbChat:'Chat',kbPause:'Pause',
       srvPrefix:'[Server]: ',srvNoCheat:'[Server]: Cheats are disabled!',srvNoPerms:'[Server]: You don\'t have permission!',
-      srvHostOnly:'[Server]: Host only!',srvUsageMode:'Usage: /mode c or /mode s',
+      srvHostOnly:'[Server]: Host only!',srvUsageMode:'Usage: /mode c, /mode s or /mode a',
       srvUsageOp:'Usage: /op <name>',srvUsageUnop:'Usage: /unop <name>',
       srvUsageKick:'Usage: /kick <name>',srvUsageBan:'Usage: /ban <name>',
       srvNoPlayer:'[Server]: Player not found: ',srvNoCantKickOp:'[Server]: Cannot kick operators!',
@@ -662,15 +674,16 @@ function setLanguage(l){
   s('inv-title',d.invTitle);s('inv-lbl-blocks',d.invBlocks);s('inv-hint',d.invHint);s('inv-close-hint',d.invClose);
   s('txt-device-title',d.deviceTitle);s('txt-pc-btn',d.pcBtn);s('txt-mobile-btn',d.mobileBtn);
   s('txt-world-title',d.worldTitle);s('txt-w-inf-title',d.wInfTitle);s('txt-w-inf-desc',d.wInfDesc);
+  s('txt-w-flat-title',d.wFlatTitle);s('txt-w-flat-desc',d.wFlatDesc);
   s('txt-w-sm-title',d.wSmTitle);s('txt-w-sm-desc',d.wSmDesc);
   document.querySelectorAll('.mbtn.back').forEach(b=>b.textContent=d.back);
   document.querySelector('#error-msg h3').textContent=d.errTitle;
   document.querySelector('#error-msg p').textContent=d.errDesc;
   s('btn-mobile-jump',d.jumpBtn);s('btn-resume',d.resume);s('btn-quit',d.quit);
   s('pause-title',d.pauseTitle);s('txt-mp-title',d.mpTitle);s('txt-mp-join',d.mpJoin);s('txt-mp-host',d.mpHost);
-  s('txt-join-title',d.joinTitle);s('txt-host-title',d.hostTitle);s('txt-gmc-surv',d.gmcSurv);s('txt-gmc-crea',d.gmcCrea);
-  s('txt-wmc-inf',d.wmcInf);s('txt-wmc-sm',d.wmcSm);s('txt-sp-surv',d.spSurv);s('txt-sp-crea',d.spCrea);
-  s('txt-rd-label',d.rdLabel);s('btn-mobile-crouch',d.crouchBtn);
+  s('txt-join-title',d.joinTitle);s('txt-host-title',d.hostTitle);s('txt-gmc-surv',d.gmcSurv);s('txt-gmc-crea',d.gmcCrea);s('txt-gmc-adv',d.gmcAdv);
+  s('txt-wmc-inf',d.wmcInf);s('txt-wmc-flat',d.wmcFlat);s('txt-wmc-sm',d.wmcSm);s('txt-sp-surv',d.spSurv);s('txt-sp-crea',d.spCrea);s('txt-sp-adv',d.spAdv);
+  s('txt-rd-label',d.rdLabel);s('txt-rd-pc-label',d.rdPcLabel);s('txt-rd-m-label',d.rdMLabel);s('btn-mobile-crouch',d.crouchBtn);
   s('txt-sp-cheats-label',d.cheatsLabel);s('txt-sp-cheat-off',d.cheatOff);s('txt-sp-cheat-on',d.cheatOn);
   s('death-title',d.deathTitle);s('btn-respawn',d.respawnBtn);
   document.getElementById('join-code-input').placeholder=d.joinCodePh;
@@ -717,15 +730,21 @@ sensPcSlider.addEventListener('input',()=>applySens(+sensPcSlider.value));
 sensMSlider.addEventListener('input',()=>applySens(+sensMSlider.value));
 fovPcSlider.addEventListener('input',()=>applyFov(+fovPcSlider.value));
 fovMSlider.addEventListener('input',()=>applyFov(+fovMSlider.value));
-// FPS: Görüş mesafesi slider (pause menüsünde)
-const pauseRdSlider=document.getElementById('pause-rd-slider');
-const pauseRdVal=document.getElementById('pause-rd-val');
-if(pauseRdSlider) pauseRdSlider.addEventListener('input',()=>{
-  const v=+pauseRdSlider.value;
-  pauseRdVal.textContent=v;
+// Ayarlar menüsündeki Render Distance slider'ları (PC + Mobil)
+const rdPcSlider=document.getElementById('rd-pc-slider');
+const rdPcVal=document.getElementById('rd-pc-val');
+const rdMSlider=document.getElementById('rd-m-slider');
+const rdMVal=document.getElementById('rd-m-val');
+function applyRdFromSettings(v){
   applyRenderDist(v);
+  if(rdPcSlider) rdPcSlider.value=v;
+  if(rdPcVal) rdPcVal.textContent=v;
+  if(rdMSlider) rdMSlider.value=v;
+  if(rdMVal) rdMVal.textContent=v;
   if(worldType==='infinite') updateChunks();
-});
+}
+if(rdPcSlider) rdPcSlider.addEventListener('input',()=>applyRdFromSettings(+rdPcSlider.value));
+if(rdMSlider) rdMSlider.addEventListener('input',()=>applyRdFromSettings(+rdMSlider.value));
  
 function openPauseMenu(){if(!deviceMode||isChatOpen||invOpen) return;isPaused=true;document.getElementById('pause-overlay').classList.add('active');if(deviceMode==='pc'&&document.pointerLockElement===document.body) document.exitPointerLock();}
 function closePauseMenu(){isPaused=false;document.getElementById('pause-overlay').classList.remove('active');if(deviceMode==='pc') document.body.requestPointerLock();}
@@ -778,9 +797,11 @@ document.getElementById('btn-back-world').addEventListener('click',()=>showScree
 document.getElementById('btn-pc').addEventListener('click',()=>{selectedDevice='pc';showScreen('screen-world');});
 document.getElementById('btn-mobile').addEventListener('click',()=>{selectedDevice='mobile';showScreen('screen-world');});
 document.getElementById('btn-world-infinite').addEventListener('click',()=>startGame(selectedDevice,'infinite',false,spGameMode,spCheatsEnabled));
+document.getElementById('btn-world-flat').addEventListener('click',()=>startGame(selectedDevice,'flat',false,spGameMode,spCheatsEnabled));
 document.getElementById('btn-world-small').addEventListener('click',()=>startGame(selectedDevice,'small',false,spGameMode,spCheatsEnabled));
-document.getElementById('sp-mode-survival').addEventListener('click',()=>{spGameMode='survival';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-survival');});
-document.getElementById('sp-mode-creative').addEventListener('click',()=>{spGameMode='creative';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-creative');});
+document.getElementById('sp-mode-survival').addEventListener('click',()=>{spGameMode='survival';selMini(['sp-mode-survival','sp-mode-creative','sp-mode-adventure'],'sp-mode-survival');});
+document.getElementById('sp-mode-creative').addEventListener('click',()=>{spGameMode='creative';selMini(['sp-mode-survival','sp-mode-creative','sp-mode-adventure'],'sp-mode-creative');});
+document.getElementById('sp-mode-adventure').addEventListener('click',()=>{spGameMode='adventure';selMini(['sp-mode-survival','sp-mode-creative','sp-mode-adventure'],'sp-mode-adventure');});
 document.getElementById('btn-multiplayer').addEventListener('click',()=>showScreen('screen-multiplayer'));
 function isGuestUser(){return myUsername.startsWith('Guest_');}
 function updateSkinScreenGuestState(){
@@ -857,10 +878,12 @@ document.getElementById('btn-mp-join').addEventListener('click',()=>showScreen('
 document.getElementById('btn-mp-host').addEventListener('click',()=>{document.getElementById('host-code-display').textContent=genCode();document.getElementById('host-status').textContent='';showScreen('screen-host');});
 document.getElementById('btn-back-join').addEventListener('click',()=>{cleanupMP();showScreen('screen-multiplayer');});
 document.getElementById('btn-back-host').addEventListener('click',()=>{cleanupMP();showScreen('screen-multiplayer');});
-document.getElementById('wmc-infinite').addEventListener('click',()=>{mpHostWorld='infinite';selMini(['wmc-infinite','wmc-small'],'wmc-infinite');});
-document.getElementById('wmc-small').addEventListener('click',()=>{mpHostWorld='small';selMini(['wmc-infinite','wmc-small'],'wmc-small');});
-document.getElementById('gmc-survival').addEventListener('click',()=>{mpGameMode='survival';selMini(['gmc-survival','gmc-creative'],'gmc-survival');});
-document.getElementById('gmc-creative').addEventListener('click',()=>{mpGameMode='creative';selMini(['gmc-survival','gmc-creative'],'gmc-creative');});
+document.getElementById('wmc-infinite').addEventListener('click',()=>{mpHostWorld='infinite';selMini(['wmc-infinite','wmc-flat','wmc-small'],'wmc-infinite');});
+document.getElementById('wmc-flat').addEventListener('click',()=>{mpHostWorld='flat';selMini(['wmc-infinite','wmc-flat','wmc-small'],'wmc-flat');});
+document.getElementById('wmc-small').addEventListener('click',()=>{mpHostWorld='small';selMini(['wmc-infinite','wmc-flat','wmc-small'],'wmc-small');});
+document.getElementById('gmc-survival').addEventListener('click',()=>{mpGameMode='survival';selMini(['gmc-survival','gmc-creative','gmc-adventure'],'gmc-survival');});
+document.getElementById('gmc-creative').addEventListener('click',()=>{mpGameMode='creative';selMini(['gmc-survival','gmc-creative','gmc-adventure'],'gmc-creative');});
+document.getElementById('gmc-adventure').addEventListener('click',()=>{mpGameMode='adventure';selMini(['gmc-survival','gmc-creative','gmc-adventure'],'gmc-adventure');});
 document.getElementById('sp-cheat-off').addEventListener('click',()=>{spCheatsEnabled=false;selMini(['sp-cheat-off','sp-cheat-on'],'sp-cheat-off');});
 document.getElementById('sp-cheat-on').addEventListener('click',()=>{spCheatsEnabled=true;selMini(['sp-cheat-off','sp-cheat-on'],'sp-cheat-on');});
 document.getElementById('cheat-off').addEventListener('click',()=>{cheatsEnabled=false;selMini(['cheat-off','cheat-on'],'cheat-off');});
@@ -901,6 +924,29 @@ function genTex(t){
     else if(t==='glass'){alpha=.25;r=195;g=230;b=255;if(x===0||x===15||y===0||y===15||((x===y||x===y+1)&&x>2&&x<11)){alpha=.85;r=255;g=255;b=255;}}
     else if(t==='leaves'){r=40;g=105;b=32;if((x+y)%2===0){r=30;g=85;b=22;}}
     else if(t==='sand'){r=218;g=199;b=145;if((x*y)%4===0){r-=12;g-=10;b-=8;}}
+    else if(t==='bedrock'){
+      // Gerçek piksel değerleri doğrudan yüklenen PNG'den okundu (16x16 -> grayscale)
+      const PX=[
+        [87,51,51,51,51,87,151,151,7,151,87,51,51,51,51,87],
+        [87,87,151,151,151,151,151,151,51,151,151,151,7,87,87,51],
+        [87,7,51,51,7,51,51,51,151,51,87,87,87,151,87,87],
+        [87,151,87,87,87,7,87,151,87,87,51,51,51,51,51,87],
+        [87,151,151,51,51,51,51,51,51,51,151,151,151,151,151,7],
+        [51,51,87,87,87,51,51,51,87,7,87,87,51,51,7,87],
+        [151,151,87,99,87,51,151,151,87,87,87,87,151,151,151,7],
+        [87,87,87,51,51,51,51,51,51,7,51,51,51,51,87,87],
+        [87,151,151,7,151,51,87,87,87,151,151,151,151,151,151,151],
+        [87,51,51,51,51,51,51,87,7,87,87,51,51,51,151,87],
+        [87,87,151,51,51,151,151,51,7,51,151,151,151,87,87,87],
+        [7,87,87,87,51,87,87,87,151,151,87,87,87,151,151,7],
+        [87,51,51,51,51,51,51,51,151,151,51,51,51,51,51,87],
+        [87,151,51,151,7,87,87,51,51,51,7,51,87,87,151,151],
+        [87,87,87,51,51,51,51,51,87,87,151,151,87,51,51,87],
+        [51,51,51,51,7,151,151,87,87,87,87,51,51,51,87,87],
+      ];
+      const v=PX[y][x];
+      r=v;g=v;b=v;n=0;
+    }
     r=Math.max(0,Math.min(255,r+n));g=Math.max(0,Math.min(255,g+n));b=Math.max(0,Math.min(255,b+n));
     ctx.fillStyle=t==='glass'?`rgba(${~~r},${~~g},${~~b},${alpha})`:`rgb(${~~r},${~~g},${~~b})`;
     ctx.fillRect(x,y,1,1);
@@ -912,6 +958,10 @@ function genTex(t){
 }
 const texGT=genTex('grass_top'),texGS=genTex('grass_side'),texDirt=genTex('dirt'),texWood=genTex('oak_planks'),texStone=genTex('stone');
 const texLS=genTex('log_side'),texLT=genTex('log_top'),texCob=genTex('cobblestone'),texGlass=genTex('glass'),texLeaves=genTex('leaves'),texSand=genTex('sand');
+const texBedrock=genTex('bedrock');
+// Bedrock önizleme (envanter/hotbar için)
+rawTexC['bedrock_top']=rawTexC['bedrock'];
+rawTexC['bedrock_side']=rawTexC['bedrock'];
 // Su önizleme dokuları (envanter/hotbar için)
 rawTexC['water_top']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(120,210,255,0.35)';for(let i=0;i<4;i++){ctx.fillRect(i%2===0?0:8,i*4,8,2);}return c;})();
 rawTexC['water_side']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#155a8a';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(80,170,230,0.3)';for(let i=0;i<4;i++){ctx.fillRect(0,i*4,16,2);}return c;})();
@@ -1197,9 +1247,14 @@ function updateWater(dt){
     }
 
     // ── Adım 2: Yayılma ─────────────────────────────────────────────────────
+    // ─── Bedrock Sınırı: Y=-11 (bedrock katmanı) – su tamamen durur ───
+    if(by <= -11) continue; // Bedrock seviyesinde su hiç yayılmaz
     const belowK=pk(bx,by-1,bz);
     const belowBd=blockMap[belowK];
-    if(!belowBd){
+    // Bedrock'ın hemen üstündeyse (-10) aşağı akma ama yatay yayılabilir
+    if(by-1 < -11){
+      // Aşağısı bedrock – aşağı akma, yatay yayılmaya geç
+    } else if(!belowBd){
       // Altı boş → önce aşağı ak (level aynı kalır, gravity)
       addWaterBlock(bx,by-1,bz,level,false);
       continue;
@@ -1229,12 +1284,12 @@ function updateWater(dt){
 // ─── InstancedMesh Sistemi ───
 const BLOCK_GEO=new THREE.BoxGeometry(1,1,1);
 const DUMMY_OBJ=new THREE.Object3D();
-const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null};
+const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null,bedrock:null};
 let iMeshes={};
 let instancesDirty=false;
-const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map()};
-function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;}
-function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';return 'planks';}
+const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map(),bedrock:new Map()};
+function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;IMAT_KEYS.bedrock=texBedrock;}
+function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';if(mat===texBedrock) return 'bedrock';return 'planks';}
 function rebuildInstancedMeshes(){
   for(const k in iMeshes){
     scene.remove(iMeshes[k]);
@@ -1305,7 +1360,7 @@ function castRayBlocks(orig,dir,skipWater=false){
 }
  
 // ─── Hotbar Önizleme ───
-const BLOCK_DEFS=[['oak_planks','oak_planks'],['grass_top','grass_side'],['dirt','dirt'],['stone','stone'],['log_top','log_side'],['cobblestone','cobblestone'],['glass','glass'],['leaves','leaves'],['sand','sand'],['water_top','water_side']];
+const BLOCK_DEFS=[['oak_planks','oak_planks'],['grass_top','grass_side'],['dirt','dirt'],['stone','stone'],['log_top','log_side'],['cobblestone','cobblestone'],['glass','glass'],['leaves','leaves'],['sand','sand'],['water_top','water_side'],['bedrock','bedrock']];
 function drawIsoBlock(ctx,topC,sideC){
   const fw=20,sh=16,cx=25,ty=3;
   ctx.save();ctx.beginPath();ctx.moveTo(cx,ty);ctx.lineTo(cx+fw,ty+fw/2);ctx.lineTo(cx,ty+fw);ctx.lineTo(cx-fw,ty+fw/2);ctx.closePath();ctx.clip();ctx.setTransform(fw/16,-fw/32,fw/16,fw/32,cx-fw,ty+fw/2);ctx.drawImage(topC,0,0,16,16);ctx.restore();
@@ -1580,6 +1635,8 @@ const WorldGen = (function(){
     const biome = getBiome(wx,wz);
     const surfY = getSurfaceY(wx,wz,biome);
     const STONE_FLOOR = -10;
+    // ─── Bedrock tabakası: Y=-11'de (zemin katından 11 blok aşağıda) ───
+    blk.push({id:'bedrock',pos:new THREE.Vector3(wx,-11,wz),mat:texBedrock});
 
     if(biome==='ocean'){
       for(let y=STONE_FLOOR;y<surfY-2;y++)
@@ -1685,8 +1742,24 @@ function genChunk(cx,cz){
   if(typeof cx!=='number'||typeof cz!=='number'||!isFinite(cx)||!isFinite(cz)) return; // NaN guard
   const rng=chRng(cx,cz);
   let blk;
-  try { blk=WorldGen.generate(cx,cz,rng); }
-  catch(e){ console.warn('[genChunk] WorldGen hatası cx='+cx+' cz='+cz, e); blk=[]; }
+  // ─── Düz Dünya (Flat) üretimi ───
+  if(worldType==='flat'){
+    blk=[];
+    const sx=cx*CS,sz=cz*CS;
+    for(let x=0;x<CS;x++){for(let z=0;z<CS;z++){
+      const wx=sx+x,wz=sz+z;
+      // Y=0: Bedrock
+      blk.push({id:'bedrock',pos:new THREE.Vector3(wx,0,wz),mat:texBedrock});
+      // Y=1,2: Dirt
+      blk.push({id:'dirt',pos:new THREE.Vector3(wx,1,wz),mat:texDirt});
+      blk.push({id:'dirt',pos:new THREE.Vector3(wx,2,wz),mat:texDirt});
+      // Y=3: Grass
+      blk.push({id:'grass',pos:new THREE.Vector3(wx,3,wz),mat:matGrass});
+    }}
+  } else {
+    try { blk=WorldGen.generate(cx,cz,rng); }
+    catch(e){ console.warn('[genChunk] WorldGen hatası cx='+cx+' cz='+cz, e); blk=[]; }
+  }
   if (!blk || !Array.isArray(blk)) blk = []; // null/undefined guard
   blk.forEach(b=>{
     if(!b||!b.pos) return; // blok null kontrolü
@@ -2285,9 +2358,13 @@ function updateBars(){
 function setGameMode(m){
   gameMode=m;
   const ind=document.getElementById('mode-indicator');
-  if(ind) ind.textContent=m==='creative'?'✨ '+langData[currentLang].modeCreative:'⚔️ '+langData[currentLang].modeSurvival;
+  if(ind){
+    if(m==='creative') ind.textContent='✨ '+langData[currentLang].modeCreative;
+    else if(m==='adventure') ind.textContent='🗺️ '+langData[currentLang].modeAdventure;
+    else ind.textContent='⚔️ '+langData[currentLang].modeSurvival;
+  }
   const bw=document.getElementById('bars-wrap');
-  if(bw) bw.style.display=m==='survival'?'flex':'none';
+  if(bw) bw.style.display=(m==='survival'||m==='adventure')?'flex':'none';
   if(m==='creative'){isFlying=false;}
   updateBars();
 }
@@ -2562,11 +2639,12 @@ function sendBlock(data){
 function sendToAll(data){if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(data);});else if(guestConn?.open) guestConn.send(data);}
  
 function applyBlockSync(data){
-  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater];
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock];
   if(data.action==='break'){
     const {bx,by,bz}=data;
     const bd=blockMap[pk(bx,by,bz)];if(!bd) return;
     if(bd.unbreakable||bd.isWater) return;
+    if(bd.id==='bedrock'&&gameMode!=='creative') return;
     hideBlock(bd);
     delete blockMap[pk(bx,by,bz)];
     const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
@@ -2575,15 +2653,17 @@ function applyBlockSync(data){
   else if(data.action==='place'){
     const {bx,by,bz,slot:s}=data;
     const occ=blockMap[pk(bx,by,bz)];
-    const safeSlot=Math.max(0,Math.min(9,parseInt(s)||0));
+    const safeSlot=Math.max(0,Math.min(10,parseInt(s)||0));
     if(occ){
       if(safeSlot!==9&&(isAnyWater(occ)||occ.isLiquid)) clearBlockAt(bx,by,bz);
       else return;
     }
-    const blockIds=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water'];
+    const blockIds=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock'];
     let bd;
     if(safeSlot===9){
       bd={id:'water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:8,visible:false};
+    } else if(safeSlot===10){
+      bd={id:'bedrock',pos:new THREE.Vector3(bx,by,bz),mat:texBedrock,visible:false};
     } else {
       bd={id:blockIds[safeSlot]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[safeSlot]||texWood,visible:false};
     }
@@ -2729,7 +2809,7 @@ function processCmd(raw){
     if(!cheatsEnabled&&!myOp){addChat(null,d.srvNoCheat,true,'warn');return;}
     if(isMP&&!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
     const arg=(parts[1]||'').toLowerCase();
-    const nm=(arg==='c'||arg==='creative')?'creative':(arg==='s'||arg==='survival')?'survival':null;
+    const nm=(arg==='c'||arg==='creative')?'creative':(arg==='s'||arg==='survival')?'survival':(arg==='a'||arg==='adventure')?'adventure':null;
     if(!nm){addChat(null,d.srvUsageMode,true);return;}
     if(!isMP){setGameMode(nm);addChat(null,d.srvModeChanged+nm,true);return;}
     if(amHost){setGameMode(nm);sendToAll({type:'modechange',target:myName,mode:nm,from:myName});addChat(null,d.srvModeChanged+nm,true);}
@@ -3027,6 +3107,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             const safeMsg=String(data.msg||'').substring(0,200);
             addShoutChat(nm,safeMsg,nmRank,nmRankColor);
             Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'shout',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});});
+            // Global: diğer sekmelere ve parent frame'e ilet
+            if(typeof _shoutBC!=='undefined'&&_shoutBC) try{_shoutBC.postMessage({type:'shout',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});}catch(e){}
+            try{window.parent.postMessage({type:'GLOBAL_SHOUT',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor},'*');}catch(e){}
           }
           else if(data.type==='aatk'){if(!connTokens.has(pid)) return;const a=animals.find(x=>x.id===data.id);if(a) attackAnimal(a,Math.min(data.dmg,20));}
           else if(data.type==='modereq'){
@@ -3357,7 +3440,7 @@ function updateBreakOverlay(){
     ctx.stroke();
   }
 }
-function startBreaking(tx,ty,tisc){if(gameMode==='creative') return;isBreaking=true;breakTouchX=tx??0;breakTouchY=ty??0;breakTouchIsc=tisc??true;}
+function startBreaking(tx,ty,tisc){if(gameMode==='creative'||gameMode==='adventure') return;isBreaking=true;breakTouchX=tx??0;breakTouchY=ty??0;breakTouchIsc=tisc??true;}
 function stopBreaking(){
   isBreaking=false;breakProgress=0;breakTarget=null;
   const overlay=document.getElementById('break-overlay');
@@ -3475,8 +3558,13 @@ if (device === 'pc') {
     }}
     rebuildInstancedMeshes();instancesDirty=false;
     rebuildWaterMesh();waterDirty=false;
-    const spS=getSpawnY(8,8); // FIX: spS artık doğru tanımlanıyor
+    const spS=getSpawnY(8,8);
     camera.position.set(spS.x,spS.y,spS.z);
+  } else if(world==='flat'){
+    // Düz dünya: spawn noktası Y=3 üstü (Y=4 + oyuncu boyu ~2.6)
+    genChunk(0,0);
+    camera.position.set(8,5.6,8);
+    updateChunks();
   } else {
     // Once spawn chunk'i uret, sonra gercek Y'yi hesapla
     genChunk(0,0);
@@ -3505,12 +3593,15 @@ function getHit(cx,cy,isc,skipWater=false){
   return castRayBlocks(orig,dir,skipWater);
 }
 function breakB(x,y,isc){
+  if(gameMode==='adventure') return; // Macera modunda blok kırma yasak
   triggerSwing();
   // Su içindeyken (swimming) su bloklarını atlayarak alttaki katı bloğa ulaş
   const _inWater=inWater(camera.position.x,camera.position.y,camera.position.z);
   const h=getHit(x,y,isc,_inWater);if(!h.length||h[0].distance>=5) return;
   const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
   if(bd.unbreakable||bd.isWater) return; // suyu kırma
+  // ─── Bedrock Kırma Kuralı: Sadece Creative modda kırılabilir ───
+  if(bd.id==='bedrock'&&gameMode!=='creative') return;
   hideBlock(bd);
   delete blockMap[pk(bx,by,bz)];
   const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
@@ -3587,6 +3678,7 @@ function clearBlockAt(bx,by,bz){
   }
 }
 function placeB(x,y,isc){
+  if(gameMode==='adventure') return; // Macera modunda blok koyma yasak
   triggerSwing(true);
   const h=getHit(x,y,isc);if(!h.length||h[0].distance>=5) return;
   const {blockPos:{x:hbx,y:hby,z:hbz},face:{normal:n},bd:hitBd}=h[0];
@@ -3599,9 +3691,11 @@ function placeB(x,y,isc){
   const by = replacingWater ? hby : hby+Math.round(n.y);
   const bz = replacingWater ? hbz : hbz+Math.round(n.z);
   if(colPlace(bx,by,bz)) return;
-  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater];
-  const ids=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water'];
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock];
+  const ids=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock'];
   const k=pk(bx,by,bz);
+  // ─── Bedrock Sınırı: Y <= -11 konumuna blok yerleştirilemez ───
+  if(by <= -11) return;
   if(actualBlock===9){
     // Su kaynağı yerleştir
     const existingAtK=blockMap[k];
@@ -3689,12 +3783,7 @@ function col(px,py,pz){
 }
 // Oyuncunun hitbox'ının temas ettiği tüm XZ bloklarını döndür (köşe geçişleri için)
 function _waterXZBlocks(px,pz){
-  const r=0.20; // Sadece merkeze yakın — yanından geçerken yanlış swimming tetiklemesin
-  const x0=Math.floor(px-r),x1=Math.floor(px+r);
-  const z0=Math.floor(pz-r),z1=Math.floor(pz+r);
-  const pairs=[];
-  for(let bx=x0;bx<=x1;bx++) for(let bz=z0;bz<=z1;bz++) pairs.push([bx,bz]);
-  return pairs;
+  return [[Math.floor(px), Math.floor(pz)]];
 }
 // Su içinde mi? – köşe geçişlerinde 4 bloğa kadar kontrol eder
 function inWater(px,py,pz){
