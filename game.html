@@ -490,11 +490,21 @@ window.addEventListener('message',function(event){
       myUsername=sanitizeName(incoming);
       playerRank=(event.data.role&&typeof event.data.role==='string')?event.data.role.trim().substring(0,32):null;
       playerRankColor=resolveRankColor(playerRank,event.data.rankColor);
+      // Hesaba ait kaydedilmiş skin varsa yükle
+      if(typeof loadSkinFromStorage==='function') loadSkinFromStorage(null);
     }
     updateSkinScreenGuestState();
   }
   if(event.data&&event.data.type==='friendResult'){
     addChat(null,event.data.msg,true,event.data.success?'srv':'warn');
+  }
+  // Global shout: site/baska sekmeden gelen mesaji goster
+  if(event.data&&event.data.type==='GLOBAL_SHOUT'){
+    const gName=String(event.data.name||'?').substring(0,32);
+    const gMsg=String(event.data.msg||'').substring(0,200);
+    const gRank=event.data.rank||null;
+    const gRankColor=event.data.rankColor||null;
+    if(typeof addShoutChat==='function') addShoutChat(gName,gMsg,gRank,gRankColor);
   }
 });
  
@@ -1821,9 +1831,36 @@ function createDefaultSteveSkin(){
   return cv;
 }
 
+// ─── Skin Kaydetme / Yükleme (localStorage) ───
+function savedSkinKey(){return 'legends_skin_'+myUsername;}
+function saveSkinToStorage(cv){
+  if(isGuestUser()) return; // misafirlerde kaydetme
+  try{
+    const b64=cv.toDataURL('image/png');
+    localStorage.setItem(savedSkinKey(),b64);
+  }catch(e){}
+}
+function loadSkinFromStorage(onLoaded){
+  if(isGuestUser()){if(onLoaded) onLoaded(null);return;}
+  try{
+    const b64=localStorage.getItem(savedSkinKey());
+    if(!b64){if(onLoaded) onLoaded(null);return;}
+    loadSkinFromB64(b64,function(cv){
+      activeSkinCanvas=cv;
+      applyNewSkin(cv);
+      if(onLoaded) onLoaded(cv);
+    });
+  }catch(e){if(onLoaded) onLoaded(null);}
+}
+
 // Aktif skin canvas (64x64)
 let activeSkinCanvas=createDefaultSteveSkin();
 let skinDirty=true;
+
+// Kayıtlı skin varsa yükle (sayfa açılışında)
+setTimeout(()=>{
+  if(!isGuestUser()) loadSkinFromStorage(null);
+},200);
 
 // Skin'den UV koordinatlarıyla tekstür oluşturan yardımcı
 // sx,sy: atlastaki sol-üst piksel, sw,sh: genişlik-yükseklik (piksel cinsinden)
@@ -1959,6 +1996,8 @@ function applyNewSkin(skinCv){
   }
   // Önizlemeyi güncelle
   updateSkinPreview(skinCv);
+  // Skin'i otomatik kaydet (sadece hesaplı kullanıcılar)
+  if(typeof saveSkinToStorage==='function') saveSkinToStorage(skinCv);
 }
 
 function updateSkinPreview(skinCv){
@@ -2775,16 +2814,19 @@ function processCmd(raw){
     const msg=parts.slice(1).join(' ').trim();
     if(!msg){addChat(null,d.srvUsageShout,true);return;}
     const safeMsg=msg.substring(0,200);
-    if(!isMP){
-      addShoutChat(myUsername,safeMsg,playerRank,playerRankColor);
-      return;
+    const shoutSenderName=myName||myUsername;
+    // Her durumda (SP, host, guest) kendi ekranında göster
+    addShoutChat(shoutSenderName,safeMsg,playerRank,playerRankColor);
+    // P2P: aynı sunucudaki oyunculara ilet
+    if(isMP){
+      if(amHost){
+        Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'shout',name:shoutSenderName,msg:safeMsg,rank:playerRank,rankColor:playerRankColor});});
+      } else if(guestConn?.open){
+        guestConn.send({type:'shout',msg:safeMsg});
+      }
     }
-    if(amHost){
-      addShoutChat(myName,safeMsg,playerRank,playerRankColor);
-      Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'shout',name:myName,msg:safeMsg,rank:playerRank,rankColor:playerRankColor});});
-    } else if(guestConn?.open){
-      guestConn.send({type:'shout',msg:safeMsg});
-    }
+    // Global: siteye/diger sekmelere ilet (tum SP/MP oturumlarinda gorunur)
+    try{window.parent.postMessage({type:'GLOBAL_SHOUT',name:shoutSenderName,msg:safeMsg,rank:playerRank,rankColor:playerRankColor},'*');}catch(e){}
     return;
   }
   addChat(null,d.srvUnknownCmd+cmd,true,'warn');
@@ -2878,12 +2920,12 @@ function applySkinFromB64ToPlayer(pid,b64){
 function broadcastSkin(cv){
   if(!isMP) return;
   const b64=canvasToB64(cv);
-  const msg={type:'skin',data:b64};
   if(amHost){
-    // Host kendi skinini tüm guestlere gönder
+    // Host kendi skinini tüm guestlere gönder; id:'host' ile geldiğini belirt
+    const msg={type:'skin',id:'host',data:b64};
     Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(msg);});
   } else if(guestConn&&guestConn.open){
-    guestConn.send(msg);
+    guestConn.send({type:'skin',data:b64});
   }
 }
 function sendMySkinToNewPlayer(conn){
@@ -3102,13 +3144,13 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         st.textContent='Bağlandı!';isMP=true;amHost=false;worldSeed=data.seed||0;
         myOp=data.isOp||false;
         data.players.forEach(p=>{
-          if(p.id==='host'||p.id===myPeer.id) return;
+          if(p.id===myPeer.id) return; // kendimizi ekleme
           addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
         });
         startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
         setTimeout(()=>broadcastSkin(activeSkinCanvas),500);
       } else if(data.type==='pos'){
-        if(data.id&&data.id!==myPeer.id&&data.id!=='host') updRP(data.id,data.x,data.y,data.z,data.ry,data.mode);
+        if(data.id&&data.id!==myPeer.id) updRP(data.id,data.x,data.y,data.z,data.ry,data.mode);
       }
       else if(data.type==='damage'){
         if(data.knockback && data.fromPos) CombatManager.applyLocalDamage(data.dmg, new THREE.Vector3(data.fromPos.x, data.fromPos.y, data.fromPos.z), data.from);
