@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Indev v1.4 - Perlin World </title>
+<title>Legends Indev v1.4.1 - Perlin World </title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
 body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:monospace}
@@ -55,7 +55,8 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .kb-label{font-size:12px;color:#ccc;}
 .kb-key{font-size:11px;color:#75a7ff;font-weight:bold;background:rgba(117,167,255,.12);padding:3px 8px;border-radius:3px;border:1px solid rgba(117,167,255,.3);}
 #game-title{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#fff;font-size:15px;font-weight:bold;text-shadow:2px 2px #000;z-index:10;pointer-events:none;display:none;}
-#crosshair{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);color:#fff;font-size:24px;font-weight:bold;display:none;justify-content:center;align-items:center;pointer-events:none;z-index:10;text-shadow:1px 1px #000;}
+#crosshair{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);color:#fff;font-size:24px;font-weight:bold;display:none !important;justify-content:center;align-items:center;pointer-events:none;z-index:10;text-shadow:1px 1px #000;}
+#crosshair.show{display:flex !important;}
 #mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
 #bars-wrap{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:3px;z-index:11;pointer-events:none;}
 .bar-row{display:flex;gap:2px;}
@@ -95,8 +96,8 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .chat-msg.srv{color:#2effdc;}
 .chat-msg.warn{color:#ffbb44;}
 .rank-tag{display:inline;font-weight:bold;}
-.rank-tag.rank-sweep{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-image:linear-gradient(105deg,var(--rtc,#fff) 0%,var(--rtc,#fff) 36%,#fff 44%,#fff 52%,var(--rtc,#fff) 60%,var(--rtc,#fff) 100%);background-size:280% 100%;background-position:220% 0;animation:rankSweep 7s cubic-bezier(.4,0,.6,1) infinite;filter:drop-shadow(0 0 5px var(--rtc,#fff));}
-@keyframes rankSweep{0%{background-position:220% 0;}28%{background-position:220% 0;}65%{background-position:-40% 0;}100%{background-position:-40% 0;}}
+.rank-tag.rank-sweep{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-image:linear-gradient(105deg,var(--rtc,#fff) 0%,var(--rtc,#fff) 36%,#fff 44%,#fff 52%,var(--rtc,#fff) 60%,var(--rtc,#fff) 100%);background-size:280% 100%;background-position:200% 0;animation:rankSweep 5s linear infinite;filter:drop-shadow(0 0 5px var(--rtc,#fff));}
+@keyframes rankSweep{0%{background-position:200% 0;}30%{background-position:-30% 0;}30.001%{background-position:200% 0;}100%{background-position:200% 0;}}
 #chat-input-row{display:none;margin-top:4px;pointer-events:all;}
 #chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
 #chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
@@ -183,9 +184,10 @@ body.low-health::after {
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
     <div class="game-logo" id="txt-title">LEGENDS INDEV</div>
-    <div class="game-version">v1.4 - Perlin World</div>
+    <div class="game-version">v1.4.1 - Perlin World</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
+    <button class="mbtn" id="btn-skin-menu"></button>
     <button class="mbtn" id="btn-settings"></button>
   </div>
   <div class="menu-screen" id="screen-settings">
@@ -310,6 +312,41 @@ body.low-health::after {
     <div class="status-msg" id="host-status"></div>
     <button class="mbtn back" id="btn-back-host"></button>
   </div>
+  <!-- ─── SKİN EKRANI ─── -->
+  <div class="menu-screen" id="screen-skin">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-skin-title">SKİN AYARLARI</div>
+    <div style="display:flex;gap:16px;width:100%;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
+      <!-- Önizleme -->
+      <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+        <div id="txt-skin-preview" style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">ÖNİZLEME</div>
+        <canvas id="skin-preview-canvas" width="88" height="176" style="image-rendering:pixelated;border:2px solid rgba(117,167,255,.35);border-radius:6px;background:rgba(0,0,0,.4);"></canvas>
+      </div>
+      <!-- Kontroller -->
+      <div style="display:flex;flex-direction:column;gap:8px;min-width:190px;flex:1;max-width:240px;">
+        <div id="txt-skin-uploader" style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">SKİN YÜKLEYİCİ</div>
+        <div style="font-size:10px;color:rgba(255,255,255,.55);line-height:1.5;background:rgba(0,0,0,.3);padding:8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);">
+          <span id="txt-skin-upload-hint">📁 Minecraft skin PNG yükle</span><br>
+          <span id="txt-skin-upload-size" style="color:rgba(255,255,255,.35);">64×64 veya 64×32 piksel</span>
+        </div>
+        <label id="skin-file-label" style="width:100%;padding:11px 14px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:13px;font-weight:bold;font-family:monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;display:block;">
+          <span id="txt-skin-choose">📂 DOSYA SEÇ</span>
+          <input type="file" id="skin-file-input" accept="image/png" style="display:none;">
+        </label>
+        <div id="skin-guest-warning" style="display:none;font-size:11px;color:#ffbb44;text-align:center;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.3);border-radius:5px;padding:8px 10px;line-height:1.6;">
+          <div id="txt-skin-guest-warning"></div>
+          <div id="txt-skin-guest-hint" style="font-size:10px;color:rgba(255,200,100,.7);margin-top:2px;"></div>
+        </div>
+        <div id="skin-status" style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;min-height:14px;"></div>
+        <div style="display:flex;gap:8px;width:100%;">
+          <button class="mbtn" id="btn-skin-steve" style="margin:0;font-size:12px;padding:9px;flex:1;"></button>
+          <button class="mbtn" id="btn-skin-alex" style="margin:0;font-size:12px;padding:9px;flex:1;"></button>
+        </div>
+        <div id="txt-skin-note" style="font-size:9px;color:rgba(255,255,255,.3);text-align:center;line-height:1.5;margin-top:2px;"></div>
+      </div>
+    </div>
+    <button class="mbtn back" id="btn-back-skin"></button>
+  </div>
 </div>
  
 <div id="game-title"></div>
@@ -373,7 +410,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v1.4</div>
+    <div id="pause-version">v1.4.1</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <div class="pause-setting">
       <span id="txt-rd-label">Görüş Mesafesi</span>
@@ -454,6 +491,7 @@ window.addEventListener('message',function(event){
       playerRank=(event.data.role&&typeof event.data.role==='string')?event.data.role.trim().substring(0,32):null;
       playerRankColor=resolveRankColor(playerRank,event.data.rankColor);
     }
+    updateSkinScreenGuestState();
   }
   if(event.data&&event.data.type==='friendResult'){
     addChat(null,event.data.msg,true,event.data.success?'srv':'warn');
@@ -479,7 +517,7 @@ const langData={
       deviceTitle:'CİHAZ SEÇİMİ',pcBtn:'BİLGİSAYAR',mobileBtn:'MOBİL',worldTitle:'DÜNYA SEÇİMİ',
       wInfTitle:'SONSUZ DÜNYA',wInfDesc:'Sınırsız keşif, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.4',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.4.1',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
@@ -519,12 +557,20 @@ const langData={
       srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
       srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!',
       srvShoutNoPerm:'Bu komut Twitch ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
-      camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)'},
+      camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)',
+      skinTitle:'SKİN AYARLARI',skinPreview:'ÖNİZLEME',skinUploader:'SKİN YÜKLEYİCİ',
+      skinUploadHint:'📁 Minecraft skin PNG yükle',skinUploadSize:'64×64 veya 64×32 piksel',
+      skinChoose:'📂 DOSYA SEÇ',skinReset:'🔄 STEVE\'E SIFIRLA',skinMenuBtn:'🎨 ÖZEL SKİN',
+      skinSteve:'👦 STEVE',skinAlex:'👩 ALEX',
+      skinNote:'Skin çok oyunculu modda diğer oyuncular tarafından görülebilir.',
+      skinLoaded:'✅ Skin yüklendi!',skinError:'❌ Hata: 64×64 veya 64×32 PNG olmalı.',
+      skinGuestWarning:'🔒 Özel skin yüklemek için hesap gerekli.',
+      skinGuestHint:'Hesap sahibiyseniz siteye giriş yapın.'},
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
       wInfTitle:'INFINITE WORLD',wInfDesc:'Endless exploration',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.4',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.4.1',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
@@ -564,7 +610,15 @@ const langData={
       srvMpOnlyCmd:'[Server]: This command can only be used in multiplayer',
       srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!',
       srvShoutNoPerm:'This command is for Twitch rank and above',srvUsageShout:'Usage: /shout <message>',
-      camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)'}
+      camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)',
+      skinTitle:'SKIN SETTINGS',skinPreview:'PREVIEW',skinUploader:'SKIN UPLOADER',
+      skinUploadHint:'📁 Upload Minecraft skin PNG',skinUploadSize:'64×64 or 64×32 pixels',
+      skinChoose:'📂 CHOOSE FILE',skinReset:'🔄 RESET TO STEVE',skinMenuBtn:'🎨 CUSTOM SKIN',
+      skinSteve:'👦 STEVE',skinAlex:'👩 ALEX',
+      skinNote:'Your skin is visible to other players in multiplayer.',
+      skinLoaded:'✅ Skin loaded!',skinError:'❌ Error: Must be a 64×64 or 64×32 PNG.',
+      skinGuestWarning:'🔒 An account is required to upload a custom skin.',
+      skinGuestHint:'Log in to the site if you have an account.'}
 };
 let currentLang='en';
 function setLanguage(l){
@@ -606,6 +660,17 @@ function setLanguage(l){
   document.getElementById('chat-input').placeholder=d.chatPh;
   s('ban-title',d.banScreenTitle);s('kick-title',d.kickScreenTitle);
   s('btn-ban-menu',d.backToMenuBtn);s('btn-kick-menu',d.backToMenuBtn);
+  // Skin ekranı
+  s('btn-skin-menu',d.skinMenuBtn);
+  s('txt-skin-title',d.skinTitle);s('txt-skin-preview',d.skinPreview);
+  s('txt-skin-uploader',d.skinUploader);s('txt-skin-upload-hint',d.skinUploadHint);
+  s('txt-skin-upload-size',d.skinUploadSize);s('txt-skin-choose',d.skinChoose);
+  s('btn-skin-steve',d.skinSteve);s('btn-skin-alex',d.skinAlex);
+  s('txt-skin-guest-warning',d.skinGuestWarning);
+  s('txt-skin-guest-hint',d.skinGuestHint);
+  const skinNoteEl=document.getElementById('txt-skin-note');
+  if(skinNoteEl) skinNoteEl.innerHTML=d.skinNote.replace(/\n/g,'<br>');
+  if(typeof updateSkinScreenGuestState==='function') updateSkinScreenGuestState();
 }
 document.getElementById('lang-tr').addEventListener('click',e=>{e.stopPropagation();setLanguage('tr');});
 document.getElementById('lang-en').addEventListener('click',e=>{e.stopPropagation();setLanguage('en');});
@@ -655,6 +720,7 @@ document.getElementById('btn-pause-settings').addEventListener('click',()=>{
 document.getElementById('btn-resume').addEventListener('click',closePauseMenu);
 document.getElementById('btn-quit').addEventListener('click',()=>{
   if(document.pointerLockElement===document.body) document.exitPointerLock();
+  document.getElementById('crosshair').classList.remove('show');
   cleanupMP();isPaused=false;DeathManager.isDead=false;deviceMode=null;isFlying=false;isCrouching=false;spaceDown=false;
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('death-screen').classList.remove('active');
@@ -696,6 +762,76 @@ document.getElementById('btn-world-small').addEventListener('click',()=>startGam
 document.getElementById('sp-mode-survival').addEventListener('click',()=>{spGameMode='survival';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-survival');});
 document.getElementById('sp-mode-creative').addEventListener('click',()=>{spGameMode='creative';selMini(['sp-mode-survival','sp-mode-creative'],'sp-mode-creative');});
 document.getElementById('btn-multiplayer').addEventListener('click',()=>showScreen('screen-multiplayer'));
+function isGuestUser(){return myUsername.startsWith('Guest_');}
+function updateSkinScreenGuestState(){
+  const isGuest=isGuestUser();
+  const label=document.getElementById('skin-file-label');
+  const warning=document.getElementById('skin-guest-warning');
+  if(label){
+    if(isGuest){
+      label.style.opacity='0.35';
+      label.style.cursor='not-allowed';
+      label.style.pointerEvents='none';
+    } else {
+      label.style.opacity='1';
+      label.style.cursor='pointer';
+      label.style.pointerEvents='auto';
+    }
+  }
+  if(warning) warning.style.display=isGuest?'block':'none';
+}
+document.getElementById('btn-skin-menu').addEventListener('click',()=>{showScreen('screen-skin');updateSkinPreview(activeSkinCanvas);updateSkinScreenGuestState();});
+document.getElementById('btn-back-skin').addEventListener('click',()=>showScreen('screen-main'));
+document.getElementById('btn-skin-steve').addEventListener('click',()=>{
+  loadSkinFromB64(STEVE_SKIN_B64,function(cv){
+    activeSkinCanvas=cv;applyNewSkin(cv);broadcastSkin(cv);
+    document.getElementById('skin-status').textContent='✅ '+(currentLang==='tr'?'Steve skini yüklendi!':'Steve skin loaded!');
+    setTimeout(()=>document.getElementById('skin-status').textContent='',2000);
+  });
+});
+document.getElementById('btn-skin-alex').addEventListener('click',()=>{
+  loadSkinFromB64(ALEX_SKIN_B64,function(cv){
+    activeSkinCanvas=cv;applyNewSkin(cv);broadcastSkin(cv);
+    document.getElementById('skin-status').textContent='✅ '+(currentLang==='tr'?'Alex skini yüklendi!':'Alex skin loaded!');
+    setTimeout(()=>document.getElementById('skin-status').textContent='',2000);
+  });
+});
+document.getElementById('skin-file-input').addEventListener('change',function(e){
+  const file=e.target.files[0];
+  if(!file){return;}
+  if(isGuestUser()){
+    document.getElementById('skin-status').textContent=langData[currentLang].skinGuestWarning;
+    this.value='';return;
+  }
+  const d=langData[currentLang];
+  if(!file.type.includes('png')&&!file.name.toLowerCase().endsWith('.png')){
+    document.getElementById('skin-status').textContent=currentLang==='tr'?'❌ Sadece PNG dosyası desteklenir!':'❌ Only PNG files are supported!';return;
+  }
+  const reader=new FileReader();
+  reader.onload=function(ev){
+    const img=new Image();
+    img.onload=function(){
+      if((img.width!==64)||(img.height!==64&&img.height!==32)){
+        document.getElementById('skin-status').textContent=d.skinError;return;
+      }
+      const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+      const c=cv.getContext('2d');c.imageSmoothingEnabled=false;
+      if(img.height===32){
+        c.drawImage(img,0,0);
+        c.save();c.scale(-1,1);c.drawImage(img,-64,0);c.restore();
+      } else {
+        c.drawImage(img,0,0);
+      }
+      applyNewSkin(cv);broadcastSkin(cv);
+      document.getElementById('skin-status').textContent=d.skinLoaded;
+      setTimeout(()=>document.getElementById('skin-status').textContent='',2500);
+    };
+    img.onerror=()=>{document.getElementById('skin-status').textContent=currentLang==='tr'?'❌ Görsel yüklenemedi!':'❌ Image could not be loaded!';};
+    img.src=ev.target.result;
+  };
+  reader.readAsDataURL(file);
+  this.value='';
+});
 document.getElementById('btn-back-mp').addEventListener('click',()=>showScreen('screen-main'));
 document.getElementById('btn-mp-join').addEventListener('click',()=>showScreen('screen-join'));
 document.getElementById('btn-mp-host').addEventListener('click',()=>{document.getElementById('host-code-display').textContent=genCode();document.getElementById('host-status').textContent='';showScreen('screen-host');});
@@ -1660,11 +1796,267 @@ function procQueues(){
   }
 }
  
-// ─── Steve ───
-const M_SKIN=new THREE.MeshStandardMaterial({color:0xf1c27d,roughness:.9});
-const M_SHIRT=new THREE.MeshStandardMaterial({color:0x4a6fb5,roughness:.9});
-const M_PANTS=new THREE.MeshStandardMaterial({color:0x2a4a9f,roughness:.9});
-const M_HAIR=new THREE.MeshStandardMaterial({color:0x5c3317,roughness:.9});
+// ─── Minecraft Steve UV Skin Sistemi ───
+// Gerçek Minecraft skin layout: 64x64 piksel PNG
+// UV haritası: her vücut parçası skin atlasından kesilir
+
+// Minecraft skin PNG'leri (base64 gömülü)
+const STEVE_SKIN_B64='data:image/png;base64,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';
+const ALEX_SKIN_B64='data:image/png;base64,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';
+
+function loadSkinFromB64(b64,callback){
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+  const img=new Image();
+  img.onload=function(){ctx.drawImage(img,0,0,64,64);callback(cv);};
+  img.src=b64;
+}
+
+function createDefaultSteveSkin(){
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+  const img=new Image();
+  img.onload=function(){ctx.drawImage(img,0,0,64,64);activeSkinCanvas=cv;applyNewSkin(cv);};
+  img.src=STEVE_SKIN_B64;
+  return cv;
+}
+
+// Aktif skin canvas (64x64)
+let activeSkinCanvas=createDefaultSteveSkin();
+let skinDirty=true;
+
+// Skin'den UV koordinatlarıyla tekstür oluşturan yardımcı
+// sx,sy: atlastaki sol-üst piksel, sw,sh: genişlik-yükseklik (piksel cinsinden)
+// atlasW=64, atlasH=64
+function makeSkinFaceTex(skinCv,sx,sy,sw,sh,flipH){
+  const S=64; // atlasın piksel boyutu
+  const cv=document.createElement('canvas');cv.width=sw*4;cv.height=sh*4;
+  const c=cv.getContext('2d');
+  c.imageSmoothingEnabled=false;
+  if(flipH){
+    c.save();c.scale(-1,1);c.drawImage(skinCv,-sw*4,0);
+    // Sadece istenen bölgeyi al
+    c.restore();
+  }
+  // Doğrudan bölgeyi çiz
+  c.clearRect(0,0,sw*4,sh*4);
+  c.drawImage(skinCv, sx,sy,sw,sh, 0,0,sw*4,sh*4);
+  if(flipH){
+    // Yatay çevir
+    const id=c.getImageData(0,0,sw*4,sh*4);
+    const d=id.data;const w=sw*4;
+    for(let row=0;row<sh*4;row++){
+      for(let col=0;col<Math.floor(w/2);col++){
+        const a=4*(row*w+col),b=4*(row*w+(w-1-col));
+        for(let k=0;k<4;k++){const tmp=d[a+k];d[a+k]=d[b+k];d[b+k]=tmp;}
+      }
+    }
+    c.putImageData(id,0,0);
+  }
+  const t=new THREE.CanvasTexture(cv);
+  t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;
+  return new THREE.MeshStandardMaterial({map:t,roughness:.85,transparent:false});
+}
+
+// Minecraft skin layout → Three.js BoxGeometry yüz sırası: [+X,-X,+Y,-Y,+Z,-Z]
+// +X = sağ, -X = sol, +Y = üst, -Y = alt, +Z = arka, -Z = ön
+function buildSkinMats(skinCv, part){
+  const s=skinCv;
+  if(part==='head'){
+    // Head UV (skin atlas 8,8 başlangıç, her yüz 8x8)
+    // Sıra: right(+X)=sol yüz(0,8,4x8), left(-X)=sağ yüz(16,8,4x8), top(+Y)=(8,0,8x8), bottom(-Y)=(16,0,8x8), back(+Z)=(24,8,8x8), front(-Z)=(8,8,8x8)
+    return [
+      makeSkinFaceTex(s,0,8,8,8,false),   // +X (sağ → karakterin sağ yanağı)
+      makeSkinFaceTex(s,16,8,8,8,false),  // -X (sol → karakterin sol yanağı)
+      makeSkinFaceTex(s,8,0,8,8,false),   // +Y üst
+      makeSkinFaceTex(s,16,0,8,8,false),  // -Y alt
+      makeSkinFaceTex(s,24,8,8,8,false),  // +Z arka
+      makeSkinFaceTex(s,8,8,8,8,false),   // -Z ön
+    ];
+  }
+  if(part==='body'){
+    // Body: 16,20 base → yüzler
+    return [
+      makeSkinFaceTex(s,16,20,4,12,false), // +X sağ yan
+      makeSkinFaceTex(s,28,20,4,12,false), // -X sol yan
+      makeSkinFaceTex(s,20,16,8,4,false),  // +Y üst
+      makeSkinFaceTex(s,28,16,8,4,false),  // -Y alt
+      makeSkinFaceTex(s,32,20,8,12,false), // +Z arka
+      makeSkinFaceTex(s,20,20,8,12,false), // -Z ön
+    ];
+  }
+  if(part==='armR'){
+    // Sağ kol: 40,16 base
+    return [
+      makeSkinFaceTex(s,40,20,4,12,false), // +X
+      makeSkinFaceTex(s,48,20,4,12,false), // -X
+      makeSkinFaceTex(s,44,16,4,4,false),  // +Y üst
+      makeSkinFaceTex(s,48,16,4,4,false),  // -Y alt
+      makeSkinFaceTex(s,52,20,4,12,false), // +Z arka
+      makeSkinFaceTex(s,44,20,4,12,false), // -Z ön
+    ];
+  }
+  if(part==='armL'){
+    // Sol kol: 32,48 (64x64 yeni format) — yoksa sağ kolu aynala
+    return [
+      makeSkinFaceTex(s,40,20,4,12,true),  // +X (aynala)
+      makeSkinFaceTex(s,48,20,4,12,true),  // -X
+      makeSkinFaceTex(s,44,16,4,4,true),   // +Y
+      makeSkinFaceTex(s,48,16,4,4,true),   // -Y
+      makeSkinFaceTex(s,52,20,4,12,true),  // +Z
+      makeSkinFaceTex(s,44,20,4,12,true),  // -Z
+    ];
+  }
+  if(part==='legR'){
+    // Sağ bacak: 0,16 base
+    return [
+      makeSkinFaceTex(s,0,20,4,12,false),  // +X
+      makeSkinFaceTex(s,8,20,4,12,false),  // -X
+      makeSkinFaceTex(s,4,16,4,4,false),   // +Y
+      makeSkinFaceTex(s,8,16,4,4,false),   // -Y
+      makeSkinFaceTex(s,12,20,4,12,false), // +Z
+      makeSkinFaceTex(s,4,20,4,12,false),  // -Z
+    ];
+  }
+  if(part==='legL'){
+    // Sol bacak: 16,48 (yeni format) veya sağı aynala
+    return [
+      makeSkinFaceTex(s,0,20,4,12,true),
+      makeSkinFaceTex(s,8,20,4,12,true),
+      makeSkinFaceTex(s,4,16,4,4,true),
+      makeSkinFaceTex(s,8,16,4,4,true),
+      makeSkinFaceTex(s,12,20,4,12,true),
+      makeSkinFaceTex(s,4,20,4,12,true),
+    ];
+  }
+  return new THREE.MeshStandardMaterial({color:0xff00ff});
+}
+
+// Tüm aktif player model referansları (skin güncellemesi için)
+const allPlayerModels=[];
+
+function applyNewSkin(skinCv){
+  activeSkinCanvas=skinCv;
+  // Mevcut tüm modelleri güncelle
+  for(const pm of allPlayerModels){
+    if(pm&&pm.userData&&pm.userData.skinParts){
+      const parts=pm.userData.skinParts;
+      const newMats={
+        head: buildSkinMats(skinCv,'head'),
+        body: buildSkinMats(skinCv,'body'),
+        armR: buildSkinMats(skinCv,'armR'),
+        armL: buildSkinMats(skinCv,'armL'),
+        legR: buildSkinMats(skinCv,'legR'),
+        legL: buildSkinMats(skinCv,'legL'),
+      };
+      if(parts.head) parts.head.material=newMats.head;
+      if(parts.body) parts.body.material=newMats.body;
+      if(parts.armR) parts.armR.material=newMats.armR;
+      if(parts.armL) parts.armL.material=newMats.armL;
+      if(parts.legR) parts.legR.material=newMats.legR;
+      if(parts.legL) parts.legL.material=newMats.legL;
+    }
+  }
+  // Önizlemeyi güncelle
+  updateSkinPreview(skinCv);
+}
+
+function updateSkinPreview(skinCv){
+  const pv=document.getElementById('skin-preview-canvas');
+  if(!pv) return;
+  const ctx=pv.getContext('2d');
+  ctx.clearRect(0,0,88,176);
+  ctx.imageSmoothingEnabled=false;
+  // Kafa (ön yüz) 8,8,8,8 → merkez üste
+  const scale=11; // 8px*11=88px tam genişlik
+  // Kafa
+  ctx.drawImage(skinCv,8,8,8,8, 16,4,56,56);
+  // Gövde
+  ctx.drawImage(skinCv,20,20,8,12, 16,60,56,72);
+  // Sağ kol
+  ctx.drawImage(skinCv,44,20,4,12, 0,60,16,72);
+  // Sol kol
+  ctx.drawImage(skinCv,44,20,4,12, 72,60,16,72); // aynala
+  // Sağ bacak
+  ctx.drawImage(skinCv,4,20,4,12, 16,132,28,44);
+  // Sol bacak
+  ctx.drawImage(skinCv,4,20,4,12, 44,132,28,44);
+}
+
+function mkPlayer(name,rank,rankColor){
+  const g=new THREE.Group();
+  const skinCv=activeSkinCanvas;
+
+  // ── Kafa ──
+  const headMats=buildSkinMats(skinCv,'head');
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),headMats);
+  head.position.y=.29; // pivot alt kenara (boyun) göre
+
+  const headPivot=new THREE.Group();
+  headPivot.position.y=1.5; // vücudun üstü
+  headPivot.add(head);
+
+  // ── Gövde ──
+  const bodyMats=buildSkinMats(skinCv,'body');
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.50,.75,.25),bodyMats);
+  body.position.y=1.125;
+
+  // ── Sağ Kol ── (pivot omuzdan döner)
+  const armRMats=buildSkinMats(skinCv,'armR');
+  const armRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),armRMats);
+  armRMesh.position.y=-.375; // pivot omuz = y=0, kol aşağı uzar
+
+  const armRPivot=new THREE.Group();
+  armRPivot.position.set(.375,1.5,0);
+  armRPivot.add(armRMesh);
+
+  // ── Sol Kol ──
+  const armLMats=buildSkinMats(skinCv,'armL');
+  const armLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),armLMats);
+  armLMesh.position.y=-.375;
+
+  const armLPivot=new THREE.Group();
+  armLPivot.position.set(-.375,1.5,0);
+  armLPivot.add(armLMesh);
+
+  // ── Sağ Bacak ── (pivot kalçadan)
+  const legRMats=buildSkinMats(skinCv,'legR');
+  const legRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),legRMats);
+  legRMesh.position.y=-.375;
+
+  const legRPivot=new THREE.Group();
+  legRPivot.position.set(.125,.75,0);
+  legRPivot.add(legRMesh);
+
+  // ── Sol Bacak ──
+  const legLMats=buildSkinMats(skinCv,'legL');
+  const legLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),legLMats);
+  legLMesh.position.y=-.375;
+
+  const legLPivot=new THREE.Group();
+  legLPivot.position.set(-.125,.75,0);
+  legLPivot.add(legLMesh);
+
+  g.add(headPivot,body,armRPivot,armLPivot,legRPivot,legLPivot);
+
+  // Animasyon için kemik referansları sakla
+  g.userData.bones={headPivot,armRPivot,armLPivot,legRPivot,legLPivot};
+  g.userData.animTime=0;
+  g.userData.swingTime=0;
+  g.userData.isSwinging=false;
+
+  // Skin güncelleme için referanslar
+  g.userData.skinParts={
+    head, body,
+    armR:armRMesh, armL:armLMesh,
+    legR:legRMesh, legL:legLMesh
+  };
+  allPlayerModels.push(g);
+
+  const ns=mkSprite(name,rank,rankColor);ns.position.y=2.36;g.add(ns);
+  scene.add(g);return g;
+}
+
 // rank: ham rütbe adı (örn "Owner / Developer") veya null/undefined -> formatRankTag ile [TAG] üretilir
 // rankColor: rütbenin hex rengi (tag bu renkte basılır, isim her zaman beyaz kalır)
 function mkSprite(name,rank,rankColor){
@@ -1712,22 +2104,7 @@ function mkSprite(name,rank,rankColor){
   sp.scale.set(2.4*(cW/256),baseH,1);
   return sp;
 }
-function mkPlayer(name,rank,rankColor){
-  const g=new THREE.Group();
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),M_SKIN);head.position.y=1.79;
-  const hair=new THREE.Mesh(new THREE.BoxGeometry(.62,.12,.62),M_HAIR);hair.position.y=2.13;
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.5,.75,.25),M_SHIRT);body.position.y=1.125;
-  const aG=new THREE.BoxGeometry(.25,.75,.25);
-  const aL=new THREE.Mesh(aG,M_SHIRT);aL.position.set(-.375,1.125,0);
-  const aR=new THREE.Mesh(aG,M_SHIRT);aR.position.set(.375,1.125,0);
-  const lG=new THREE.BoxGeometry(.24,.75,.25);
-  const lL=new THREE.Mesh(lG,M_PANTS);lL.position.set(-.125,.375,0);
-  const lR=new THREE.Mesh(lG,M_PANTS);lR.position.set(.125,.375,0);
-  g.add(head,hair,body,aL,aR,lL,lR);
-  const ns=mkSprite(name,rank,rankColor);ns.position.y=2.3;g.add(ns);
-  scene.add(g);return g;
-}
- 
+
 // ─── Hayvanlar ───
 const animals=[];let animalIdCounter=0;
 const A_COLS=[[0xeeeef0,0xb0b0b2],[0x3a2010,0x221005],[0xf0a0b0,0xd07080]];
@@ -2092,9 +2469,14 @@ function attackAnimal(a,dmg=5){
 }
  
 // ─── Entity Raycasting ───
-function findEntityInCrosshair(maxDist=5){
-  const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-  const orig=camera.position.clone();
+function findEntityInCrosshair(maxDist=5,screenX=null,screenY=null){
+  let orig,dir;
+  if(screenX!==null&&screenY!==null){
+    const m=new THREE.Vector2((screenX/window.innerWidth)*2-1,-(screenY/window.innerHeight)*2+1);
+    RC.setFromCamera(m,camera);orig=RC.ray.origin.clone();dir=RC.ray.direction.clone();
+  } else {
+    dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);orig=camera.position.clone();
+  }
   let best=null,bestD=maxDist;
   for(const a of animals){
     if(a.hp<=0) continue;
@@ -2165,7 +2547,7 @@ function applyBlockSync(data){
  
 function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.6,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
 function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.6,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
-function remRP(id){if(remPlayers[id]){scene.remove(remPlayers[id].g);delete remPlayers[id];}}
+function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;scene.remove(g);const idx=allPlayerModels.indexOf(g);if(idx>-1)allPlayerModels.splice(idx,1);delete remPlayers[id];}}
  
 let chatHideTimer=null;
 function showChatLog(){
@@ -2419,6 +2801,7 @@ function cleanupMP(){
 }
 function goToMainMenu(){
   if(document.pointerLockElement===document.body) document.exitPointerLock();
+  document.getElementById('crosshair').classList.remove('show');
   cleanupMP();isPaused=false;DeathManager.isDead=false;deviceMode=null;isFlying=false;isCrouching=false;spaceDown=false;
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('death-screen').classList.remove('active');
@@ -2463,6 +2846,52 @@ function showKickScreen(byName){
 }
 document.getElementById('btn-ban-menu').addEventListener('click',goToMainMenu);
 document.getElementById('btn-kick-menu').addEventListener('click',goToMainMenu);
+// ─── Skin Senkronizasyonu (MP) ───
+function canvasToB64(cv){
+  return cv.toDataURL('image/png');
+}
+function applySkinFromB64ToPlayer(pid,b64){
+  const rp=remPlayers[pid];
+  if(!rp||!rp.g) return;
+  rp.skinB64=b64; // sakla, yeni oyunculara göndermek için
+  const img=new Image();
+  img.onload=function(){
+    const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+    const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(img,0,0,64,64);
+    const pm=rp.g;
+    if(pm&&pm.userData&&pm.userData.skinParts){
+      const parts=pm.userData.skinParts;
+      const nm={head:buildSkinMats(cv,'head'),body:buildSkinMats(cv,'body'),
+        armR:buildSkinMats(cv,'armR'),armL:buildSkinMats(cv,'armL'),
+        legR:buildSkinMats(cv,'legR'),legL:buildSkinMats(cv,'legL')};
+      if(parts.head) parts.head.material=nm.head;
+      if(parts.body) parts.body.material=nm.body;
+      if(parts.armR) parts.armR.material=nm.armR;
+      if(parts.armL) parts.armL.material=nm.armL;
+      if(parts.legR) parts.legR.material=nm.legR;
+      if(parts.legL) parts.legL.material=nm.legL;
+    }
+  };
+  img.src=b64;
+}
+function broadcastSkin(cv){
+  if(!isMP) return;
+  const b64=canvasToB64(cv);
+  const msg={type:'skin',data:b64};
+  if(amHost){
+    // Host kendi skinini tüm guestlere gönder
+    Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(msg);});
+  } else if(guestConn&&guestConn.open){
+    guestConn.send(msg);
+  }
+}
+function sendMySkinToNewPlayer(conn){
+  if(!activeSkinCanvas) return;
+  const b64=canvasToB64(activeSkinCanvas);
+  if(conn&&conn.open) conn.send({type:'skin',data:b64,fromHost:amHost});
+}
+
 function startBC(){
   if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
   bcTimer=setInterval(()=>{
@@ -2502,6 +2931,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName)});
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName,rank:safeRank,rankColor:safeRankColor});});
             addRP(pid,safeName,8,2.1,8,0,'survival',safeRank,safeRankColor);addChat(null,safeName+langData[currentLang].sysJoin,true);
+            sendMySkinToNewPlayer(conn);
+            // Mevcut oyuncuların skinlerini yeni guest'e gönder
+            Object.entries(remPlayers).forEach(([id,rp])=>{if(rp.skinB64) conn.send({type:'skin',id:id,data:rp.skinB64});});
           } else if(data.type==='pos'){
             if(!connTokens.has(pid)) return;
             if(hostConns[pid]) Object.assign(hostConns[pid],{x:data.x,y:data.y,z:data.z,ry:data.ry,mode:data.mode||'survival'});
@@ -2612,6 +3044,13 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
               }
             }
           }
+          else if(data.type==='skin'){
+            if(!connTokens.has(pid)) return;
+            // Bu guest'in skinini diğer guestlere ilet
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'skin',id:pid,data:data.data});});
+            // Host kendi görüntüsünde de uygula
+            applySkinFromB64ToPlayer(pid,data.data);
+          }
           else if(data.type==='deathmsg'){
             if(!connTokens.has(pid)) return;
             const dmsg=String(data.msg||'').substring(0,200);
@@ -2667,6 +3106,7 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
           addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
         });
         startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
+        setTimeout(()=>broadcastSkin(activeSkinCanvas),500);
       } else if(data.type==='pos'){
         if(data.id&&data.id!==myPeer.id&&data.id!=='host') updRP(data.id,data.x,data.y,data.z,data.ry,data.mode);
       }
@@ -2686,6 +3126,16 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         if(data.id===myPeer.id) return;
         addRP(data.id,sanitizeName(data.name),8,2.1,8,0,'survival',data.rank||null,data.rankColor||null);
         addChat(null,sanitizeName(data.name)+langData[currentLang].sysJoin,true);
+      }
+      else if(data.type==='skin'){
+        // Başka bir oyuncunun skini geldi (host'tan yönlendirilmiş)
+        const skinId=data.id||'host';
+        if(skinId==='host'){
+          // Host'un skini
+          if(remPlayers['host']) applySkinFromB64ToPlayer('host',data.data);
+        } else {
+          applySkinFromB64ToPlayer(skinId,data.data);
+        }
       }
       else if(data.type==='pleave'){remRP(data.id);addChat(null,(sanitizeName(data.name)||'?')+langData[currentLang].sysLeft,true);}
       else if(data.type==='animals') applyAnimalSync(data.list);
@@ -2809,7 +3259,7 @@ function updateRenderCamera(){
 }
 
 // ─── Kırma İlerleme Sistemi (Survival) ───
-let breakProgress=0,breakTarget=null,isBreaking=false;
+let breakProgress=0,breakTarget=null,isBreaking=false,breakTouchX=0,breakTouchY=0,breakTouchIsc=true;
 const BLOCK_HARDNESS={'grass':0.6,'dirt':0.5,'stone':1.5,'planks':0.8,'log':1.2,'cobblestone':2.0,'glass':0.3,'leaves':0.2,'sand':0.5,'default':1.0};
 function getHardness(bd){
   if(!bd) return 1.0;
@@ -2848,7 +3298,7 @@ function updateBreakOverlay(){
     ctx.stroke();
   }
 }
-function startBreaking(){if(gameMode==='creative') return;isBreaking=true;}
+function startBreaking(tx,ty,tisc){if(gameMode==='creative') return;isBreaking=true;breakTouchX=tx??0;breakTouchY=ty??0;breakTouchIsc=tisc??true;}
 function stopBreaking(){
   isBreaking=false;breakProgress=0;breakTarget=null;
   const overlay=document.getElementById('break-overlay');
@@ -2857,19 +3307,24 @@ function stopBreaking(){
 function tickBreaking(dt){
   if(!isBreaking||gameMode!=='survival') return;
   const _inWater=inWater(camera.position.x,camera.position.y,camera.position.z);
-  const h=getHit(0,0,true,_inWater);
+  const h=getHit(breakTouchX,breakTouchY,breakTouchIsc,_inWater);
   if(!h.length||h[0].distance>=5){stopBreaking();return;}
   const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
   if(!bd||bd.unbreakable||bd.isWater){stopBreaking();return;}
-  // Hedef değiştiyse progress sıfırla
   const tKey=pk(bx,by,bz);
   if(!breakTarget||pk(breakTarget.x,breakTarget.y,breakTarget.z)!==tKey){
     breakProgress=0;breakTarget={x:bx,y:by,z:bz};
   }
   breakProgress+=dt/getHardness(bd);
   updateBreakOverlay();
+  if(selfModel&&selfModel.userData.bones){
+    if(!selfModel.userData.isSwinging){
+      selfModel.userData.isSwinging=true;
+      selfModel.userData.swingTime=0;
+    }
+  }
   if(breakProgress>=1){
-    breakB(0,0,true);
+    breakB(breakTouchX,breakTouchY,breakTouchIsc);
     stopBreaking();
   }
 }
@@ -2907,8 +3362,9 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
   document.getElementById('hotbar').style.display='flex';
   document.getElementById('game-title').textContent=langData[currentLang].gameTitle;
   initHotbar();
-  if(device==='pc'){document.getElementById('crosshair').style.display='flex';setupPC();}
+  if(device==='pc'){document.getElementById('crosshair').classList.add('show');setupPC();}
   else{
+    document.getElementById('crosshair').classList.remove('show');
     document.getElementById('joystick-container').style.display='flex';
     document.getElementById('mobile-jump-container').style.display='flex';
     document.getElementById('mobile-pause-btn').style.display='block';
@@ -2978,12 +3434,19 @@ document.querySelectorAll('.hotbar-slot').forEach(s=>{
  
 // ─── Raycaster ───
 function getHit(cx,cy,isc,skipWater=false){
-  let orig,dir;
-  if(isc){dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);orig=camera.position.clone();}
-  else{const m=new THREE.Vector2((cx/window.innerWidth)*2-1,-(cy/window.innerHeight)*2+1);RC.setFromCamera(m,camera);orig=RC.ray.origin.clone();dir=RC.ray.direction.clone();}
+  const orig=camera.position.clone();
+  let dir;
+  if(isc){
+    dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
+  } else {
+    const ndcX=(cx/window.innerWidth)*2-1;
+    const ndcY=-(cy/window.innerHeight)*2+1;
+    dir=new THREE.Vector3(ndcX,ndcY,-1).applyMatrix4(camera.projectionMatrixInverse).applyQuaternion(camera.quaternion).normalize();
+  }
   return castRayBlocks(orig,dir,skipWater);
 }
 function breakB(x,y,isc){
+  triggerSwing();
   // Su içindeyken (swimming) su bloklarını atlayarak alttaki katı bloğa ulaş
   const _inWater=inWater(camera.position.x,camera.position.y,camera.position.z);
   const h=getHit(x,y,isc,_inWater);if(!h.length||h[0].distance>=5) return;
@@ -3065,6 +3528,7 @@ function clearBlockAt(bx,by,bz){
   }
 }
 function placeB(x,y,isc){
+  triggerSwing(true);
   const h=getHit(x,y,isc);if(!h.length||h[0].distance>=5) return;
   const {blockPos:{x:hbx,y:hby,z:hbz},face:{normal:n},bd:hitBd}=h[0];
   const actualBlock=hotbarSlots[slot];
@@ -3131,6 +3595,7 @@ function placeB(x,y,isc){
 }
 function doLeftClick(x,y,isc){
   if(DeathManager.isDead) return;
+  triggerSwing();
   const entity=findEntityInCrosshair(5);
   if(entity){
     if(entity.type==='animal') attackAnimal(entity.animal,5);
@@ -3365,38 +3830,62 @@ function setupMobile(){
   let aT={},lkId=null,sx=0,sy=0;
   window.addEventListener('touchstart',e=>{
     if(deviceMode!=='mobile') return;
-    // Fix 2: Menü açıkken oyunun tüm dokunmatik girdilerini engelle
     if(document.getElementById('menu-overlay').style.display!=='none') return;
     for(let i=0;i<e.changedTouches.length;i++){
       const t=e.changedTouches[i];
       if(t.target.closest('#joystick-container')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#pause-overlay')||t.target.closest('#btn-mobile-chat')||t.target.closest('#chat-input-row')||t.target.closest('#death-screen')||t.target.closest('#btn-mobile-inv')||t.target.closest('#inv-overlay')||t.target.closest('#btn-mobile-cam')||t.target.closest('#btn-mobile-crouch')) continue;
       const id=t.identifier;
-      aT[id]={sx:t.clientX,sy:t.clientY,mv:false,to:setTimeout(()=>{if(aT[id]&&!aT[id].mv){breakB(aT[id].sx,aT[id].sy,false);delete aT[id];}},300)};
-      if(lkId===null){lkId=id;sx=t.clientX;sy=t.clientY;}
+      const willBeLkId=(lkId===null);
+      if(willBeLkId){lkId=id;sx=t.clientX;sy=t.clientY;}
+      // Dokunulan koordinat — uzun basış ve kısa dokunuş için kullanılır
+      const tx=t.clientX,ty=t.clientY;
+      aT[id]={sx:tx,sy:ty,cx:tx,cy:ty,mv:false,breaking:false,isCamera:willBeLkId,
+        to:setTimeout(()=>{
+          // Uzun basış (300ms): dokunulan yöne raycast ile blok kır
+          if(aT[id]&&!aT[id].mv){
+            aT[id].breaking=true;
+            breakB(aT[id].cx,aT[id].cy,false);
+            if(gameMode==='survival') startBreaking(aT[id].cx,aT[id].cy,false);
+          }
+        },300)};
     }
   },{passive:false});
   window.addEventListener('touchmove',e=>{
     if(deviceMode!=='mobile') return;
-    // Fix 2: Menü açıkken oyunun dokunmatik hareketlerini engelle
     if(document.getElementById('menu-overlay').style.display!=='none') return;
     for(let i=0;i<e.touches.length;i++){
       const t=e.touches[i],id=t.identifier;
       if(id===jTid&&jActive){mvJ(t);continue;}
-      if(aT[id]){const dx=t.clientX-aT[id].sx,dy=t.clientY-aT[id].sy;if(Math.abs(dx)>7||Math.abs(dy)>7){aT[id].mv=true;clearTimeout(aT[id].to);}}
+      if(aT[id]){
+        const dx=t.clientX-aT[id].sx,dy=t.clientY-aT[id].sy;
+        aT[id].cx=t.clientX;aT[id].cy=t.clientY;
+        if(Math.abs(dx)>15||Math.abs(dy)>15){
+          // Parmak kaydı = kamera modu, blok işlemi iptal
+          aT[id].mv=true;
+          clearTimeout(aT[id].to);
+          if(aT[id].breaking){stopBreaking();aT[id].breaking=false;}
+        }
+      }
       if(id===lkId){const dx=t.clientX-sx,dy=t.clientY-sy;lon-=dx*.0038*sensitivity;lat-=dy*.0038*sensitivity;lat=Math.max(-Math.PI/2.2,Math.min(Math.PI/2.2,lat));camera.rotation.y=lon;camera.rotation.x=lat;sx=t.clientX;sy=t.clientY;}
     }
   },{passive:false});
   window.addEventListener('touchend',e=>{
     if(deviceMode!=='mobile') return;
-    // Fix 2: Menü açıkken touchend işlemlerini de engelle
     if(document.getElementById('menu-overlay').style.display!=='none') return;
     for(let i=0;i<e.changedTouches.length;i++){
       const t=e.changedTouches[i],id=t.identifier;
+      if(t.target.closest('#btn-mobile-cam')||t.target.closest('#btn-mobile-crouch')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#btn-mobile-chat')||t.target.closest('#btn-mobile-inv')){
+        clearTimeout(aT[id]?.to);delete aT[id];if(id===lkId) lkId=null;continue;
+      }
       if(id===jTid){jActive=false;jTid=null;jx=0;jy=0;jT.style.transform='translate(0px,0px)';}
       if(aT[id]){
         clearTimeout(aT[id].to);
-        if(!aT[id].mv){
-          const entity=findEntityInCrosshair(5);
+        if(aT[id].breaking){
+          stopBreaking();
+        } else if(!aT[id].mv){
+          if(DeathManager.isDead){delete aT[id];if(id===lkId) lkId=null;continue;}
+          // Kısa dokunuş: dokunulan yöne raycast ile blok koy veya canlıya saldır
+          const entity=findEntityInCrosshair(5,aT[id].cx,aT[id].cy);
           if(entity&&gameMode==='survival'){
             if(entity.type==='animal') attackAnimal(entity.animal,5);
             else if(entity.type==='player'&&isMP){
@@ -3406,7 +3895,7 @@ function setupMobile(){
             }
             const t2=document.getElementById('game-title');t2.style.color='#fa0';setTimeout(()=>{if(t2) t2.style.color='#fff';},110);
           } else {
-            placeB(aT[id].sx,aT[id].sy,false);
+            placeB(aT[id].cx,aT[id].cy,false);
           }
         }
         delete aT[id];
@@ -3431,7 +3920,7 @@ function animate(){
     updateAnimals(dt);updateFoods(dt);updateHealthSystem(dt);
     updateWater(dt);
     SuffocationManager.checkSuffocation();
-    if(isBreaking&&deviceMode==='pc') tickBreaking(dt);
+    if(isBreaking) tickBreaking(dt);
     const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
     const sV=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
     fV.y=0;fV.normalize();sV.y=0;sV.normalize();
@@ -3557,9 +4046,114 @@ if (camera.position.y < -100) {
   const _wv=document.getElementById('water-vignette');
   if(_wv) _wv.style.opacity=_eyeInWater?'1':'0';
   updateRenderCamera();
+  updatePlayerAnimations(dt);
   renderer.render(scene,renderCamera);
 }
  
+// ─── Karakter Animasyon Sistemi ───
+// Blok kırma/koyma swing tetikleyicisi (dışarıdan çağrılır)
+let _swingPending=false,_swingPlacing=false;
+function triggerSwing(placing=false){ _swingPending=true;_swingPlacing=placing; }
+
+// Bir modeli yürüme/idle/swing ile güncelle
+// isMoving: hareket var mı, isSwinging: kol sallanıyor mu, dt: delta time
+function animatePlayerModel(g, isMoving, swingActive, dt){
+  if(!g||!g.userData.bones) return;
+  const b=g.userData.bones;
+
+  // Animasyon zaman sayacı
+  g.userData.animTime=(g.userData.animTime||0)+dt;
+  const t=g.userData.animTime;
+
+  // ─ Yürüme animasyonu ─
+  const WALK_FREQ=8;    // salınım hızı (rad/s)
+  const WALK_AMP=0.55;  // maksimum açı (rad)
+  const IDLE_HEAD=0.04; // idle kafa titremesi
+
+  if(isMoving){
+    const phase=t*WALK_FREQ;
+    // Bacaklar ileri-geri
+    b.legRPivot.rotation.x= Math.sin(phase)*WALK_AMP;
+    b.legLPivot.rotation.x=-Math.sin(phase)*WALK_AMP;
+    // Kollar bacaklara zıt
+    if(!swingActive){
+      b.armRPivot.rotation.x=-Math.sin(phase)*WALK_AMP*0.85;
+      b.armLPivot.rotation.x= Math.sin(phase)*WALK_AMP*0.85;
+    }
+    // Kafa hafif sallanır
+    b.headPivot.rotation.z=Math.sin(phase*0.5)*0.04;
+    b.headPivot.rotation.y=0;
+  } else {
+    // Idle: bacak ve kolları sıfırla (yumuşak)
+    const LERP=1-Math.pow(0.01,dt);
+    b.legRPivot.rotation.x*=(1-LERP);
+    b.legLPivot.rotation.x*=(1-LERP);
+    if(!swingActive){
+      b.armRPivot.rotation.x*=(1-LERP);
+      b.armLPivot.rotation.x*=(1-LERP);
+    }
+    // Idle kafa nefes hareketi
+    b.headPivot.rotation.z=Math.sin(t*1.2)*IDLE_HEAD;
+  }
+
+  // ─ Swing (blok kırma/koyma) animasyonu ─
+  if(swingActive){
+    g.userData.swingTime=(g.userData.swingTime||0)+dt;
+    const st=g.userData.swingTime;
+    const SWING_DUR=0.28; // toplam swing süresi (saniye)
+    const progress=Math.min(st/SWING_DUR,1);
+
+    // Swing: öne-aşağı (blok kırma) veya geriye-yukarı (blok koyma)
+    const swingDir=g.userData.isPlacing?1:-1;
+    const angle=swingDir*Math.sin(progress*Math.PI)*1.4;
+    b.armRPivot.rotation.x=angle;
+
+    if(progress>=1){
+      // Swing bitti - kırma devam ediyorsa tekrar başlat
+      if((isBreaking||g.userData.isPlacingActive)&&g===selfModel){
+        g.userData.swingTime=0; // loop
+      } else {
+        g.userData.isSwinging=false;
+        g.userData.swingTime=0;
+        b.armRPivot.rotation.x=0;
+      }
+    }
+  }
+}
+
+// Kendi selfModel'in swing'ini başlat
+function startSelfSwing(placing=false){
+  const sm=selfModel;
+  if(!sm||!sm.userData.bones) return;
+  sm.userData.isSwinging=true;
+  sm.userData.swingTime=0;
+  sm.userData.isPlacing=placing;
+}
+
+// Animate loop'unda çağrılacak ana animasyon güncelleme fonksiyonu
+function updatePlayerAnimations(dt){
+  // Kendi modelimiz (3. şahıs kamera)
+  if(selfModel&&selfModel.visible){
+    const mV_len=(mv.f||mv.b||mv.l||mv.r||jActive)?1:0;
+    if(_swingPending){ startSelfSwing(_swingPlacing); _swingPending=false;_swingPlacing=false; }
+    animatePlayerModel(selfModel, mV_len>0, selfModel.userData.isSwinging||false, dt);
+  } else if(_swingPending){
+    _swingPending=false; // 1. şahıs modda yine de tüket
+  }
+
+  // Uzak oyuncular - hareket yönünden is-moving tespit et (konum değişimi)
+  for(const id in remPlayers){
+    const rp=remPlayers[id];
+    if(!rp||!rp.g) continue;
+    const g=rp.g;
+    // Önceki kareye göre konum farkı ile hareket tespiti
+    const prev=g.userData._prevPos||(g.userData._prevPos=g.position.clone());
+    const moved=g.position.distanceToSquared(prev)>0.0001;
+    prev.copy(g.position);
+    animatePlayerModel(g, moved, g.userData.isSwinging||false, dt);
+  }
+}
+
 window.addEventListener('resize',()=>{camera.aspect=window.innerWidth/window.innerHeight;camera.updateProjectionMatrix();renderer.setSize(window.innerWidth,window.innerHeight);});
 window.addEventListener('beforeunload',()=>cleanupMP());
 setLanguage('en');
