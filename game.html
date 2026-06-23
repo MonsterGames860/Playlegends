@@ -6,8 +6,12 @@
 <title>Legends Indev v1.5 - Perlin World</title>
 <style>
 @import url('https://fonts.cdnfonts.com/css/minecraft-4');
+@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@font-face{font-family:'MatrixSans-Rg';src:url('https://fonts.cdnfonts.com/s/15286/MatrixSans-Rg.woff') format('woff'),url('https://db.onlinewebfonts.com/t/5dcece65040a96cd79edde8c29e1c67d.woff2') format('woff2');font-weight:normal;font-style:normal;}
 *{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
-body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:'Minecraft',monospace}
+body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:'Minecraft','VT323','Courier New',monospace}
+/* Chat input ve hint için MatrixSans-Rg */
+#chat-input,#chat-hint{font-family:'MatrixSans-Rg','VT323',monospace!important;font-size:14px!important;letter-spacing:.5px;}
 #menu-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;}
 .menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px;max-height:95vh;overflow-y:auto;}
 .menu-screen.active{display:flex;}
@@ -66,14 +70,15 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
   radial-gradient(ellipse at center, rgba(40,110,200,0) 45%, rgba(30,90,180,.35) 78%, rgba(15,55,120,.65) 100%),
   linear-gradient(rgba(40,120,220,.18), rgba(40,120,220,.18));
   box-shadow:inset 0 0 140px 40px rgba(20,80,170,.55);}
-#joystick-container{position:absolute;bottom:35px;left:45px;width:120px;height:120px;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.25);border-radius:50%;display:none;justify-content:center;align-items:center;z-index:10;touch-action:none;}
+#joystick-zone{position:absolute;bottom:0;left:0;width:220px;height:220px;z-index:9;touch-action:none;display:none;}
+#joystick-container{position:absolute;width:120px;height:120px;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.25);border-radius:50%;display:none;justify-content:center;align-items:center;z-index:10;touch-action:none;pointer-events:none;}
 #joystick-thumb{width:50px;height:50px;background:rgba(255,255,255,.92);border-radius:50%;position:absolute;box-shadow:0 4px 10px rgba(0,0,0,.3);}
 #mobile-jump-container{position:absolute;bottom:35px;right:45px;display:none;z-index:10;flex-direction:column;gap:8px;align-items:flex-end;}
 .btn{width:55px;height:55px;background:rgba(0,0,0,.45);border:2px solid #fff;border-radius:8px;color:#fff;font-size:11px;font-weight:bold;display:flex;justify-content:center;align-items:center;}
-#btn-mobile-jump{width:90px;height:58px;font-size:13px;background:rgba(0,100,250,.5);border-color:#77c8ff;border-radius:12px;}
-#btn-mobile-crouch{width:70px;height:42px;background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.6);border-radius:10px;}
-#hotbar{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);display:none;background:rgba(0,0,0,.65);padding:5px;border-radius:12px;border:2px solid #fff;z-index:100;gap:4px;max-width:90vw;box-shadow:0 4px 15px rgba(0,0,0,.5);}
-.hotbar-slot{width:50px;height:50px;background:rgba(255,255,255,.1);border:2px solid #aaa;border-radius:6px;overflow:hidden;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all .15s;}
+#btn-mobile-jump{width:56px;height:56px;font-size:24px;background:rgba(0,100,250,.5);border-color:#77c8ff;border-radius:12px;}
+#btn-mobile-crouch{width:56px;height:56px;font-size:20px;background:rgba(0,0,0,.45);border-color:rgba(255,255,255,.6);border-radius:12px;}
+#hotbar{position:absolute;bottom:25px;left:50%;transform:translateX(-50%);display:none;background:rgba(0,0,0,.65);padding:4px;border-radius:10px;border:2px solid #fff;z-index:100;gap:3px;max-width:90vw;box-shadow:0 4px 15px rgba(0,0,0,.5);}
+.hotbar-slot{width:42px;height:42px;background:rgba(255,255,255,.1);border:2px solid #aaa;border-radius:5px;overflow:hidden;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all .15s;}
 .hotbar-slot canvas{width:100%;height:100%;image-rendering:pixelated;}
 .hotbar-slot.active{border-color:#75a7ff;background:rgba(117,167,255,.3);box-shadow:0 0 10px #75a7ff;}
 #mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:1px;}
@@ -92,17 +97,17 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #chat-container{position:absolute;bottom:90px;left:10px;width:300px;max-width:calc(100vw - 20px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
 #chat-log{max-height:130px;overflow-y:auto;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;}
 #chat-log::-webkit-scrollbar{display:none;}
-.chat-msg{color:#fff;font-size:12px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
+.chat-msg{color:#fff;font-size:12px;font-family:'MatrixSans-Rg','VT323',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
 .chat-msg.sys{color:#acd4ff;}
 .chat-msg.srv{color:#2effdc;}
 .chat-msg.warn{color:#ffbb44;}
-.rank-tag{display:inline;font-weight:bold;}
+.rank-tag{display:inline;font-weight:bold;font-family:'Minecraft',monospace!important;}
 .rank-tag.rank-sweep{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-image:linear-gradient(105deg,var(--rtc,#fff) 0%,var(--rtc,#fff) 36%,#fff 44%,#fff 52%,var(--rtc,#fff) 60%,var(--rtc,#fff) 100%);background-size:280% 100%;background-position:200% 0;animation:rankSweep 5s linear infinite;filter:drop-shadow(0 0 5px var(--rtc,#fff));}
 @keyframes rankSweep{0%{background-position:200% 0;}30%{background-position:-30% 0;}30.001%{background-position:200% 0;}100%{background-position:200% 0;}}
 #chat-input-row{display:none;margin-top:4px;pointer-events:all;}
 #chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:'Minecraft',monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
 #chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
-#btn-mobile-chat{position:absolute;bottom:118px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:16px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
+#btn-mobile-chat{position:absolute;bottom:20px;left:20px;width:54px;height:54px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:22px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #death-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(180,0,0,0.52);z-index:850;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding-top:18%;}
 #death-screen.active{display:flex;}
 #death-title{font-size:44px;font-weight:bold;color:#fff;text-shadow:0 0 24px rgba(255,0,0,.9),3px 3px #000;letter-spacing:5px;margin-bottom:12px;font-family:'Minecraft',monospace;}
@@ -160,13 +165,13 @@ body.low-health::after {
   .hotbar-slot.active{border:1.5px solid #75a7ff;}
   #joystick-container{width:100px;height:100px;bottom:25px;left:25px;}
   #joystick-thumb{width:42px;height:42px;}
-  #btn-mobile-jump{width:80px;height:54px;font-size:12px;}
+  #btn-mobile-jump{width:52px;height:52px;font-size:20px;}
   #mobile-jump-container{bottom:25px;right:25px;}
   .world-cards,.device-cards,.mp-cards{flex-direction:column;}
   .game-logo{font-size:26px;}
   #chat-container{bottom:76px;}
   #chat-hint{bottom:55px;}
-  #btn-mobile-chat{bottom:100px;right:25px;}
+  #btn-mobile-chat{bottom:20px;left:20px;right:auto;}
   #btn-mobile-inv{bottom:145px;right:25px;}
   #btn-mobile-cam{top:8px;right:8px;width:38px;height:38px;font-size:16px;}
   #bars-wrap{bottom:76px;}
@@ -383,10 +388,11 @@ body.low-health::after {
   <div class="hotbar-slot" data-index="7"><canvas width="50" height="50"></canvas></div>
   <div class="hotbar-slot" data-index="8"><canvas width="50" height="50"></canvas></div>
 </div>
+<div id="joystick-zone"></div>
 <div id="joystick-container"><div id="joystick-thumb"></div></div>
 <div id="mobile-jump-container">
-  <div class="btn" id="btn-mobile-crouch">ÇÖMEL</div>
-  <div class="btn" id="btn-mobile-jump"></div>
+  <div class="btn" id="btn-mobile-jump">&#9650;</div>
+  <div class="btn" id="btn-mobile-crouch">&#9660;</div>
 </div>
 <button id="mobile-pause-btn">&#9646;&#9646;</button>
 <div id="btn-mobile-chat">💬</div>
@@ -425,7 +431,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v1.4.1</div>
+    <div id="pause-version">v1.5</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <button class="mbtn" id="btn-pause-settings"></button>
     <button class="mbtn quit-btn" id="btn-quit"></button>
@@ -679,11 +685,11 @@ function setLanguage(l){
   document.querySelectorAll('.mbtn.back').forEach(b=>b.textContent=d.back);
   document.querySelector('#error-msg h3').textContent=d.errTitle;
   document.querySelector('#error-msg p').textContent=d.errDesc;
-  s('btn-mobile-jump',d.jumpBtn);s('btn-resume',d.resume);s('btn-quit',d.quit);
+  s('btn-resume',d.resume);s('btn-quit',d.quit);
   s('pause-title',d.pauseTitle);s('txt-mp-title',d.mpTitle);s('txt-mp-join',d.mpJoin);s('txt-mp-host',d.mpHost);
   s('txt-join-title',d.joinTitle);s('txt-host-title',d.hostTitle);s('txt-gmc-surv',d.gmcSurv);s('txt-gmc-crea',d.gmcCrea);s('txt-gmc-adv',d.gmcAdv);
   s('txt-wmc-inf',d.wmcInf);s('txt-wmc-flat',d.wmcFlat);s('txt-wmc-sm',d.wmcSm);s('txt-sp-surv',d.spSurv);s('txt-sp-crea',d.spCrea);s('txt-sp-adv',d.spAdv);
-  s('txt-rd-label',d.rdLabel);s('txt-rd-pc-label',d.rdPcLabel);s('txt-rd-m-label',d.rdMLabel);s('btn-mobile-crouch',d.crouchBtn);
+  s('txt-rd-label',d.rdLabel);s('txt-rd-pc-label',d.rdPcLabel);s('txt-rd-m-label',d.rdMLabel);
   s('txt-sp-cheats-label',d.cheatsLabel);s('txt-sp-cheat-off',d.cheatOff);s('txt-sp-cheat-on',d.cheatOn);
   s('death-title',d.deathTitle);s('btn-respawn',d.respawnBtn);
   document.getElementById('join-code-input').placeholder=d.joinCodePh;
@@ -2188,7 +2194,7 @@ function mkSprite(name,rank,rankColor){
 
   // Genişliği içeriğe göre ölçmek için geçici context
   const measure=document.createElement('canvas').getContext('2d');
-  measure.font='bold 22px monospace';
+  measure.font='bold 22px "MatrixSans-Rg", monospace';
   const tagW=tag?measure.measureText(tag+' ').width:0;
   const nameW=measure.measureText(safeN).width;
   const padding=24;
@@ -2201,7 +2207,7 @@ function mkSprite(name,rank,rankColor){
   if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
   else {ctx.fillRect(2,4,cW-4,cH-8);}
 
-  ctx.font='bold 22px monospace';ctx.textBaseline='middle';
+  ctx.font='bold 22px "MatrixSans-Rg", monospace';ctx.textBaseline='middle';
   const totalW=tagW+nameW;
   let x=(cW-totalW)/2;
   const yMid=cH/2-1;
@@ -2956,7 +2962,7 @@ function goToMainMenu(){
   showScreen('screen-main');
 }
 function hideGameHUD(){
-  ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
+  ['game-title','hotbar','crosshair','joystick-zone','joystick-container','mobile-jump-container','mobile-pause-btn',
    'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   document.getElementById('pause-overlay').classList.remove('active');
@@ -3507,7 +3513,7 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
   if(device==='pc'){document.getElementById('crosshair').classList.add('show');setupPC();}
   else{
     document.getElementById('crosshair').classList.remove('show');
-    document.getElementById('joystick-container').style.display='flex';
+    document.getElementById('joystick-zone').style.display='block';
     document.getElementById('mobile-jump-container').style.display='flex';
     document.getElementById('mobile-pause-btn').style.display='block';
     document.getElementById('btn-mobile-inv').style.display='flex';
@@ -3960,9 +3966,58 @@ let mobDone=false;
 function setupMobile(){
   if(mobDone) return;mobDone=true;
   const jC=document.getElementById('joystick-container'),jT=document.getElementById('joystick-thumb');
+  const jZone=document.getElementById('joystick-zone');
   const mr=window.innerWidth<=768?36:46;
-  jC.addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();if(jActive) return;const t=e.changedTouches[0];jActive=true;jTid=t.identifier;mvJ(t);},{passive:false});
-  function mvJ(t){const r=jC.getBoundingClientRect(),cx=r.left+r.width/2,cy=r.top+r.height/2;let dx=t.clientX-cx,dy=t.clientY-cy;const d=Math.sqrt(dx*dx+dy*dy);if(d>mr){dx=dx/d*mr;dy=dy/d*mr;}jT.style.transform=`translate(${dx}px,${dy}px)`;jx=dx/mr;jy=dy/mr;}
+  const JR=60; // joystick container radius (half of 120px)
+  // joystick origin (centre of container) in page coords
+  let jOx=0,jOy=0;
+  function showJoystick(cx,cy){
+    // Clamp so joystick stays on screen
+    const hw=window.innerWidth,hh=window.innerHeight;
+    jOx=Math.max(JR,Math.min(hw-JR,cx));
+    jOy=Math.max(JR,Math.min(hh-JR,cy));
+    jC.style.left=(jOx-JR)+'px';
+    jC.style.top=(jOy-JR)+'px';
+    jC.style.display='flex';
+  }
+  function hideJoystick(){
+    jC.style.display='none';
+    jT.style.transform='translate(0px,0px)';
+    jx=0;jy=0;
+  }
+  function mvJ(t){
+    let dx=t.clientX-jOx,dy=t.clientY-jOy;
+    const d=Math.sqrt(dx*dx+dy*dy);
+    if(d>mr){dx=dx/d*mr;dy=dy/d*mr;}
+    jT.style.transform=`translate(${dx}px,${dy}px)`;
+    jx=dx/mr;jy=dy/mr;
+  }
+  // Joystick zone touch handling
+  jZone.addEventListener('touchstart',e=>{
+    e.preventDefault();e.stopPropagation();
+    if(jActive) return;
+    const t=e.changedTouches[0];
+    jActive=true;jTid=t.identifier;
+    showJoystick(t.clientX,t.clientY);
+    mvJ(t);
+  },{passive:false});
+  jZone.addEventListener('touchmove',e=>{
+    e.preventDefault();e.stopPropagation();
+    for(let i=0;i<e.changedTouches.length;i++){
+      const t=e.changedTouches[i];
+      if(t.identifier===jTid){mvJ(t);break;}
+    }
+  },{passive:false});
+  jZone.addEventListener('touchend',e=>{
+    e.preventDefault();e.stopPropagation();
+    for(let i=0;i<e.changedTouches.length;i++){
+      if(e.changedTouches[i].identifier===jTid){
+        jActive=false;jTid=null;
+        hideJoystick();
+        break;
+      }
+    }
+  },{passive:false});
   let mLastJump=0;
   document.getElementById('btn-mobile-jump').addEventListener('touchstart',e=>{
     e.preventDefault();e.stopPropagation();if(DeathManager.isDead) return;
@@ -3974,14 +4029,16 @@ function setupMobile(){
     else{if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}else if(grounded){velY=JUMP;grounded=false;}}
   },{passive:false});
   document.getElementById('btn-mobile-jump').addEventListener('touchend',e=>{e.preventDefault();spaceDown=false;},{passive:false});
-  document.getElementById('btn-mobile-crouch').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();isCrouching=!isCrouching;},{passive:false});
+  document.getElementById('btn-mobile-crouch').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();isCrouching=true;},{passive:false});
+  document.getElementById('btn-mobile-crouch').addEventListener('touchend',e=>{e.preventDefault();isCrouching=false;},{passive:false});
+  document.getElementById('btn-mobile-crouch').addEventListener('touchcancel',e=>{e.preventDefault();isCrouching=false;},{passive:false});
   let aT={},lkId=null,sx=0,sy=0;
   window.addEventListener('touchstart',e=>{
     if(deviceMode!=='mobile') return;
     if(document.getElementById('menu-overlay').style.display!=='none') return;
     for(let i=0;i<e.changedTouches.length;i++){
       const t=e.changedTouches[i];
-      if(t.target.closest('#joystick-container')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#pause-overlay')||t.target.closest('#btn-mobile-chat')||t.target.closest('#chat-input-row')||t.target.closest('#death-screen')||t.target.closest('#btn-mobile-inv')||t.target.closest('#inv-overlay')||t.target.closest('#btn-mobile-cam')||t.target.closest('#btn-mobile-crouch')) continue;
+      if(t.target.closest('#joystick-zone')||t.target.closest('#joystick-container')||t.target.closest('#mobile-jump-container')||t.target.closest('#hotbar')||t.target.closest('#mobile-pause-btn')||t.target.closest('#pause-overlay')||t.target.closest('#btn-mobile-chat')||t.target.closest('#chat-input-row')||t.target.closest('#death-screen')||t.target.closest('#btn-mobile-inv')||t.target.closest('#inv-overlay')||t.target.closest('#btn-mobile-cam')||t.target.closest('#btn-mobile-crouch')) continue;
       const id=t.identifier;
       const willBeLkId=(lkId===null);
       if(willBeLkId){lkId=id;sx=t.clientX;sy=t.clientY;}
@@ -4003,7 +4060,7 @@ function setupMobile(){
     if(document.getElementById('menu-overlay').style.display!=='none') return;
     for(let i=0;i<e.touches.length;i++){
       const t=e.touches[i],id=t.identifier;
-      if(id===jTid&&jActive){mvJ(t);continue;}
+      if(id===jTid&&jActive) continue; // joystick zone handles this
       if(aT[id]){
         const dx=t.clientX-aT[id].sx,dy=t.clientY-aT[id].sy;
         aT[id].cx=t.clientX;aT[id].cy=t.clientY;
