@@ -347,7 +347,7 @@ body.low-health::after {
         <div id="txt-skin-uploader" style="font-size:9px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:2px;">SKİN YÜKLEYİCİ</div>
         <div style="font-size:10px;color:rgba(255,255,255,.55);line-height:1.5;background:rgba(0,0,0,.3);padding:8px;border-radius:5px;border:1px solid rgba(255,255,255,.1);">
           <span id="txt-skin-upload-hint">📁 Minecraft skin PNG yükle</span><br>
-          <span id="txt-skin-upload-size" style="color:rgba(255,255,255,.35);">64×64 veya 64×32 piksel</span>
+          <span id="txt-skin-upload-size" style="color:rgba(255,255,255,.35);">64×64, 64×32 veya 128×128 piksel</span>
         </div>
         <label id="skin-file-label" style="width:100%;padding:11px 14px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;display:block;">
           <span id="txt-skin-choose">📂 DOSYA SEÇ</span>
@@ -596,11 +596,11 @@ const langData={
       srvShoutNoPerm:'Bu komut Twitch ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
       camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)',
       skinTitle:'SKİN AYARLARI',skinPreview:'ÖNİZLEME',skinUploader:'SKİN YÜKLEYİCİ',
-      skinUploadHint:'📁 Minecraft skin PNG yükle',skinUploadSize:'64×64 veya 64×32 piksel',
+      skinUploadHint:'📁 Minecraft skin PNG yükle',skinUploadSize:'64×64, 64×32 veya 128×128 piksel',
       skinChoose:'📂 DOSYA SEÇ',skinReset:'🔄 STEVE\'E SIFIRLA',skinMenuBtn:'🎨 ÖZEL SKİN',
       skinSteve:'👦 STEVE',skinAlex:'👩 ALEX',
       skinNote:'Skin çok oyunculu modda diğer oyuncular tarafından görülebilir.',
-      skinLoaded:'✅ Skin yüklendi!',skinError:'❌ Hata: 64×64 veya 64×32 PNG olmalı.',
+      skinLoaded:'✅ Skin yüklendi!',skinError:'❌ Hata: 64×64, 64×32 veya 128×128 PNG olmalı.',
       skinGuestWarning:'🔒 Özel skin yüklemek için hesap gerekli.',
       skinGuestHint:'Hesap sahibiyseniz siteye giriş yapın.'},
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
@@ -650,11 +650,11 @@ const langData={
       srvShoutNoPerm:'This command is for Twitch rank and above',srvUsageShout:'Usage: /shout <message>',
       camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)',
       skinTitle:'SKIN SETTINGS',skinPreview:'PREVIEW',skinUploader:'SKIN UPLOADER',
-      skinUploadHint:'📁 Upload Minecraft skin PNG',skinUploadSize:'64×64 or 64×32 pixels',
+      skinUploadHint:'📁 Upload Minecraft skin PNG',skinUploadSize:'64×64, 64×32 or 128×128 pixels',
       skinChoose:'📂 CHOOSE FILE',skinReset:'🔄 RESET TO STEVE',skinMenuBtn:'🎨 CUSTOM SKIN',
       skinSteve:'👦 STEVE',skinAlex:'👩 ALEX',
       skinNote:'Your skin is visible to other players in multiplayer.',
-      skinLoaded:'✅ Skin loaded!',skinError:'❌ Error: Must be a 64×64 or 64×32 PNG.',
+      skinLoaded:'✅ Skin loaded!',skinError:'❌ Error: Must be a 64×64, 64×32 or 128×128 PNG.',
       skinGuestWarning:'🔒 An account is required to upload a custom skin.',
       skinGuestHint:'Log in to the site if you have an account.'}
 };
@@ -858,16 +858,20 @@ document.getElementById('skin-file-input').addEventListener('change',function(e)
   reader.onload=function(ev){
     const img=new Image();
     img.onload=function(){
-      if((img.width!==64)||(img.height!==64&&img.height!==32)){
+      const is64=(img.width===64&&(img.height===64||img.height===32));
+      const is128=(img.width===128&&img.height===128);
+      if(!is64&&!is128){
         document.getElementById('skin-status').textContent=d.skinError;return;
       }
-      const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+      const size=is128?128:64;
+      const cv=document.createElement('canvas');cv.width=size;cv.height=size;
+      cv._hd=is128;
       const c=cv.getContext('2d');c.imageSmoothingEnabled=false;
       if(img.height===32){
         c.drawImage(img,0,0);
         c.save();c.scale(-1,1);c.drawImage(img,-64,0);c.restore();
       } else {
-        c.drawImage(img,0,0);
+        c.drawImage(img,0,0,size,size);
       }
       applyNewSkin(cv);broadcastSkin(cv);
       document.getElementById('skin-status').textContent=d.skinLoaded;
@@ -1904,13 +1908,18 @@ const STEVE_SKIN_B64='data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYA
 const ALEX_SKIN_B64='data:image/png;base64,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';
 
 function loadSkinFromB64(b64,callback){
-  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
-  const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
   const img=new Image();
-  img.onload=function(){ctx.drawImage(img,0,0,64,64);callback(cv);};
+  img.onload=function(){
+    // 128x128 veya 64x64 — her ikisini de destekle
+    const size=img.width>=128?128:64;
+    const cv=document.createElement('canvas');cv.width=size;cv.height=size;
+    const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
+    ctx.drawImage(img,0,0,size,size);
+    cv._hd=(size===128); // HD flag
+    callback(cv);
+  };
   img.src=b64;
 }
-
 function createDefaultSteveSkin(){
   const cv=document.createElement('canvas');cv.width=64;cv.height=64;
   const ctx=cv.getContext('2d');ctx.imageSmoothingEnabled=false;
@@ -1951,27 +1960,19 @@ setTimeout(()=>{
   if(!isGuestUser()) loadSkinFromStorage(null);
 },200);
 
-// Skin'den UV koordinatlarıyla tekstür oluşturan yardımcı
-// sx,sy: atlastaki sol-üst piksel, sw,sh: genişlik-yükseklik (piksel cinsinden)
-// atlasW=64, atlasH=64
-function makeSkinFaceTex(skinCv,sx,sy,sw,sh,flipH){
-  const S=64; // atlasın piksel boyutu
-  const cv=document.createElement('canvas');cv.width=sw*4;cv.height=sh*4;
+// sx,sy,sw,sh → 64x64 koordinatlarıyla verilir; HD skin (128x128) otomatik 2x ölçeklenir
+function makeSkinFaceTex(skinCv,sx,sy,sw,sh,flipH,isOverlay){
+  const scale=skinCv._hd?2:1; // 128x128 için 2x çarpan
+  const rsx=sx*scale,rsy=sy*scale,rsw=sw*scale,rsh=sh*scale;
+  const cv=document.createElement('canvas');cv.width=rsw*4;cv.height=rsh*4;
   const c=cv.getContext('2d');
   c.imageSmoothingEnabled=false;
+  c.clearRect(0,0,rsw*4,rsh*4);
+  c.drawImage(skinCv,rsx,rsy,rsw,rsh,0,0,rsw*4,rsh*4);
   if(flipH){
-    c.save();c.scale(-1,1);c.drawImage(skinCv,-sw*4,0);
-    // Sadece istenen bölgeyi al
-    c.restore();
-  }
-  // Doğrudan bölgeyi çiz
-  c.clearRect(0,0,sw*4,sh*4);
-  c.drawImage(skinCv, sx,sy,sw,sh, 0,0,sw*4,sh*4);
-  if(flipH){
-    // Yatay çevir
-    const id=c.getImageData(0,0,sw*4,sh*4);
-    const d=id.data;const w=sw*4;
-    for(let row=0;row<sh*4;row++){
+    const id=c.getImageData(0,0,rsw*4,rsh*4);
+    const d=id.data;const w=rsw*4;
+    for(let row=0;row<rsh*4;row++){
       for(let col=0;col<Math.floor(w/2);col++){
         const a=4*(row*w+col),b=4*(row*w+(w-1-col));
         for(let k=0;k<4;k++){const tmp=d[a+k];d[a+k]=d[b+k];d[b+k]=tmp;}
@@ -1981,78 +1982,106 @@ function makeSkinFaceTex(skinCv,sx,sy,sw,sh,flipH){
   }
   const t=new THREE.CanvasTexture(cv);
   t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;
-  return new THREE.MeshStandardMaterial({map:t,roughness:.85,transparent:false});
+  // Overlay katmanlar şeffaflık aktif
+  const matOpts={map:t,roughness:.85};
+  if(isOverlay){matOpts.transparent=true;matOpts.alphaTest=0.5;matOpts.depthWrite=false;}
+  else{matOpts.transparent=false;}
+  return new THREE.MeshStandardMaterial(matOpts);
 }
 
 // Minecraft skin layout → Three.js BoxGeometry yüz sırası: [+X,-X,+Y,-Y,+Z,-Z]
 // +X = sağ, -X = sol, +Y = üst, -Y = alt, +Z = arka, -Z = ön
-function buildSkinMats(skinCv, part){
-  const s=skinCv;
+// overlay=true → dış katman (hat/jacket/sleeve/pants) UV'leri kullanılır
+function buildSkinMats(skinCv, part, overlay){
+  const s=skinCv;const ov=!!overlay;
   if(part==='head'){
-    // Head UV (skin atlas 8,8 başlangıç, her yüz 8x8)
-    // Sıra: right(+X)=sol yüz(0,8,4x8), left(-X)=sağ yüz(16,8,4x8), top(+Y)=(8,0,8x8), bottom(-Y)=(16,0,8x8), back(+Z)=(24,8,8x8), front(-Z)=(8,8,8x8)
+    // Base: 8,8 | Overlay (hat): 40,8
+    const ox=ov?40:8;
     return [
-      makeSkinFaceTex(s,0,8,8,8,false),   // +X (sağ → karakterin sağ yanağı)
-      makeSkinFaceTex(s,16,8,8,8,false),  // -X (sol → karakterin sol yanağı)
-      makeSkinFaceTex(s,8,0,8,8,false),   // +Y üst
-      makeSkinFaceTex(s,16,0,8,8,false),  // -Y alt
-      makeSkinFaceTex(s,24,8,8,8,false),  // +Z arka
-      makeSkinFaceTex(s,8,8,8,8,false),   // -Z ön
+      makeSkinFaceTex(s,ox-8,8,8,8,false,ov),  // +X sağ yanak
+      makeSkinFaceTex(s,ox+8,8,8,8,false,ov),  // -X sol yanak
+      makeSkinFaceTex(s,ox,0,8,8,false,ov),    // +Y üst
+      makeSkinFaceTex(s,ox+8,0,8,8,false,ov),  // -Y alt
+      makeSkinFaceTex(s,ox+16,8,8,8,false,ov), // +Z arka
+      makeSkinFaceTex(s,ox,8,8,8,false,ov),    // -Z ön
     ];
   }
   if(part==='body'){
-    // Body: 16,20 base → yüzler
+    // Base: 16,20 | Overlay (jacket): 16,36
+    const oy=ov?36:20;const oyTop=ov?32:16;
     return [
-      makeSkinFaceTex(s,16,20,4,12,false), // +X sağ yan
-      makeSkinFaceTex(s,28,20,4,12,false), // -X sol yan
-      makeSkinFaceTex(s,20,16,8,4,false),  // +Y üst
-      makeSkinFaceTex(s,28,16,8,4,false),  // -Y alt
-      makeSkinFaceTex(s,32,20,8,12,false), // +Z arka
-      makeSkinFaceTex(s,20,20,8,12,false), // -Z ön
+      makeSkinFaceTex(s,16,oy,4,12,false,ov),  // +X sağ yan
+      makeSkinFaceTex(s,28,oy,4,12,false,ov),  // -X sol yan
+      makeSkinFaceTex(s,20,oyTop,8,4,false,ov),// +Y üst
+      makeSkinFaceTex(s,28,oyTop,8,4,false,ov),// -Y alt
+      makeSkinFaceTex(s,32,oy,8,12,false,ov),  // +Z arka
+      makeSkinFaceTex(s,20,oy,8,12,false,ov),  // -Z ön
     ];
   }
   if(part==='armR'){
-    // Sağ kol: 40,16 base
+    // Base: 40,20 | Overlay (right sleeve): 40,36
+    const oy=ov?36:20;const oyTop=ov?32:16;
     return [
-      makeSkinFaceTex(s,40,20,4,12,false), // +X
-      makeSkinFaceTex(s,48,20,4,12,false), // -X
-      makeSkinFaceTex(s,44,16,4,4,false),  // +Y üst
-      makeSkinFaceTex(s,48,16,4,4,false),  // -Y alt
-      makeSkinFaceTex(s,52,20,4,12,false), // +Z arka
-      makeSkinFaceTex(s,44,20,4,12,false), // -Z ön
+      makeSkinFaceTex(s,40,oy,4,12,false,ov),  // +X
+      makeSkinFaceTex(s,48,oy,4,12,false,ov),  // -X
+      makeSkinFaceTex(s,44,oyTop,4,4,false,ov),// +Y
+      makeSkinFaceTex(s,48,oyTop,4,4,false,ov),// -Y
+      makeSkinFaceTex(s,52,oy,4,12,false,ov),  // +Z
+      makeSkinFaceTex(s,44,oy,4,12,false,ov),  // -Z
     ];
   }
   if(part==='armL'){
-    // Sol kol: 32,48 (64x64 yeni format) — yoksa sağ kolu aynala
+    // Base: 32,48 (64x64 yeni format) | Overlay (left sleeve): 48,48
+    if(ov){
+      return [
+        makeSkinFaceTex(s,48,52,4,12,false,ov),
+        makeSkinFaceTex(s,56,52,4,12,false,ov),
+        makeSkinFaceTex(s,52,48,4,4,false,ov),
+        makeSkinFaceTex(s,56,48,4,4,false,ov),
+        makeSkinFaceTex(s,60,52,4,12,false,ov),
+        makeSkinFaceTex(s,52,52,4,12,false,ov),
+      ];
+    }
     return [
-      makeSkinFaceTex(s,40,20,4,12,true),  // +X (aynala)
-      makeSkinFaceTex(s,48,20,4,12,true),  // -X
-      makeSkinFaceTex(s,44,16,4,4,true),   // +Y
-      makeSkinFaceTex(s,48,16,4,4,true),   // -Y
-      makeSkinFaceTex(s,52,20,4,12,true),  // +Z
-      makeSkinFaceTex(s,44,20,4,12,true),  // -Z
+      makeSkinFaceTex(s,40,20,4,12,true,false),
+      makeSkinFaceTex(s,48,20,4,12,true,false),
+      makeSkinFaceTex(s,44,16,4,4,true,false),
+      makeSkinFaceTex(s,48,16,4,4,true,false),
+      makeSkinFaceTex(s,52,20,4,12,true,false),
+      makeSkinFaceTex(s,44,20,4,12,true,false),
     ];
   }
   if(part==='legR'){
-    // Sağ bacak: 0,16 base
+    // Base: 0,20 | Overlay (right pant): 0,36
+    const oy=ov?36:20;const oyTop=ov?32:16;
     return [
-      makeSkinFaceTex(s,0,20,4,12,false),  // +X
-      makeSkinFaceTex(s,8,20,4,12,false),  // -X
-      makeSkinFaceTex(s,4,16,4,4,false),   // +Y
-      makeSkinFaceTex(s,8,16,4,4,false),   // -Y
-      makeSkinFaceTex(s,12,20,4,12,false), // +Z
-      makeSkinFaceTex(s,4,20,4,12,false),  // -Z
+      makeSkinFaceTex(s,0,oy,4,12,false,ov),
+      makeSkinFaceTex(s,8,oy,4,12,false,ov),
+      makeSkinFaceTex(s,4,oyTop,4,4,false,ov),
+      makeSkinFaceTex(s,8,oyTop,4,4,false,ov),
+      makeSkinFaceTex(s,12,oy,4,12,false,ov),
+      makeSkinFaceTex(s,4,oy,4,12,false,ov),
     ];
   }
   if(part==='legL'){
-    // Sol bacak: 16,48 (yeni format) veya sağı aynala
+    // Base: 16,52 (yeni format) | Overlay (left pant): 0,52
+    if(ov){
+      return [
+        makeSkinFaceTex(s,0,52,4,12,false,ov),
+        makeSkinFaceTex(s,8,52,4,12,false,ov),
+        makeSkinFaceTex(s,4,48,4,4,false,ov),
+        makeSkinFaceTex(s,8,48,4,4,false,ov),
+        makeSkinFaceTex(s,12,52,4,12,false,ov),
+        makeSkinFaceTex(s,4,52,4,12,false,ov),
+      ];
+    }
     return [
-      makeSkinFaceTex(s,0,20,4,12,true),
-      makeSkinFaceTex(s,8,20,4,12,true),
-      makeSkinFaceTex(s,4,16,4,4,true),
-      makeSkinFaceTex(s,8,16,4,4,true),
-      makeSkinFaceTex(s,12,20,4,12,true),
-      makeSkinFaceTex(s,4,20,4,12,true),
+      makeSkinFaceTex(s,0,20,4,12,true,false),
+      makeSkinFaceTex(s,8,20,4,12,true,false),
+      makeSkinFaceTex(s,4,16,4,4,true,false),
+      makeSkinFaceTex(s,8,16,4,4,true,false),
+      makeSkinFaceTex(s,12,20,4,12,true,false),
+      makeSkinFaceTex(s,4,20,4,12,true,false),
     ];
   }
   return new THREE.MeshStandardMaterial({color:0xff00ff});
@@ -2063,29 +2092,40 @@ const allPlayerModels=[];
 
 function applyNewSkin(skinCv){
   activeSkinCanvas=skinCv;
-  // Mevcut tüm modelleri güncelle
   for(const pm of allPlayerModels){
     if(pm&&pm.userData&&pm.userData.skinParts){
       const parts=pm.userData.skinParts;
       const newMats={
-        head: buildSkinMats(skinCv,'head'),
-        body: buildSkinMats(skinCv,'body'),
-        armR: buildSkinMats(skinCv,'armR'),
-        armL: buildSkinMats(skinCv,'armL'),
-        legR: buildSkinMats(skinCv,'legR'),
-        legL: buildSkinMats(skinCv,'legL'),
+        head:    buildSkinMats(skinCv,'head'),
+        body:    buildSkinMats(skinCv,'body'),
+        armR:    buildSkinMats(skinCv,'armR'),
+        armL:    buildSkinMats(skinCv,'armL'),
+        legR:    buildSkinMats(skinCv,'legR'),
+        legL:    buildSkinMats(skinCv,'legL'),
+        // Overlay katmanlar
+        headOv:  buildSkinMats(skinCv,'head',true),
+        bodyOv:  buildSkinMats(skinCv,'body',true),
+        armROv:  buildSkinMats(skinCv,'armR',true),
+        armLOv:  buildSkinMats(skinCv,'armL',true),
+        legROv:  buildSkinMats(skinCv,'legR',true),
+        legLOv:  buildSkinMats(skinCv,'legL',true),
       };
-      if(parts.head) parts.head.material=newMats.head;
-      if(parts.body) parts.body.material=newMats.body;
-      if(parts.armR) parts.armR.material=newMats.armR;
-      if(parts.armL) parts.armL.material=newMats.armL;
-      if(parts.legR) parts.legR.material=newMats.legR;
-      if(parts.legL) parts.legL.material=newMats.legL;
+      if(parts.head)   parts.head.material=newMats.head;
+      if(parts.body)   parts.body.material=newMats.body;
+      if(parts.armR)   parts.armR.material=newMats.armR;
+      if(parts.armL)   parts.armL.material=newMats.armL;
+      if(parts.legR)   parts.legR.material=newMats.legR;
+      if(parts.legL)   parts.legL.material=newMats.legL;
+      // Overlay
+      if(parts.headOv) parts.headOv.material=newMats.headOv;
+      if(parts.bodyOv) parts.bodyOv.material=newMats.bodyOv;
+      if(parts.armROv) parts.armROv.material=newMats.armROv;
+      if(parts.armLOv) parts.armLOv.material=newMats.armLOv;
+      if(parts.legROv) parts.legROv.material=newMats.legROv;
+      if(parts.legLOv) parts.legLOv.material=newMats.legLOv;
     }
   }
-  // Önizlemeyi güncelle
   updateSkinPreview(skinCv);
-  // Skin'i otomatik kaydet (sadece hesaplı kullanıcılar)
   if(typeof saveSkinToStorage==='function') saveSkinToStorage(skinCv);
 }
 
@@ -2115,69 +2155,87 @@ function mkPlayer(name,rank,rankColor){
   const g=new THREE.Group();
   const skinCv=activeSkinCanvas;
 
+  // ─── Yardımcı: overlay mesh (iç katmandan biraz büyük) ───
+  function mkOv(w,h,d,scaleFactor,part){
+    const ov=new THREE.Mesh(
+      new THREE.BoxGeometry(w*scaleFactor,h*scaleFactor,d*scaleFactor),
+      buildSkinMats(skinCv,part,true)
+    );
+    return ov;
+  }
+
   // ── Kafa ──
-  const headMats=buildSkinMats(skinCv,'head');
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),headMats);
-  head.position.y=.29; // pivot alt kenara (boyun) göre
+  const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),buildSkinMats(skinCv,'head'));
+  head.position.y=.29;
+  const headOv=mkOv(.58,.58,.58,1.08,'head');
+  headOv.position.y=.29;
 
   const headPivot=new THREE.Group();
-  headPivot.position.y=1.5; // vücudun üstü
-  headPivot.add(head);
+  headPivot.position.y=1.5;
+  headPivot.add(head,headOv);
 
   // ── Gövde ──
-  const bodyMats=buildSkinMats(skinCv,'body');
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.50,.75,.25),bodyMats);
+  const body=new THREE.Mesh(new THREE.BoxGeometry(.50,.75,.25),buildSkinMats(skinCv,'body'));
   body.position.y=1.125;
+  const bodyOv=mkOv(.50,.75,.25,1.06,'body');
+  bodyOv.position.y=1.125;
 
-  // ── Sağ Kol ── (pivot omuzdan döner)
-  const armRMats=buildSkinMats(skinCv,'armR');
-  const armRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),armRMats);
-  armRMesh.position.y=-.375; // pivot omuz = y=0, kol aşağı uzar
+  // ── Sağ Kol ──
+  const armRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'armR'));
+  armRMesh.position.y=-.375;
+  const armROv=mkOv(.25,.75,.25,1.06,'armR');
+  armROv.position.y=-.375;
 
   const armRPivot=new THREE.Group();
   armRPivot.position.set(.375,1.5,0);
-  armRPivot.add(armRMesh);
+  armRPivot.add(armRMesh,armROv);
 
   // ── Sol Kol ──
-  const armLMats=buildSkinMats(skinCv,'armL');
-  const armLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),armLMats);
+  const armLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'armL'));
   armLMesh.position.y=-.375;
+  const armLOv=mkOv(.25,.75,.25,1.06,'armL');
+  armLOv.position.y=-.375;
 
   const armLPivot=new THREE.Group();
   armLPivot.position.set(-.375,1.5,0);
-  armLPivot.add(armLMesh);
+  armLPivot.add(armLMesh,armLOv);
 
-  // ── Sağ Bacak ── (pivot kalçadan)
-  const legRMats=buildSkinMats(skinCv,'legR');
-  const legRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),legRMats);
+  // ── Sağ Bacak ──
+  const legRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'legR'));
   legRMesh.position.y=-.375;
+  const legROv=mkOv(.25,.75,.25,1.06,'legR');
+  legROv.position.y=-.375;
 
   const legRPivot=new THREE.Group();
   legRPivot.position.set(.125,.75,0);
-  legRPivot.add(legRMesh);
+  legRPivot.add(legRMesh,legROv);
 
   // ── Sol Bacak ──
-  const legLMats=buildSkinMats(skinCv,'legL');
-  const legLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),legLMats);
+  const legLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'legL'));
   legLMesh.position.y=-.375;
+  const legLOv=mkOv(.25,.75,.25,1.06,'legL');
+  legLOv.position.y=-.375;
 
   const legLPivot=new THREE.Group();
   legLPivot.position.set(-.125,.75,0);
-  legLPivot.add(legLMesh);
+  legLPivot.add(legLMesh,legLOv);
 
-  g.add(headPivot,body,armRPivot,armLPivot,legRPivot,legLPivot);
+  g.add(headPivot,body,bodyOv,armRPivot,armLPivot,legRPivot,legLPivot);
 
-  // Animasyon için kemik referansları sakla
+  // Animasyon için kemik referansları
   g.userData.bones={headPivot,armRPivot,armLPivot,legRPivot,legLPivot};
   g.userData.animTime=0;
   g.userData.swingTime=0;
   g.userData.isSwinging=false;
 
-  // Skin güncelleme için referanslar
+  // Skin güncelleme için tüm part mesh'leri (overlay dahil)
   g.userData.skinParts={
     head, body,
     armR:armRMesh, armL:armLMesh,
-    legR:legRMesh, legL:legLMesh
+    legR:legRMesh, legL:legLMesh,
+    headOv, bodyOv,
+    armROv, armLOv,
+    legROv, legLOv,
   };
   allPlayerModels.push(g);
 
