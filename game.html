@@ -3583,52 +3583,65 @@ const _lastSoundTime  = { mining: 0,   hit: 0,  dig: 0, jump: 0 };
 // ─── Ana ses çalma fonksiyonu ───
 // blockType : 'planks' | 'stone' | 'grass' | 'dirt' | 'log' | 'sand' | 'glass' | 'leaves' | 'cobblestone' | 'bedrock' | 'default'
 // category  : 'hit' | 'mining' | 'dig' | 'jump'
+// ─── Blok türü normalize: her yerden tek noktada çağrılır ───
+function getNormalizedBlockType(blockType) {
+  let bt = (typeof blockType === 'string' ? blockType : 'default').toLowerCase();
+  if (bt === 'planks')                          return 'planks';
+  if (bt.includes('log'))                       return 'log';
+  if (bt.includes('wood'))                      return 'planks';
+  if (bt === 'grass')                           return 'grass';
+  if (bt === 'dirt' || bt === 'gravel')         return 'dirt';
+  if (bt === 'stone')                           return 'stone';
+  if (bt === 'cobblestone' || bt === 'cob')     return 'cobblestone';
+  if (bt === 'glass')                           return 'glass';
+  if (bt === 'leaves')                          return 'leaves';
+  if (bt === 'sand')                            return 'sand';
+  if (bt === 'bedrock')                         return 'bedrock';
+  if (bt === 'water')                           return 'default';
+  return blockSoundPool[bt] ? bt : 'default';
+}
+
 function playBlockSound(blockType, category) {
   const now = performance.now();
   const cd  = _soundCooldown[category] ?? 150;
   if (now - (_lastSoundTime[category] ?? 0) < cd) return;
   _lastSoundTime[category] = now;
 
-  // ── blockType normalize ──
-  // Gelen değer ne olursa olsun (stone, STONE, Stone, LOG_WOOD, log_wood, GRASS vb.)
-  // küçük harfe çevirip bilinen havuz anahtarlarından birine eşle.
-  let bt = (typeof blockType === 'string' ? blockType : 'default').toLowerCase();
-  // Alias eşleme
-  if (bt.includes('log') || bt.includes('wood') || bt === 'planks') {
-    bt = bt === 'planks' ? 'planks' : bt.includes('log') ? 'log' : 'planks';
-  } else if (bt === 'grass') {
-    bt = 'grass';
-  } else if (bt === 'dirt' || bt === 'gravel') {
-    bt = 'dirt';
-  } else if (bt === 'stone') {
-    bt = 'stone';
-  } else if (bt === 'cobblestone' || bt === 'cob') {
-    bt = 'cobblestone';
-  } else if (bt === 'glass') {
-    bt = 'glass';
-  } else if (bt === 'leaves') {
-    bt = 'leaves';
-  } else if (bt === 'sand') {
-    bt = 'sand';
-  } else if (bt === 'bedrock') {
-    bt = 'bedrock';
-  } else if (!blockSoundPool[bt]) {
-    bt = 'default';
-  }
-
-  // Blok türü havuzdan al, yoksa default'a düş
+  const bt = getNormalizedBlockType(blockType);
   const pool = (blockSoundPool[bt] ?? blockSoundPool['default']);
   const sounds = pool[category];
   if (!sounds || sounds.length === 0) return;
 
-  // null olmayan sesler arasından rastgele seç
   const valid = sounds.filter(s => s !== null);
   if (valid.length === 0) return;
 
   const snd = valid[Math.floor(Math.random() * valid.length)];
   try {
     snd.currentTime = 0;
-    snd.play().catch(() => {}); // Tarayıcı autoplay politikasını sessizce geç
+    snd.play().catch(() => {});
+  } catch(e) {}
+}
+
+// ─── Yürüme Sesi (hit havuzundan, kısık ses) ───
+let lastFootstepTime = 0;
+function playFootstepSound(blockType) {
+  const now = performance.now();
+  if (now - lastFootstepTime < 350) return;
+  lastFootstepTime = now;
+
+  const bt = getNormalizedBlockType(blockType || 'grass');
+  const pool = (blockSoundPool[bt] ?? blockSoundPool['default'])['hit'];
+  if (!pool || pool.length === 0) return;
+
+  const valid = pool.filter(s => s !== null);
+  if (valid.length === 0) return;
+
+  const snd = valid[Math.floor(Math.random() * valid.length)];
+  try {
+    // Yürüme sesleri daha kısık çalar
+    const clone = new Audio(snd.src);
+    clone.volume = 0.25;
+    clone.play().catch(() => {});
   } catch(e) {}
 }
 
@@ -3638,20 +3651,21 @@ function _getFloorMatKey() {
   const fy = Math.floor(camera.position.y - 1.72);
   const fz = Math.floor(camera.position.z);
   const bd = blockMap[pk(fx, fy, fz)] || blockMap[pk(fx, fy - 1, fz)];
-  if (!bd) return 'default';
-  return getMatKey(bd.mat) || 'default';
+  if (!bd) return 'grass';
+  return getMatKey(bd.mat) || 'grass';
 }
 
 // ─── Adım Sesi Sistemi ───
 let _stepTimer = 0;
-const STEP_INTERVAL = 0.42; // saniye (yürüme hızına göre ayarla)
+const STEP_INTERVAL = 0.42;
 
 function tickStepSounds(dt, isMoving) {
   if (!isMoving || !grounded) { _stepTimer = 0; return; }
   _stepTimer += dt;
   if (_stepTimer >= STEP_INTERVAL) {
     _stepTimer = 0;
-    playBlockSound(_getFloorMatKey(), 'dig');
+    // Yürüme: hit havuzu, kısık ses — dig değil!
+    playFootstepSound(_getFloorMatKey());
   }
 }
 
@@ -4114,8 +4128,8 @@ function placeB(x,y,isc){
   blockMap[k]=bd;
   const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
   showBlock(bd);refreshNbr(bx,by,bz);instancesDirty=true;
-  // ── Blok koyma sesi: yerleştirilen bloğun tipine göre çal ──
-  playBlockSound(ids[actualBlock] || 'default', 'dig');
+  // ── Blok koyma sesi: ELDEKİ seçili bloğun tipine göre çal (hedef bloğa değil) ──
+  playBlockSound(ids[actualBlock] || 'planks', 'dig');
   sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
 }
 function doLeftClick(x,y,isc){
