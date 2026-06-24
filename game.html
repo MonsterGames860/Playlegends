@@ -84,8 +84,6 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:1px;}
 #error-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,40,40,.95);color:#fff;padding:20px;border-radius:12px;text-align:center;z-index:1100;border:2px solid #fff;display:none;}
 /* ─── Kırma Çatlak Overlay ─── */
-#break-overlay{position:absolute;pointer-events:none;z-index:30;display:none;border:2px solid rgba(0,0,0,0.6);box-sizing:border-box;}
-#break-overlay canvas{position:absolute;top:0;left:0;width:100%;height:100%;opacity:0.7;}
 #pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.72);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:900;color:#fff;}
 #pause-overlay.active{display:flex;}
 #pause-box{display:flex;flex-direction:column;align-items:center;width:100%;max-width:320px;padding:0 24px;}
@@ -185,7 +183,7 @@ body.low-health::after {
 </head>
 <body>
 <div id="error-msg"><h3></h3><p style="font-size:12px;margin-top:8px;opacity:.9"></p></div>
-<div id="break-overlay"><canvas id="break-canvas" width="64" height="64"></canvas></div>
+
 <div id="menu-overlay">
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
@@ -2155,80 +2153,82 @@ function mkPlayer(name,rank,rankColor){
   const g=new THREE.Group();
   const skinCv=activeSkinCanvas;
 
-  // ─── Yardımcı: overlay mesh (iç katmandan biraz büyük) ───
+  // Model toplam yüksekliği hitbox ile eşleşmeli:
+  // Fizik: ayak=0, baş üstü=1.7 (camera y-1.6 → y+0.1)
+  // Ölçek faktörü: 1.7/2.08 ≈ 0.817
+  const S=0.95;
+
+  // ─── Yardımcı: overlay mesh ───
   function mkOv(w,h,d,scaleFactor,part){
-    const ov=new THREE.Mesh(
+    return new THREE.Mesh(
       new THREE.BoxGeometry(w*scaleFactor,h*scaleFactor,d*scaleFactor),
       buildSkinMats(skinCv,part,true)
     );
-    return ov;
   }
 
-  // ── Kafa ──
-  const head=new THREE.Mesh(new THREE.BoxGeometry(.58,.58,.58),buildSkinMats(skinCv,'head'));
-  head.position.y=.29;
-  const headOv=mkOv(.58,.58,.58,1.08,'head');
-  headOv.position.y=.29;
+  // ── Kafa (0.58 → 0.474) ──
+  const hS=0.58*S;
+  const head=new THREE.Mesh(new THREE.BoxGeometry(hS,hS,hS),buildSkinMats(skinCv,'head'));
+  head.position.y=hS/2;
+  const headOv=mkOv(hS,hS,hS,1.08,'head');
+  headOv.position.y=hS/2;
 
   const headPivot=new THREE.Group();
-  headPivot.position.y=1.5;
+  headPivot.position.y=1.5*S; // vücut üstü
   headPivot.add(head,headOv);
 
-  // ── Gövde ──
-  const body=new THREE.Mesh(new THREE.BoxGeometry(.50,.75,.25),buildSkinMats(skinCv,'body'));
-  body.position.y=1.125;
-  const bodyOv=mkOv(.50,.75,.25,1.06,'body');
-  bodyOv.position.y=1.125;
+  // ── Gövde (0.50×0.75×0.25 → ölçekli) ──
+  const bW=0.50*S,bH=0.75*S,bD=0.25*S;
+  const body=new THREE.Mesh(new THREE.BoxGeometry(bW,bH,bD),buildSkinMats(skinCv,'body'));
+  body.position.y=1.125*S;
+  const bodyOv=mkOv(bW,bH,bD,1.06,'body');
+  bodyOv.position.y=1.125*S;
 
-  // ── Sağ Kol ──
-  const armRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'armR'));
-  armRMesh.position.y=-.375;
-  const armROv=mkOv(.25,.75,.25,1.06,'armR');
-  armROv.position.y=-.375;
+  // ── Kollar (0.25×0.75×0.25 → ölçekli) ──
+  const aW=0.25*S,aH=0.75*S,aD=0.25*S;
 
+  const armRMesh=new THREE.Mesh(new THREE.BoxGeometry(aW,aH,aD),buildSkinMats(skinCv,'armR'));
+  armRMesh.position.y=-aH/2;
+  const armROv=mkOv(aW,aH,aD,1.06,'armR');
+  armROv.position.y=-aH/2;
   const armRPivot=new THREE.Group();
-  armRPivot.position.set(.375,1.5,0);
+  armRPivot.position.set((bW/2+aW/2),1.5*S,0);
   armRPivot.add(armRMesh,armROv);
 
-  // ── Sol Kol ──
-  const armLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'armL'));
-  armLMesh.position.y=-.375;
-  const armLOv=mkOv(.25,.75,.25,1.06,'armL');
-  armLOv.position.y=-.375;
-
+  const armLMesh=new THREE.Mesh(new THREE.BoxGeometry(aW,aH,aD),buildSkinMats(skinCv,'armL'));
+  armLMesh.position.y=-aH/2;
+  const armLOv=mkOv(aW,aH,aD,1.06,'armL');
+  armLOv.position.y=-aH/2;
   const armLPivot=new THREE.Group();
-  armLPivot.position.set(-.375,1.5,0);
+  armLPivot.position.set(-(bW/2+aW/2),1.5*S,0);
   armLPivot.add(armLMesh,armLOv);
 
-  // ── Sağ Bacak ──
-  const legRMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'legR'));
-  legRMesh.position.y=-.375;
-  const legROv=mkOv(.25,.75,.25,1.06,'legR');
-  legROv.position.y=-.375;
+  // ── Bacaklar (0.25×0.75×0.25 → ölçekli) ──
+  const lW=0.25*S,lH=0.75*S,lD=0.25*S;
 
+  const legRMesh=new THREE.Mesh(new THREE.BoxGeometry(lW,lH,lD),buildSkinMats(skinCv,'legR'));
+  legRMesh.position.y=-lH/2;
+  const legROv=mkOv(lW,lH,lD,1.06,'legR');
+  legROv.position.y=-lH/2;
   const legRPivot=new THREE.Group();
-  legRPivot.position.set(.125,.75,0);
+  legRPivot.position.set(lW/2,0.75*S,0);
   legRPivot.add(legRMesh,legROv);
 
-  // ── Sol Bacak ──
-  const legLMesh=new THREE.Mesh(new THREE.BoxGeometry(.25,.75,.25),buildSkinMats(skinCv,'legL'));
-  legLMesh.position.y=-.375;
-  const legLOv=mkOv(.25,.75,.25,1.06,'legL');
-  legLOv.position.y=-.375;
-
+  const legLMesh=new THREE.Mesh(new THREE.BoxGeometry(lW,lH,lD),buildSkinMats(skinCv,'legL'));
+  legLMesh.position.y=-lH/2;
+  const legLOv=mkOv(lW,lH,lD,1.06,'legL');
+  legLOv.position.y=-lH/2;
   const legLPivot=new THREE.Group();
-  legLPivot.position.set(-.125,.75,0);
+  legLPivot.position.set(-lW/2,0.75*S,0);
   legLPivot.add(legLMesh,legLOv);
 
   g.add(headPivot,body,bodyOv,armRPivot,armLPivot,legRPivot,legLPivot);
 
-  // Animasyon için kemik referansları
   g.userData.bones={headPivot,armRPivot,armLPivot,legRPivot,legLPivot};
   g.userData.animTime=0;
   g.userData.swingTime=0;
   g.userData.isSwinging=false;
 
-  // Skin güncelleme için tüm part mesh'leri (overlay dahil)
   g.userData.skinParts={
     head, body,
     armR:armRMesh, armL:armLMesh,
@@ -2239,7 +2239,7 @@ function mkPlayer(name,rank,rankColor){
   };
   allPlayerModels.push(g);
 
-  const ns=mkSprite(name,rank,rankColor);ns.position.y=2.36;g.add(ns);
+  const ns=mkSprite(name,rank,rankColor);ns.position.y=2.20;g.add(ns);
   scene.add(g);return g;
 }
 
@@ -2738,8 +2738,8 @@ function applyBlockSync(data){
   }
 }
  
-function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.6,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
-function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.6,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
+function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.70,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
+function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.70,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
 function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;scene.remove(g);const idx=allPlayerModels.indexOf(g);if(idx>-1)allPlayerModels.splice(idx,1);delete remPlayers[id];}}
  
 let chatHideTimer=null;
@@ -3459,56 +3459,308 @@ function updateRenderCamera(){
   }
   if(selfModel){
     selfModel.visible=true;
-    selfModel.position.set(camera.position.x,camera.position.y-1.6,camera.position.z);
+    selfModel.position.set(camera.position.x,camera.position.y-1.70,camera.position.z);
     selfModel.rotation.y=camera.rotation.y;
   }
 }
 
 // ─── Kırma İlerleme Sistemi (Survival) ───
 let breakProgress=0,breakTarget=null,isBreaking=false,breakTouchX=0,breakTouchY=0,breakTouchIsc=true;
-const BLOCK_HARDNESS={'grass':0.6,'dirt':0.5,'stone':1.5,'planks':0.8,'log':1.2,'cobblestone':2.0,'glass':0.3,'leaves':0.2,'sand':0.5,'default':1.0};
+// ── Blok Kırılma Süreleri (ms) ──
+const BLOCK_HARDNESS={
+  grass:400, dirt:400, sand:400,
+  planks:800, log:1200,
+  stone:1500, cobblestone:1800,
+  glass:300,
+  leaves:200,
+  bedrock:Infinity, // Survival/Adventure'da kırılamaz
+  default:800
+};
 function getHardness(bd){
-  if(!bd) return 1.0;
+  if(!bd) return BLOCK_HARDNESS.default;
   const mk=getMatKey(bd.mat)||'default';
-  return BLOCK_HARDNESS[mk]||BLOCK_HARDNESS['default'];
+  return BLOCK_HARDNESS[mk]??BLOCK_HARDNESS.default;
 }
-function updateBreakOverlay(){
-  const overlay=document.getElementById('break-overlay');
-  const cvs=document.getElementById('break-canvas');
-  if(!overlay||!cvs) return;
-  if(!isBreaking||!breakTarget||gameMode!=='survival'){overlay.style.display='none';return;}
-  // Hedef bloğun ekran koordinatlarına project et
-  const bv=new THREE.Vector3(breakTarget.x,breakTarget.y,breakTarget.z);
-  bv.project(camera);
-  const sx=(bv.x*0.5+0.5)*window.innerWidth;
-  const sy=(-bv.y*0.5+0.5)*window.innerHeight;
-  const blockScreenSize=Math.max(30,Math.min(120,window.innerHeight/8));
-  overlay.style.display='block';
-  overlay.style.left=(sx-blockScreenSize/2)+'px';
-  overlay.style.top=(sy-blockScreenSize/2)+'px';
-  overlay.style.width=blockScreenSize+'px';
-  overlay.style.height=blockScreenSize+'px';
-  // Çatlak dokusu çiz
-  const ctx=cvs.getContext('2d');
-  ctx.clearRect(0,0,64,64);
-  const stages=Math.floor(breakProgress*8); // 0-8 aşama
-  ctx.strokeStyle='rgba(0,0,0,0.85)';
-  ctx.lineWidth=1.5;
-  // Her aşamada daha fazla çatlak
-  for(let i=0;i<stages;i++){
-    const seed=(i+1)*137;
-    const x1=(seed*17)%64,y1=(seed*31)%64;
-    const x2=(seed*53)%64,y2=(seed*71)%64;
-    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);
-    if(i>3){const x3=(seed*89)%64,y3=(seed*97)%64;ctx.lineTo(x3,y3);}
-    ctx.stroke();
+
+// ── 3D Çatlak Mesh Sistemi — Minecraft Tarzı ──
+let _crackMesh=null,_crackTex=null;
+const CRACK_STAGES=10; // Minecraft'ta 0-9 arası 10 aşama
+
+// ══════════════════════════════════════════════════════════════════════
+// 🎵 4-KATEGORİLİ RASTGELE SES HAVUZU SİSTEMİ (Legends v1.5 Pro Audio)
+// Kategoriler: dig | hit | mining | jump
+// Her kategoride birden fazla dosya → her çalımda rastgele seçilir
+// ══════════════════════════════════════════════════════════════════════
+
+// ─── Yardımcı: Audio nesnesi fabrikası (hata varsa null döner) ───
+function _a(src){ try{ const a=new Audio(src); a.preload='auto'; return a; }catch(e){ return null; } }
+
+// ─── BLOK SES HAVUZU MATRİSİ ───
+const blockSoundPool = {
+  // ── TAHTA / PLANK ──
+  planks: {
+    mining: [_a('sounds/Wood_mining1.ogg'),_a('sounds/Wood_mining2.ogg'),_a('sounds/Wood_mining3.ogg'),_a('sounds/Wood_mining4.ogg')],
+    hit:    [_a('sounds/Wood_hit1.ogg'),_a('sounds/Wood_hit2.ogg'),_a('sounds/Wood_hit3.ogg'),_a('sounds/Wood_hit4.ogg')],
+    dig:    [_a('sounds/Wood_dig1.ogg'),_a('sounds/Wood_dig2.ogg'),_a('sounds/Wood_dig3.ogg'),_a('sounds/Wood_dig4.ogg')],
+    jump:   [_a('sounds/Wood_jump1.ogg'),_a('sounds/Wood_jump2.ogg')]
+  },
+  // ── KÜTÜK / LOG ──
+  log: {
+    mining: [_a('sounds/Wood_mining1.ogg'),_a('sounds/Wood_mining2.ogg'),_a('sounds/Wood_mining3.ogg'),_a('sounds/Wood_mining4.ogg')],
+    hit:    [_a('sounds/Wood_hit1.ogg'),_a('sounds/Wood_hit2.ogg'),_a('sounds/Wood_hit3.ogg'),_a('sounds/Wood_hit4.ogg')],
+    dig:    [_a('sounds/Wood_dig1.ogg'),_a('sounds/Wood_dig2.ogg'),_a('sounds/Wood_dig3.ogg'),_a('sounds/Wood_dig4.ogg')],
+    jump:   [_a('sounds/Wood_jump1.ogg'),_a('sounds/Wood_jump2.ogg')]
+  },
+  // ── ÇİMEN ──
+  grass: {
+    mining: [_a('sounds/Grass_mining1.ogg'),_a('sounds/Grass_mining2.ogg'),_a('sounds/Grass_mining3.ogg'),_a('sounds/Grass_mining4.ogg')],
+    hit:    [_a('sounds/Grass_hit1.ogg'),_a('sounds/Grass_hit2.ogg'),_a('sounds/Grass_hit3.ogg'),_a('sounds/Grass_hit4.ogg')],
+    dig:    [_a('sounds/Grass_dig1.ogg'),_a('sounds/Grass_dig2.ogg'),_a('sounds/Grass_dig3.ogg'),_a('sounds/Grass_dig4.ogg')],
+    jump:   [_a('sounds/Grass_jump1.ogg'),_a('sounds/Grass_jump2.ogg')]
+  },
+  // ── TOPRAK / DIRT ──
+  dirt: {
+    mining: [_a('sounds/Dirt_mining1.ogg'),_a('sounds/Dirt_mining2.ogg'),_a('sounds/Dirt_mining3.ogg'),_a('sounds/Dirt_mining4.ogg')],
+    hit:    [_a('sounds/Dirt_hit1.ogg'),_a('sounds/Dirt_hit2.ogg'),_a('sounds/Dirt_hit3.ogg'),_a('sounds/Dirt_hit4.ogg')],
+    dig:    [_a('sounds/Dirt_dig1.ogg'),_a('sounds/Dirt_dig2.ogg'),_a('sounds/Dirt_dig3.ogg'),_a('sounds/Dirt_dig4.ogg')],
+    jump:   [_a('sounds/Dirt_jump1.ogg'),_a('sounds/Dirt_jump2.ogg')]
+  },
+  // ── TAŞ / STONE ──
+  stone: {
+    mining: [_a('sounds/Stone_mining1.ogg'),_a('sounds/Stone_mining2.ogg'),_a('sounds/Stone_mining3.ogg'),_a('sounds/Stone_mining4.ogg')],
+    hit:    [_a('sounds/Stone_hit1.ogg'),_a('sounds/Stone_hit2.ogg'),_a('sounds/Stone_hit3.ogg'),_a('sounds/Stone_hit4.ogg')],
+    dig:    [_a('sounds/Stone_dig1.ogg'),_a('sounds/Stone_dig2.ogg'),_a('sounds/Stone_dig3.ogg'),_a('sounds/Stone_dig4.ogg')],
+    jump:   [_a('sounds/Stone_jump1.ogg'),_a('sounds/Stone_jump2.ogg')]
+  },
+  // ── KAYRAK / COBBLESTONE ──
+  cobblestone: {
+    mining: [_a('sounds/Stone_mining1.ogg'),_a('sounds/Stone_mining2.ogg'),_a('sounds/Stone_mining3.ogg'),_a('sounds/Stone_mining4.ogg')],
+    hit:    [_a('sounds/Stone_hit1.ogg'),_a('sounds/Stone_hit2.ogg'),_a('sounds/Stone_hit3.ogg'),_a('sounds/Stone_hit4.ogg')],
+    dig:    [_a('sounds/Stone_dig1.ogg'),_a('sounds/Stone_dig2.ogg'),_a('sounds/Stone_dig3.ogg'),_a('sounds/Stone_dig4.ogg')],
+    jump:   [_a('sounds/Stone_jump1.ogg'),_a('sounds/Stone_jump2.ogg')]
+  },
+  // ── CAM / GLASS ──
+  glass: {
+    mining: [_a('sounds/Stone_mining1.ogg'),_a('sounds/Stone_mining2.ogg')],
+    hit:    [_a('sounds/Stone_hit1.ogg'),_a('sounds/Stone_hit2.ogg')],
+    dig:    [_a('sounds/Stone_dig1.ogg'),_a('sounds/Stone_dig2.ogg')],
+    jump:   [_a('sounds/Stone_jump1.ogg')]
+  },
+  // ── YAPRAK / LEAVES ──
+  leaves: {
+    mining: [_a('sounds/Grass_mining1.ogg'),_a('sounds/Grass_mining2.ogg'),_a('sounds/Grass_mining3.ogg')],
+    hit:    [_a('sounds/Grass_hit1.ogg'),_a('sounds/Grass_hit2.ogg'),_a('sounds/Grass_hit3.ogg')],
+    dig:    [_a('sounds/Grass_dig1.ogg'),_a('sounds/Grass_dig2.ogg'),_a('sounds/Grass_dig3.ogg')],
+    jump:   [_a('sounds/Grass_jump1.ogg')]
+  },
+  // ── KUM / SAND ──
+  sand: {
+    mining: [_a('sounds/Sand_mining1.ogg'),_a('sounds/Sand_mining2.ogg'),_a('sounds/Sand_mining3.ogg'),_a('sounds/Sand_mining4.ogg')],
+    hit:    [_a('sounds/Sand_hit1.ogg'),_a('sounds/Sand_hit2.ogg'),_a('sounds/Sand_hit3.ogg'),_a('sounds/Sand_hit4.ogg')],
+    dig:    [_a('sounds/Sand_dig1.ogg'),_a('sounds/Sand_dig2.ogg'),_a('sounds/Sand_dig3.ogg'),_a('sounds/Sand_dig4.ogg')],
+    jump:   [_a('sounds/Sand_jump1.ogg'),_a('sounds/Sand_jump2.ogg')]
+  },
+  // ── KAYADIBI / BEDROCK ──
+  bedrock: {
+    mining: [_a('sounds/Stone_mining1.ogg'),_a('sounds/Stone_mining2.ogg')],
+    hit:    [_a('sounds/Stone_hit1.ogg'),_a('sounds/Stone_hit2.ogg')],
+    dig:    [_a('sounds/Stone_dig1.ogg')],
+    jump:   [_a('sounds/Stone_jump1.ogg')]
+  },
+  // ── VARSAYILAN (fallback) ──
+  default: {
+    mining: [_a('sounds/Wood_mining1.ogg'),_a('sounds/Wood_mining2.ogg')],
+    hit:    [_a('sounds/Wood_hit1.ogg'),_a('sounds/Wood_hit2.ogg')],
+    dig:    [_a('sounds/Wood_dig1.ogg'),_a('sounds/Wood_dig2.ogg')],
+    jump:   [_a('sounds/Wood_jump1.ogg')]
+  }
+};
+
+// ─── Cooldown kontrolü (kategori bazlı) ───
+const _soundCooldown = { mining: 250, hit: 80, dig: 0, jump: 0 };
+const _lastSoundTime  = { mining: 0,   hit: 0,  dig: 0, jump: 0 };
+
+// ─── Ana ses çalma fonksiyonu ───
+// blockType : 'planks' | 'stone' | 'grass' | 'dirt' | 'log' | 'sand' | 'glass' | 'leaves' | 'cobblestone' | 'bedrock' | 'default'
+// category  : 'hit' | 'mining' | 'dig' | 'jump'
+function playBlockSound(blockType, category) {
+  const now = performance.now();
+  const cd  = _soundCooldown[category] ?? 150;
+  if (now - (_lastSoundTime[category] ?? 0) < cd) return;
+  _lastSoundTime[category] = now;
+
+  // Blok türü havuzdan al, yoksa default'a düş
+  const pool = (blockSoundPool[blockType] ?? blockSoundPool['default']);
+  const sounds = pool[category];
+  if (!sounds || sounds.length === 0) return;
+
+  // null olmayan sesler arasından rastgele seç
+  const valid = sounds.filter(s => s !== null);
+  if (valid.length === 0) return;
+
+  const snd = valid[Math.floor(Math.random() * valid.length)];
+  try {
+    snd.currentTime = 0;
+    snd.play().catch(() => {}); // Tarayıcı autoplay politikasını sessizce geç
+  } catch(e) {}
+}
+
+// ─── Zemin altındaki bloğun matKey'ini döndürür ───
+function _getFloorMatKey() {
+  const fx = Math.floor(camera.position.x);
+  const fy = Math.floor(camera.position.y - 1.72);
+  const fz = Math.floor(camera.position.z);
+  const bd = blockMap[pk(fx, fy, fz)] || blockMap[pk(fx, fy - 1, fz)];
+  if (!bd) return 'default';
+  return getMatKey(bd.mat) || 'default';
+}
+
+// ─── Adım Sesi Sistemi ───
+let _stepTimer = 0;
+const STEP_INTERVAL = 0.42; // saniye (yürüme hızına göre ayarla)
+
+function tickStepSounds(dt, isMoving) {
+  if (!isMoving || !grounded) { _stepTimer = 0; return; }
+  _stepTimer += dt;
+  if (_stepTimer >= STEP_INTERVAL) {
+    _stepTimer = 0;
+    playBlockSound(_getFloorMatKey(), 'dig');
   }
 }
-function startBreaking(tx,ty,tisc){if(gameMode==='creative'||gameMode==='adventure') return;isBreaking=true;breakTouchX=tx??0;breakTouchY=ty??0;breakTouchIsc=tisc??true;}
+
+// Minecraft destroy_stage_N görselini canvas'ta üretir
+// 16x16 piksel grid üzerinde — sonra 64x64'e ölçeklenir
+function _buildCrackTexture(stage){
+  const G=16; // piksel grid boyutu
+  const cv=document.createElement('canvas');cv.width=G;cv.height=G;
+  const ctx=cv.getContext('2d');
+  ctx.imageSmoothingEnabled=false;
+  ctx.clearRect(0,0,G,G);
+  if(stage<=0) return cv;
+
+  // Hafif karartma — aşama arttıkça
+  ctx.fillStyle=`rgba(0,0,0,${Math.min(0.04*stage,0.35)})`;
+  ctx.fillRect(0,0,G,G);
+
+  // Minecraft destroy_stage piksel haritaları (16x16 grid, 1px çizgiler)
+  // Her stage öncekinin üstüne eklenir
+  // Koordinatlar [x1,y1,x2,y2] formatında — 16x16 grid içinde
+  const stageLines=[
+    // 1 — tek merkez çatlak
+    [[7,4,8,12]],
+    // 2
+    [[4,7,7,4],[8,12,11,9]],
+    // 3
+    [[4,7,2,11],[11,9,13,5]],
+    // 4
+    [[2,11,4,14],[13,5,11,2],[7,4,5,1]],
+    // 5
+    [[4,14,8,15],[11,2,14,3],[5,1,2,3]],
+    // 6
+    [[8,15,13,14],[14,3,15,7],[2,3,1,6]],
+    // 7
+    [[13,14,15,11],[15,7,13,10],[1,6,2,10]],
+    // 8
+    [[15,11,14,14],[13,10,11,13],[2,10,3,13]],
+    // 9
+    [[11,13,8,15],[3,13,5,15]],
+    // 10
+    [[1,1,3,3],[12,1,14,2],[1,12,2,14],[13,13,15,15]],
+  ];
+
+  ctx.lineCap='square';
+
+  for(let s=0;s<stage&&s<stageLines.length;s++){
+    const lines=stageLines[s];
+    // Beyaz highlight (1px sağa-aşağı kaydır)
+    ctx.strokeStyle='rgba(255,255,255,0.3)';
+    ctx.lineWidth=1;
+    for(const [x1,y1,x2,y2] of lines){
+      ctx.beginPath();ctx.moveTo(x1+1.5,y1+1.5);ctx.lineTo(x2+1.5,y2+1.5);ctx.stroke();
+    }
+    // Siyah ana çizgi
+    const alpha=Math.min(0.75+s*0.025,1.0);
+    ctx.strokeStyle=`rgba(0,0,0,${alpha})`;
+    ctx.lineWidth=1;
+    for(const [x1,y1,x2,y2] of lines){
+      ctx.beginPath();ctx.moveTo(x1+0.5,y1+0.5);ctx.lineTo(x2+0.5,y2+0.5);ctx.stroke();
+    }
+  }
+
+  // Köşe / kırık piksel noktaları
+  const dotsByStage=[
+    [[7,4]],
+    [[4,7],[8,12]],
+    [[2,11],[11,9]],
+    [[4,14],[13,5]],
+    [[5,1],[11,2]],
+    [[8,15],[14,3]],
+    [[15,7],[1,6]],
+    [[13,10],[2,10]],
+    [[11,13],[3,13]],
+    [[8,15],[5,15]],
+  ];
+  ctx.fillStyle='rgba(0,0,0,0.85)';
+  for(let s=0;s<stage&&s<dotsByStage.length;s++){
+    for(const [dx,dy] of dotsByStage[s]){
+      ctx.fillRect(dx,dy,1,1);
+    }
+  }
+
+  return cv;
+}
+
+// Stage cache — her stage için bir kez üretilir
+const _crackTexCache=new Array(CRACK_STAGES+1).fill(null);
+
+function _getCrackTex(stage){
+  const s=Math.max(0,Math.min(stage,CRACK_STAGES));
+  if(!_crackTexCache[s]){
+    const cv=_buildCrackTexture(s);
+    const t=new THREE.CanvasTexture(cv);
+    t.magFilter=THREE.NearestFilter;
+    t.minFilter=THREE.NearestFilter;
+    _crackTexCache[s]=t;
+  }
+  return _crackTexCache[s];
+}
+
+function _showCrackMesh(bx,by,bz,stage){
+  const tex=_getCrackTex(stage);
+  if(!_crackMesh){
+    const geo=new THREE.BoxGeometry(1.003,1.003,1.003);
+    const mats=Array(6).fill(null).map(()=>new THREE.MeshBasicMaterial({
+      map:tex,transparent:true,depthWrite:false,
+      polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-2,
+      opacity:0.9,
+    }));
+    _crackMesh=new THREE.Mesh(geo,mats);
+    scene.add(_crackMesh);
+  } else {
+    // Texture'ı güncelle
+    _crackMesh.material.forEach(m=>{m.map=tex;m.needsUpdate=true;});
+  }
+  _crackMesh.position.set(bx,by,bz);
+  _crackMesh.visible=true;
+}
+
+function _hideCrackMesh(){
+  if(_crackMesh) _crackMesh.visible=false;
+}
+
+function updateBreakOverlay(){
+  if(!isBreaking||!breakTarget||gameMode!=='survival'){_hideCrackMesh();return;}
+  const stage=Math.floor(breakProgress*CRACK_STAGES);
+  _showCrackMesh(breakTarget.x,breakTarget.y,breakTarget.z,stage);
+}
+
+function startBreaking(tx,ty,tisc){
+  if(gameMode==='creative'||gameMode==='adventure') return;
+  isBreaking=true;breakTouchX=tx??0;breakTouchY=ty??0;breakTouchIsc=tisc??true;
+}
 function stopBreaking(){
   isBreaking=false;breakProgress=0;breakTarget=null;
-  const overlay=document.getElementById('break-overlay');
-  if(overlay) overlay.style.display='none';
+  _hideCrackMesh();
 }
 function tickBreaking(dt){
   if(!isBreaking||gameMode!=='survival') return;
@@ -3516,12 +3768,29 @@ function tickBreaking(dt){
   const h=getHit(breakTouchX,breakTouchY,breakTouchIsc,_inWater);
   if(!h.length||h[0].distance>=5){stopBreaking();return;}
   const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
-  if(!bd||bd.unbreakable||bd.isWater){stopBreaking();return;}
+  if(!bd||bd.isWater){stopBreaking();return;}
+  // Bedrock: survival/adventure'da tamamen imkansız
+  if(bd.id==='bedrock'){stopBreaking();return;}
+  // Kırılamaz bloklar
+  if(bd.unbreakable){stopBreaking();return;}
   const tKey=pk(bx,by,bz);
   if(!breakTarget||pk(breakTarget.x,breakTarget.y,breakTarget.z)!==tKey){
     breakProgress=0;breakTarget={x:bx,y:by,z:bz};
   }
-  breakProgress+=dt/getHardness(bd);
+  // dt saniye cinsinden, hardness ms cinsinden → normalize
+  const prevStage=Math.floor(breakProgress*CRACK_STAGES);
+  breakProgress+=dt/(getHardness(bd)/1000);
+  const newStage=Math.floor(breakProgress*CRACK_STAGES);
+  // 🎵 HIT: İlk çatlak aşamasında (stage 1) bir kez hit sesi
+  if(prevStage===0&&newStage>=1){
+    const mk=getMatKey(bd.mat)||'default';
+    playBlockSound(mk,'hit');
+  }
+  // 🎵 MINING: Her 2 aşamada bir mining sesi (ritmik darbe)
+  if(newStage>prevStage&&newStage%2===1){
+    const mk=getMatKey(bd.mat)||'default';
+    playBlockSound(mk,'mining');
+  }
   updateBreakOverlay();
   if(selfModel&&selfModel.userData.bones){
     if(!selfModel.userData.isSwinging){
@@ -3530,6 +3799,9 @@ function tickBreaking(dt){
     }
   }
   if(breakProgress>=1){
+    // 🎵 DIG: Blok tamamen kırılınca
+    const mk=getMatKey(bd.mat)||'default';
+    playBlockSound(mk,'dig');
     breakB(breakTouchX,breakTouchY,breakTouchIsc);
     stopBreaking();
   }
@@ -3552,11 +3824,17 @@ function resetWorld(){
   clearAnimals();foods.forEach(f=>scene.remove(f.mesh));foods.length=0;
   animalSpawnTimer=15;animalSyncTimer=0;
   isResetting=false;
+  // 3D crack mesh'i temizle
+  if(_crackMesh){scene.remove(_crackMesh);_crackMesh=null;}
+  _crackTexCache.fill(null);
+  stopBreaking();
   const log=document.getElementById('chat-log');while(log.firstChild) log.removeChild(log.firstChild);
   cameraMode='first';
   if(selfModel) selfModel.visible=false;
 }
 function startGame(device,world,mp=false,gm='survival',cheats=true){
+  // AudioContext artık Web Audio API yerine HTML Audio nesneleri kullanılıyor
+  // (blockSoundPool tarafından yönetilir – kullanıcı etkileşimi zaten burada gerçekleşir)
   resetWorld();
   deviceMode=device;worldType=world;cheatsEnabled=cheats;DeathManager.isDead=false;
   if(device==='mobile'){const el=document.documentElement;if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();}
@@ -3705,9 +3983,9 @@ function breakB(x,y,isc){
   }
 }
 function colPlace(bx,by,bz){
-  const px=camera.position.x,py=camera.position.y,pz=camera.position.z,r=.3;
-  if(by<py-1.62) return false;
-  if(px+r>bx-.5&&px-r<bx+.5&&py+.1>by-.5&&py-1.6<by+.5&&pz+r>bz-.5&&pz-r<bz+.5) return true;
+  const px=camera.position.x,py=camera.position.y,pz=camera.position.z,r=.25;
+  if(by<py-1.72) return false;
+  if(px+r>bx-.5&&px-r<bx+.5&&py+.0>by-.5&&py-1.70<by+.5&&pz+r>bz-.5&&pz-r<bz+.5) return true;
   for(const rp of Object.values(remPlayers)){
     const g=rp.g.position;const rx=g.x,ry=g.y+0.8,rz=g.z;
     if(Math.abs(bx-rx)<.7&&Math.abs(by-ry)<1.1&&Math.abs(bz-rz)<.7) return true;
@@ -3837,7 +4115,7 @@ function isSolidBlock(bd){
   return true;
 }
 function col(px,py,pz){
-  const r=.3,minX=px-r,maxX=px+r,minZ=pz-r,maxZ=pz+r,minY=py-1.6,maxY=py+.1;
+  const r=.25,minX=px-r,maxX=px+r,minZ=pz-r,maxZ=pz+r,minY=py-1.70,maxY=py+.00;
   // epsilon: köşe geçişlerinde sahte bariyer oluşmasını önler
   const eps=0.001;
   for(let bx=Math.floor(minX);bx<=Math.floor(maxX)+1;bx++){for(let by=Math.floor(minY);by<=Math.floor(maxY)+1;by++){for(let bz=Math.floor(minZ);bz<=Math.floor(maxZ)+1;bz++){
@@ -3864,8 +4142,8 @@ function inWater(px,py,pz){
 function onWaterSurface(px,py,pz){
   const xzList=_waterXZBlocks(px,pz);
   for(const [bx,bz] of xzList){
-    const bBelow =blockMap[pk(bx,Math.floor(py-1.65),bz)];
-    const bBelow2=blockMap[pk(bx,Math.floor(py-1.80),bz)];
+    const bBelow =blockMap[pk(bx,Math.floor(py-1.72),bz)];
+    const bBelow2=blockMap[pk(bx,Math.floor(py-1.85),bz)];
     if(isAnyWater(bBelow)||isAnyWater(bBelow2)) return true;
   }
   return false;
@@ -3979,7 +4257,10 @@ function setupPC(){
         const swimNow=inWater(camera.position.x,camera.position.y,camera.position.z);
         if(swimNow){/* suda: spaceDown=true, buoyancy fiziği loop'ta işlenir – ani fırlama yok */}
         else if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}
-        else if(grounded){velY=JUMP;grounded=false;}
+        else if(grounded){velY=JUMP;grounded=false;
+          // 🎵 JUMP: Zıplama anında zemin bloğunun sesi
+          playBlockSound(_getFloorMatKey(),'jump');
+        }
       }
     }
     for(let i=0;i<9;i++) if(e.code===`Digit${i+1}`) selSlot(i);
@@ -3997,6 +4278,11 @@ function setupPC(){
     if(document.pointerLockElement!==document.body||DeathManager.isDead) return;
     if(e.button===0){
       if(gameMode==='survival'){
+        // 🎵 HIT: Sol tık anında (ilk dokunuş)
+        const _hh=getHit(0,0,true,inWater(camera.position.x,camera.position.y,camera.position.z));
+        if(_hh.length&&_hh[0].bd&&!_hh[0].bd.isWater){
+          playBlockSound(getMatKey(_hh[0].bd.mat)||'default','hit');
+        }
         startBreaking(); // Survival: basılı tut = kır
       } else {
         // Creative: anında kır
@@ -4084,7 +4370,10 @@ function setupMobile(){
     const swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
     if(isFlying){if(dbl){isFlying=false;velY=0;}}
     else if(swimming){/* suda sadece buoyancy - velY=JUMP yok */}
-    else{if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}else if(grounded){velY=JUMP;grounded=false;}}
+    else{if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}else if(grounded){velY=JUMP;grounded=false;
+      // 🎵 JUMP: Mobil zıplama anında zemin bloğunun sesi
+      playBlockSound(_getFloorMatKey(),'jump');
+    }}
   },{passive:false});
   document.getElementById('btn-mobile-jump').addEventListener('touchend',e=>{e.preventDefault();spaceDown=false;},{passive:false});
   document.getElementById('btn-mobile-crouch').addEventListener('touchstart',e=>{e.preventDefault();e.stopPropagation();isCrouching=true;},{passive:false});
@@ -4104,11 +4393,21 @@ function setupMobile(){
       const tx=t.clientX,ty=t.clientY;
       aT[id]={sx:tx,sy:ty,cx:tx,cy:ty,mv:false,breaking:false,isCamera:willBeLkId,
         to:setTimeout(()=>{
-          // Uzun basış (300ms): dokunulan yöne raycast ile blok kır
+          // Uzun basış (300ms): survival=kırma başlat, creative=anında kır
           if(aT[id]&&!aT[id].mv){
             aT[id].breaking=true;
-            breakB(aT[id].cx,aT[id].cy,false);
-            if(gameMode==='survival') startBreaking(aT[id].cx,aT[id].cy,false);
+            if(gameMode==='survival'){
+              // 🎵 HIT: Uzun basış anında ilk temas sesi
+              const _mhh=getHit(aT[id].cx,aT[id].cy,false,inWater(camera.position.x,camera.position.y,camera.position.z));
+              if(_mhh.length&&_mhh[0].bd&&!_mhh[0].bd.isWater){
+                playBlockSound(getMatKey(_mhh[0].bd.mat)||'default','hit');
+              }
+              startBreaking(aT[id].cx,aT[id].cy,false);
+            } else if(gameMode==='creative'){
+              // Sadece Creative: anında kır
+              breakB(aT[id].cx,aT[id].cy,false);
+            }
+            // Adventure: hiçbir şey yapma
           }
         },300)};
     }
@@ -4166,6 +4465,18 @@ function setupMobile(){
       if(id===lkId) lkId=null;
     }
   });
+  window.addEventListener('touchcancel',e=>{
+    if(deviceMode!=='mobile') return;
+    for(let i=0;i<e.changedTouches.length;i++){
+      const t=e.changedTouches[i],id=t.identifier;
+      if(aT[id]){
+        clearTimeout(aT[id].to);
+        if(aT[id].breaking) stopBreaking();
+        delete aT[id];
+      }
+      if(id===lkId) lkId=null;
+    }
+  });
 }
  
 // ─── Render Döngüsü ───
@@ -4184,8 +4495,7 @@ function animate(){
     updateWater(dt);
     SuffocationManager.checkSuffocation();
     if(isBreaking) tickBreaking(dt);
-    const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);
-    const sV=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
+    const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);    const sV=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
     fV.y=0;fV.normalize();sV.y=0;sV.normalize();
     const spd=isFlying?FLY_SPD:(isCrouching?SPD*.55:SPD);
     const mV=new THREE.Vector3();
@@ -4249,10 +4559,10 @@ function animate(){
         camera.position.y+=velY;
         grounded=false; fallStartY=null;
         // Suyun dibindeki katı bloğa gömülmeyi engelle
-        const wFloor=Math.floor((camera.position.y-1.6)+.01);
+        const wFloor=Math.floor((camera.position.y-1.70)+.01);
         const bdFloor=blockMap[pk(Math.floor(camera.position.x),wFloor,Math.floor(camera.position.z))];
         if(isSolidBlock(bdFloor)){
-          const restY=wFloor+.5+1.6;
+          const restY=wFloor+.5+1.70;
           if(camera.position.y<restY){camera.position.y=restY;velY=Math.max(velY,0);}
         }
         wasSwimming=true;
@@ -4270,7 +4580,7 @@ function animate(){
                      ||col(camera.position.x,camera.position.y-0.01,camera.position.z);
         if(onGround){
           if(velY<=0){grounded=true;if(!prevGrounded) checkFallDamage();velY=0;
-            const by=Math.floor((camera.position.y-1.6)+.01);const cy=by+.5+1.6;
+            const by=Math.floor((camera.position.y-1.70)+.01);const cy=by+.5+1.70;
             if(camera.position.y<cy) camera.position.y=cy;
           }
         } else grounded=false;
@@ -4308,6 +4618,9 @@ if (camera.position.y < -100) {
   if(waterMesh) waterMesh.visible=!_eyeInWater;
   const _wv=document.getElementById('water-vignette');
   if(_wv) _wv.style.opacity=_eyeInWater?'1':'0';
+  // 🎵 ADIM SESİ: Yürürken zemin bloğuna göre ritimli ses
+  const _isMovingNow=(mv.f||mv.b||mv.l||mv.r||jActive)&&!isPaused&&!DeathManager.isDead;
+  tickStepSounds(dt,_isMovingNow);
   updateRenderCamera();
   updatePlayerAnimations(dt);
   renderer.render(scene,renderCamera);
