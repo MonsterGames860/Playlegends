@@ -1,0 +1,24 @@
+# ===================================================
+# PLAY LEGENDS - MULTIPLAYER BACKEND CONFIGURATION
+# ===================================================
+
+# Proje kütüphanelerini internete yükleme (Render bunu otomatik kuracak)
+node_modules/
+
+# Gizli çevre değişkenleri, şifreler ve lokal ayarlar
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Sunucu log kayıtları ve hata dökümleri
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# İşletim sistemlerinin oluşturduğu gereksiz gizli dosyalar
+.DS_Store
+Thumbs.db
