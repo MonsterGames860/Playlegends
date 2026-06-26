@@ -478,6 +478,7 @@ function formatRankTag(rank){
 const RANK_COLOR_FALLBACK={
   'Owner / Developer':'#ff4d4d','Admin / Developer':'#ff4d4d','Developer':'#660000',
   'Admin':'#0049ff','Mod':'#ffeb3b','Helper':'#66fcf1','YouTube':'#e91e63','Twitch':'#6441a5',
+  'OG':'#00ffc8',
   'Tiktoker':'#00f2fe','TikToker':'#00f2fe','MVP':'#9c27b0','VIP':'#ff9800','Champion':'#ffd700',
   'Veteran':'#4caf50','Beta Tester':'#9e9e9e'
 };
@@ -489,7 +490,7 @@ function resolveRankColor(rank,color){
 // ─── 📢 /shout komutu için izinli rütbeler ───
 // Twitch ve üzeri: Twitch, YouTube, Beta Tester, Helper, Mod, Admin, Dev, Admin/Dev, Owner
 const SHOUT_ALLOWED_RANKS=new Set([
-  'twitch','youtube','beta tester','helper','mod','admin','dev','developer',
+  'twitch','og','youtube','beta tester','helper','mod','admin','dev','developer',
   'admin/dev','admin / dev','admin / developer','owner','owner / developer','owner/dev','owner/developer'
 ]);
 function canUseShout(rank){
@@ -594,7 +595,7 @@ const langData={
       srvCheatsOn:'[Sunucu]: Hileler açıldı!',srvCheatsOff:'[Sunucu]: Hileler kapatıldı!',srvUsageCheats:'Kullanım: /cheats on veya /cheats off',srvCheatsHostOnly:'[Sunucu]: Hileler sadece yönetici tarafından değiştirilebilir!',
       srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
       srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!',
-      srvShoutNoPerm:'Bu komut Twitch ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
+      srvShoutNoPerm:'Bu komut OG ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
       camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)',
       skinTitle:'SKİN AYARLARI',skinPreview:'ÖNİZLEME',skinUploader:'SKİN YÜKLEYİCİ',
       skinUploadHint:'📁 Minecraft skin PNG yükle',skinUploadSize:'64×64, 64×32 veya 128×128 piksel',
@@ -666,7 +667,7 @@ const langData={
       srvCheatsOn:'[Server]: Cheats enabled!',srvCheatsOff:'[Server]: Cheats disabled!',srvUsageCheats:'Usage: /cheats on or /cheats off',srvCheatsHostOnly:'[Server]: Only the host can change cheats!',
       srvMpOnlyCmd:'[Server]: This command can only be used in multiplayer',
       srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!',
-      srvShoutNoPerm:'This command is for Twitch rank and above',srvUsageShout:'Usage: /shout <message>',
+      srvShoutNoPerm:'This command is for OG rank and above',srvUsageShout:'Usage: /shout <message>',
       camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)',
       skinTitle:'SKIN SETTINGS',skinPreview:'PREVIEW',skinUploader:'SKIN UPLOADER',
       skinUploadHint:'📁 Upload Minecraft skin PNG',skinUploadSize:'64×64, 64×32 or 128×128 pixels',
@@ -2366,50 +2367,98 @@ function mkPlayer(name,rank,rankColor){
 
 // rank: ham rütbe adı (örn "Owner / Developer") veya null/undefined -> formatRankTag ile [TAG] üretilir
 // rankColor: rütbenin hex rengi (tag bu renkte basılır, isim her zaman beyaz kalır)
+// ── Nickname sprite canvas çizim fonksiyonu (sweep animasyonu için ayrı) ──
+function _drawNameCanvas(ctx,cW,cH,safeN,tag,color,tagW,nameW,sweepT){
+  ctx.clearRect(0,0,cW,cH);
+  // Minecraft tarzı yarı saydam siyah arka plan
+  ctx.fillStyle='rgba(0,0,0,0.45)';
+  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
+  else{ctx.fillRect(2,4,cW-4,cH-8);}
+
+  ctx.font='bold 22px "MatrixSans-Rg",monospace';
+  ctx.textBaseline='middle';
+  const totalW=tagW+nameW;
+  let x=(cW-totalW)/2;
+  const yMid=cH/2-1;
+
+  if(tag){
+    ctx.textAlign='left';
+    if(sweepT!==null){
+      // ── Sweep efekti: chat'tekiyle aynı formül ──
+      // sweepT: 0-1 arası zaman (performance.now() % 5000 / 5000)
+      // Beyaz parlak şerit soldan sağa süpürülür, sonra anında başa döner (chat'teki %30 zamanında)
+      const progress=sweepT<0.30?(sweepT/0.30):1.1; // 0→1 arası (0.30'da tamamlanır, sonra gizlenir)
+      const gradX=x+tagW*progress; // şeridin merkezi
+      const grad=ctx.createLinearGradient(gradX-tagW*0.18,0,gradX+tagW*0.18,0);
+      grad.addColorStop(0,color);
+      grad.addColorStop(0.35,color);
+      grad.addColorStop(0.5,'#ffffff');
+      grad.addColorStop(0.65,color);
+      grad.addColorStop(1,color);
+      ctx.shadowColor=color;ctx.shadowBlur=10;
+      ctx.fillStyle=(progress<=1.02)?grad:color;
+      ctx.fillText(tag+' ',x,yMid);
+      ctx.fillText(tag+' ',x,yMid);
+      ctx.shadowBlur=0;
+    } else {
+      // Sweep yok: sabit renk + glow
+      ctx.shadowColor=color;ctx.shadowBlur=10;
+      ctx.fillStyle=color;
+      ctx.fillText(tag+' ',x,yMid);
+      ctx.fillText(tag+' ',x,yMid);
+      ctx.shadowBlur=0;
+    }
+    x+=tagW;
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle='#fff';
+  ctx.fillText(safeN,x,yMid);
+}
+
+// Animasyonlu sprite listesi
+const _animSprites=[];
+
 function mkSprite(name,rank,rankColor){
   const safeN=sanitizeName(name).substring(0,14);
   const tag=formatRankTag(rank);
   const color=tag?resolveRankColor(rank,rankColor):'#ffffff';
+  const hasSweep=tag&&canUseShout(rank); // chat'tekiyle aynı koşul
 
-  // Genişliği içeriğe göre ölçmek için geçici context
   const measure=document.createElement('canvas').getContext('2d');
-  measure.font='bold 22px "MatrixSans-Rg", monospace';
+  measure.font='bold 22px "MatrixSans-Rg",monospace';
   const tagW=tag?measure.measureText(tag+' ').width:0;
   const nameW=measure.measureText(safeN).width;
   const padding=24;
   const cW=Math.max(160,Math.min(380,Math.ceil(tagW+nameW+padding*2)));
   const cH=48;
 
-  const c=document.createElement('canvas');c.width=cW;c.height=cH;const ctx=c.getContext('2d');
-  // Minecraft tarzı: tam şeffaf olmayan, yarı saydam siyah şerit (arkadaki dünya hafifçe görünür)
-  ctx.fillStyle="rgba(0, 0, 0, 0.45)";
-  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
-  else {ctx.fillRect(2,4,cW-4,cH-8);}
-
-  ctx.font='bold 22px "MatrixSans-Rg", monospace';ctx.textBaseline='middle';
-  const totalW=tagW+nameW;
-  let x=(cW-totalW)/2;
-  const yMid=cH/2-1;
-  if(tag){
-    ctx.textAlign='left';
-    ctx.shadowColor=color;
-    ctx.shadowBlur=10;
-    ctx.fillStyle=color;
-    ctx.fillText(tag+' ',x,yMid);
-    ctx.fillText(tag+' ',x,yMid); // glow'u belirginleştirmek için iki kez çiz
-    ctx.shadowBlur=0;
-    x+=tagW;
-  }
-  ctx.textAlign='left';
-  ctx.fillStyle='#fff';
-  ctx.fillText(safeN,x,yMid);
+  const c=document.createElement('canvas');c.width=cW;c.height=cH;
+  const ctx=c.getContext('2d');
+  _drawNameCanvas(ctx,cW,cH,safeN,tag,color,tagW,nameW,hasSweep?0:null);
 
   const tex=new THREE.CanvasTexture(c);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
-  // Genişliği canvas oranına göre ölçekle, yükseklik sabit kalsın (Sprite her zaman kameraya bakar)
   const baseH=.46;
   sp.scale.set(2.4*(cW/256),baseH,1);
+
+  if(hasSweep){
+    // Animasyon için kaydet — her sprite kendi fazını taşır (chat'teki animationDelay gibi)
+    const phase=performance.now()%5000/5000; // başlangıç fazı
+    _animSprites.push({sp,ctx,c,tex,cW,cH,safeN,tag,color,tagW,nameW,phase});
+  }
   return sp;
+}
+
+// ── Her frame sweep sprite'larını güncelle ──
+function tickNameSprites(){
+  if(!_animSprites.length) return;
+  const t=performance.now()/5000; // global zaman (5s periyot)
+  for(const s of _animSprites){
+    if(!s.sp.parent) continue; // sahneden kaldırılmış
+    const sweepT=((t+s.phase)%1); // 0-1 arası, her sprite farklı fazda başlar
+    _drawNameCanvas(s.ctx,s.cW,s.cH,s.safeN,s.tag,s.color,s.tagW,s.nameW,sweepT);
+    s.tex.needsUpdate=true;
+  }
 }
 
 // ─── Hayvanlar ───
@@ -4926,6 +4975,7 @@ function animate(){
     if(isBreaking) tickBreaking(dt);
     tickDebris(dt);
     tickBarrierSprites();
+    tickNameSprites();
     tickWorldBorder(dt);
     const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);    const sV=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
     fV.y=0;fV.normalize();sV.y=0;sV.normalize();

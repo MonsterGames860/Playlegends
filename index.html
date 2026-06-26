@@ -707,6 +707,26 @@
             50% { opacity: 0.6; }
         }
 
+        @keyframes rankSweep {
+            0%   { background-position: 200% 0; }
+            30%  { background-position: -30% 0; }
+            30.001% { background-position: 200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .rank-sweep-text {
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-image: linear-gradient(105deg, var(--rtc,#fff) 0%, var(--rtc,#fff) 36%, #fff 44%, #fff 52%, var(--rtc,#fff) 60%, var(--rtc,#fff) 100%);
+            background-size: 280% 100%;
+            background-position: 200% 0;
+            animation: rankSweep 5s linear infinite;
+            filter: drop-shadow(0 0 5px var(--rtc,#fff));
+            font-weight: bold;
+            font-size: 16px;
+            letter-spacing: 0.5px;
+        }
+
         #bannedReasonText {
             font-size: 1.1rem;
             color: #fff;
@@ -2127,15 +2147,16 @@ function renderRanksList() {
     }
 
     const ranksData = [
-        { name: "Owner / Developer", color: "#ff4d4d", desc: { tr: "Proje Kurucusu ve Baş Geliştirici", en: "Project Founder and Lead Developer" }, get: { tr: "Alınamaz", en: "Unobtainable" } },
-        { name: "Admin / Developer", color: "#ff4d4d", desc: { tr: "Yönetim yetkisine sahip Sistem Geliştiricisi", en: "System Developer with management authority" }, get: { tr: "Geliştirici ekibine katılarak alınır", en: "By joining the development team" } },
-        { name: "Developer", color: "#660000", desc: { tr: "Oyun ve site kodlamasından sorumlu yazılımcı", en: "Developer responsible for game and site coding" }, get: { tr: "Başvuru ve teknik mülakat ile alınır", en: "Through application and technical interview" } },
-        { name: "Admin", color: "#0049ff", desc: { tr: "Sunucu düzeni ve genel yönetimden sorumlu üst düzey yetkili", en: "High-level official responsible for server order and general management" }, get: { tr: "Yönetim kadrosu kararıyla yükseltilir", en: "Promoted by management decision" } },
-        { name: "Mod", color: "#ffeb3b", desc: { tr: "Oyun içi düzeni sağlayan, kuralları uygulayan moderatör", en: "Moderator who maintains in-game order and enforces rules" }, get: { tr: "Moderatör başvuruları ile alınır", en: "Through moderator applications" } },
-        { name: "Helper", color: "#66fcf1", desc: { tr: "Oyuncuların sorularını yanıtlayan, destek olan yardımcı", en: "Helper who answers players' questions and provides support" }, get: { tr: "Rehberlik başvuruları ile alınır", en: "Through helper applications" } },
-        { name: "Beta Tester", color: "#9e9e9e", desc: { tr: "Hataları (bug) test eden ve gelişim sürecine destek olan kişi", en: "Person who tests bugs and supports the development process" }, get: { get: "Oyun test süreçlerine aktif katılarak alınır", en: "By actively participating in game test phases" } },
-        { name: "YouTube", color: "#e91e63", desc: { tr: "YouTube platformunda oyunu tanıtan içerik üreticisi unvanı", en: "Content creator title promoting the game on YouTube" }, get: { tr: "Belirli bir bilet ve izlenme sınırı ile alınır", en: "Obtained with a certain subscriber and view limit" } },
-        { name: "Twitch", color: "#6441a5", desc: { tr: "Twitch üzerinde oyun canlı yayınları açan yayıncı unvanı", en: "Streamer title opening game live streams on Twitch" }, get: { tr: "Düzenli Legends yayını açarak alınır", en: "By regularly streaming Legends" } },
+        { name: "Owner / Developer", color: "#ff4d4d", sweep: true, desc: { tr: "Proje Kurucusu ve Baş Geliştirici", en: "Project Founder and Lead Developer" }, get: { tr: "Alınamaz", en: "Unobtainable" } },
+        { name: "Admin / Developer", color: "#ff4d4d", sweep: true, desc: { tr: "Yönetim yetkisine sahip Sistem Geliştiricisi", en: "System Developer with management authority" }, get: { tr: "Geliştirici ekibine katılarak alınır", en: "By joining the development team" } },
+        { name: "Developer", color: "#660000", sweep: true, desc: { tr: "Oyun ve site kodlamasından sorumlu yazılımcı", en: "Developer responsible for game and site coding" }, get: { tr: "Başvuru ve teknik mülakat ile alınır", en: "Through application and technical interview" } },
+        { name: "Admin", color: "#0049ff", sweep: true, desc: { tr: "Sunucu düzeni ve genel yönetimden sorumlu üst düzey yetkili", en: "High-level official responsible for server order and general management" }, get: { tr: "Yönetim kadrosu kararıyla yükseltilir", en: "Promoted by management decision" } },
+        { name: "Mod", color: "#ffeb3b", sweep: true, desc: { tr: "Oyun içi düzeni sağlayan, kuralları uygulayan moderatör", en: "Moderator who maintains in-game order and enforces rules" }, get: { tr: "Moderatör başvuruları ile alınır", en: "Through moderator applications" } },
+        { name: "Helper", color: "#66fcf1", sweep: true, desc: { tr: "Oyuncuların sorularını yanıtlayan, destek olan yardımcı", en: "Helper who answers players' questions and provides support" }, get: { tr: "Rehberlik başvuruları ile alınır", en: "Through helper applications" } },
+        { name: "Beta Tester", color: "#9e9e9e", sweep: true, desc: { tr: "Hataları (bug) test eden ve gelişim sürecine destek olan kişi", en: "Person who tests bugs and supports the development process" }, get: { get: "Oyun test süreçlerine aktif katılarak alınır", en: "By actively participating in game test phases" } },
+        { name: "YouTube", color: "#e91e63", sweep: true, desc: { tr: "YouTube platformunda oyunu tanıtan içerik üreticisi unvanı", en: "Content creator title promoting the game on YouTube" }, get: { tr: "Belirli bir bilet ve izlenme sınırı ile alınır", en: "Obtained with a certain subscriber and view limit" } },
+        { name: "Twitch", color: "#6441a5", sweep: true, desc: { tr: "Twitch üzerinde oyun canlı yayınları açan yayıncı unvanı", en: "Streamer title opening game live streams on Twitch" }, get: { tr: "Düzenli Legends yayını açarak alınır", en: "By regularly streaming Legends" } },
+        { name: "OG", color: "#00ffc8", sweep: true, desc: { tr: "Legends tarihine sadece tanıklık etmekle kalmayıp onu aktif olarak şekillendiren sunucunun gerçek direği.", en: "This rank belongs to the pillars of our server who didn't just witness the history of Legends, but actively helped shape it. You are the true core that keeps this kingdom standing." }, get: { tr: "Uzun süreli üyelik, istisnai sadakat veya oyunun gelişimine değerli katkı sağlayan kişilere yönetim tarafından özel olarak verilir. Kesinlikle sınırlı bir statüdür.", en: "Granted exclusively by the administration to long-term members who demonstrate exceptional loyalty, active participation in the community, or valuable contributions to the game's development. This is a strictly limited status." } },
         { name: "Tiktoker", color: "#00f2fe", desc: { tr: "TikTok platformunda Legends videoları üreten içerik üreticisi", en: "Content creator producing Legends videos on TikTok" }, get: { tr: "Keşfet etkileşimi ve video şartıyla alınır", en: "Obtained via algorithm reach and video requirements" } },
         { name: "MVP", color: "#9c27b0", desc: { tr: "Sunucuya en üst düzey maddi veya aktiflik desteği veren üye", en: "Member providing top-tier financial or activity support to the server" }, get: { tr: "Mağaza destekleri veya etkinliklerle alınır", en: "Through store support or special events" } },
         { name: "VIP", color: "#ff9800", desc: { tr: "Sunucuya özel katkıda bulunmuş seçkin topluluk üyesi", en: "Distinguished community member who made special contributions" }, get: { tr: "Özel destekçi paketleri ile alınır", en: "Through special supporter packages" } },
@@ -2162,7 +2183,7 @@ function renderRanksList() {
         
         item.innerHTML = `
             <div style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px;">
-                <span style="color: ${rank.color}; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">${rank.name}</span>
+                ${rank.sweep ? `<span class="rank-sweep-text" style="--rtc:${rank.color}">${rank.name}</span>` : `<span style="color: ${rank.color}; font-weight: bold; font-size: 16px; letter-spacing: 0.5px;">${rank.name}</span>`}
                 <span style="font-size: 11px; background: rgba(51, 51, 51, 0.6); padding: 4px 10px; border-radius: 6px; color: #ffd700; border: 1px solid rgba(255,215,0,0.2); white-space: normal; word-break: break-word;">
                     🔨 ${howToGetLabel}: ${activeGet}
                 </span>
@@ -2236,6 +2257,7 @@ function renderRanksList() {
                 'Helper': '#66fcf1',
                 'YouTube': '#e91e63',
                 'Twitch': '#6441a5',
+                'OG': '#00ffc8',
                 'Tiktoker': '#00f2fe',
                 'TikToker': '#00f2fe',
                 'MVP': '#9c27b0',
