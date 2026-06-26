@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Indev v1.6 - Perlin World</title>
+<title>Legends Indev v1.6.1 - Perlin World</title>
 <style>
 @import url('https://fonts.cdnfonts.com/css/minecraft-4');
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
@@ -12,8 +12,11 @@
 body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:'Minecraft','VT323','Courier New',monospace}
 /* Chat input ve hint için MatrixSans-Rg */
 #chat-input,#chat-hint{font-family:'MatrixSans-Rg','VT323',monospace!important;font-size:14px!important;letter-spacing:.5px;}
-#menu-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;}
-.menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px;max-height:95vh;overflow-y:auto;}
+#menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;overflow:hidden;}
+.menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px 18px;max-height:96vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
+.menu-screen::-webkit-scrollbar{width:4px;}
+.menu-screen::-webkit-scrollbar-track{background:transparent;}
+.menu-screen::-webkit-scrollbar-thumb{background:rgba(117,167,255,0.3);border-radius:2px;}
 .menu-screen.active{display:flex;}
 .game-logo{font-size:34px;font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:2px;margin-bottom:4px;}
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
@@ -63,13 +66,62 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #crosshair{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);color:#fff;font-size:24px;font-weight:bold;display:none !important;justify-content:center;align-items:center;pointer-events:none;z-index:10;text-shadow:1px 1px #000;}
 #crosshair.show{display:flex !important;}
 #mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
-#bars-wrap{position:absolute;bottom:90px;left:50%;transform:translateX(-50%);display:none;flex-direction:column;align-items:center;gap:3px;z-index:11;pointer-events:none;}
-.bar-row{display:flex;gap:2px;}
-.hrt,.hnr{font-size:13px;line-height:1;text-shadow:1px 1px #000;}
+/* ── KALP & AÇLIK BARLARI (Minecraft tarzı) ─────────────────────── */
+#bars-wrap{
+  position:absolute;bottom:90px;left:0;right:0;
+  display:none;
+  flex-direction:row;
+  justify-content:space-between;
+  align-items:flex-end;
+  padding:0 8px;
+  z-index:11;pointer-events:none;
+  gap:0;
+}
+#hearts-row,#hunger-row{
+  display:flex;gap:1px;align-items:center;
+}
+/* Açlık sağdan azalır: items flex-end sağa yaslanır */
+#hunger-row{ justify-content:flex-end; }
+.mc-heart,.mc-hunger{
+  width:9px;height:9px;
+  image-rendering:pixelated;
+  display:inline-block;
+  flex-shrink:0;
+}
+/* Kalp: kırmızı piksel kalp */
+.mc-heart canvas,.mc-hunger canvas{display:block;}
 #water-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:15;opacity:0;transition:opacity .35s ease;background:
   radial-gradient(ellipse at center, rgba(40,110,200,0) 45%, rgba(30,90,180,.35) 78%, rgba(15,55,120,.65) 100%),
   linear-gradient(rgba(40,120,220,.18), rgba(40,120,220,.18));
   box-shadow:inset 0 0 140px 40px rgba(20,80,170,.55);}
+#lava-vignette{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:16;opacity:0;transition:opacity .25s ease;background:
+  radial-gradient(ellipse at center, rgba(255,80,0,0) 30%, rgba(220,60,0,.45) 70%, rgba(160,30,0,.75) 100%),
+  linear-gradient(rgba(255,80,0,.22), rgba(255,80,0,.22));
+  box-shadow:inset 0 0 120px 50px rgba(200,40,0,.6);}
+
+/* ── ATEŞ EFEKTİ ─────────────────────────────────────────────── */
+#fire-overlay{
+  position:absolute;bottom:0;left:0;width:100%;height:45%;
+  pointer-events:none;z-index:17;opacity:0;
+  transition:opacity 0.3s ease;
+  overflow:hidden;
+}
+.fire-flame{
+  position:absolute;bottom:0;
+  border-radius:50% 50% 30% 30%;
+  animation:flicker linear infinite;
+  transform-origin:bottom center;
+  mix-blend-mode:screen;
+}
+@keyframes flicker{
+  0%  {transform:scaleX(1)   scaleY(1)   translateY(0px);   opacity:.9;}
+  15% {transform:scaleX(.85) scaleY(1.1) translateY(-3px);  opacity:.85;}
+  30% {transform:scaleX(1.1) scaleY(.95) translateY(-1px);  opacity:.95;}
+  50% {transform:scaleX(.9)  scaleY(1.15)translateY(-5px);  opacity:.8;}
+  70% {transform:scaleX(1.05)scaleY(.9) translateY(-2px);   opacity:.9;}
+  85% {transform:scaleX(.92) scaleY(1.08)translateY(-4px);  opacity:.88;}
+  100%{transform:scaleX(1)   scaleY(1)   translateY(0px);   opacity:.9;}
+}
 #joystick-zone{position:absolute;bottom:0;left:0;width:220px;height:220px;z-index:9;touch-action:none;display:none;}
 #joystick-container{position:absolute;width:120px;height:120px;background:rgba(255,255,255,.18);border:3px solid rgba(255,255,255,.25);border-radius:50%;display:none;justify-content:center;align-items:center;z-index:10;touch-action:none;pointer-events:none;}
 #joystick-thumb{width:50px;height:50px;background:rgba(255,255,255,.92);border-radius:50%;position:absolute;box-shadow:0 4px 10px rgba(0,0,0,.3);}
@@ -175,14 +227,126 @@ body.low-health::after {
   #btn-mobile-chat{bottom:20px;left:20px;right:auto;}
   #btn-mobile-inv{bottom:145px;right:25px;}
   #btn-mobile-cam{top:8px;right:8px;width:38px;height:38px;font-size:16px;}
-  #bars-wrap{bottom:76px;}
+  #bars-wrap{bottom:76px;padding:0 6px;}
   #inv-grid{grid-template-columns:repeat(5,1fr);}
   #inv-hotbar-row{gap:3px;flex-wrap:wrap;}
   .inv-hslot{max-width:36px;}
 }
+
+/* ── Multiplayer Server List Section ── */
+.mp-server-list-section{width:100%;margin-top:6px;}
+.sl-tab-btn{flex:1;padding:8px 4px;background:rgba(0,0,0,.35);border:none;color:rgba(255,255,255,.5);font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;transition:background .15s,color .15s;border-right:1px solid rgba(117,167,255,.15);}
+.sl-tab-btn:last-child{border-right:none;}
+.sl-tab-btn:hover:not(.active){background:rgba(117,167,255,.08);color:rgba(255,255,255,.75);}
+.sl-tab-btn.active{background:linear-gradient(180deg,#1a3a7f,#0e2255);color:#fff;}
+#sl-arrow{margin-left:4px;font-size:9px;transition:transform .2s;display:inline-block;}
+#sl-arrow.open{transform:rotate(180deg);}
+#browse-list-inline .browse-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:5px;margin-bottom:4px;cursor:pointer;transition:border-color .15s;gap:6px;}
+#browse-list-inline .browse-row:hover{border-color:rgba(117,167,255,.4);}
+#load-list-inline .load-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:5px;margin-bottom:4px;cursor:pointer;transition:border-color .15s;}
+#load-list-inline .load-row:hover{border-color:rgba(117,167,255,.4);}
+#load-list-inline .load-row.selected{border-color:#75a7ff;background:linear-gradient(180deg,rgba(40,80,150,.6),rgba(20,50,100,.6));}
+
+/* ── Infinite → Normal rename fix ── */
+
+/* ── Test Mode Warning Modal ── */
+#testmode-modal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.82);display:none;justify-content:center;align-items:center;z-index:2000;
+}
+#testmode-modal.active{display:flex;}
+#testmode-box{
+  background:linear-gradient(180deg,#1a2540,#0d1525);
+  border:2px solid rgba(255,200,80,.45);
+  border-radius:10px;padding:28px 28px 22px;max-width:360px;width:90%;text-align:center;
+  box-shadow:0 0 40px rgba(255,180,0,.15),0 8px 32px rgba(0,0,0,.6);
+}
+#testmode-box .tm-icon{font-size:36px;margin-bottom:10px;}
+#testmode-box .tm-title{font-size:15px;font-weight:bold;color:#ffc84a;letter-spacing:2px;margin-bottom:8px;text-shadow:0 0 12px rgba(255,200,0,.4);}
+#testmode-box .tm-desc{font-size:11px;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:18px;}
+#testmode-box .tm-btns{display:flex;gap:10px;justify-content:center;}
+#btn-testmode-continue{padding:10px 20px;background:linear-gradient(180deg,#c47a00,#8a5200);border:none;border-bottom:3px solid #4a2a00;border-right:3px solid #4a2a00;border-top:3px solid #ffb030;border-left:3px solid #ffb030;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-testmode-continue:hover{filter:brightness(1.15);}
+#btn-testmode-cancel{padding:10px 20px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #111;border-right:3px solid #111;border-top:3px solid #555;border-left:3px solid #555;color:#aaa;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-testmode-cancel:hover{filter:brightness(1.1);}
+
+/* ── Browse Screen ── */
+#screen-browse .browse-toolbar{width:100%;display:flex;gap:8px;margin-bottom:10px;align-items:center;}
+#browse-search{flex:1;padding:8px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:12px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;}
+#browse-search:focus{border-color:rgba(117,167,255,.5);}
+#btn-browse-refresh{padding:8px 12px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:3px solid #0a1030;border-right:3px solid #0a1030;border-top:3px solid #4a6aba;border-left:3px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
+#btn-browse-refresh:hover{filter:brightness(1.15);}
+#browse-list{width:100%;max-height:260px;overflow-y:auto;margin-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
+#browse-list::-webkit-scrollbar{width:4px;}
+#browse-list::-webkit-scrollbar-thumb{background:rgba(117,167,255,.3);border-radius:2px;}
+.browse-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:9px 12px;background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:6px;margin-bottom:5px;cursor:pointer;transition:border-color .15s,background .15s;gap:8px;}
+.browse-row:hover{border-color:rgba(117,167,255,.4);background:linear-gradient(180deg,rgba(40,70,120,.8),rgba(20,40,80,.8));}
+.browse-row-info{flex:1;min-width:0;}
+.browse-server-name{font-size:12px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.browse-server-host{font-size:9px;color:rgba(255,255,255,.4);margin-top:1px;}
+.browse-server-meta{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;}
+.browse-tag{font-size:9px;color:#75a7ff;background:rgba(117,167,255,.1);padding:1px 6px;border-radius:10px;border:1px solid rgba(117,167,255,.2);}
+.browse-players{font-size:11px;color:#aaffaa;font-weight:bold;white-space:nowrap;}
+.browse-join-btn{padding:6px 12px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:2px solid #0a1a4f;border-right:2px solid #0a1a4f;border-top:2px solid #4a8acf;border-left:2px solid #4a8acf;color:#fff;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
+.browse-join-btn:hover{filter:brightness(1.15);}
+#browse-status{font-size:11px;color:rgba(255,255,255,.45);text-align:center;padding:20px 0;}
+#browse-empty{font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:22px 0;display:none;}
+
+/* ── Load World Screen ── */
+#screen-load .load-list{width:100%;max-height:260px;overflow-y:auto;margin-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
+#screen-load .load-list::-webkit-scrollbar{width:4px;}
+#screen-load .load-list::-webkit-scrollbar-thumb{background:rgba(117,167,255,.3);border-radius:2px;}
+.load-row{width:100%;display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:6px;margin-bottom:5px;cursor:pointer;transition:border-color .15s;}
+.load-row:hover{border-color:rgba(117,167,255,.4);}
+.load-row.selected{border-color:#75a7ff;background:linear-gradient(180deg,rgba(40,80,150,.6),rgba(20,50,100,.6));}
+.load-row-info{flex:1;}
+.load-world-name{font-size:12px;font-weight:bold;color:#fff;}
+.load-world-meta{font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;}
+.load-empty{font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:24px 0;}
+#load-status{font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin:4px 0;}
+
+/* ── Create Server Modal ── */
+#create-server-modal{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:flex-start;
+  z-index:1500;overflow-y:auto;padding:16px 0;
+}
+#create-server-modal.active{display:flex;}
+#create-server-box{
+  background:linear-gradient(180deg,#1c2a42,#0e1826);
+  border:2px solid rgba(117,167,255,.3);
+  border-radius:12px;padding:24px 22px 20px;max-width:440px;width:92%;
+  box-shadow:0 0 60px rgba(30,80,200,.2),0 12px 48px rgba(0,0,0,.7);
+  margin:auto;
+}
+.cs-header{text-align:center;margin-bottom:18px;}
+.cs-title{font-size:18px;font-weight:bold;color:#75a7ff;letter-spacing:3px;text-shadow:0 0 16px rgba(117,167,255,.4);}
+.cs-subtitle{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;margin-top:3px;}
+.cs-section{margin-bottom:14px;}
+.cs-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.cs-input{width:100%;padding:9px 12px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:13px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;}
+.cs-input:focus{border-color:rgba(117,167,255,.55);}
+.cs-input::placeholder{color:rgba(255,255,255,.25);font-size:11px;}
+.cs-select{width:100%;padding:9px 12px;background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:12px;font-family:'Minecraft',monospace;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
+.cs-select:focus{border-color:rgba(117,167,255,.55);}
+.cs-select option{background:#1a2540;color:#fff;}
+.cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.cs-toggle-row{display:flex;gap:8px;}
+.cs-toggle{flex:1;padding:8px 6px;background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.12);border-radius:5px;cursor:pointer;text-align:center;transition:border-color .15s,background .15s;}
+.cs-toggle.sel{border-color:#75a7ff;background:rgba(117,167,255,.15);}
+.cs-toggle:hover:not(.sel){border-color:rgba(117,167,255,.3);}
+.cs-toggle-icon{font-size:14px;margin-bottom:2px;}
+.cs-toggle-label{font-size:9px;font-weight:bold;color:#fff;font-family:'Minecraft',monospace;}
+.cs-footer{display:flex;gap:10px;margin-top:20px;}
+#btn-cs-create{flex:2;padding:13px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-cs-create:hover{filter:brightness(1.15);}
+#btn-cs-cancel{flex:1;padding:13px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:4px solid #111;border-right:4px solid #111;border-top:4px solid #555;border-left:4px solid #555;color:#aaa;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-cs-cancel:hover{filter:brightness(1.1);}
+#cs-status{font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin-top:8px;min-height:14px;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/three@0.128.0/build/three.min.js';document.head.appendChild(s);"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s);"></script>
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js" crossorigin="anonymous"></script>
 </head>
 <body>
 <div id="error-msg"><h3></h3><p style="font-size:12px;margin-top:8px;opacity:.9"></p></div>
@@ -191,7 +355,7 @@ body.low-health::after {
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
   <div class="menu-screen active" id="screen-main">
     <div class="game-logo" id="txt-title">LEGENDS INDEV</div>
-    <div class="game-version">v1.6 - Perlin World</div>
+    <div class="game-version">v1.6.1 - Perlin World</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-skin-menu"></button>
@@ -291,14 +455,87 @@ body.low-health::after {
   </div>
   <div class="menu-screen" id="screen-multiplayer">
     <div class="game-logo">LEGENDS INDEV</div>
-    <div class="screen-title" id="txt-mp-title">ÇOK OYUNCULU</div>
-    <div class="mp-cards">
-      <div class="mp-card" id="btn-mp-join"><div class="mc-icon">🔗</div><div class="mc-title" id="txt-mp-join">KATIL</div></div>
-      <div class="mp-card" id="btn-mp-host"><div class="mc-icon">🏠</div><div class="mc-title" id="txt-mp-host">ODA KUR</div></div>
-      <div class="mp-card disabled-card"><div class="mc-icon">🔍</div><div class="mc-title" id="txt-mp-browse">GÖZ AT</div></div>
+    <div class="screen-title" id="txt-mp-title">MULTIPLAYER</div>
+    <div class="mp-cards" style="flex-direction:column;">
+      <div class="mp-card" id="btn-mp-join"><div class="mc-icon">🔗</div><div class="mc-title" id="txt-mp-join">JOIN</div></div>
+      <div class="mp-card" id="btn-mp-host"><div class="mc-icon">🏠</div><div class="mc-title" id="txt-mp-host">HOST</div></div>
+      <div class="mp-card" id="btn-mp-serverlist"><div class="mc-icon">📋</div><div class="mc-title" id="txt-mp-serverlist">SERVER LIST</div></div>
     </div>
     <button class="mbtn back" id="btn-back-mp"></button>
   </div>
+
+  <!-- ─── SERVER LIST SCREEN ─── -->
+  <div class="menu-screen" id="screen-serverlist">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-sl-title">SERVER LIST</div>
+    <!-- Sekmeler -->
+    <div id="sl-tab-bar" style="display:flex;width:100%;border-radius:5px 5px 0 0;overflow:hidden;border:2px solid rgba(117,167,255,.25);border-bottom:none;margin-bottom:0;">
+      <button class="sl-tab-btn active" data-tab="browse" id="tab-btn-browse">🔍 <span id="txt-mp-browse">GÖZ AT</span></button>
+      <button class="sl-tab-btn" data-tab="load" id="tab-btn-load">💾 <span id="txt-mp-load">YÜKLE</span></button>
+      <button class="sl-tab-btn" data-tab="create" id="tab-btn-create">⚙️ <span id="txt-mp-create">OLUŞTUR</span></button>
+    </div>
+    <div style="border:2px solid rgba(117,167,255,.25);border-radius:0 0 5px 5px;padding:10px 10px 8px;background:rgba(0,0,0,.3);width:100%;margin-bottom:6px;">
+      <!-- BROWSE -->
+      <div class="sl-tab-pane" id="sl-pane-browse">
+        <div style="display:flex;gap:8px;margin-bottom:8px;">
+          <input id="browse-search-inline" type="text" placeholder="Sunucu ara..." autocomplete="off" spellcheck="false" style="flex:1;padding:7px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:11px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;">
+          <button id="btn-browse-refresh-inline" style="padding:7px 10px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:2px solid #0a1030;border-right:2px solid #0a1030;border-top:2px solid #4a6aba;border-left:2px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;">🔄</button>
+        </div>
+        <div id="browse-list-inline" style="max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
+          <div id="browse-status-inline" style="font-size:11px;color:rgba(255,255,255,.45);text-align:center;padding:20px 0;">Sunucu listesine bağlanılıyor...</div>
+          <div id="browse-empty-inline" style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:22px 0;display:none;">Aktif sunucu bulunamadı.</div>
+        </div>
+      </div>
+      <!-- LOAD -->
+      <div class="sl-tab-pane" id="sl-pane-load" style="display:none;">
+        <div style="font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">KAYITLI DÜNYA SEÇ</div>
+        <div id="load-list-inline" style="max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
+          <div id="load-empty-inline" style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:22px 0;">Tarayıcıda kayıtlı dünya bulunamadı.</div>
+        </div>
+        <div id="load-status-inline" style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin:4px 0;min-height:14px;"></div>
+        <button class="mbtn primary" id="btn-do-load-inline" disabled style="opacity:.4;cursor:not-allowed;margin-top:4px;padding:10px;">YÜKLE & HOST</button>
+      </div>
+      <!-- CREATE -->
+      <div class="sl-tab-pane" id="sl-pane-create" style="display:none;">
+        <div style="font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;">SUNUCU AYARLARI</div>
+        <div id="create-guest-warning" style="display:none;background:rgba(255,150,0,.12);border:1px solid rgba(255,180,0,.35);border-radius:6px;padding:10px 12px;margin-bottom:10px;font-size:11px;color:#ffcc66;text-align:center;line-height:1.6;">
+          🔒 <strong>Sunucu oluşturmak için hesap gereklidir.</strong><br><span style="font-size:10px;color:rgba(255,200,100,.7);">Siteye giriş yaparak bu özelliği kullanabilirsiniz.</span>
+        </div>
+        <button class="mbtn primary" id="btn-open-create-server-inline" style="padding:12px;margin:0;">⚙️ SUNUCU OLUŞTUR</button>
+        <div id="create-inline-status" style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin-top:8px;min-height:14px;"></div>
+      </div>
+    </div>
+    <button class="mbtn back" id="btn-back-serverlist"></button>
+  </div>
+
+  <!-- ─── BROWSE SCREEN ─── -->
+  <div class="menu-screen" id="screen-browse">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-browse-title">BROWSE SERVERS</div>
+    <div class="browse-toolbar">
+      <input id="browse-search" type="text" placeholder="Search server name..." autocomplete="off" spellcheck="false">
+      <button id="btn-browse-refresh">🔄 REFRESH</button>
+    </div>
+    <div id="browse-list">
+      <div id="browse-status">Connecting to server list...</div>
+      <div id="browse-empty">No active servers found.</div>
+    </div>
+    <button class="mbtn back" id="btn-back-browse"></button>
+  </div>
+
+  <!-- ─── LOAD WORLD SCREEN ─── -->
+  <div class="menu-screen" id="screen-load">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-load-title">LOAD WORLD</div>
+    <div class="sub-title" id="txt-load-hint">SELECT A SAVED WORLD TO HOST</div>
+    <div class="load-list" id="load-list">
+      <div class="load-empty" id="load-empty">No saved worlds found in your browser.</div>
+    </div>
+    <div class="status-msg" id="load-status"></div>
+    <button class="mbtn primary" id="btn-do-load" disabled style="opacity:.4;cursor:not-allowed;" id="btn-do-load">UPLOAD & HOST</button>
+    <button class="mbtn back" id="btn-back-load"></button>
+  </div>
+
   <div class="menu-screen" id="screen-join">
     <div class="game-logo">LEGENDS INDEV</div>
     <div class="screen-title" id="txt-join-title">ODAYA KATIL</div>
@@ -370,10 +607,119 @@ body.low-health::after {
   </div>
 </div>
  
+<!-- ═══ TEST MODE WARNING MODAL ═══ -->
+<div id="testmode-modal">
+  <div id="testmode-box">
+    <div class="tm-icon">🧪</div>
+    <div class="tm-title" id="txt-tm-title">TESTING PHASE</div>
+    <div class="tm-desc" id="txt-tm-desc">You are not logged in. In normal conditions, this action requires an account.<br><br>Since the game is in <strong style="color:#ffc84a">Development / Testing</strong> phase, you can continue without an account. However this version <strong style="color:#ff7a7a">may contain bugs and missing features</strong>, server data will be sent as a guest.</div>
+    <div class="tm-btns">
+      <button id="btn-testmode-continue">CONTINUE ANYWAY</button>
+      <button id="btn-testmode-cancel">CANCEL</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ CREATE SERVER MODAL ═══ -->
+<div id="create-server-modal">
+  <div id="create-server-box">
+    <div class="cs-header">
+      <div class="cs-title">⚙ CREATE SERVER</div>
+      <div class="cs-subtitle">CONFIGURE YOUR WORLD SETTINGS</div>
+    </div>
+
+    <div class="cs-grid">
+      <div class="cs-section">
+        <div class="cs-label" id="cs-lbl-worldname">World Name</div>
+        <input class="cs-input" id="cs-world-name" type="text" maxlength="32" placeholder="My Kingdom..." autocomplete="off" spellcheck="false">
+      </div>
+      <div class="cs-section">
+        <div class="cs-label" id="cs-lbl-seed">Seed</div>
+        <input class="cs-input" id="cs-seed" type="text" maxlength="20" placeholder="Random" autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <div class="cs-grid">
+      <div class="cs-section">
+        <div class="cs-label" id="cs-lbl-worldtype">World Type</div>
+        <select class="cs-select" id="cs-world-type">
+          <option value="infinite">🌍 Normal</option>
+          <option value="flat">🟫 Flat</option>
+          <option value="small">🏝️ Small</option>
+        </select>
+      </div>
+      <div class="cs-section">
+        <div class="cs-label" id="cs-lbl-gamemode">Game Mode</div>
+        <select class="cs-select" id="cs-game-mode">
+          <option value="survival">⚔️ Survival</option>
+          <option value="creative">✨ Creative</option>
+          <option value="adventure">🗺️ Adventure</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cs-grid">
+      <div class="cs-section">
+        <div class="cs-label" id="cs-lbl-difficulty">Difficulty</div>
+        <select class="cs-select" id="cs-difficulty">
+          <option value="peaceful">🕊️ Peaceful</option>
+          <option value="easy">🌿 Easy</option>
+          <option value="normal" selected>⚖️ Normal</option>
+          <option value="hard">💀 Hard</option>
+        </select>
+      </div>
+      <div class="cs-section">
+        <div class="cs-label" id="cs-lbl-access">Access Level</div>
+        <select class="cs-select" id="cs-access">
+          <option value="public">🌐 Public</option>
+          <option value="registered">🔑 Registered Only</option>
+          <option value="private">🔒 Private</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="cs-section">
+      <div class="cs-label" id="cs-lbl-cheats">Cheats</div>
+      <div class="cs-toggle-row">
+        <div class="cs-toggle sel" id="cs-cheat-off" onclick="csToggle('cheats','off')">
+          <div class="cs-toggle-icon">🔒</div>
+          <div class="cs-toggle-label" id="cs-txt-cheat-off">OFF</div>
+        </div>
+        <div class="cs-toggle" id="cs-cheat-on" onclick="csToggle('cheats','on')">
+          <div class="cs-toggle-icon">🔓</div>
+          <div class="cs-toggle-label" id="cs-txt-cheat-on">ON</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cs-section">
+      <div class="cs-label" id="cs-lbl-pvp">PvP</div>
+      <div class="cs-toggle-row">
+        <div class="cs-toggle sel" id="cs-pvp-on" onclick="csToggle('pvp','on')">
+          <div class="cs-toggle-icon">⚔️</div>
+          <div class="cs-toggle-label" id="cs-txt-pvp-on">ON</div>
+        </div>
+        <div class="cs-toggle" id="cs-pvp-off" onclick="csToggle('pvp','off')">
+          <div class="cs-toggle-icon">🛡️</div>
+          <div class="cs-toggle-label" id="cs-txt-pvp-off">OFF</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cs-footer">
+      <button id="btn-cs-cancel">CANCEL</button>
+      <button id="btn-cs-create">🚀 CREATE SERVER</button>
+    </div>
+    <div id="cs-status"></div>
+  </div>
+</div>
+
 <div id="game-title"></div>
 <div id="crosshair">+</div>
 <div id="mode-indicator"></div>
 <div id="water-vignette"></div>
+<div id="lava-vignette"></div>
+<div id="fire-overlay"></div>
 <div id="bars-wrap">
   <div class="bar-row" id="hearts-row"></div>
   <div class="bar-row" id="hunger-row"></div>
@@ -432,7 +778,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v1.6</div>
+    <div id="pause-version">v1.6.1</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <button class="mbtn" id="btn-pause-settings"></button>
     <button class="mbtn quit-btn" id="btn-quit"></button>
@@ -478,7 +824,6 @@ function formatRankTag(rank){
 const RANK_COLOR_FALLBACK={
   'Owner / Developer':'#ff4d4d','Admin / Developer':'#ff4d4d','Developer':'#660000',
   'Admin':'#0049ff','Mod':'#ffeb3b','Helper':'#66fcf1','YouTube':'#e91e63','Twitch':'#6441a5',
-  'OG':'#00ffc8',
   'Tiktoker':'#00f2fe','TikToker':'#00f2fe','MVP':'#9c27b0','VIP':'#ff9800','Champion':'#ffd700',
   'Veteran':'#4caf50','Beta Tester':'#9e9e9e'
 };
@@ -487,10 +832,21 @@ function resolveRankColor(rank,color){
   if(rank&&RANK_COLOR_FALLBACK[rank]) return RANK_COLOR_FALLBACK[rank];
   return '#ffffff';
 }
+// ─── 🎖️ Rütbeye göre maksimum oyuncu sayısı ───
+// Ranksız: 20 | Veteran-VIP: 25 | MVP-Tiktoker: 30 | OG-YouTube: 40 | Beta Tester-Owner/Developer: 50
+function getMaxPlayersByRank(rank){
+  if(!rank||typeof rank!=='string') return 20;
+  const r=rank.trim().toLowerCase();
+  if(['Owner / Developer','Ownee/Developer','Owner','Admin / Developer','Admin/Developer','Admin','Mod','Helper','Developer','Dev','Beta Tester'].includes(r)) return 50;
+  if(['YouTube','Twitch','OG'].includes(r)) return 40;
+  if(['MVP','Tiktoker'].includes(r)) return 30;
+  if(['Veteran','VIP','Champion'].includes(r)) return 25;
+  return 20;
+}
 // ─── 📢 /shout komutu için izinli rütbeler ───
 // Twitch ve üzeri: Twitch, YouTube, Beta Tester, Helper, Mod, Admin, Dev, Admin/Dev, Owner
 const SHOUT_ALLOWED_RANKS=new Set([
-  'twitch','og','youtube','beta tester','helper','mod','admin','dev','developer',
+  'twitch','youtube','beta tester','helper','mod','admin','dev','developer',
   'admin/dev','admin / dev','admin / developer','owner','owner / developer','owner/dev','owner/developer'
 ]);
 function canUseShout(rank){
@@ -556,7 +912,7 @@ const langData={
       wInfTitle:'NORMAL DÜNYA',wInfDesc:'Perlin Noise arazi, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',
       wFlatTitle:'DÜZ DÜNYA',wFlatDesc:'Tamamen düz zemin',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.6',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.6.1',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
@@ -567,8 +923,11 @@ const langData={
       spSurv:'HAY. KALMA',spCrea:'YARATICI',spAdv:'MACERA',crouchBtn:'ÇÖMEL',cheatsLabel:'HİLELER',cheatOff:'KAPALI',cheatOn:'AÇIK',
       deathTitle:'Öldün!',respawnBtn:'Yeniden Doğ',pauseSettings:'AYARLAR',
       mpBrowse:'GÖZ AT',
+      mpLoad:'YÜKLE',
+      mpCreate:'OLUŞTUR',
+      mpServerList:'SUNUCU LİSTESİ',
       invTitle:'ENVANTER',invBlocks:'BLOKLAR',invHint:'HOTBAR – ATAMAK İÇİN BLOK SEÇ, SONRA SLOTA TIKLA',invClose:'[E] kapat',
-      bkNames:['Tahta','Çimen','Toprak','Taş','Odun','Karaktas','Cam','Yaprak','Kum','Su','Kaya Dibi'],
+      bkNames:['Tahta','Çimen','Toprak','Taş','Odun','Karaktas','Cam','Yaprak','Kum','Su','Kaya Dibi','Lav','Obsidyen'],
       settingsPcBtn:'PC AYARLARI',settingsMobileBtn:'MOBİL AYARLAR',
       pcSettingsTitle:'PC AYARLARI',mobileSettingsTitle:'MOBİL AYARLAR',
       sensLabel:'Hassasiyet',fovLabel:'Görüş Açısı (FOV)',keybindsTitle:'TUŞ ATAMALARI',
@@ -588,14 +947,14 @@ const langData={
       srvKickedNotice:'Sunucudan çıkarıldınız: ',banScreenTitle:'Bu Sunucudan Yasaklandın!',
       kickScreenTitle:'Sunucudan Atıldın!',banByText:' sizi yasakladı!',kickByText:' sizi attı!',backToMenuBtn:'Ana Menüye Dön',
       rateLimitMsg:'Çok hızlı mesaj gönderiyorsunuz!',
-      deathMessages:{fall:'Yüksek düşüş',suffocation:'Sıkışma',void:'Boşluk',pvp:'PvP',unknown:'Bilinmeyen neden'},
-      deathChat:{pvp:'%V%, %A% tarafından öldürüldü',suffocation:'%V% blokların arasına sıkışarak öldü',void:'%V% boşluktan düşerek öldü',fall:'%V% yüksekten düşerek öldü'},
+      deathMessages:{fall:'Yüksek düşüş',suffocation:'Sıkışma',void:'Boşluk',pvp:'PvP',lava:'Lav',fire:'Ateş',unknown:'Bilinmeyen neden'},
+      deathChat:{pvp:'%V%, %A% tarafından öldürüldü',suffocation:'%V% blokların arasına sıkışarak öldü',void:'%V% boşluktan düşerek öldü',fall:'%V% yüksekten düşerek öldü',lava:'%V% lavda yanarak öldü',fire:'%V% ateşte yanarak öldü'},
       killDeathMsg:'Oyuncu öldü',killAllMsg:'[Sunucu]: Tüm oyuncular öldürüldü',
       srvUsageKillCmd:'Kullanım: /kill | /kill @p | /kill @a | /kill <isim>',srvKillNoPlayer:'[Sunucu]: Oyuncu bulunamadı: ',
       srvCheatsOn:'[Sunucu]: Hileler açıldı!',srvCheatsOff:'[Sunucu]: Hileler kapatıldı!',srvUsageCheats:'Kullanım: /cheats on veya /cheats off',srvCheatsHostOnly:'[Sunucu]: Hileler sadece yönetici tarafından değiştirilebilir!',
       srvMpOnlyCmd:'[Sunucu]: Bu komud sadece çok oyunculuda kullanılabilir',
       srvCheatsSpOnly:'[Sunucu]: Hileler menüden açılıp kapatılabilir!',
-      srvShoutNoPerm:'Bu komut OG ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
+      srvShoutNoPerm:'Bu komut Twitch ve üzeri rütbeler içindir',srvUsageShout:'Kullanım: /shout <mesaj>',
       camFirstPerson:'🎥 1. Şahıs',camThirdBack:'🎥 3. Şahıs (Arka)',camThirdFront:'🎥 3. Şahıs (Ön)',
       skinTitle:'SKİN AYARLARI',skinPreview:'ÖNİZLEME',skinUploader:'SKİN YÜKLEYİCİ',
       skinUploadHint:'📁 Minecraft skin PNG yükle',skinUploadSize:'64×64, 64×32 veya 128×128 piksel',
@@ -622,13 +981,36 @@ const langData={
         '/friend <isim>  →  Arkadaşlık isteği',
         '/shout <mesaj>  →  Global mesaj',
         '/help  →  Bu menüyü göster',
-      ]},
+      ],
+      // Test modu & misafir uyarıları
+      tmTitle:'TEST AŞAMASI',
+      tmDesc:'Giriş yapmadınız. Normal koşullarda bu işlem hesap gerektirir.<br><br>Oyun <strong style="color:#ffc84a">Geliştirme / Test</strong> aşamasında olduğundan hesapsız devam edebilirsiniz. Ancak bu sürüm <strong style="color:#ff7a7a">hatalar ve eksiklikler içerebilir</strong>, veriler misafir olarak gönderilecektir.',
+      tmContinue:'YINE DE DEVAM ET',
+      tmCancel:'İPTAL',
+      guestCreateTitle:'Sunucu oluşturmak için hesap gereklidir.',
+      guestCreateHint:'Siteye giriş yaparak bu özelliği kullanabilirsiniz.',
+      guestLoadMsg:'🔒 Dünya yüklemek için hesap gereklidir.',
+      guestCreateMsg:'🔒 Sunucu oluşturmak için hesap gereklidir. Lütfen siteye giriş yapın.',
+      slTitle:'SUNUCU LİSTESİ',
+      slSavedWorld:'KAYITLI DÜNYA SEÇ',
+      slNoBrowser:'Tarayıcıda kayıtlı dünya bulunamadı.',
+      slServerSettings:'SUNUCU AYARLARI',
+      slLoadHost:'YÜKLE & HOST',
+      slWorldLoading:'Dünya yükleniyor...',
+      slWorldReadError:'⚠ Dünya verisi okunamadı.',
+      slServerError:'⚠ Sunucu hatası: ',
+      slSearchPh:'Sunucu ara...',
+      slConnecting:'Sunucular yükleniyor...',
+      slNoResponse:'⚠ Sunucudan yanıt gelmedi.',
+      slNoServers:'Aktif sunucu bulunamadı.',
+      slCreateServer:'⚙️ SUNUCU OLUŞTUR',
+  },
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
       wInfTitle:'NORMAL WORLD',wInfDesc:'Perlin Noise terrain',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',
       wFlatTitle:'FLAT WORLD',wFlatDesc:'Completely flat terrain',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.6',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.6.1',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
@@ -639,8 +1021,11 @@ const langData={
       spSurv:'SURVIVAL',spCrea:'CREATIVE',spAdv:'ADVENTURE',crouchBtn:'CROUCH',cheatsLabel:'CHEATS',cheatOff:'OFF',cheatOn:'ON',
       deathTitle:'You Died!',respawnBtn:'Respawn',pauseSettings:'SETTINGS',
       mpBrowse:'BROWSE',
+      mpLoad:'LOAD',
+      mpCreate:'CREATE',
+      mpServerList:'SERVER LIST',
       invTitle:'INVENTORY',invBlocks:'BLOCKS',invHint:'HOTBAR – SELECT A BLOCK, THEN CLICK A SLOT TO ASSIGN',invClose:'[E] close',
-      bkNames:['Planks','Grass','Dirt','Stone','Log','Cobblestone','Glass','Leaves','Sand','Water','Bedrock'],
+      bkNames:['Planks','Grass','Dirt','Stone','Log','Cobblestone','Glass','Leaves','Sand','Water','Bedrock','Lava','Obsidian'],
       settingsPcBtn:'PC SETTINGS',settingsMobileBtn:'MOBILE SETTINGS',
       pcSettingsTitle:'PC SETTINGS',mobileSettingsTitle:'MOBILE SETTINGS',
       sensLabel:'Sensitivity',fovLabel:'Field of View (FOV)',keybindsTitle:'KEY BINDINGS',
@@ -660,14 +1045,14 @@ const langData={
       srvKickedNotice:'You were removed from the server: ',banScreenTitle:'You have been banned from this server!',
       kickScreenTitle:'You have been kicked from the server!',banByText:' banned you!',kickByText:' kicked you!',backToMenuBtn:'Back to Main Menu',
       rateLimitMsg:'You are sending messages too fast!',
-      deathMessages:{fall:'High fall',suffocation:'Suffocation',void:'Void',pvp:'PvP',unknown:'Unknown'},
-      deathChat:{pvp:'%V% was killed by %A%',suffocation:'%V% suffocated in a wall',void:'%V% fell out of the world',fall:'%V% fell from a high place'},
+      deathMessages:{fall:'High fall',suffocation:'Suffocation',void:'Void',pvp:'PvP',lava:'Lava',fire:'Fire',unknown:'Unknown'},
+      deathChat:{pvp:'%V% was killed by %A%',suffocation:'%V% suffocated in a wall',void:'%V% fell out of the world',fall:'%V% fell from a high place',lava:'%V% burned to death in lava',fire:'%V% burned to death'},
       killDeathMsg:'Player died',killAllMsg:'[Server]: All players were killed',
       srvUsageKillCmd:'Usage: /kill | /kill @p | /kill @a | /kill <name>',srvKillNoPlayer:'[Server]: Player not found: ',
       srvCheatsOn:'[Server]: Cheats enabled!',srvCheatsOff:'[Server]: Cheats disabled!',srvUsageCheats:'Usage: /cheats on or /cheats off',srvCheatsHostOnly:'[Server]: Only the host can change cheats!',
       srvMpOnlyCmd:'[Server]: This command can only be used in multiplayer',
       srvCheatsSpOnly:'[Server]: Cheats can be toggled from the menu!',
-      srvShoutNoPerm:'This command is for OG rank and above',srvUsageShout:'Usage: /shout <message>',
+      srvShoutNoPerm:'This command is for Twitch rank and above',srvUsageShout:'Usage: /shout <message>',
       camFirstPerson:'🎥 First Person',camThirdBack:'🎥 Third Person (Back)',camThirdFront:'🎥 Third Person (Front)',
       skinTitle:'SKIN SETTINGS',skinPreview:'PREVIEW',skinUploader:'SKIN UPLOADER',
       skinUploadHint:'📁 Upload Minecraft skin PNG',skinUploadSize:'64×64, 64×32 or 128×128 pixels',
@@ -694,7 +1079,30 @@ const langData={
         '/friend <name>  →  Friend request',
         '/shout <msg>  →  Global message',
         '/help  →  Show this menu',
-      ]}
+      ],
+      // Test mode & guest warnings
+      tmTitle:'TESTING PHASE',
+      tmDesc:'You are not logged in. In normal conditions, this action requires an account.<br><br>Since the game is in <strong style="color:#ffc84a">Development / Testing</strong> phase, you can continue without an account. However this version <strong style="color:#ff7a7a">may contain bugs and missing features</strong>, server data will be sent as a guest.',
+      tmContinue:'CONTINUE ANYWAY',
+      tmCancel:'CANCEL',
+      guestCreateTitle:'An account is required to create a server.',
+      guestCreateHint:'Log in to the site to use this feature.',
+      guestLoadMsg:'🔒 An account is required to load a world.',
+      guestCreateMsg:'🔒 An account is required to create a server. Please log in.',
+      slTitle:'SERVER LIST',
+      slSavedWorld:'SELECT SAVED WORLD',
+      slNoBrowser:'No saved worlds found in your browser.',
+      slServerSettings:'SERVER SETTINGS',
+      slLoadHost:'LOAD & HOST',
+      slWorldLoading:'Loading world...',
+      slWorldReadError:'⚠ Could not read world data.',
+      slServerError:'⚠ Server error: ',
+      slSearchPh:'Search server...',
+      slConnecting:'Loading servers...',
+      slNoResponse:'⚠ No response from server.',
+      slNoServers:'No active servers found.',
+      slCreateServer:'⚙️ CREATE SERVER',
+  }
 };
 let currentLang='en';
 function setLanguage(l){
@@ -703,6 +1111,36 @@ function setLanguage(l){
   document.getElementById('lang-en').classList.toggle('active',l==='en');
   const d=langData[l];
   const s=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
+  const sh=(id,h)=>{const el=document.getElementById(id);if(el)el.innerHTML=h;};
+  // Test mode modal
+  s('txt-tm-title',d.tmTitle);
+  sh('txt-tm-desc',d.tmDesc);
+  s('btn-testmode-continue',d.tmContinue);
+  s('btn-testmode-cancel',d.tmCancel);
+  // Create guest warning
+  const cgTitle=document.querySelector('#create-guest-warning strong');
+  const cgHint=document.querySelector('#create-guest-warning span');
+  if(cgTitle) cgTitle.textContent=d.guestCreateTitle;
+  if(cgHint) cgHint.textContent=d.guestCreateHint;
+  // Create server button
+  const csBtn=document.getElementById('btn-open-create-server-inline');
+  if(csBtn) csBtn.textContent=d.slCreateServer;
+  // Browse inline placeholder & status
+  const bsiEl=document.getElementById('browse-status-inline');
+  if(bsiEl&&(bsiEl.textContent.includes('yükleniyor')||bsiEl.textContent.includes('Loading')))
+    bsiEl.textContent=d.slConnecting;
+  const beiEl=document.getElementById('browse-empty-inline');
+  if(beiEl) beiEl.textContent=d.slNoServers;
+  // Load inline
+  const leiEl=document.getElementById('load-empty-inline');
+  if(leiEl) leiEl.textContent=d.slNoBrowser;
+  const ldbEl=document.getElementById('btn-do-load-inline');
+  if(ldbEl) ldbEl.textContent=d.slLoadHost;
+  // Browse search placeholder
+  const bsi=document.getElementById('browse-search-inline');
+  if(bsi) bsi.placeholder=d.slSearchPh;
+  // Server list screen title
+  s('txt-sl-title',d.slTitle);
   s('txt-title',d.title);s('btn-singleplayer',d.singleplayer);s('btn-multiplayer',d.multiplayer);s('btn-settings',d.settings);
   s('txt-settings-title',d.settingsTitle);s('btn-back-settings',d.back);
   s('txt-settings-pc-btn',d.settingsPcBtn);s('txt-settings-mobile-btn',d.settingsMobileBtn);
@@ -715,6 +1153,7 @@ function setLanguage(l){
   document.getElementById('btn-back-pc-settings').textContent=d.back;
   document.getElementById('btn-back-mobile-settings').textContent=d.back;
   s('txt-mp-browse',d.mpBrowse);s('btn-pause-settings',d.pauseSettings);
+  s('txt-mp-load',d.mpLoad);s('txt-mp-create',d.mpCreate);s('txt-mp-serverlist',d.mpServerList);
   s('inv-title',d.invTitle);s('inv-lbl-blocks',d.invBlocks);s('inv-hint',d.invHint);s('inv-close-hint',d.invClose);
   s('txt-device-title',d.deviceTitle);s('txt-pc-btn',d.pcBtn);s('txt-mobile-btn',d.mobileBtn);
   s('txt-world-title',d.worldTitle);s('txt-w-inf-title',d.wInfTitle);s('txt-w-inf-desc',d.wInfDesc);
@@ -790,14 +1229,19 @@ function applyRdFromSettings(v){
 if(rdPcSlider) rdPcSlider.addEventListener('input',()=>applyRdFromSettings(+rdPcSlider.value));
 if(rdMSlider) rdMSlider.addEventListener('input',()=>applyRdFromSettings(+rdMSlider.value));
  
-function openPauseMenu(){if(!deviceMode||isChatOpen||invOpen) return;isPaused=true;document.getElementById('pause-overlay').classList.add('active');if(deviceMode==='pc'&&document.pointerLockElement===document.body) document.exitPointerLock();}
+function openPauseMenu(){if(!deviceMode||isChatOpen||invOpen) return;isPaused=true;document.getElementById('pause-overlay').classList.add('active');if(deviceMode==='pc'&&document.pointerLockElement===document.body) document.exitPointerLock();
+  // Lav sesini duraklat
+  if(_sndLava&&!_sndLava.paused){_sndLava.pause();_lavaAmbientActive=false;}
+}
 function closePauseMenu(){isPaused=false;document.getElementById('pause-overlay').classList.remove('active');if(deviceMode==='pc') document.body.requestPointerLock();}
 document.getElementById('btn-pause-settings').addEventListener('click',()=>{
   settingsFromPause=true;isPaused=false;
   document.getElementById('pause-overlay').classList.remove('active');
+  // FIX: Ayarlar açıkken pointer lock'u bırak (imleç ortaya kilitleniyor sorununu önler)
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
   document.getElementById('menu-overlay').style.display='flex';
-  // Fix 2: Ayarlar menüsü açıkken dokunmatik girdi menüye gitsin
   document.getElementById('menu-overlay').style.pointerEvents='auto';
+  document.getElementById('menu-overlay').style.zIndex='1000';
   showScreen('screen-settings');
 });
 document.getElementById('btn-resume').addEventListener('click',closePauseMenu);
@@ -813,7 +1257,7 @@ document.getElementById('btn-quit').addEventListener('click',()=>{
   const mo=document.getElementById('menu-overlay');
   mo.style.display='flex';
   mo.style.pointerEvents='auto';
-  mo.style.zIndex='1000';
+  mo.style.zIndex='1000'; // FIX: Ana menüye dönerken z-index geri yükle
   showScreen('screen-main');
 });
 document.getElementById('mobile-pause-btn').addEventListener('click',e=>{e.stopPropagation();if(isPaused) closePauseMenu(); else openPauseMenu();});
@@ -828,8 +1272,9 @@ document.getElementById('btn-singleplayer').addEventListener('click',()=>showScr
 document.getElementById('btn-settings').addEventListener('click',()=>showScreen('screen-settings'));
 document.getElementById('btn-back-settings').addEventListener('click',()=>{
   if(settingsFromPause){settingsFromPause=false;document.getElementById('menu-overlay').style.display='none';
-  // Fix 2: Ayarlardan oyuna dönerken menü katmanı girdi engellemesin
-  document.getElementById('menu-overlay').style.pointerEvents='none';openPauseMenu();}
+  document.getElementById('menu-overlay').style.pointerEvents='none';
+  // FIX: Ayarlardan dönünce pointer lock yeniden iste (sadece PC modda)
+  openPauseMenu();}
   else showScreen('screen-main');
 });
 document.getElementById('btn-settings-pc').addEventListener('click',()=>showScreen('screen-pc-settings'));
@@ -926,6 +1371,453 @@ document.getElementById('btn-mp-join').addEventListener('click',()=>showScreen('
 document.getElementById('btn-mp-host').addEventListener('click',()=>{document.getElementById('host-code-display').textContent=genCode();document.getElementById('host-status').textContent='';showScreen('screen-host');});
 document.getElementById('btn-back-join').addEventListener('click',()=>{cleanupMP();showScreen('screen-multiplayer');});
 document.getElementById('btn-back-host').addEventListener('click',()=>{cleanupMP();showScreen('screen-multiplayer');});
+
+// ═══════════════════════════════════════════════════════════════
+// SOCKET.IO LOBBY SYSTEM
+// ═══════════════════════════════════════════════════════════════
+const RENDER_SERVER_URL = 'https://playlegends.onrender.com';
+let lobbySocket = null;
+let _testModePendingAction = null; // Holds callback for after test mode confirmation
+let _csSettings = { cheats: 'off', pvp: 'on' };
+
+// ── Test Mode Modal ──
+function showTestModeModal(onContinue) {
+  _testModePendingAction = onContinue;
+  document.getElementById('testmode-modal').classList.add('active');
+}
+document.getElementById('btn-testmode-continue').addEventListener('click', () => {
+  document.getElementById('testmode-modal').classList.remove('active');
+  if (typeof _testModePendingAction === 'function') { _testModePendingAction(); _testModePendingAction = null; }
+});
+document.getElementById('btn-testmode-cancel').addEventListener('click', () => {
+  document.getElementById('testmode-modal').classList.remove('active');
+  _testModePendingAction = null;
+});
+
+// ── Guard: requires login, but allows guest in test mode ──
+function requireAccountOrTestMode(action) {
+  if (!isGuestUser()) { action(); return; }
+  showTestModeModal(action);
+}
+
+// ── Connect to lobby socket ──
+function connectLobbySocket(cb) {
+  if (lobbySocket && lobbySocket.connected) { if(cb) cb(); return; }
+  try {
+    lobbySocket = io(RENDER_SERVER_URL, { transports: ['websocket','polling'], reconnectionAttempts: 3 });
+    lobbySocket.on('connect', () => { if(cb) cb(); });
+    lobbySocket.on('connect_error', () => {
+      const st = document.getElementById('browse-status');
+      if(st) st.textContent = '⚠ Could not connect to lobby server.';
+    });
+  } catch(e) {
+    console.warn('Socket.IO not available:', e);
+    const st = document.getElementById('browse-status');
+    if(st) st.textContent = '⚠ Socket.IO failed to load.';
+  }
+}
+
+// ─── SERVER LIST BUTTON → opens screen-serverlist ───
+document.getElementById('btn-mp-serverlist').addEventListener('click', () => {
+  showScreen('screen-serverlist');
+  // activate first tab (browse) and load it
+  slSwitchTab('browse');
+  fetchBrowseListInline();
+});
+document.getElementById('btn-back-serverlist').addEventListener('click', () => showScreen('screen-multiplayer'));
+
+// ─── SERVER LIST TABS ───
+function slSwitchTab(tab) {
+  document.querySelectorAll('.sl-tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+  document.querySelectorAll('.sl-tab-pane').forEach(p => p.style.display = 'none');
+  const pane = document.getElementById('sl-pane-' + tab);
+  if (pane) pane.style.display = 'block';
+}
+document.querySelectorAll('.sl-tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    // FIX: Yükle ve Oluştur sekmeleri hesap gerektirir
+    if ((btn.dataset.tab === 'load' || btn.dataset.tab === 'create') && isGuestUser()) {
+      slSwitchTab(btn.dataset.tab);
+      if (btn.dataset.tab === 'load') {
+        const st = document.getElementById('load-status-inline');
+        if(st){
+          st.textContent = langData[currentLang].guestLoadMsg;
+          st.style.color='#ffcc66';
+        }
+        const lb = document.getElementById('btn-do-load-inline');
+        if(lb){ lb.disabled=true; lb.style.opacity='0.4'; lb.style.cursor='not-allowed'; }
+      }
+      if (btn.dataset.tab === 'create') {
+        const warn = document.getElementById('create-guest-warning');
+        if(warn) warn.style.display='block';
+        const cb = document.getElementById('btn-open-create-server-inline');
+        if(cb){ cb.disabled=true; cb.style.opacity='0.4'; cb.style.cursor='not-allowed'; }
+      }
+      return;
+    }
+    // Giriş yapmış kullanıcılar için uyarıları gizle
+    if (btn.dataset.tab === 'create') {
+      const warn = document.getElementById('create-guest-warning');
+      if(warn) warn.style.display='none';
+      const cb = document.getElementById('btn-open-create-server-inline');
+      if(cb){ cb.disabled=false; cb.style.opacity=''; cb.style.cursor='pointer'; }
+    }
+    slSwitchTab(btn.dataset.tab);
+    if (btn.dataset.tab === 'browse') fetchBrowseListInline();
+    else if (btn.dataset.tab === 'load') populateLoadListInline();
+  });
+});
+
+// ─── INLINE BROWSE ───
+function fetchBrowseListInline() {
+  const statusEl = document.getElementById('browse-status-inline');
+  const emptyEl = document.getElementById('browse-empty-inline');
+  const listEl = document.getElementById('browse-list-inline');
+  statusEl.textContent = langData[currentLang].slConnecting;
+  statusEl.style.display = 'block';
+  emptyEl.style.display = 'none';
+  listEl.querySelectorAll('.browse-row').forEach(r => r.remove());
+  connectLobbySocket(() => {
+    lobbySocket.emit('lobby:list');
+    lobbySocket.once('lobby:list:response', (rooms) => {
+      _browseData = Array.isArray(rooms) ? rooms : [];
+      statusEl.style.display = 'none';
+      renderBrowseListInline(_browseData);
+    });
+    setTimeout(() => { if (statusEl.style.display !== 'none') statusEl.textContent = langData[currentLang].slNoResponse; }, 6000);
+  });
+}
+document.getElementById('btn-browse-refresh-inline').addEventListener('click', fetchBrowseListInline);
+document.getElementById('browse-search-inline').addEventListener('input', () => {
+  const q = document.getElementById('browse-search-inline').value.toLowerCase().trim();
+  const available = _browseData.filter(r => (r.players||0) < (r.maxPlayers||20));
+  renderBrowseListInline(q ? available.filter(r => (r.name||'').toLowerCase().includes(q)||(r.host||'').toLowerCase().includes(q)) : available);
+});
+function renderBrowseListInline(rooms) {
+  const listEl = document.getElementById('browse-list-inline');
+  const emptyEl = document.getElementById('browse-empty-inline');
+  listEl.querySelectorAll('.browse-row').forEach(r => r.remove());
+  // Dolu sunucuları gizle (players >= maxPlayers)
+  const visible = (rooms||[]).filter(r => (r.players||0) < (r.maxPlayers||20));
+  if (!visible || visible.length === 0) { emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  visible.forEach(room => {
+    const cur = room.players||0;
+    const max = room.maxPlayers||20;
+    const row = document.createElement('div');
+    row.className = 'browse-row';
+    row.innerHTML = `<div class="browse-row-info"><div class="browse-server-name">${sanitizeText(room.name||'Unnamed Server')}</div><div class="browse-server-host">Host: ${sanitizeText(room.host||'Unknown')}</div><div class="browse-server-meta"><span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span><span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>${room.access==='registered'?'<span class="browse-tag" style="color:#ffbb44;">🔑</span>':''}${room.access==='private'?'<span class="browse-tag" style="color:#ff6666;">🔒</span>':''}</div></div><div class="browse-players">${cur}/${max} 👥</div><button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">GİR</button>`;
+    row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = e.target.dataset.code;
+      if (code) { document.getElementById('join-code-input').value = code; showScreen('screen-join'); document.getElementById('join-status').textContent = `Katılıyor: ${room.name||code}`; }
+    });
+    listEl.appendChild(row);
+  });
+}
+
+// ─── INLINE LOAD ───
+let _selectedLoadKeyInline = null;
+function populateLoadListInline() {
+  const listEl = document.getElementById('load-list-inline');
+  const emptyEl = document.getElementById('load-empty-inline');
+  const loadBtn = document.getElementById('btn-do-load-inline');
+  listEl.querySelectorAll('.load-row').forEach(r => r.remove());
+  _selectedLoadKeyInline = null;
+  loadBtn.disabled = true; loadBtn.style.opacity = '0.4'; loadBtn.style.cursor = 'not-allowed';
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); if (k && (k.startsWith('world_')||k.startsWith('legends_world')||k.includes('_save'))) keys.push(k); }
+  if (keys.length === 0) { emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  keys.forEach(key => {
+    let displayName = key.replace(/^world_|_save$/g, '').replace(/_/g, ' ') || key;
+    let meta = '';
+    try { const d = JSON.parse(localStorage.getItem(key)||'{}'); if(d.name) displayName=d.name; if(d.mode) meta+=d.mode+' '; if(d.worldType) meta+=d.worldType; } catch(e) {}
+    const row = document.createElement('div');
+    row.className = 'load-row';
+    row.innerHTML = `<div class="load-row-info"><div class="load-world-name">${sanitizeText(displayName)}</div><div class="load-world-meta">${sanitizeText(meta||'Kayıtlı Dünya')}</div></div><span style="font-size:18px;">🌍</span>`;
+    row.dataset.key = key;
+    row.addEventListener('click', () => {
+      listEl.querySelectorAll('.load-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      _selectedLoadKeyInline = key;
+      loadBtn.disabled = false; loadBtn.style.opacity = '1'; loadBtn.style.cursor = 'pointer';
+    });
+    listEl.appendChild(row);
+  });
+}
+document.getElementById('btn-do-load-inline').addEventListener('click', () => {
+  if (!_selectedLoadKeyInline) return;
+  const statusEl = document.getElementById('load-status-inline');
+  statusEl.textContent = langData[currentLang].slWorldLoading;
+  let worldData = null;
+  try { worldData = JSON.parse(localStorage.getItem(_selectedLoadKeyInline)); } catch(e) {}
+  if (!worldData) { statusEl.textContent = langData[currentLang].slWorldReadError; return; }
+  connectLobbySocket(() => {
+    const code = genCode();
+    lobbySocket.emit('lobby:load-world', { code, host: myUsername, worldData, gameMode: worldData.mode||'survival', worldType: worldData.worldType||'infinite' });
+    lobbySocket.once('lobby:load-world:response', (res) => {
+      if (res && res.success) { statusEl.textContent = '✅ '+(currentLang==='tr'?'Yüklendi! Kod: ':'Loaded! Code: ')+code; document.getElementById('host-code-display').textContent=code; showScreen('screen-host'); }
+      else { statusEl.textContent = langData[currentLang].slServerError+(res&&res.error||(currentLang==='tr'?'Bilinmeyen':'Unknown')); }
+    });
+  });
+});
+
+// ─── INLINE CREATE ───
+document.getElementById('btn-open-create-server-inline').addEventListener('click', () => {
+  // FIX: Oluştur tamamen hesap gerektirir, test mode bypass yok
+  if (isGuestUser()) {
+    const statusEl = document.getElementById('cs-status');
+    if (statusEl) {
+      statusEl.textContent = langData[currentLang].guestCreateMsg;
+      statusEl.style.color = '#ffcc66';
+    }
+    return;
+  }
+  document.getElementById('cs-status').textContent = '';
+  document.getElementById('cs-world-name').value = '';
+  document.getElementById('cs-seed').value = '';
+  document.getElementById('create-server-modal').classList.add('active');
+});
+
+// ─── LEGACY BROWSE SCREEN (still used for back navigation) ───
+document.getElementById('btn-back-browse').addEventListener('click', () => showScreen('screen-multiplayer'));
+document.getElementById('btn-browse-refresh').addEventListener('click', fetchBrowseList);
+document.getElementById('browse-search').addEventListener('input', filterBrowseList);
+
+let _browseData = [];
+function fetchBrowseList() {
+  const statusEl = document.getElementById('browse-status');
+  const emptyEl = document.getElementById('browse-empty');
+  const listEl = document.getElementById('browse-list');
+  statusEl.textContent = 'Loading servers...';
+  statusEl.style.display = 'block';
+  emptyEl.style.display = 'none';
+  // Remove old rows
+  listEl.querySelectorAll('.browse-row').forEach(r => r.remove());
+
+  connectLobbySocket(() => {
+    lobbySocket.emit('lobby:list');
+    lobbySocket.once('lobby:list:response', (rooms) => {
+      _browseData = Array.isArray(rooms) ? rooms : [];
+      statusEl.style.display = 'none';
+      renderBrowseList(_browseData);
+    });
+    // Timeout fallback
+    setTimeout(() => {
+      if (statusEl.style.display !== 'none') {
+        statusEl.textContent = '⚠ No response from server.';
+      }
+    }, 6000);
+  });
+}
+
+function renderBrowseList(rooms) {
+  const listEl = document.getElementById('browse-list');
+  const emptyEl = document.getElementById('browse-empty');
+  listEl.querySelectorAll('.browse-row').forEach(r => r.remove());
+  // Dolu sunucuları gizle
+  const visible = (rooms||[]).filter(r => (r.players||0) < (r.maxPlayers||20));
+  if (!visible || visible.length === 0) { emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+  visible.forEach(room => {
+    const cur = room.players||0;
+    const max = room.maxPlayers||20;
+    const row = document.createElement('div');
+    row.className = 'browse-row';
+    row.innerHTML = `
+      <div class="browse-row-info">
+        <div class="browse-server-name">${sanitizeText(room.name||'Unnamed Server')}</div>
+        <div class="browse-server-host">Host: ${sanitizeText(room.host||'Unknown')}</div>
+        <div class="browse-server-meta">
+          <span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span>
+          <span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>
+          ${room.access==='registered'?'<span class="browse-tag" style="color:#ffbb44;border-color:rgba(255,180,0,.3);">🔑 Registered</span>':''}
+          ${room.access==='private'?'<span class="browse-tag" style="color:#ff6666;border-color:rgba(255,80,80,.3);">🔒 Private</span>':''}
+        </div>
+      </div>
+      <div class="browse-players">${cur}/${max} 👥</div>
+      <button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">JOIN</button>
+    `;
+    row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      const code = e.target.dataset.code;
+      if (code) {
+        document.getElementById('join-code-input').value = code;
+        showScreen('screen-join');
+        document.getElementById('join-status').textContent = `Joining: ${room.name||code}`;
+      }
+    });
+    listEl.appendChild(row);
+  });
+}
+
+function filterBrowseList() {
+  const q = document.getElementById('browse-search').value.toLowerCase().trim();
+  const available = _browseData.filter(r => (r.players||0) < (r.maxPlayers||20));
+  if (!q) { renderBrowseList(available); return; }
+  const filtered = available.filter(r => (r.name||'').toLowerCase().includes(q) || (r.host||'').toLowerCase().includes(q));
+  renderBrowseList(filtered);
+}
+
+// ─── LOAD WORLD SCREEN (legacy screens kept for compatibility) ───
+document.getElementById('btn-back-load').addEventListener('click', () => showScreen('screen-multiplayer'));
+
+let _selectedLoadKey = null;
+function populateLoadList() {
+  const listEl = document.getElementById('load-list');
+  const emptyEl = document.getElementById('load-empty');
+  const loadBtn = document.getElementById('btn-do-load');
+  listEl.querySelectorAll('.load-row').forEach(r => r.remove());
+  _selectedLoadKey = null;
+  loadBtn.disabled = true; loadBtn.style.opacity = '0.4'; loadBtn.style.cursor = 'not-allowed';
+
+  // Scan localStorage for saved world keys (adapt pattern to your save format)
+  const keys = [];
+  for (let i = 0; i < localStorage.length; i++) {
+    const k = localStorage.key(i);
+    if (k && (k.startsWith('world_') || k.startsWith('legends_world') || k.includes('_save'))) keys.push(k);
+  }
+
+  if (keys.length === 0) { emptyEl.style.display = 'block'; return; }
+  emptyEl.style.display = 'none';
+
+  keys.forEach(key => {
+    let displayName = key.replace(/^world_|_save$/g, '').replace(/_/g, ' ') || key;
+    let meta = '';
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) {
+        const d = JSON.parse(raw);
+        if (d.name) displayName = d.name;
+        if (d.mode) meta += d.mode + '  ';
+        if (d.worldType) meta += d.worldType;
+      }
+    } catch(e) {}
+    const row = document.createElement('div');
+    row.className = 'load-row';
+    row.innerHTML = `<div class="load-row-info"><div class="load-world-name">${sanitizeText(displayName)}</div><div class="load-world-meta">${sanitizeText(meta||'Saved World')}</div></div><span style="font-size:18px;">🌍</span>`;
+    row.dataset.key = key;
+    row.addEventListener('click', () => {
+      listEl.querySelectorAll('.load-row').forEach(r => r.classList.remove('selected'));
+      row.classList.add('selected');
+      _selectedLoadKey = key;
+      loadBtn.disabled = false; loadBtn.style.opacity = '1'; loadBtn.style.cursor = 'pointer';
+    });
+    listEl.appendChild(row);
+  });
+}
+
+document.getElementById('btn-do-load').addEventListener('click', () => {
+  if (!_selectedLoadKey) return;
+  const statusEl = document.getElementById('load-status');
+  statusEl.textContent = 'Uploading world data to server...';
+  let worldData = null;
+  try { worldData = JSON.parse(localStorage.getItem(_selectedLoadKey)); } catch(e) {}
+  if (!worldData) { statusEl.textContent = '⚠ Could not read world data.'; return; }
+  connectLobbySocket(() => {
+    const code = genCode();
+    lobbySocket.emit('lobby:load-world', {
+      code,
+      host: myUsername,
+      worldData,
+      gameMode: worldData.mode || 'survival',
+      worldType: worldData.worldType || 'infinite',
+    });
+    lobbySocket.once('lobby:load-world:response', (res) => {
+      if (res && res.success) {
+        statusEl.textContent = '✅ World loaded! Code: ' + code;
+        document.getElementById('host-code-display').textContent = code;
+        showScreen('screen-host');
+      } else {
+        statusEl.textContent = '⚠ Server error: ' + (res&&res.error||'Unknown');
+      }
+    });
+  });
+});
+
+// ─── CREATE SERVER MODAL ───
+function csToggle(group, val) {
+  _csSettings[group] = val;
+  if (group === 'cheats') {
+    document.getElementById('cs-cheat-off').classList.toggle('sel', val==='off');
+    document.getElementById('cs-cheat-on').classList.toggle('sel', val==='on');
+  } else if (group === 'pvp') {
+    document.getElementById('cs-pvp-on').classList.toggle('sel', val==='on');
+    document.getElementById('cs-pvp-off').classList.toggle('sel', val==='off');
+  }
+}
+
+// ─── CREATE SERVER MODAL (opened from inline panel) ───
+document.getElementById('btn-cs-cancel').addEventListener('click', () => {
+  document.getElementById('create-server-modal').classList.remove('active');
+});
+
+document.getElementById('btn-cs-create').addEventListener('click', () => {
+  const name = document.getElementById('cs-world-name').value.trim() || ('Server_' + genCode());
+  const seed = document.getElementById('cs-seed').value.trim() || String(Math.floor(Math.random()*999999));
+  const worldType = document.getElementById('cs-world-type').value;
+  const gameMode = document.getElementById('cs-game-mode').value;
+  const difficulty = document.getElementById('cs-difficulty').value;
+  const access = document.getElementById('cs-access').value;
+  const cheats = _csSettings.cheats === 'on';
+  const pvp = _csSettings.pvp === 'on';
+  const code = genCode();
+  const statusEl = document.getElementById('cs-status');
+
+  statusEl.textContent = 'Creating server...';
+
+  const maxPlayers = getMaxPlayersByRank(playerRank);
+  const serverConfig = { code, name, host: myUsername, seed, worldType, gameMode, difficulty, access, cheats, pvp, players: 1, maxPlayers };
+
+  connectLobbySocket(() => {
+    lobbySocket.emit('lobby:create', serverConfig);
+    lobbySocket.once('lobby:create:response', (res) => {
+      if (res && res.success) {
+        document.getElementById('create-server-modal').classList.remove('active');
+        document.getElementById('host-code-display').textContent = code;
+        // Apply settings to local host state
+        mpHostWorld = worldType;
+        mpGameMode = gameMode;
+        cheatsEnabled = cheats;
+        document.getElementById('host-status').textContent = '✅ Server registered! Share code: ' + code;
+        showScreen('screen-host');
+      } else {
+        statusEl.textContent = '⚠ ' + (res&&res.error||'Server unreachable. Starting locally.');
+        // Fallback: still allow local P2P hosting
+        setTimeout(() => {
+          document.getElementById('create-server-modal').classList.remove('active');
+          document.getElementById('host-code-display').textContent = code;
+          mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
+          showScreen('screen-host');
+        }, 1500);
+      }
+    });
+    // Timeout fallback
+    setTimeout(() => {
+      if (statusEl.textContent === 'Creating server...') {
+        statusEl.textContent = '⚠ Lobby server timeout. Starting locally.';
+        setTimeout(() => {
+          document.getElementById('create-server-modal').classList.remove('active');
+          document.getElementById('host-code-display').textContent = code;
+          mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
+          showScreen('screen-host');
+        }, 1500);
+      }
+    }, 7000);
+  });
+});
+
+// ── Emit lobby:join when starting a hosted room ──
+// (Hook into existing do-host button to also register on lobby)
+const _origDoHostBtn = document.getElementById('btn-do-host');
+_origDoHostBtn.addEventListener('click', () => {
+  const code = document.getElementById('host-code-display').textContent;
+  if (lobbySocket && lobbySocket.connected && code && code !== '----') {
+    lobbySocket.emit('lobby:update', { code, players: 1, status: 'open' });
+  }
+});
+
 document.getElementById('wmc-infinite').addEventListener('click',()=>{mpHostWorld='infinite';selMini(['wmc-infinite','wmc-flat','wmc-small'],'wmc-infinite');});
 document.getElementById('wmc-flat').addEventListener('click',()=>{mpHostWorld='flat';selMini(['wmc-infinite','wmc-flat','wmc-small'],'wmc-flat');});
 document.getElementById('wmc-small').addEventListener('click',()=>{mpHostWorld='small';selMini(['wmc-infinite','wmc-flat','wmc-small'],'wmc-small');});
@@ -1018,6 +1910,84 @@ const texBedrock=genTex('bedrock');
 // Bedrock önizleme (envanter/hotbar için)
 rawTexC['bedrock_top']=rawTexC['bedrock'];
 rawTexC['bedrock_side']=rawTexC['bedrock'];
+
+// ─── LAV Dokusu (Minecraft tarzı 16x16 piksel) ────────────────────────────────
+const matLava=(()=>{
+  const c=document.createElement('canvas');c.width=16;c.height=16;
+  const ctx=c.getContext('2d');
+  // Minecraft Java Edition lav dokusu renk paleti (gerçek piksel data)
+  const P=[
+    // Her satır 16 piksel: 0=koyu kırmızı, 1=turuncu, 2=parlak sarı, 3=orta turuncu, 4=kırmızı-turuncu
+    [0,0,1,1,3,3,0,0,1,1,3,3,0,0,1,1],
+    [0,1,1,3,3,3,1,1,3,3,3,1,1,3,3,0],
+    [1,1,3,3,2,3,3,3,3,2,3,3,3,3,1,1],
+    [1,3,3,2,2,2,3,3,2,2,2,3,3,3,3,1],
+    [3,3,2,2,2,2,2,2,2,2,2,2,2,3,3,3],
+    [3,2,2,2,2,2,2,2,2,2,2,2,2,2,3,3],
+    [1,1,3,2,2,2,2,2,2,2,2,2,2,3,1,1],
+    [0,1,1,3,3,2,2,2,2,2,2,3,3,1,1,0],
+    [0,0,1,1,3,3,3,2,2,3,3,3,1,1,0,0],
+    [3,0,0,1,1,3,3,3,3,3,3,1,1,0,0,3],
+    [3,3,0,0,1,1,3,4,4,3,1,1,0,0,3,3],
+    [1,3,3,0,0,1,1,4,4,1,1,0,0,3,3,1],
+    [1,1,3,3,0,0,1,1,1,1,0,0,3,3,1,1],
+    [3,1,1,3,3,4,0,0,0,0,4,3,3,1,1,3],
+    [3,3,1,1,3,3,4,4,4,4,3,3,1,1,3,3],
+    [0,3,3,1,1,3,3,3,3,3,3,1,1,3,3,0],
+  ];
+  const COLS=[
+    [180,30,0],   // 0 = koyu kırmızı
+    [210,70,0],   // 1 = koyu turuncu
+    [255,130,0],  // 2 = parlak sarı-turuncu (sıcak merkez)
+    [240,90,0],   // 3 = turuncu
+    [140,20,0],   // 4 = çok koyu kırmızı
+  ];
+  for(let y=0;y<16;y++){for(let x=0;x<16;x++){
+    const [r,g,b]=COLS[P[y][x]];
+    // Hafif gürültü ekle
+    const n=(Math.random()-0.5)*14;
+    ctx.fillStyle=`rgb(${Math.min(255,r+n|0)},${Math.max(0,g+n*0.5|0)},${Math.max(0,b|0)})`;
+    ctx.fillRect(x,y,1,1);
+  }}
+  rawTexC['lava_top']=c;rawTexC['lava_side']=c;
+  const t=new THREE.CanvasTexture(c);
+  t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  t.repeat.set(1,1);
+  return new THREE.MeshStandardMaterial({
+    map:t,roughness:0.9,metalness:0.0,
+    emissive:new THREE.Color(0xcc3300),emissiveIntensity:0.45,
+  });
+})();
+
+// ─── OBSİDYEN Dokusu ─────────────────────────────────────────────────────────
+const texObsidian=(()=>{
+  const c=document.createElement('canvas');c.width=16;c.height=16;
+  const ctx=c.getContext('2d');
+  // Koyu mor/siyah zemin
+  ctx.fillStyle='#150b24';ctx.fillRect(0,0,16,16);
+  // Mor-siyah granül/tanecik dokusu
+  const grains=[
+    {x:1,y:0,c:'#1e1030'},{x:4,y:1,c:'#251440'},{x:9,y:0,c:'#1a0e2e'},
+    {x:13,y:2,c:'#2a1848'},{x:2,y:4,c:'#1e1030'},{x:7,y:3,c:'#301a50'},
+    {x:11,y:5,c:'#251440'},{x:0,y:7,c:'#1a0e2e'},{x:5,y:7,c:'#2a1848'},
+    {x:14,y:6,c:'#1e1030'},{x:3,y:10,c:'#251440'},{x:8,y:9,c:'#1a0e2e'},
+    {x:12,y:10,c:'#2a1848'},{x:1,y:13,c:'#301a50'},{x:6,y:12,c:'#1e1030'},
+    {x:10,y:13,c:'#251440'},{x:15,y:12,c:'#1a0e2e'},{x:4,y:15,c:'#2a1848'},
+    {x:13,y:15,c:'#1e1030'},
+  ];
+  for(const g of grains){ctx.fillStyle=g.c;ctx.fillRect(g.x,g.y,2,2);}
+  // İnce mor parıltı çizgileri
+  ctx.fillStyle='#3d1e6e';
+  for(const [x,y] of [[3,2],[8,6],[5,11],[11,1],[14,9],[2,14],[7,8]]){ctx.fillRect(x,y,1,1);}
+  // Çok ince mat vurgu
+  ctx.fillStyle='#0a0514';
+  for(const [x,y] of [[0,0],[6,3],[10,7],[1,9],[15,0],[14,15]]){ctx.fillRect(x,y,1,1);}
+  rawTexC['obsidian_top']=c;rawTexC['obsidian_side']=c;
+  const t=new THREE.CanvasTexture(c);t.magFilter=THREE.NearestFilter;t.minFilter=THREE.NearestFilter;
+  return new THREE.MeshStandardMaterial({map:t,roughness:0.9,metalness:0.05});
+})();
+
 // Su önizleme dokuları (envanter/hotbar için)
 rawTexC['water_top']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(120,210,255,0.35)';for(let i=0;i<4;i++){ctx.fillRect(i%2===0?0:8,i*4,8,2);}return c;})();
 rawTexC['water_side']=(function(){const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#155a8a';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(80,170,230,0.3)';for(let i=0;i<4;i++){ctx.fillRect(0,i*4,16,2);}return c;})();
@@ -1025,8 +1995,14 @@ const matGrass=[texGS,texGS,texGT,texDirt,texGS,texGS];
 const matLog=[texLS,texLS,texLT,texLT,texLS,texLS];
 // Su materyali: yarı saydam mavi
 const matWater=(()=>{
-  const c=document.createElement('canvas');c.width=16;c.height=16;const ctx=c.getContext('2d');ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,16,16);ctx.fillStyle='rgba(100,180,255,0.12)';for(let i=0;i<4;i++){ctx.fillRect(0,i*4,16,2);}
-  const t=new THREE.CanvasTexture(c);t.wrapS=t.wrapT=THREE.ClampToEdgeWrapping;
+  const c=document.createElement('canvas');c.width=32;c.height=32;const ctx=c.getContext('2d');
+  // Daha detaylı su dokusu animasyon için
+  ctx.fillStyle='#1a6fa8';ctx.fillRect(0,0,32,32);
+  ctx.fillStyle='rgba(100,180,255,0.25)';for(let i=0;i<8;i++){ctx.fillRect(0,i*4,32,2);}
+  ctx.fillStyle='rgba(200,240,255,0.12)';for(let i=0;i<4;i++){ctx.fillRect(i*8,0,4,32);}
+  const t=new THREE.CanvasTexture(c);
+  t.wrapS=t.wrapT=THREE.RepeatWrapping;
+  t.repeat.set(1,1);
   return new THREE.MeshStandardMaterial({
     map:t,transparent:true,opacity:0.62,roughness:0.1,metalness:0.15,
     side:THREE.DoubleSide,
@@ -1111,15 +2087,14 @@ function isWaterFaceVisible(x,y,z,dx,dy,dz){
   const nx=x+dx,ny=y+dy,nz=z+dz;
   const nb=blockMap[pk(nx,ny,nz)];
   if(!nb){
-    // Komşu boş (hava) → yüzü göster
     if(worldType==='small') return true;
     const ch=getChunkAt(nx,nz);
     if(!ch||!ch.loaded){ return dy===1; }
     return true;
   }
+  // Üstte herhangi bir katı/opak blok varsa → üst yüzü gizle
+  if(dy===1 && !isAnyWater(nb) && !nb.isLiquid && !isAnyLava(nb)) return false;
   if(isAnyWater(nb)||nb.isLiquid){
-    // Yatay komşu da su ama SEVİYESİ daha düşükse (basamak/şelale geçişi) → yüzü göster.
-    // Aynı yükseklikteki normal yatay komşular için gizle (gereksiz iç yüzey yok).
     if(dy===0){
       const myLvl=Math.max(1,Math.min(8,blockMap[pk(x,y,z)]?.waterLevel??8));
       const nLvl=Math.max(1,Math.min(8,nb.waterLevel??8));
@@ -1127,8 +2102,7 @@ function isWaterFaceVisible(x,y,z,dx,dy,dz){
     }
     return false;
   }
-  if(nb.mat===texGlass) return true;             // cam → göster (şeffaf)
-  // Katı/opak blok → bu yönde su yüzü çizme (Z-fighting önleme)
+  if(nb.mat===texGlass) return true;
   return false;
 }
 // Su bloklarını takip et (sadece görünür olanlar) – tüm blockMap taramasını önle
@@ -1393,15 +2367,410 @@ function updateWater(dt){
   }
 }
 
+// ─── LAV SİSTEMİ (Cellular Automata) ────────────────────────────────────────
+// Lavın akış hızı suya göre çok daha yavaştır
+let lavaTickTimer=0;
+const LAVA_TICK_INTERVAL=1.8;  // saniye (su: 0.4s, lav çok daha yavaş)
+const lavaPendingSet=new Set(); // yayılma bekleyen lav bloklarının pk'ları
+const LAVA_MAX_SPREAD=4;        // kaynak lav bloğu en fazla 4 blok yayılır
+
+// bir bloğun lav olup olmadığını kontrol et
+function isAnyLava(b){
+  return !!(b&&(b.isLava||b.id==='lava'||b.id==='flowing_lava'));
+}
+
+// Verilen konuma lav bloğu ekle
+function addLavaBlock(bx,by,bz,level,isSource){
+  const k=pk(bx,by,bz);
+  if(blockMap[k]) return; // konum dolu
+  const bd={
+    id:isSource?'lava':'flowing_lava',
+    pos:new THREE.Vector3(bx,by,bz),
+    mat:matLava,
+    isLava:true,
+    lavaLevel:level,
+    isSource:!!isSource,
+    isSolid:false,
+    solid:false,
+    visible:false
+  };
+  blockMap[k]=bd;
+  const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];
+  if(ch) ch.blocks.push(bd);
+  showBlock(bd);refreshNbr(bx,by,bz);
+  instancesDirty=true;
+  lavaPendingSet.add(k);
+}
+
+// Lav kaynağı silindiğinde bağlı akan lavları temizle
+function drainConnectedLava(startX,startY,startZ){
+  const queue=[[startX,startY,startZ]];
+  const visited=new Set();
+  visited.add(pk(startX,startY,startZ));
+  let processed=0;
+  const MAX_DRAIN=500;
+  while(queue.length&&processed<MAX_DRAIN){
+    const [bx,by,bz]=queue.shift();
+    processed++;
+    for(const [dx,dy,dz] of CA_DIRS_ALL){
+      const nx=bx+dx,ny=by+dy,nz=bz+dz;
+      const nk=pk(nx,ny,nz);
+      if(visited.has(nk)) continue;
+      visited.add(nk);
+      const nb=blockMap[nk];
+      if(!nb||!isAnyLava(nb)) continue;
+      if(nb.isSource) continue;
+      hideBlock(nb);
+      delete blockMap[nk];
+      const ch=chunks[ck(~~(nx/CS),~~(nz/CS))];
+      if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===nx&&Math.round(b.pos.y)===ny&&Math.round(b.pos.z)===nz));
+      instancesDirty=true;
+      queue.push([nx,ny,nz]);
+    }
+  }
+}
+
+// Lav bloğunun hâlâ beslenip beslenmediğini kontrol et
+function isLavaFed(bx,by,bz){
+  const bd=blockMap[pk(bx,by,bz)];
+  if(!bd) return false;
+  if(bd.isSource) return true;
+  const above=blockMap[pk(bx,by+1,bz)];
+  if(isAnyLava(above)) return true;
+  for(const [dx,,dz] of CA_DIRS_H){
+    const nb=blockMap[pk(bx+dx,by,bz+dz)];
+    if(nb&&isAnyLava(nb)&&(nb.lavaLevel??0)>=(bd.lavaLevel??1)) return true;
+  }
+  return false;
+}
+
+// Su-Lav etkileşimi: obsidyen veya kırıktaş oluştur
+function checkLavaWaterInteraction(bx,by,bz,bd){
+  const neighbors6=[[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]];
+  for(const [dx,dy,dz] of neighbors6){
+    const nx=bx+dx,ny=by+dy,nz=bz+dz;
+    const nb=blockMap[pk(nx,ny,nz)];
+    if(!nb||!isAnyWater(nb)) continue;
+
+    // Su komşusu bulundu — lav bloğu dönüşecek
+    // Kaynak lav → lav konumu obsidyen olur
+    // Akan lav → lav konumu kırıktaş olur (Minecraft davranışı)
+    const isLavaSource=bd.isSource;
+    const targetId=isLavaSource?'obsidian':'cobblestone';
+    const targetMat=isLavaSource?texObsidian:texCob;
+    const lk=pk(bx,by,bz);
+
+    // 1) Lav bloğunu visiblePositions'tan çıkar
+    hideBlock(bd);
+    // 2) blockMap'ten sil
+    delete blockMap[lk];
+    // 3) Chunk listesinden sil
+    const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];
+    if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+    lavaPendingSet.delete(lk);
+
+    // 4) Yeni katı blok koy (obsidyen veya kırıktaş)
+    const newBd={id:targetId,pos:new THREE.Vector3(bx,by,bz),mat:targetMat,visible:false};
+    blockMap[lk]=newBd;
+    const ch2=chunks[ck(~~(bx/CS),~~(bz/CS))];
+    if(ch2) ch2.blocks.push(newBd);
+    showBlock(newBd);
+    refreshNbr(bx,by,bz);
+    instancesDirty=true;
+    return true; // dönüşüm gerçekleşti
+  }
+  return false;
+}
+
+// Lav tick fonksiyonu
+function updateLava(dt){
+  lavaTickTimer+=dt;
+  if(lavaTickTimer<LAVA_TICK_INTERVAL) return;
+  lavaTickTimer=0;
+  if(!lavaPendingSet.size) return;
+  const toProcess=Array.from(lavaPendingSet).slice(0,24);
+  for(const k of toProcess) lavaPendingSet.delete(k);
+  for(const k of toProcess){
+    const bd=blockMap[k];
+    if(!bd||!isAnyLava(bd)) continue;
+    const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+    const level=bd.lavaLevel??LAVA_MAX_SPREAD;
+
+    // Su-Lav etkileşim kontrolü (önce bak)
+    const interacted=checkLavaWaterInteraction(bx,by,bz,bd);
+    if(interacted) continue; // dönüşüm olduysa bu bloğu işleme
+
+    // Beslenme kontrolü (kaynak bloklar hep besleniyor)
+    if(!bd.isSource&&!isLavaFed(bx,by,bz)){
+      hideBlock(bd);
+      delete blockMap[k];
+      const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];
+      if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+      instancesDirty=true;
+      for(const [dx,dy,dz] of CA_DIRS_ALL){
+        const nb=blockMap[pk(bx+dx,by+dy,bz+dz)];
+        if(nb&&isAnyLava(nb)&&!nb.isSource) lavaPendingSet.add(pk(bx+dx,by+dy,bz+dz));
+      }
+      continue;
+    }
+
+    // Y sınırı
+    if(by<=-11) continue;
+
+    // Yayılma: ÖNCE AŞAĞI BAK
+    // Altı boşsa → aşağıya ak (level sıfırlanmaz, tam lav seviyesiyle iner)
+    const belowK=pk(bx,by-1,bz);
+    const belowBd=blockMap[belowK];
+    const canFlowDown = !belowBd && by-1 >= -11;
+
+    if(canFlowDown){
+      // Aşağıya akar — level LAVA_MAX_SPREAD olarak iner (Minecraft davranışı: aşağıda tam yayılma)
+      addLavaBlock(bx,by-1,bz,LAVA_MAX_SPREAD,false);
+      // Kaynak bloklar yatay da yayılır, aşağı da — continue YOK
+    }
+
+    if(isAnyLava(belowBd)){
+      lavaPendingSet.add(belowK);
+      // Aşağıda zaten lav varsa yatay yayılmaya devam et
+    }
+
+    // Yatay yayılma: level>1 ise ve ALTTA KATI ZEMİN VARSA yayıl
+    // (altta boşluk varsa sadece aşağı akar, yatay yayılma olmaz — Minecraft davranışı)
+    if(level>1 && !canFlowDown){
+      for(const [dx,,dz] of CA_DIRS_H){
+        const nk=pk(bx+dx,by,bz+dz);
+        const nb=blockMap[nk];
+        if(!nb){
+          addLavaBlock(bx+dx,by,bz+dz,level-1,false);
+        } else if(isAnyLava(nb)&&(nb.lavaLevel??0)<level-1){
+          nb.lavaLevel=level-1;
+          lavaPendingSet.add(nk);
+        }
+      }
+    }
+    // Tüm lav blokları (akan dahil) su-lav etkileşimi için yeniden pending'e eklenmeli
+    // Kaynak bloklar hep, akan bloklar da yüksek priority ile (su temas tespiti için)
+    lavaPendingSet.add(k);
+  }
+}
+
+// ─── ATEŞ SİSTEMİ ────────────────────────────────────────────────────────────
+let onFire=false;
+let fireTimer=0;
+const FIRE_DURATION=8;
+const FIRE_DAMAGE_INTERVAL=1.5; // ateşte 1.5s'de 1 hasar
+let fireDmgTimer=0;
+let lavaDamageTimer=0;
+const LAVA_DAMAGE_INTERVAL=0.5;
+
+// Ateş overlay: altta animasyonlu alevler (DOM hazır olduğunda çağrılır)
+function buildFireOverlay(){
+  const el=document.getElementById('fire-overlay');
+  if(!el||el.childNodes.length>0) return;
+  const flames=[
+    {l:0, w:16,h:42,c:'#ff6a00',d:0.55},{l:10,w:20,h:58,c:'#ff4500',d:0.42},
+    {l:22,w:14,h:48,c:'#ff8c00',d:0.68},{l:34,w:18,h:66,c:'#ff3300',d:0.38},
+    {l:45,w:22,h:75,c:'#ff5500',d:0.51},{l:58,w:15,h:52,c:'#ff6a00',d:0.72},
+    {l:68,w:19,h:60,c:'#ff4500',d:0.44},{l:78,w:13,h:46,c:'#ff8c00',d:0.60},
+    {l:86,w:17,h:70,c:'#ff3300',d:0.33},{l:93,w:14,h:44,c:'#ff5500',d:0.57},
+    // İç sarı alev
+    {l:4, w:9, h:30,c:'#ffcc00',d:0.62},{l:16,w:11,h:40,c:'#ffaa00',d:0.48},
+    {l:28,w:9, h:34,c:'#ffdd00',d:0.70},{l:40,w:13,h:46,c:'#ffcc00',d:0.40},
+    {l:52,w:9, h:36,c:'#ffaa00',d:0.58},{l:63,w:11,h:42,c:'#ffdd00',d:0.66},
+    {l:73,w:9, h:28,c:'#ffcc00',d:0.44},{l:81,w:11,h:50,c:'#ffaa00',d:0.52},
+  ];
+  flames.forEach(f=>{
+    const div=document.createElement('div');
+    div.className='fire-flame';
+    div.style.cssText=`left:${f.l}%;width:${f.w}%;height:${f.h}%;`+
+      `background:radial-gradient(ellipse at 50% 90%,${f.c},rgba(255,50,0,0.3) 70%,transparent 100%);`+
+      `animation-duration:${f.d}s;animation-delay:${(Math.random()*0.3).toFixed(2)}s;`;
+    el.appendChild(div);
+  });
+}
+
+function showFireOverlay(show){
+  const el=document.getElementById('fire-overlay');
+  if(el) el.style.opacity=show?'1':'0';
+}
+function ignitePlayer(){ onFire=true; fireTimer=FIRE_DURATION; showFireOverlay(true); }
+function extinguishPlayer(){ onFire=false; fireTimer=0; fireDmgTimer=0; showFireOverlay(false); }
+
+function inLava(px,py,pz){
+  // Oyuncunun ayak seviyesindeki bloğu direkt kontrol et
+  // camera.position.y = göz seviyesi ≈ zemin + 1.7
+  const footY  = py - 1.65; // ayak tabanı
+  const ankleY = py - 1.30; // ayak bilği
+  const kneeY  = py - 0.90; // diz
+  
+  for(const cy of [footY, ankleY, kneeY]){
+    const by = Math.floor(cy);
+    // Oyuncunun merkezi hangi bloktaysa onu ve 1 birim çevresini kontrol et
+    for(const dx of [0,1,-1]){
+      for(const dz of [0,1,-1]){
+        const bx = Math.floor(px)+dx;
+        const bz = Math.floor(pz)+dz;
+        const bd = blockMap[pk(bx,by,bz)];
+        if(!bd||!isAnyLava(bd)) continue;
+        // Oyuncu gerçekten bu bloğa yakın mı? (0.5 hitbox)
+        if(Math.abs(px - (bx+0.5)) > 0.9) continue;
+        if(Math.abs(pz - (bz+0.5)) > 0.9) continue;
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+function updateLavaDamage(dt){
+  if(gameMode==='creative'||DeathManager.isDead) return;
+  const inL=inLava(camera.position.x,camera.position.y,camera.position.z);
+  const inW=inWater(camera.position.x,camera.position.y,camera.position.z);
+  // Su söndürür
+  if(inW&&onFire){ extinguishPlayer(); }
+  if(inL){
+    // Lavda: 2 kalp (4hp) / 0.5s
+    lavaDamageTimer+=dt;
+    if(lavaDamageTimer>=LAVA_DAMAGE_INTERVAL){
+      lavaDamageTimer=0;
+      HealthManager.takeDamage(4,'lava');
+      if(typeof playDamageSound==='function') playDamageSound();
+    }
+    fireTimer=FIRE_DURATION;
+    if(!onFire) ignitePlayer();
+  } else {
+    lavaDamageTimer=0;
+    if(onFire&&!inW){
+      // Ateşte: yarım kalp (1hp) / 0.5s
+      fireTimer-=dt;
+      if(fireTimer<=0){ extinguishPlayer(); return; }
+      fireDmgTimer+=dt;
+      if(fireDmgTimer>=FIRE_DAMAGE_INTERVAL){
+        fireDmgTimer=0;
+        HealthManager.takeDamage(1,'fire');
+        if(typeof playDamageSound==='function') playDamageSound();
+      }
+    }
+  }
+}
+
+
+// ─── LAV MESH SİSTEMİ (Su gibi level bazlı yükseklik) ─────────────────────
+let lavaMesh=null;
+const visibleLavaSet=new Set();
+let lavaMeshDirty=false;
+
+function neighborLavaTopY(nb){
+  if(!nb||!isAnyLava(nb)) return null;
+  const nLvl=Math.max(1,Math.min(4,nb.lavaLevel??4));
+  return nLvl>=4?0.5:(-0.5+(nLvl/4)*1.0);
+}
+function isLavaFaceVisible(x,y,z,dx,dy,dz){
+  const nx=x+dx,ny=y+dy,nz=z+dz;
+  const nb=blockMap[pk(nx,ny,nz)];
+  if(!nb) return true;
+  if(isAnyLava(nb)){
+    if(dy===0){
+      const myLvl=Math.max(1,Math.min(4,blockMap[pk(x,y,z)]?.lavaLevel??4));
+      const nLvl=Math.max(1,Math.min(4,nb.lavaLevel??4));
+      return nLvl<myLvl;
+    }
+    return false;
+  }
+  if(nb.mat===texGlass) return true;
+  return false;
+}
+function buildLavaGeometry(){
+  const positions=[],normals=[],uvs=[],indices=[];
+  let vtx=0;
+  const UV_SET=[[0,1],[0,0],[1,0],[1,1]];
+  function pushFace(verts,n){
+    for(let i=0;i<4;i++){
+      positions.push(verts[i][0],verts[i][1],verts[i][2]);
+      normals.push(n[0],n[1],n[2]);
+      uvs.push(UV_SET[i][0],UV_SET[i][1]);
+    }
+    indices.push(vtx,vtx+1,vtx+2,vtx,vtx+2,vtx+3);
+    vtx+=4;
+  }
+  const SIDE_DEFS=[
+    {dx:1,dy:0,dz:0, n:[1,0,0], v:(t,b)=>[[0.5,t,0.5],[0.5,b,0.5],[0.5,b,-0.5],[0.5,t,-0.5]]},
+    {dx:-1,dy:0,dz:0,n:[-1,0,0],v:(t,b)=>[[-0.5,t,-0.5],[-0.5,b,-0.5],[-0.5,b,0.5],[-0.5,t,0.5]]},
+    {dx:0,dy:0,dz:1, n:[0,0,1], v:(t,b)=>[[-0.5,t,0.5],[-0.5,b,0.5],[0.5,b,0.5],[0.5,t,0.5]]},
+    {dx:0,dy:0,dz:-1,n:[0,0,-1],v:(t,b)=>[[0.5,t,-0.5],[0.5,b,-0.5],[-0.5,b,-0.5],[-0.5,t,-0.5]]},
+  ];
+  for(const k of visibleLavaSet){
+    const bd=blockMap[k];
+    if(!bd||!isAnyLava(bd)||!bd.visible) continue;
+    const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+    const lvl=Math.max(1,Math.min(4,bd.lavaLevel??4));
+    const aboveBd=blockMap[pk(bx,by+1,bz)];
+    const aboveIsLava=!!(aboveBd&&isAnyLava(aboveBd));
+    const topY=(aboveIsLava||lvl>=4)?0.5:(-0.5+(lvl/4)*1.0);
+    // Üst yüz
+    if(isLavaFaceVisible(bx,by,bz,0,1,0)){
+      pushFace([
+        [bx-0.5,by+topY,bz-0.5],[bx-0.5,by+topY,bz+0.5],
+        [bx+0.5,by+topY,bz+0.5],[bx+0.5,by+topY,bz-0.5]
+      ],[0,1,0]);
+    }
+    // Yan yüzler
+    for(const s of SIDE_DEFS){
+      if(!isLavaFaceVisible(bx,by,bz,s.dx,s.dy,s.dz)) continue;
+      const nb=blockMap[pk(bx+s.dx,by+s.dy,bz+s.dz)];
+      const nbTopY=neighborLavaTopY(nb);
+      const bottomY=(nbTopY!=null)?(nbTopY-0.015):-0.5;
+      const vl=s.v(topY,bottomY);
+      pushFace(vl.map(p=>[bx+p[0],by+p[1],bz+p[2]]),s.n);
+    }
+    // Alt yüz (her zaman)
+    pushFace([
+      [bx-0.5,by-0.5,bz+0.5],[bx-0.5,by-0.5,bz-0.5],
+      [bx+0.5,by-0.5,bz-0.5],[bx+0.5,by-0.5,bz+0.5]
+    ],[0,-1,0]);
+  }
+  if(vtx===0) return null;
+  const geo=new THREE.BufferGeometry();
+  geo.setAttribute('position',new THREE.Float32BufferAttribute(positions,3));
+  geo.setAttribute('normal',new THREE.Float32BufferAttribute(normals,3));
+  geo.setAttribute('uv',new THREE.Float32BufferAttribute(uvs,2));
+  geo.setIndex(indices);
+  return geo;
+}
+function rebuildLavaMesh(){
+  if(lavaMesh){scene.remove(lavaMesh);lavaMesh.geometry.dispose();lavaMesh=null;}
+  const geo=buildLavaGeometry();
+  if(!geo) return;
+  lavaMesh=new THREE.Mesh(geo,matLava);
+  lavaMesh.renderOrder=2;
+  lavaMesh.frustumCulled=false;
+  scene.add(lavaMesh);
+}
+
+// Lav yüzme sabitleri (sudan daha yavaş/ağır)
+const LAVA_SWIM_VEL_DAMP=0.72;
+const LAVA_SWIM_BUOYANCY=0.042;   // su ile aynı (su=0.028 değil, WATER_BUOYANCY değerini kullan)
+const LAVA_SWIM_MAX_RISE=0.065;   // tam 1 blok çıkış için yeterli
+const LAVA_SWIM_SINK_CAP=-0.07;
+const LAVA_SWIM_DOWN_SPD=0.07;
+const LAVA_SWIM_MOVE_MULT=0.30;
+let wasInLavaSwim=false;
+
+function inLavaSwim(px,py,pz){
+  // Sadece ayak veya diz seviyesi gerçekten lav bloğunun içindeyse yüzme aktif
+  // inLava ile aynı mantık — tek fark yüzme için kısmi overlap yeterli
+  return inLava(px,py,pz);
+}
+
 // ─── InstancedMesh Sistemi ───
 const BLOCK_GEO=new THREE.BoxGeometry(1,1,1);
 const DUMMY_OBJ=new THREE.Object3D();
-const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null,bedrock:null,barrier:null};
+const IMAT_KEYS={planks:null,grass:null,dirt:null,stone:null,log:null,cobblestone:null,glass:null,leaves:null,sand:null,bedrock:null,barrier:null,lava:null,obsidian:null};
 let iMeshes={};
 let instancesDirty=false;
-const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map(),bedrock:new Map(),barrier:new Map()};
-function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;IMAT_KEYS.bedrock=texBedrock;IMAT_KEYS.barrier=texBarrier;}
-function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';if(mat===texBedrock) return 'bedrock';if(mat===texBarrier) return 'barrier';return 'planks';}
+const visiblePositions={planks:new Map(),grass:new Map(),dirt:new Map(),stone:new Map(),log:new Map(),cobblestone:new Map(),glass:new Map(),leaves:new Map(),sand:new Map(),bedrock:new Map(),barrier:new Map(),lava:new Map(),obsidian:new Map()};
+function initImatKeys(){IMAT_KEYS.planks=texWood;IMAT_KEYS.grass=matGrass;IMAT_KEYS.dirt=texDirt;IMAT_KEYS.stone=texStone;IMAT_KEYS.log=matLog;IMAT_KEYS.cobblestone=texCob;IMAT_KEYS.glass=texGlass;IMAT_KEYS.leaves=texLeaves;IMAT_KEYS.sand=texSand;IMAT_KEYS.bedrock=texBedrock;IMAT_KEYS.barrier=texBarrier;IMAT_KEYS.lava=matLava;IMAT_KEYS.obsidian=texObsidian;}
+function getMatKey(mat){if(mat===texWood) return 'planks';if(mat===matGrass) return 'grass';if(mat===texDirt) return 'dirt';if(mat===texStone) return 'stone';if(mat===matLog) return 'log';if(mat===texCob) return 'cobblestone';if(mat===texGlass) return 'glass';if(mat===texLeaves) return 'leaves';if(mat===texSand) return 'sand';if(mat===texBedrock) return 'bedrock';if(mat===texBarrier) return 'barrier';if(mat===matLava) return 'lava';if(mat===texObsidian) return 'obsidian';return 'planks';}
 function rebuildInstancedMeshes(){
   for(const k in iMeshes){
     scene.remove(iMeshes[k]);
@@ -1464,6 +2833,8 @@ function castRayBlocks(orig,dir,skipWater=false){
     if(!bd.visible&&bd.id!=='barrier') continue;
     // Su içindeyken kırma modunda su bloklarını atla; alttaki katı bloğa ulaşılsın
     if(skipWater&&isAnyWater(bd)) continue;
+    // Lav bloğu HER ZAMAN raycast'te atlanır (geçilebilir sıvı)
+    if(isAnyLava(bd)) continue;
     const t=raySlabAABB(orig.x,orig.y,orig.z,dir.x,dir.y,dir.z,bx-0.5,by-0.5,bz-0.5,bx+0.5,by+0.5,bz+0.5);
     if(t!==null&&t>0.08&&t<bestT){
       const hx=orig.x+dir.x*t,hy=orig.y+dir.y*t,hz=orig.z+dir.z*t;
@@ -1474,8 +2845,12 @@ function castRayBlocks(orig,dir,skipWater=false){
 }
  
 // ─── Hotbar Önizleme ───
-const BLOCK_DEFS=[['oak_planks','oak_planks'],['grass_top','grass_side'],['dirt','dirt'],['stone','stone'],['log_top','log_side'],['cobblestone','cobblestone'],['glass','glass'],['leaves','leaves'],['sand','sand'],['water_top','water_side'],['bedrock','bedrock']];
-const BARRIER_BLOCK_IDX = 11; // BLOCK_DEFS dışında, sadece creative mod /give ile elde edilebilir
+// İndeks: 0=planks 1=grass 2=dirt 3=stone 4=log 5=cobblestone 6=glass 7=leaves 8=sand 9=water 10=bedrock 11=lava 12=obsidian
+// Bariyer BLOCK_DEFS'te YOK – sadece /give ile elde edilir (index 99)
+const BLOCK_DEFS=[['oak_planks','oak_planks'],['grass_top','grass_side'],['dirt','dirt'],['stone','stone'],['log_top','log_side'],['cobblestone','cobblestone'],['glass','glass'],['leaves','leaves'],['sand','sand'],['water_top','water_side'],['bedrock','bedrock'],['lava_top','lava_side'],['obsidian_top','obsidian_side']];
+const LAVA_BLOCK_IDX=11;     // BLOCK_DEFS[11] = lava
+const OBSIDIAN_BLOCK_IDX=12; // BLOCK_DEFS[12] = obsidian
+const BARRIER_BLOCK_IDX=99;  // Envanterde YOK; /give barrier ile alınır
 function drawIsoBlock(ctx,topC,sideC){
   if(!topC||!sideC) return; // null/undefined guard – hata önleme
   const fw=20,sh=16,cx=25,ty=3;
@@ -1516,7 +2891,11 @@ function renderInvGrid(){
     drawIsoBlock(ctx,rawTexC[def[0]],rawTexC[def[1]]);
     const lbl=document.createElement('div');lbl.className='inv-item-name';lbl.textContent=names[i]||'';
     item.appendChild(c);item.appendChild(lbl);
-    item.addEventListener('click',()=>{invSelectedBlock=i;renderInvGrid();});
+    item.addEventListener('click',()=>{
+      invSelectedBlock=i;
+      if(typeof playClickSound==='function') playClickSound();
+      renderInvGrid();
+    });
     grid.appendChild(item);
   });
 }
@@ -1581,7 +2960,15 @@ function showBlock(bd){
     waterDirty=true;
     return;
   }
-  if(hidden(bx,by,bz)){if(bd.visible){const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);visiblePositions[mk].delete(k);bd.visible=false;instancesDirty=true;}return;}
+  // Lav blokları özel lavaMesh sistemine gidiyor
+  if(isAnyLava(bd)){
+    const k=pk(bx,by,bz);
+    bd.visible=true;
+    visibleLavaSet.add(k);
+    lavaMeshDirty=true;
+    return;
+  }
+  if(hidden(bx,by,bz)&&!isAnyLava(bd)){if(bd.visible){const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);visiblePositions[mk].delete(k);bd.visible=false;instancesDirty=true;}return;}
   const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);
   if(bd.visible&&visiblePositions[mk].has(k)) return;
   visiblePositions[mk].set(k,bd.pos);bd.visible=true;instancesDirty=true;
@@ -1593,27 +2980,40 @@ function hideBlock(bd){
     visibleWaterSet.delete(pk(bx,by,bz));
     bd.visible=false;waterDirty=true;return;
   }
+  if(isAnyLava(bd)){
+    const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
+    visibleLavaSet.delete(pk(bx,by,bz));
+    bd.visible=false;lavaMeshDirty=true;return;
+  }
   const bx=Math.round(bd.pos.x),by=Math.round(bd.pos.y),bz=Math.round(bd.pos.z);
   const k=pk(bx,by,bz);const mk=getMatKey(bd.mat);
   visiblePositions[mk].delete(k);bd.visible=false;instancesDirty=true;
 }
 function refreshNbr(bx,by,bz){
-  // Komşu blokları yeniden değerlendir: gizli olanları göster, görünür olanları gizle
   [[1,0,0],[-1,0,0],[0,1,0],[0,-1,0],[0,0,1],[0,0,-1]].forEach(([dx,dy,dz])=>{
     const nb=blockMap[pk(bx+dx,by+dy,bz+dz)];
     if(!nb) return;
     if(isAnyWater(nb)||nb.isLiquid){waterDirty=true;waterPendingSet.add(pk(bx+dx,by+dy,bz+dz));return;}
-    // hidden() ile yeniden değerlendir
+    if(isAnyLava(nb)){lavaMeshDirty=true;return;}
     if(hidden(bx+dx,by+dy,bz+dz)){
       if(nb.visible) hideBlock(nb);
     } else {
       if(!nb.visible) showBlock(nb);
     }
   });
-  // Su bloğun kendisi de etkilenebilir
+  // Altında su bloğu varsa (üstüne blok konuldu) → yeniden çiz
+  const belowWater=blockMap[pk(bx,by-1,bz)];
+  if(belowWater&&(isAnyWater(belowWater)||belowWater.isLiquid)){
+    waterDirty=true;waterPendingSet.add(pk(bx,by-1,bz));
+  }
+  // Altında su bloğu varsa (üstüne blok konuldu) → yüz güncelle
+  const belowK=pk(bx,by-1,bz);
+  const belowBd=blockMap[belowK];
+  if(belowBd&&(isAnyWater(belowBd)||belowBd.isLiquid)){waterDirty=true;waterPendingSet.add(belowK);}
+  // Su bloğun kendisi etkilenebilir
   const self=blockMap[pk(bx,by,bz)];
   if(self&&(isAnyWater(self)||self.isLiquid)){waterDirty=true;waterPendingSet.add(pk(bx,by,bz));}
-} 
+}
 // ─── Chunks ───
 const CS=16,SWS=48;
 const chunks={},blockMap={};
@@ -1903,6 +3303,7 @@ function genChunk(cx,cz){
 function isOpaqueBlock(b){
   if(!b) return false;              // boş veya yüklenmemiş → saydam
   if(isAnyWater(b)||b.isLiquid) return false;
+  if(isAnyLava(b)) return false;   // lav → saydam (komşuları gizleme)
   if(b.mat===texGlass) return false;
   if(b.mat===texLeaves) return false;
   if(b.id==='barrier') return false; // barrier görünmez → komşuları gizleme
@@ -1920,6 +3321,8 @@ function hidden(x,y,z){
       return b&&(isAnyWater(b)||b.isLiquid||isOpaqueBlock(b));
     });
   }
+  // Lav blokları: her zaman görünür (instancedMesh'te, showBlock'ta özel yol)
+  if(isAnyLava(self)) return false;
   // Komşu yoksa (chunk yüklenmemiş) → saydam say → blok her zaman görünür
   // Bu chunk sınırında bloğun kaybolmasını ve yüzen taş oluşmasını önler
   const n1=blockMap[pk(x+1,y,z)]; if(!n1||!isOpaqueBlock(n1)) return false;
@@ -2367,98 +3770,50 @@ function mkPlayer(name,rank,rankColor){
 
 // rank: ham rütbe adı (örn "Owner / Developer") veya null/undefined -> formatRankTag ile [TAG] üretilir
 // rankColor: rütbenin hex rengi (tag bu renkte basılır, isim her zaman beyaz kalır)
-// ── Nickname sprite canvas çizim fonksiyonu (sweep animasyonu için ayrı) ──
-function _drawNameCanvas(ctx,cW,cH,safeN,tag,color,tagW,nameW,sweepT){
-  ctx.clearRect(0,0,cW,cH);
-  // Minecraft tarzı yarı saydam siyah arka plan
-  ctx.fillStyle='rgba(0,0,0,0.45)';
-  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
-  else{ctx.fillRect(2,4,cW-4,cH-8);}
-
-  ctx.font='bold 22px "MatrixSans-Rg",monospace';
-  ctx.textBaseline='middle';
-  const totalW=tagW+nameW;
-  let x=(cW-totalW)/2;
-  const yMid=cH/2-1;
-
-  if(tag){
-    ctx.textAlign='left';
-    if(sweepT!==null){
-      // ── Sweep efekti: chat'tekiyle aynı formül ──
-      // sweepT: 0-1 arası zaman (performance.now() % 5000 / 5000)
-      // Beyaz parlak şerit soldan sağa süpürülür, sonra anında başa döner (chat'teki %30 zamanında)
-      const progress=sweepT<0.30?(sweepT/0.30):1.1; // 0→1 arası (0.30'da tamamlanır, sonra gizlenir)
-      const gradX=x+tagW*progress; // şeridin merkezi
-      const grad=ctx.createLinearGradient(gradX-tagW*0.18,0,gradX+tagW*0.18,0);
-      grad.addColorStop(0,color);
-      grad.addColorStop(0.35,color);
-      grad.addColorStop(0.5,'#ffffff');
-      grad.addColorStop(0.65,color);
-      grad.addColorStop(1,color);
-      ctx.shadowColor=color;ctx.shadowBlur=10;
-      ctx.fillStyle=(progress<=1.02)?grad:color;
-      ctx.fillText(tag+' ',x,yMid);
-      ctx.fillText(tag+' ',x,yMid);
-      ctx.shadowBlur=0;
-    } else {
-      // Sweep yok: sabit renk + glow
-      ctx.shadowColor=color;ctx.shadowBlur=10;
-      ctx.fillStyle=color;
-      ctx.fillText(tag+' ',x,yMid);
-      ctx.fillText(tag+' ',x,yMid);
-      ctx.shadowBlur=0;
-    }
-    x+=tagW;
-  }
-  ctx.textAlign='left';
-  ctx.fillStyle='#fff';
-  ctx.fillText(safeN,x,yMid);
-}
-
-// Animasyonlu sprite listesi
-const _animSprites=[];
-
 function mkSprite(name,rank,rankColor){
   const safeN=sanitizeName(name).substring(0,14);
   const tag=formatRankTag(rank);
   const color=tag?resolveRankColor(rank,rankColor):'#ffffff';
-  const hasSweep=tag&&canUseShout(rank); // chat'tekiyle aynı koşul
 
+  // Genişliği içeriğe göre ölçmek için geçici context
   const measure=document.createElement('canvas').getContext('2d');
-  measure.font='bold 22px "MatrixSans-Rg",monospace';
+  measure.font='bold 22px "MatrixSans-Rg", monospace';
   const tagW=tag?measure.measureText(tag+' ').width:0;
   const nameW=measure.measureText(safeN).width;
   const padding=24;
   const cW=Math.max(160,Math.min(380,Math.ceil(tagW+nameW+padding*2)));
   const cH=48;
 
-  const c=document.createElement('canvas');c.width=cW;c.height=cH;
-  const ctx=c.getContext('2d');
-  _drawNameCanvas(ctx,cW,cH,safeN,tag,color,tagW,nameW,hasSweep?0:null);
+  const c=document.createElement('canvas');c.width=cW;c.height=cH;const ctx=c.getContext('2d');
+  // Minecraft tarzı: tam şeffaf olmayan, yarı saydam siyah şerit (arkadaki dünya hafifçe görünür)
+  ctx.fillStyle="rgba(0, 0, 0, 0.45)";
+  if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
+  else {ctx.fillRect(2,4,cW-4,cH-8);}
+
+  ctx.font='bold 22px "MatrixSans-Rg", monospace';ctx.textBaseline='middle';
+  const totalW=tagW+nameW;
+  let x=(cW-totalW)/2;
+  const yMid=cH/2-1;
+  if(tag){
+    ctx.textAlign='left';
+    ctx.shadowColor=color;
+    ctx.shadowBlur=10;
+    ctx.fillStyle=color;
+    ctx.fillText(tag+' ',x,yMid);
+    ctx.fillText(tag+' ',x,yMid); // glow'u belirginleştirmek için iki kez çiz
+    ctx.shadowBlur=0;
+    x+=tagW;
+  }
+  ctx.textAlign='left';
+  ctx.fillStyle='#fff';
+  ctx.fillText(safeN,x,yMid);
 
   const tex=new THREE.CanvasTexture(c);
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tex,depthTest:false,transparent:true}));
+  // Genişliği canvas oranına göre ölçekle, yükseklik sabit kalsın (Sprite her zaman kameraya bakar)
   const baseH=.46;
   sp.scale.set(2.4*(cW/256),baseH,1);
-
-  if(hasSweep){
-    // Animasyon için kaydet — her sprite kendi fazını taşır (chat'teki animationDelay gibi)
-    const phase=performance.now()%5000/5000; // başlangıç fazı
-    _animSprites.push({sp,ctx,c,tex,cW,cH,safeN,tag,color,tagW,nameW,phase});
-  }
   return sp;
-}
-
-// ── Her frame sweep sprite'larını güncelle ──
-function tickNameSprites(){
-  if(!_animSprites.length) return;
-  const t=performance.now()/5000; // global zaman (5s periyot)
-  for(const s of _animSprites){
-    if(!s.sp.parent) continue; // sahneden kaldırılmış
-    const sweepT=((t+s.phase)%1); // 0-1 arası, her sprite farklı fazda başlar
-    _drawNameCanvas(s.ctx,s.cW,s.cH,s.safeN,s.tag,s.color,s.tagW,s.nameW,sweepT);
-    s.tex.needsUpdate=true;
-  }
 }
 
 // ─── Hayvanlar ───
@@ -2580,13 +3935,57 @@ function updateFoods(dt){
 let health=20,hunger=20,gameMode='survival';
 let healthTimer=0,hungerTimer=0;
 let fallStartY=null,lastGrounded=true,voidDamageTimer=0;
+// Minecraft tarzı piksel kalp çizer (9x9 canvas)
+function drawMCHeart(ctx,full,half){
+  ctx.clearRect(0,0,9,9);
+  const body=[[1,0],[2,0],[3,0],[5,0],[6,0],[7,0],[0,1],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[7,1],[8,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[8,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[8,3],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[7,4],[2,5],[3,5],[4,5],[5,5],[6,5],[3,6],[4,6],[5,6],[4,7]];
+  // Gölge
+  ctx.fillStyle='rgba(0,0,0,0.6)';
+  for(const[x,y] of body) ctx.fillRect(x+1,y+1,1,1);
+  // Renk
+  ctx.fillStyle= full?'#c00000': half?'#c00000':'#2a2a2a';
+  for(const[x,y] of body) ctx.fillRect(x,y,1,1);
+  // Yarım: sağ tarafı sil
+  if(half){ctx.fillStyle='#2a2a2a';for(const[x,y] of body) if(x>=5) ctx.fillRect(x,y,1,1);}
+  // Vurgu
+  if(full||half){ctx.fillStyle='#ff5555';ctx.fillRect(2,1,2,1);ctx.fillRect(1,2,1,1);}
+}
+// Minecraft tarzı tavuk but çizer (9x9 canvas)
+function drawMCHunger(ctx,full,half){
+  ctx.clearRect(0,0,9,9);
+  const body=[[2,0],[3,0],[4,0],[5,0],[1,1],[2,1],[3,1],[4,1],[5,1],[6,1],[0,2],[1,2],[2,2],[3,2],[4,2],[5,2],[6,2],[7,2],[0,3],[1,3],[2,3],[3,3],[4,3],[5,3],[6,3],[7,3],[1,4],[2,4],[3,4],[4,4],[5,4],[6,4],[2,5],[3,5],[4,5],[5,5],[3,6],[4,6],[3,7],[4,7]];
+  ctx.fillStyle='rgba(0,0,0,0.5)';
+  for(const[x,y] of body) ctx.fillRect(x+1,y+1,1,1);
+  ctx.fillStyle= full?'#c87828': half?'#c87828':'#2a2a2a';
+  for(const[x,y] of body) ctx.fillRect(x,y,1,1);
+  if(half){ctx.fillStyle='#2a2a2a';for(const[x,y] of body) if(x>=4) ctx.fillRect(x,y,1,1);}
+  if(full||half){ctx.fillStyle='#f0b864';ctx.fillRect(3,1,2,1);ctx.fillRect(2,2,1,1);}
+}
 function updateBars(){
   const hr=document.getElementById('hearts-row');
   const hnr=document.getElementById('hunger-row');
   if(!hr||!hnr) return;
   hr.innerHTML='';hnr.innerHTML='';
-  for(let i=0;i<10;i++){const sp=document.createElement('span');sp.className='hrt';sp.textContent=health>i*2+1?'❤️':'🖤';hr.appendChild(sp);}
-  for(let i=0;i<10;i++){const sp=document.createElement('span');sp.className='hnr';sp.textContent=hunger>i*2+1?'🍗':'🩶';hnr.appendChild(sp);}
+
+  // Kalpler: 0..9 → soldan sağa, 0.index en sol (en önce dolu)
+  for(let i=0;i<10;i++){
+    const hp=health-(i*2); // i=0: hp=health (tam), i=9: hp=health-18
+    const cv=document.createElement('canvas');cv.width=9;cv.height=9;
+    cv.style.cssText='width:16px;height:16px;image-rendering:pixelated;display:block;';
+    drawMCHeart(cv.getContext('2d'), hp>=2, hp===1);
+    hr.appendChild(cv);
+  }
+
+  // Açlık: soldan dolu, sağdan azalır
+  // i=0 en sol (her zaman dolu eğer hunger>=2), i=9 en sağ (ilk boşalan)
+  for(let i=0;i<10;i++){
+    const fp=hunger-(i*2);
+    const cv=document.createElement('canvas');cv.width=9;cv.height=9;
+    cv.style.cssText='width:16px;height:16px;image-rendering:pixelated;display:block;';
+    drawMCHunger(cv.getContext('2d'), fp>=2, fp===1);
+    hnr.appendChild(cv);
+  }
+
   document.body.classList.toggle('low-health', health <= 6);
 }
 function setGameMode(m){
@@ -2645,14 +4044,26 @@ const HealthManager = {
             overlay = document.createElement('div');
             overlay.id = 'damage-overlay';
             overlay.style.cssText = `
-                position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-                background: rgba(0,0,0,0.3); pointer-events: none; z-index: 1000;
-                opacity: 0; transition: opacity 0.1s;
+                position:fixed;top:0;left:0;width:100%;height:100%;
+                pointer-events:none;z-index:1200;opacity:0;
+                transition:opacity 0.05s ease-in;
+                background:radial-gradient(ellipse at center,
+                  rgba(255,0,0,0) 55%,
+                  rgba(200,0,0,0.45) 75%,
+                  rgba(160,0,0,0.75) 90%,
+                  rgba(120,0,0,0.90) 100%);
+                box-shadow:inset 0 0 0 6px rgba(200,0,0,0.85),
+                           inset 0 0 25px 8px rgba(255,0,0,0.5);
             `;
             document.body.appendChild(overlay);
         }
-        overlay.style.opacity = '0.6';
-        setTimeout(() => { if (overlay) overlay.style.opacity = '0'; }, 120);
+        overlay.style.transition='opacity 0.04s ease-in';
+        overlay.style.opacity='1';
+        clearTimeout(overlay._t);
+        overlay._t=setTimeout(()=>{
+          overlay.style.transition='opacity 0.5s ease-out';
+          overlay.style.opacity='0';
+        }, 60);
     }
 };
 
@@ -2681,6 +4092,8 @@ const DeathManager = {
         else if (reason === 'suffocation') template = dL.deathChat.suffocation;
         else if (reason === 'void') template = dL.deathChat.void;
         else if (reason === 'fall') template = dL.deathChat.fall;
+        else if (reason === 'lava') template = dL.deathChat.lava;
+        else if (reason === 'fire') template = dL.deathChat.fire;
 
         if (template) {
             const chatMsg = template.replace('%V%', victim);
@@ -2704,8 +4117,9 @@ const DeathManager = {
     respawn() {
         this.isDead = false;
         isDead = false;
-        isResetting = false; // Fix 3: Respawn sonrası void kilidini temizle
+        isResetting = false;
         HealthManager.reset();
+        extinguishPlayer();
         hunger = 20;
         updateBars();
         // Respawn: gercek yuzey Y'sine gore konumlan
@@ -2875,7 +4289,7 @@ function sendBlock(data){
 function sendToAll(data){if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(data);});else if(guestConn?.open) guestConn.send(data);}
  
 function applyBlockSync(data){
-  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock];
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock,matLava,texObsidian];
   if(data.action==='break'){
     const {bx,by,bz}=data;
     const bd=blockMap[pk(bx,by,bz)];if(!bd) return;
@@ -2889,17 +4303,21 @@ function applyBlockSync(data){
   else if(data.action==='place'){
     const {bx,by,bz,slot:s}=data;
     const occ=blockMap[pk(bx,by,bz)];
-    const safeSlot=Math.max(0,Math.min(10,parseInt(s)||0));
+    const safeSlot=Math.max(0,Math.min(99,parseInt(s)||0));
     if(occ){
-      if(safeSlot!==9&&(isAnyWater(occ)||occ.isLiquid)) clearBlockAt(bx,by,bz);
+      if(safeSlot!==9&&safeSlot!==11&&(isAnyWater(occ)||occ.isLiquid)) clearBlockAt(bx,by,bz);
       else return;
     }
-    const blockIds=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock'];
+    const blockIds=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock','lava','obsidian'];
     let bd;
     if(safeSlot===9){
       bd={id:'water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:8,visible:false};
     } else if(safeSlot===10){
       bd={id:'bedrock',pos:new THREE.Vector3(bx,by,bz),mat:texBedrock,visible:false};
+    } else if(safeSlot===11){
+      bd={id:'lava',pos:new THREE.Vector3(bx,by,bz),mat:matLava,isLava:true,lavaLevel:LAVA_MAX_SPREAD,isSource:true,isSolid:false,solid:false,visible:false};
+    } else if(safeSlot===BARRIER_BLOCK_IDX){
+      bd={id:'barrier',pos:new THREE.Vector3(bx,by,bz),mat:texBarrier,visible:false};
     } else {
       bd={id:blockIds[safeSlot]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[safeSlot]||texWood,visible:false};
     }
@@ -2907,6 +4325,7 @@ function applyBlockSync(data){
     const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
     showBlock(bd);refreshNbr(bx,by,bz);instancesDirty=true;
     if(safeSlot===9) waterPendingSet.add(pk(bx,by,bz));
+    if(safeSlot===11) lavaPendingSet.add(pk(bx,by,bz));
   }
 }
  
@@ -3194,7 +4613,9 @@ function processCmd(raw){
       sand:8,kum:8,
       water:9,su:9,
       bedrock:10,kayadibi:10,bedrak:10,
-      barrier:11,bariyer:11,
+      barrier:99,bariyer:99,
+      lava:11,lav:11,
+      obsidian:12,obsidyen:12,
     };
     const blockIdx = BLOCK_NAME_MAP[blockName];
     if(blockIdx===undefined){addChat(null,d.giveUnknownBlock+blockName,true,'warn');return;}
@@ -3221,6 +4642,7 @@ function cleanupMP(){
   Object.values(hostConns).forEach(({conn})=>{try{conn.close();}catch(e){}});hostConns={};
   if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;}
   isMP=false;amHost=false;opPlayers.clear();myOp=false;
+  // Lobby socket: only disconnect on full quit, not on back navigation
 }
 function goToMainMenu(){
   if(document.pointerLockElement===document.body) document.exitPointerLock();
@@ -3236,7 +4658,7 @@ function goToMainMenu(){
   const mo=document.getElementById('menu-overlay');
   mo.style.display='flex';
   mo.style.pointerEvents='auto';
-  mo.style.zIndex='1000';
+  mo.style.zIndex='1000'; // FIX: Ana menüye dönerken z-index geri yükle
   showScreen('screen-main');
 }
 function hideGameHUD(){
@@ -3337,6 +4759,29 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
   myPeer.on('open',()=>{
     worldSeed=(Math.random()*2147483647)|0||42317;
     st.textContent='Oda hazır!';isMP=true;amHost=true;hostConns={};connTokens.clear();
+
+    // ── 15 saniye boş kalırsa oda kapansın ──
+    let _emptyRoomTimer = null;
+    function _startEmptyTimer(){
+      if(_emptyRoomTimer) clearTimeout(_emptyRoomTimer);
+      _emptyRoomTimer = setTimeout(()=>{
+        if(isMP && amHost && Object.keys(hostConns).length === 0){
+          addChat(null,'[Sunucu]: 15 saniye boyunca kimse girmedi. Sunucu kapatılıyor.',true,'warn');
+          setTimeout(()=>goToMainMenu(), 1500);
+        }
+      }, 15000);
+    }
+    _startEmptyTimer(); // Sunucu açılır açılmaz sayaç başlar
+
+    // ── Lobby'e oyuncu sayısı bildir ──
+    function _updateLobbyPlayerCount(){
+      const cnt = 1 + Object.keys(hostConns).length; // host + guests
+      const serverCode = document.getElementById('host-code-display').textContent;
+      if(lobbySocket && lobbySocket.connected && serverCode && serverCode !== '----'){
+        lobbySocket.emit('lobby:update', { code: serverCode, players: cnt, status: 'open' });
+      }
+    }
+
     myPeer.on('connection',conn=>{
       conn.on('open',()=>{
         conn.on('data',data=>{
@@ -3349,6 +4794,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             if(hostConns[pid]){return;}
             connTokens.set(pid,safeName);
             hostConns[pid]={conn,name:safeName,x:8,y:2.1,z:8,ry:0,rank:safeRank,rankColor:safeRankColor};
+            // Oyuncu girdi → boş oda sayacını iptal et
+            if(_emptyRoomTimer){ clearTimeout(_emptyRoomTimer); _emptyRoomTimer=null; }
+            _updateLobbyPlayerCount();
             const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,rank:playerRank,rankColor:playerRankColor}];
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry,rank:p.rank,rankColor:p.rankColor});});
             conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName)});
@@ -3490,6 +4938,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
           remRP(pid);delete hostConns[pid];
           addChat(null,nm+langData[currentLang].sysLeft,true);
           Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name:nm});});
+          _updateLobbyPlayerCount();
+          // Eğer sunucu boşaldıysa 15 saniyelik sayacı başlat
+          if(Object.keys(hostConns).length === 0) _startEmptyTimer();
         });
       });
     });
@@ -3693,6 +5144,7 @@ const BLOCK_HARDNESS={
   stone:1500, cobblestone:1800,
   glass:300,
   leaves:200,
+  obsidian:120000, // 2 dakika (survival modda)
   bedrock:Infinity, // Survival/Adventure'da kırılamaz
   default:800
 };
@@ -3818,6 +5270,7 @@ function getNormalizedBlockType(blockType) {
   if (bt === 'sand')                            return 'sand';
   if (bt === 'bedrock')                         return 'bedrock';
   if (bt === 'water')                           return 'default';
+  if (bt === 'obsidian')                        return 'stone'; // Obsidyen → taş sesleri
   return blockSoundPool[bt] ? bt : 'default';
 }
 
@@ -4156,24 +5609,21 @@ function tickBreaking(dt){
   if(!h.length||h[0].distance>=5){stopBreaking();return;}
   const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
   if(!bd||bd.isWater){stopBreaking();return;}
-  // Bedrock: survival/adventure'da tamamen imkansız
   if(bd.id==='bedrock'){stopBreaking();return;}
-  // Kırılamaz bloklar
   if(bd.unbreakable){stopBreaking();return;}
   const tKey=pk(bx,by,bz);
   if(!breakTarget||pk(breakTarget.x,breakTarget.y,breakTarget.z)!==tKey){
     breakProgress=0;breakTarget={x:bx,y:by,z:bz};
+    // Obsidyen ve sert bloklar: kırılmaya BAŞLAR BAŞLAMAZ crack 1. aşamayı göster
+    _showCrackMesh(bx,by,bz,0);
   }
-  // dt saniye cinsinden, hardness ms cinsinden → normalize
   const prevStage=Math.floor(breakProgress*CRACK_STAGES);
   breakProgress+=dt/(getHardness(bd)/1000);
   const newStage=Math.floor(breakProgress*CRACK_STAGES);
-  // 🎵 HIT: İlk çatlak aşamasında (stage 1) bir kez hit sesi
   if(prevStage===0&&newStage>=1){
     const mk=getNormalizedBlockType(getMatKey(bd.mat));
     playBlockSound(mk,'hit');
   }
-  // 🎵 MINING: Her 2 aşamada bir mining sesi (ritmik darbe)
   if(newStage>prevStage&&newStage%2===1){
     const mk=getNormalizedBlockType(getMatKey(bd.mat));
     playBlockSound(mk,'mining');
@@ -4186,10 +5636,8 @@ function tickBreaking(dt){
     }
   }
   if(breakProgress>=1){
-    // 🎵 DIG: Blok tamamen kırılınca
     const mk=getNormalizedBlockType(getMatKey(bd.mat));
     playBlockSound(mk,'dig');
-    // 3D debris patlaması
     spawnBlockDebris(bx, by, bz, _debrisColorFromMat(bd.mat));
     breakB(breakTouchX,breakTouchY,breakTouchIsc);
     stopBreaking();
@@ -4203,6 +5651,10 @@ function resetWorld(){
   if(waterMesh){scene.remove(waterMesh);waterMesh.geometry.dispose();waterMesh=null;}
   waterDirty=false;
   waterPendingSet.clear();
+  lavaPendingSet.clear();
+  visibleLavaSet.clear();
+  if(lavaMesh){scene.remove(lavaMesh);lavaMesh.geometry&&lavaMesh.geometry.dispose();lavaMesh=null;}
+  lavaMeshDirty=false;
   for(const mk in visiblePositions) visiblePositions[mk]=new Map();
   instancesDirty=false;
   Object.keys(chunks).forEach(k=>delete chunks[k]);
@@ -4236,9 +5688,11 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
   // Dünya sınırı duvarını oluştur
   _buildWorldBorderMesh();
   if(device==='mobile'){const el=document.documentElement;if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();}
-  document.getElementById('menu-overlay').style.display='none';
-  // Fix 2: Oyun başlarken menü katmanı dokunmatik girdi almayacak
-  document.getElementById('menu-overlay').style.pointerEvents='none';
+  // FIX: Menü overlay'ini tamamen gizle ve girdi almayacak hale getir
+  const mo=document.getElementById('menu-overlay');
+  mo.style.display='none';
+  mo.style.pointerEvents='none';
+  mo.style.zIndex='-1'; // oyun sırasında hiçbir zaman üste çıkmasın
   document.getElementById('death-screen').classList.remove('active');
   ['game-title','hotbar','mode-indicator'].forEach(id=>document.getElementById(id).style.display='block');
   document.getElementById('hotbar').style.display='flex';
@@ -4277,6 +5731,7 @@ if (device === 'pc') {
   if(!isMP) worldSeed=(Math.random()*2147483647)|0||42317;
   WorldGen.clearBiomeCache(); // seed değişti, önbelleği temizle
   initImatKeys();
+  buildFireOverlay();
 
   // Spawn noktasinin gercek yuzey yuksekligini hesapla
   function getSpawnY(wx,wz){
@@ -4340,6 +5795,19 @@ function breakB(x,y,isc){
   const h=getHit(x,y,isc,_inWater);if(!h.length||h[0].distance>=5) return;
   const {blockPos:{x:bx,y:by,z:bz},bd}=h[0];
   if(bd.unbreakable||bd.isWater) return; // suyu kırma
+  if(bd.isLava){
+    // Lav kırıldığında: kaynaksa bağlı lavları da kurut
+    const wasSource=bd.isSource;
+    hideBlock(bd);
+    delete blockMap[pk(bx,by,bz)];
+    const chL=chunks[ck(~~(bx/CS),~~(bz/CS))];
+    if(chL) chL.blocks=chL.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+    lavaPendingSet.delete(pk(bx,by,bz));
+    instancesDirty=true;
+    if(wasSource) drainConnectedLava(bx,by,bz);
+    sendBlock({type:'block',action:'break',bx,by,bz});
+    return;
+  }
   // ─── Bedrock Kırma Kuralı: Sadece Creative modda kırılabilir ───
   if(bd.id==='bedrock'&&gameMode!=='creative') return;
   // ─── Bariyer Kırma: Sadece Creative modda kırılabilir ───
@@ -4457,68 +5925,62 @@ function placeB(x,y,isc){
   const h=getHit(x,y,isc);if(!h.length||h[0].distance>=5) return;
   const {blockPos:{x:hbx,y:hby,z:hbz},face:{normal:n},bd:hitBd}=h[0];
   const actualBlock=hotbarSlots[slot];
-  // Su "değiştirilebilir" sayılır: katı blok yerleştirirken doğrudan baktığın su bloğunun
-  // İÇİNE/yerine koyulur (artık komşuya kaydırılmıyor) – suya blok koyma engeli kaldırıldı.
-  // Ama su bloğu yerleştirirken (slot=9): su üstüne su koyma engeli – normal yüz yönünde yerleştir
-  const replacingWater = actualBlock!==9 && !!(hitBd&&(isAnyWater(hitBd)||hitBd.isLiquid));
-  const bx = replacingWater ? hbx : hbx+Math.round(n.x);
-  const by = replacingWater ? hby : hby+Math.round(n.y);
-  const bz = replacingWater ? hbz : hbz+Math.round(n.z);
+  // Su veya lav bloğu "değiştirilebilir" — içine başka sıvı veya katı koyulabilir
+  const hitIsLiquid=!!(hitBd&&(isAnyWater(hitBd)||hitBd.isLiquid||isAnyLava(hitBd)));
+  const replacingLiquid = actualBlock!==9 && actualBlock!==LAVA_BLOCK_IDX
+    ? hitIsLiquid  // katı blok: sıvı yerine koy
+    : (actualBlock===9 && hitBd&&isAnyLava(hitBd))  // su: lav yerine koy
+    || (actualBlock===LAVA_BLOCK_IDX && hitBd&&(isAnyWater(hitBd)||hitBd.isLiquid)); // lav: su yerine koy
+  const bx = replacingLiquid ? hbx : hbx+Math.round(n.x);
+  const by = replacingLiquid ? hby : hby+Math.round(n.y);
+  const bz = replacingLiquid ? hbz : hbz+Math.round(n.z);
   if(colPlace(bx,by,bz)) return;
   // ─── Bariyer Bloğu Üzerine Blok Koyma Engeli ───
-  // Bariyer bloğunun olduğu konuma veya bariyer bloğunun üstüne başka blok koyulamaz
   const existingAtTarget=blockMap[pk(bx,by,bz)];
-  if(existingAtTarget&&existingAtTarget.id==='barrier') return; // barrier'ın içine koyma
-  // Bariyer üstüne barrier koyamaz
+  if(existingAtTarget&&existingAtTarget.id==='barrier') return;
   if(actualBlock===BARRIER_BLOCK_IDX){
     const belowAtTarget=blockMap[pk(bx,by-1,bz)];
     if(belowAtTarget&&belowAtTarget.id==='barrier') return;
   }
-  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock,texBarrier];
-  const ids=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock','barrier'];
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock,matLava,texObsidian];
+  const ids=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock','lava','obsidian'];
   const k=pk(bx,by,bz);
-  // ─── Bedrock Sınırı: Y <= -11 konumuna blok yerleştirilemez ───
   if(by <= -11) return;
-  // ─── Yükseklik Limiti: Y >= 250 konumuna blok yerleştirilemez ───
-  if(by >= 250){
-    addChat(null, langData[currentLang].heightLimitMsg, true, 'warn');
-    return;
-  }
+  if(by >= 250){ addChat(null, langData[currentLang].heightLimitMsg, true, 'warn'); return; }
   if(actualBlock===9){
-    // Su kaynağı yerleştir
+    // Su kaynağı yerleştir — lav varsa önce kaldır (su-lav etkileşimi)
     const existingAtK=blockMap[k];
-    // Hedef hücrede zaten bir blok var mı?
     if(existingAtK){
-      if(isAnyWater(existingAtK)||existingAtK.isLiquid){
-        const lvl=existingAtK.waterLevel??8;
-        if(lvl<8){
-          // Eksik su → tam su kaynağına dönüştür
-          existingAtK.waterLevel=8;
-          existingAtK.isSource=true;
-          waterDirty=true;
-          waterPendingSet.add(k);
-        }
-        // Tam su ise hiçbir şey yapma
+      if(isAnyLava(existingAtK)){
+        // Lav yerine su: lavı kaldır, su koy (obsidyen/cobblestone oluşacak)
+        hideBlock(existingAtK);
+        delete blockMap[k];
+        lavaPendingSet.delete(k);
+        const chL=chunks[ck(~~(bx/CS),~~(bz/CS))];
+        if(chL) chL.blocks=chL.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+        lavaMeshDirty=true;
+        // Su yerine katı blok oluştur (obsidyen veya kırıktaş)
+        const solidId=existingAtK.isSource?'obsidian':'cobblestone';
+        const solidMat=existingAtK.isSource?texObsidian:texCob;
+        const solidBd={id:solidId,pos:new THREE.Vector3(bx,by,bz),mat:solidMat,visible:false};
+        blockMap[k]=solidBd;
+        const chS=chunks[ck(~~(bx/CS),~~(bz/CS))];if(chS) chS.blocks.push(solidBd);
+        showBlock(solidBd);refreshNbr(bx,by,bz);instancesDirty=true;
         return;
       }
-      return; // Başka katı blok varsa da koyma
+      if(isAnyWater(existingAtK)||existingAtK.isLiquid){
+        const lvl=existingAtK.waterLevel??8;
+        if(lvl<8){ existingAtK.waterLevel=8; existingAtK.isSource=true; waterDirty=true; waterPendingSet.add(k); }
+        return;
+      }
+      return;
     }
-    // Hedef hücre boş ama bakılan yüz bir su bloğunun üstüyse (n.y=1):
-    // altındaki blok tam su ise üstüne yeni su ekleme — zaten dolup taşacak
     const belowK=pk(bx,by-1,bz);
     const belowBd=blockMap[belowK];
     if(belowBd&&(isAnyWater(belowBd)||belowBd.isLiquid)){
       const belowLvl=belowBd.waterLevel??8;
-      if(belowLvl>=8&&belowBd.isSource){
-        // Altı tam kaynak su → üstü zaten kaynaktan doluyor, yeni blok gereksiz
-        return;
-      }
-      // Altı eksik su → bu konuma kaynak koy, eksik suyu doldur
-      belowBd.waterLevel=8;
-      belowBd.isSource=true;
-      waterDirty=true;
-      waterPendingSet.add(belowK);
-      return;
+      if(belowLvl>=8&&belowBd.isSource){ return; }
+      belowBd.waterLevel=8; belowBd.isSource=true; waterDirty=true; waterPendingSet.add(belowK); return;
     }
     const bd={id:'water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:8,isSource:true,visible:false};
     blockMap[k]=bd;
@@ -4527,7 +5989,91 @@ function placeB(x,y,isc){
     sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
     return;
   }
-  // Hedef hücrede su varsa önce temizle (su yerine katı blok koyulabilsin)
+  // ─── Lav Kaynağı Yerleştir (slot 11) ─────────────────────────────────────
+  if(actualBlock===LAVA_BLOCK_IDX){
+    // Lav koyarken özel raycast: lav bloklarını da vurabilir (skip etme)
+    // Önce normal raycast (katı bloklar için)
+    // Sonra ayrı bir lav-farkında raycast yap
+    let lavTargetBd=null, lavTargetK=null, lavTargetX=bx, lavTargetY=by, lavTargetZ=bz;
+
+    // Kamera yönünde lav bloğu var mı kontrol et (6 blok mesafede)
+    const orig=new THREE.Vector3();
+    camera.getWorldPosition(orig);
+    const dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion).normalize();
+    const px2=Math.floor(orig.x),py2=Math.floor(orig.y),pz2=Math.floor(orig.z);
+    let bestLavT=6;
+    for(let ddx=-6;ddx<=6;ddx++){for(let ddy=-10;ddy<=6;ddy++){for(let ddz=-6;ddz<=6;ddz++){
+      const lbx=px2+ddx,lby=py2+ddy,lbz=pz2+ddz;
+      const lbd=blockMap[pk(lbx,lby,lbz)];
+      if(!lbd||!isAnyLava(lbd)) continue;
+      const t=raySlabAABB(orig.x,orig.y,orig.z,dir.x,dir.y,dir.z,lbx-0.5,lby-0.5,lbz-0.5,lbx+0.5,lby+0.5,lbz+0.5);
+      if(t!==null&&t>0.08&&t<bestLavT){
+        bestLavT=t;
+        lavTargetBd=lbd; lavTargetK=pk(lbx,lby,lbz);
+        lavTargetX=lbx; lavTargetY=lby; lavTargetZ=lbz;
+      }
+    }}}
+
+    // Eğer bakılan konumda akan lav varsa → kaynağa çevir
+    if(lavTargetBd&&lavTargetK&&bestLavT<5){
+      if(!lavTargetBd.isSource||(lavTargetBd.lavaLevel??0)<LAVA_MAX_SPREAD){
+        lavTargetBd.isSource=true;
+        lavTargetBd.lavaLevel=LAVA_MAX_SPREAD;
+        lavTargetBd.id='lava';
+        lavaPendingSet.add(lavTargetK);
+        lavaMeshDirty=true;
+        sendBlock({type:'block',action:'place',bx:lavTargetX,by:lavTargetY,bz:lavTargetZ,slot:actualBlock});
+      }
+      return;
+    }
+
+    // Yoksa hedef konuma yeni kaynak lav koy (boş konuma veya su varsa yerine)
+    const existingAtK=blockMap[k];
+    if(existingAtK){
+      if(isAnyLava(existingAtK)){
+        existingAtK.lavaLevel=LAVA_MAX_SPREAD; existingAtK.isSource=true;
+        lavaPendingSet.add(k); lavaMeshDirty=true;
+        return;
+      }
+      if(isAnyWater(existingAtK)||existingAtK.isLiquid){
+        // Su yerine lav: önce suyu kaldır
+        hideBlock(existingAtK);
+        delete blockMap[k];
+        waterPendingSet.delete(k);
+        visibleWaterSet.delete(k);
+        const chW=chunks[ck(~~(bx/CS),~~(bz/CS))];
+        if(chW) chW.blocks=chW.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+        waterDirty=true;
+        // Lav koy
+        const lavaBd2={id:'lava',pos:new THREE.Vector3(bx,by,bz),mat:matLava,isLava:true,lavaLevel:LAVA_MAX_SPREAD,isSource:true,isSolid:false,solid:false,visible:false};
+        blockMap[k]=lavaBd2;
+        const chL2=chunks[ck(~~(bx/CS),~~(bz/CS))];if(chL2) chL2.blocks.push(lavaBd2);
+        showBlock(lavaBd2);refreshNbr(bx,by,bz);
+        lavaPendingSet.add(k);lavaMeshDirty=true;
+        sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
+        return;
+      }
+      return;
+    }
+    const lavaBd={id:'lava',pos:new THREE.Vector3(bx,by,bz),mat:matLava,isLava:true,lavaLevel:LAVA_MAX_SPREAD,isSource:true,isSolid:false,solid:false,visible:false};
+    blockMap[k]=lavaBd;
+    const chL=chunks[ck(~~(bx/CS),~~(bz/CS))];if(chL) chL.blocks.push(lavaBd);
+    showBlock(lavaBd);refreshNbr(bx,by,bz);
+    lavaPendingSet.add(k);instancesDirty=true;
+    sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
+    return;
+  }
+  // ─── Bariyer Bloğu Yerleştir (slot 99) ────────────────────────────────────
+  if(actualBlock===BARRIER_BLOCK_IDX){
+    if(blockMap[k]) return;
+    const barrierBd={id:'barrier',pos:new THREE.Vector3(bx,by,bz),mat:texBarrier,visible:false};
+    blockMap[k]=barrierBd;
+    const chB=chunks[ck(~~(bx/CS),~~(bz/CS))];if(chB) chB.blocks.push(barrierBd);
+    showBlock(barrierBd);refreshNbr(bx,by,bz);instancesDirty=true;
+    updateBarrierVisibility();
+    sendBlock({type:'block',action:'place',bx,by,bz,slot:actualBlock});
+    return;
+  }
   if(blockMap[k]&&(isAnyWater(blockMap[k])||blockMap[k].isLiquid)) clearBlockAt(bx,by,bz);
   const bd={id:ids[actualBlock]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[actualBlock]||texWood,visible:false};
   blockMap[k]=bd;
@@ -4563,6 +6109,7 @@ function doLeftClick(x,y,isc){
 function isSolidBlock(bd){
   if(!bd) return false;
   if(isAnyWater(bd)||bd.isLiquid) return false; // su -> solid DEĞİL, trigger/liquid
+  if(isAnyLava(bd)) return false; // lav -> solid DEĞİL, geçilebilir
   return true;
 }
 function col(px,py,pz){
@@ -4729,11 +6276,21 @@ function setupPC(){
       if(isFlying){if(dbl){isFlying=false;velY=0;}}
       else{
         const swimNow=inWater(camera.position.x,camera.position.y,camera.position.z);
-        if(swimNow){/* suda: spaceDown=true, buoyancy fiziği loop'ta işlenir – ani fırlama yok */}
+        const lavSwimNow=!swimNow&&inLavaSwim(camera.position.x,camera.position.y,camera.position.z);
+        if(swimNow||lavSwimNow){/* sıvı içinde: buoyancy loop'ta işlenir */}
         else if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}
-        else if(grounded){velY=JUMP;grounded=false;
-          // 🎵 JUMP: Zıplama anında zemin bloğunun sesi
-          playBlockSound(_getFloorMatKey(),'jump');
+        else if(grounded){
+          const hxJ=camera.position.x,hzJ=camera.position.z,rJ=0.26;
+          const nYJ=camera.position.y+JUMP;
+          const ceilJ=
+            isSolidBlock(blockMap[pk(Math.floor(hxJ),   Math.floor(nYJ+0.02),Math.floor(hzJ))])||
+            isSolidBlock(blockMap[pk(Math.floor(hxJ-rJ),Math.floor(nYJ+0.02),Math.floor(hzJ-rJ))])||
+            isSolidBlock(blockMap[pk(Math.floor(hxJ+rJ),Math.floor(nYJ+0.02),Math.floor(hzJ-rJ))])||
+            isSolidBlock(blockMap[pk(Math.floor(hxJ-rJ),Math.floor(nYJ+0.02),Math.floor(hzJ+rJ))])||
+            isSolidBlock(blockMap[pk(Math.floor(hxJ+rJ),Math.floor(nYJ+0.02),Math.floor(hzJ+rJ))]);
+          if(!ceilJ){ velY=JUMP;grounded=false;
+            playBlockSound(_getFloorMatKey(),'jump');
+          }
         }
       }
     }
@@ -4840,14 +6397,24 @@ function setupMobile(){
   let mLastJump=0;
   document.getElementById('btn-mobile-jump').addEventListener('touchstart',e=>{
     e.preventDefault();e.stopPropagation();if(DeathManager.isDead) return;
-    spaceDown=true; // PC'deki Space davranışıyla aynı: suda yüzerken buoyancy için de gerekli
+    spaceDown=true;
     const now=Date.now(),dbl=(now-mLastJump)<350;mLastJump=now;
     const swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
+    const lavSwim=!swimming&&inLavaSwim(camera.position.x,camera.position.y,camera.position.z);
     if(isFlying){if(dbl){isFlying=false;velY=0;}}
-    else if(swimming){/* suda sadece buoyancy - velY=JUMP yok */}
-    else{if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}else if(grounded){velY=JUMP;grounded=false;
-      // 🎵 JUMP: Mobil zıplama anında zemin bloğunun sesi
-      playBlockSound(_getFloorMatKey(),'jump');
+    else if(swimming||lavSwim){/* sıvı içinde: sadece buoyancy, velY=JUMP yok */}
+    else{if(gameMode==='creative'&&dbl){isFlying=true;velY=0;grounded=false;}else if(grounded){
+      // Tavan kontrolü: zıplamadan önce kafanın üstünde yer var mı?
+      const hx2=camera.position.x,hz2=camera.position.z,r3=0.26;
+      const nextY2=camera.position.y+JUMP;
+      const ceilBlocked=
+        isSolidBlock(blockMap[pk(Math.floor(hx2),    Math.floor(nextY2+0.02),Math.floor(hz2))])||
+        isSolidBlock(blockMap[pk(Math.floor(hx2-r3), Math.floor(nextY2+0.02),Math.floor(hz2-r3))])||
+        isSolidBlock(blockMap[pk(Math.floor(hx2+r3), Math.floor(nextY2+0.02),Math.floor(hz2-r3))])||
+        isSolidBlock(blockMap[pk(Math.floor(hx2-r3), Math.floor(nextY2+0.02),Math.floor(hz2+r3))])||
+        isSolidBlock(blockMap[pk(Math.floor(hx2+r3), Math.floor(nextY2+0.02),Math.floor(hz2+r3))]);
+      if(!ceilBlocked){ velY=JUMP;grounded=false;
+      playBlockSound(_getFloorMatKey(),'jump'); }
     }}
   },{passive:false});
   document.getElementById('btn-mobile-jump').addEventListener('touchend',e=>{e.preventDefault();spaceDown=false;},{passive:false});
@@ -4963,19 +6530,50 @@ let lastCX=0,lastCZ=0,lastT=performance.now();
 let _dirtyThrottle=0;
 function animate(){
   requestAnimationFrame(animate);
+  // Sekme gizlenince lav sesini durdur
+  document.addEventListener('visibilitychange',()=>{
+    if(document.hidden && _sndLava && !_sndLava.paused){
+      _sndLava.pause(); _lavaAmbientActive=false;
+    }
+  });
   if(!deviceMode){renderer.render(scene,camera);return;}
   const now=performance.now(),dt=Math.min((now-lastT)/1000,.05);lastT=now;
   procQueues(); // Her frame chunk işle
   if(instancesDirty){_dirtyThrottle++;if(_dirtyThrottle>=3){rebuildInstancedMeshes();instancesDirty=false;_dirtyThrottle=0;}}
-  if(waterDirty){rebuildWaterMesh();waterDirty=false;}
+  // waterDirty is rebuilt inside the !isPaused block below
   if(!isPaused&&!isChatOpen&&!DeathManager.isDead){
     updateAnimals(dt);updateFoods(dt);updateHealthSystem(dt);
     updateWater(dt);
+    if(waterDirty){rebuildWaterMesh();waterDirty=false;}
+    if(lavaMeshDirty){rebuildLavaMesh();lavaMeshDirty=false;}
+    updateLava(dt);
+    updateLavaDamage(dt);
+    updateLavaSounds(dt);
+    // ─── SU & LAV DOKU ANİMASYONU ──────────────────────────────────────────
+    // Su: akan yönde UV kayması (akan bloklarda hız daha yüksek)
+    if(matWater&&matWater.map){
+      // Akan su → hızlı akış, durgun su → yavaş dalgalanma
+      const hasFlowing = Array.from(visibleWaterSet).some(k=>{const b=blockMap[k];return b&&b.id==='flowing_water';});
+      const waterFlowSpeed = hasFlowing ? 0.35 : 0.08;
+      matWater.map.offset.y = ((matWater.map.offset.y||0) + dt * waterFlowSpeed) % 1;
+      matWater.map.offset.x = ((matWater.map.offset.x||0) + dt * waterFlowSpeed * 0.3) % 1;
+      matWater.map.needsUpdate=true;
+    }
+    // Lav: yavaş kaynayan/patlayan loop animasyonu
+    if(matLava&&matLava.map){
+      const hasFlowingLava = Array.from(visibleLavaSet).some(k=>{const b=blockMap[k];return b&&b.id==='flowing_lava';});
+      const lavaFlowSpeed = hasFlowingLava ? 0.12 : 0.04;
+      matLava.map.offset.x = ((matLava.map.offset.x||0) + dt * lavaFlowSpeed) % 1;
+      matLava.map.offset.y = ((matLava.map.offset.y||0) + dt * lavaFlowSpeed * 0.6) % 1;
+      // Lav parıltısı: emissiveIntensity hafif titremesi
+      matLava.emissiveIntensity = 0.40 + Math.sin(now * 0.0025) * 0.08;
+      matLava.map.needsUpdate=true;
+    }
+    // ───────────────────────────────────────────────────────────────────────
     SuffocationManager.checkSuffocation();
     if(isBreaking) tickBreaking(dt);
     tickDebris(dt);
     tickBarrierSprites();
-    tickNameSprites();
     tickWorldBorder(dt);
     const fV=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);    const sV=new THREE.Vector3(1,0,0).applyQuaternion(camera.quaternion);
     fV.y=0;fV.normalize();sV.y=0;sV.normalize();
@@ -4995,7 +6593,8 @@ function animate(){
       if(worldType==='infinite'&&(Math.abs(camera.position.x-lastCX)>8||Math.abs(camera.position.z-lastCZ)>8)){updateChunks();lastCX=camera.position.x;lastCZ=camera.position.z;}
     } else {
       const swimming=inWater(camera.position.x,camera.position.y,camera.position.z);
-      const moveSpd=swimming?spd*WATER_MOVE_MULT:spd; // su içinde sürtünme nedeniyle daha yavaş hareket
+      const lavSwimming=!swimming&&inLavaSwim(camera.position.x,camera.position.y,camera.position.z);
+      const moveSpd=(swimming||lavSwimming)?spd*(lavSwimming?LAVA_SWIM_MOVE_MULT:WATER_MOVE_MULT):spd;
       const curMV=swimming?new THREE.Vector3(mV.x*moveSpd/spd,mV.y,mV.z*moveSpd/spd):mV;
       if(curMV.lengthSq()>0){
         const st=8,stepX=curMV.x/st,stepZ=curMV.z/st;
@@ -5048,7 +6647,6 @@ function animate(){
         else                 velY=Math.max(velY-WATER_GRAV,WATER_SINK_CAP);
         camera.position.y+=velY;
         grounded=false; fallStartY=null;
-        // Suyun dibindeki katı bloğa gömülmeyi engelle
         const wFloor=Math.floor((camera.position.y-1.70)+.01);
         const bdFloor=blockMap[pk(Math.floor(camera.position.x),wFloor,Math.floor(camera.position.z))];
         if(isSolidBlock(bdFloor)){
@@ -5056,16 +6654,46 @@ function animate(){
           if(camera.position.y<restY){camera.position.y=restY;velY=Math.max(velY,0);}
         }
         wasSwimming=true;
-      } else {
-        // Su çıkışı: wasSwimming bayrağı varsa ani fırlama olmasın
-        if(wasSwimming){
-          // Su çıkış hızını sınırla – WATER_MAX_RISE'ın biraz üstü yeterli
-          velY=Math.min(velY, WATER_MAX_RISE + 0.01);
+        wasInLavaSwim=false;
+      } else if(lavSwimming){
+        // Lavda yüzme: sudan çok daha ağır/viskoz
+        velY*=LAVA_SWIM_VEL_DAMP;
+        if(spaceDown)        velY=Math.min(velY+LAVA_SWIM_BUOYANCY, LAVA_SWIM_MAX_RISE);
+        else if(isCrouching) velY=Math.max(velY-LAVA_SWIM_DOWN_SPD, LAVA_SWIM_SINK_CAP);
+        else                 velY=Math.max(velY-WATER_GRAV*0.85, LAVA_SWIM_SINK_CAP);
+        camera.position.y+=velY;
+        grounded=false; fallStartY=null;
+        const lFloor=Math.floor((camera.position.y-1.70)+.01);
+        const bdLFloor=blockMap[pk(Math.floor(camera.position.x),lFloor,Math.floor(camera.position.z))];
+        if(isSolidBlock(bdLFloor)){
+          const restY=lFloor+.5+1.70;
+          if(camera.position.y<restY){camera.position.y=restY;velY=Math.max(velY,0);}
         }
+        wasInLavaSwim=true;
         wasSwimming=false;
+      } else {
+        // Su/lav çıkışı: ani fırlama olmasın
+        if(wasSwimming){ velY=Math.min(velY, WATER_MAX_RISE+0.01); }
+        if(wasInLavaSwim){ velY=Math.min(velY, LAVA_SWIM_MAX_RISE+0.01); }
+        wasSwimming=false;
+        wasInLavaSwim=false;
+        // Tavan kontrolü ÖNCE: yukarı gidiyorsa kafanın gireceği yeri kontrol et
+        if(velY>0){
+          const nextY=camera.position.y+velY;
+          const hx=camera.position.x, hz=camera.position.z;
+          const r2=0.26;
+          const headBlocked=
+            isSolidBlock(blockMap[pk(Math.floor(hx),    Math.floor(nextY+0.02),Math.floor(hz))])||
+            isSolidBlock(blockMap[pk(Math.floor(hx-r2), Math.floor(nextY+0.02),Math.floor(hz-r2))])||
+            isSolidBlock(blockMap[pk(Math.floor(hx+r2), Math.floor(nextY+0.02),Math.floor(hz-r2))])||
+            isSolidBlock(blockMap[pk(Math.floor(hx-r2), Math.floor(nextY+0.02),Math.floor(hz+r2))])||
+            isSolidBlock(blockMap[pk(Math.floor(hx+r2), Math.floor(nextY+0.02),Math.floor(hz+r2))]);
+          if(headBlocked){
+            velY=0; // tavana çarptı, yukarı geçemez
+          }
+        }
         velY=Math.max(velY-GRAV,-MFALL);camera.position.y+=velY;
         const prevGrounded=grounded;
-        // Zemin tespiti: hem 0.05 hem 0.01 ile kontrol et (daha güvenilir)
         const onGround=col(camera.position.x,camera.position.y-0.05,camera.position.z)
                      ||col(camera.position.x,camera.position.y-0.01,camera.position.z);
         if(onGround){
@@ -5074,7 +6702,12 @@ function animate(){
             if(camera.position.y<cy) camera.position.y=cy;
           }
         } else grounded=false;
-        if(velY>0&&col(camera.position.x,camera.position.y+.05,camera.position.z)) velY=0;
+        // Altına hızlıca blok konulunca: yukarı it (sıkışma engeli)
+        const feetBd=blockMap[pk(Math.floor(camera.position.x),Math.floor(camera.position.y-1.70),Math.floor(camera.position.z))];
+        if(feetBd&&isSolidBlock(feetBd)){
+          const pushY=(Math.floor(camera.position.y-1.70))+0.5+1.70;
+          if(camera.position.y<pushY) camera.position.y=pushY;
+        }
         if(!grounded&&velY<0&&fallStartY===null) fallStartY=camera.position.y;
       }
     }
@@ -5108,6 +6741,10 @@ if (camera.position.y < -100) {
   if(waterMesh) waterMesh.visible=!_eyeInWater;
   const _wv=document.getElementById('water-vignette');
   if(_wv) _wv.style.opacity=_eyeInWater?'1':'0';
+  // Lav vignette
+  const _eyeInLava=inLava(camera.position.x,camera.position.y,camera.position.z);
+  const _lv=document.getElementById('lava-vignette');
+  if(_lv) _lv.style.opacity=_eyeInLava?'1':'0';
   // 🎵 ADIM SESİ: Yürürken zemin bloğuna göre ritimli ses
   const _isMovingNow=(mv.f||mv.b||mv.l||mv.r||jActive)&&!isPaused&&!DeathManager.isDead;
   tickStepSounds(dt,_isMovingNow);
@@ -5226,6 +6863,109 @@ function updatePlayerAnimations(dt){
 const _sndClick  = (()=>{ try{ const a=new Audio('click.mp3');  a.preload='auto'; return a; }catch(e){ return null; } })();
 const _sndDamage = (()=>{ try{ const a=new Audio('damage.mp3'); a.preload='auto'; return a; }catch(e){ return null; } })();
 
+// ─── LAV SES SİSTEMİ ─────────────────────────────────────────────────────────
+const _sndLava = (()=>{
+  try{
+    const a = new Audio('lava_sound.mp3');
+    a.loop    = true;
+    a.volume  = 0;
+    a.preload = 'auto';
+    return a;
+  }catch(e){ return null; }
+})();
+
+const _sndLavaPop = (()=>{
+  try{
+    const a = new Audio('lavapop_sound.mp3');
+    a.preload = 'auto';
+    a.volume  = 0.7;
+    return a;
+  }catch(e){ return null; }
+})();
+
+// Lav ambient durum takibi
+let _lavaAmbientActive = false;
+let _lavaPopTimer      = 0;
+let _lavaPopInterval   = 3.5; // ilk pop aralığı (saniye)
+
+function _lavaPopRandom(){
+  // 2.5 – 6 saniye arası rastgele aralık
+  return 2.5 + Math.random() * 3.5;
+}
+
+function updateLavaSounds(dt){
+  if(!_sndLava && !_sndLavaPop) return;
+
+  // Yakında lav bloğu var mı? (8 blok yarıçapında)
+  const cx = Math.floor(camera.position.x);
+  const cy = Math.floor(camera.position.y);
+  const cz = Math.floor(camera.position.z);
+  const RANGE = 8;
+  let nearLava = false;
+  let nearestDist = Infinity;
+
+  outer:
+  for(let dx=-RANGE;dx<=RANGE;dx++){
+    for(let dy=-4;dy<=4;dy++){
+      for(let dz=-RANGE;dz<=RANGE;dz++){
+        const bd = blockMap[pk(cx+dx, cy+dy, cz+dz)];
+        if(bd && isAnyLava(bd)){
+          const dist = Math.sqrt(dx*dx + dy*dy + dz*dz);
+          if(dist < nearestDist) nearestDist = dist;
+          nearLava = true;
+          break outer;
+        }
+      }
+    }
+  }
+
+  // ── Ambient ses (lava_sound.mp3) ─────────────────────────────────────────
+  if(_sndLava){
+    const targetVol = nearLava
+      ? Math.max(0.15, Math.min(1.0, 1.0 - (nearestDist / (RANGE + 2))))
+      : 0;
+
+    if(nearLava && !_lavaAmbientActive){
+      _lavaAmbientActive = true;
+      _sndLava.currentTime = Math.random() * (_sndLava.duration || 0);
+      _sndLava.play().catch(()=>{});
+    } else if(!nearLava && _lavaAmbientActive){
+      _lavaAmbientActive = false;
+      // Yavaşça kıs sonra durdur
+      _sndLava._fadingOut = true;
+    }
+
+    if(_sndLava._fadingOut){
+      _sndLava.volume = Math.max(0, _sndLava.volume - dt * 1.5);
+      if(_sndLava.volume <= 0){
+        _sndLava.pause();
+        _sndLava._fadingOut = false;
+      }
+    } else {
+      // Hedef sese yumuşak geçiş (fade in/out)
+      const diff = targetVol - _sndLava.volume;
+      _sndLava.volume = Math.max(0, Math.min(1, _sndLava.volume + diff * dt * 2.5));
+    }
+  }
+
+  // ── Pop sesi (lavapop_sound.mp3) ─────────────────────────────────────────
+  if(_sndLavaPop && nearLava){
+    _lavaPopTimer += dt;
+    if(_lavaPopTimer >= _lavaPopInterval){
+      _lavaPopTimer = 0;
+      _lavaPopInterval = _lavaPopRandom();
+
+      // Mesafeye göre volume
+      const popVol = Math.max(0.15, Math.min(0.85, 1.0 - (nearestDist / (RANGE + 4))));
+      const clone  = new Audio(_sndLavaPop.src);
+      clone.volume = popVol;
+      clone.play().catch(()=>{});
+    }
+  } else if(!nearLava){
+    _lavaPopTimer = 0;
+  }
+}
+
 function playClickSound(){
   if(!_sndClick) return;
   try{
@@ -5289,7 +7029,15 @@ function playDamageSound(){
        e.target.closest('#inv-overlay')||
        e.target.closest('.inv-item')||
        e.target.closest('.inv-hslot')||
-       e.target.closest('#skin-file-label')
+       e.target.closest('#skin-file-label')||
+       e.target.closest('.browse-join-btn')||
+       e.target.closest('#btn-browse-refresh')||
+       e.target.closest('.load-row')||
+       e.target.closest('.cs-toggle')||
+       e.target.closest('#btn-cs-create')||
+       e.target.closest('#btn-cs-cancel')||
+       e.target.closest('#btn-testmode-continue')||
+       e.target.closest('#btn-testmode-cancel')
     ){
       if(!EXCLUDED_IDS.has(e.target.id)&&!e.target.closest('#joystick-zone')&&!e.target.closest('#joystick-container')){
         playClickSound();
