@@ -1380,14 +1380,12 @@ let lobbySocket = null;
 let _testModePendingAction = null;
 let _csSettings = { cheats: 'off', pvp: 'on' };
 
-// ── PRE-WARM: Sayfa yüklendiği anda sunucuyu arka planda uyandır ──
-// Render.com ücretsiz plan uyku modundan çıkması ~1dk sürebilir.
-// Oyuncu henüz ana menüdeyken biz sunucuya gizli bir HTTP isteği atıyoruz.
+// ── PRE-WARM: Sayfa yüklenince sunucuyu arka planda uyandır ──
 document.addEventListener('DOMContentLoaded', () => {
   setTimeout(() => {
     fetch(RENDER_SERVER_URL, { method: 'GET', mode: 'no-cors', cache: 'no-store' })
-      .catch(() => {}); // Hata olursa sessizce geç — bu sadece ön ısıtma
-  }, 2000); // 2 sn bekle, önce sayfa render etsin
+      .catch(() => {});
+  }, 2000);
 });
 
 // ── Test Mode Modal ──
@@ -1410,72 +1408,46 @@ function requireAccountOrTestMode(action) {
   showTestModeModal(action);
 }
 
-// ── Connect to lobby socket (Gelişmiş bağlantı + 60s timeout toleransı) ──
-// - Hem WebSocket hem Polling desteklenir (upgrade: true ile önce WS dener)
-// - reconnectionAttempts: 5 ile bağlantı kesilirse tekrar dener
-// - timeout: 60000 — Render cold-start için 1dk tolerans
-let _lobbyConnectQueue = []; // Bağlantı gelene kadar bekleyen callback'ler
-let _lobbyConnecting = false; // Çift bağlantı girişimini önler
+// ── Connect to lobby socket (gelişmiş: kuyruk + 60s tolerans) ──
+let _lobbyConnectQueue = [];
+let _lobbyConnecting = false;
 
 function connectLobbySocket(cb) {
-  // Zaten bağlıysa direkt devam et
-  if (lobbySocket && lobbySocket.connected) {
-    if (cb) cb();
-    return;
-  }
-  // Callback kuyruğa ekle
+  if (lobbySocket && lobbySocket.connected) { if(cb) cb(); return; }
   if (cb) _lobbyConnectQueue.push(cb);
-
-  // Zaten bağlanmaya çalışılıyorsa yeni socket açma — sadece kuyruğa ekledik, bekle
   if (_lobbyConnecting) return;
-
-  // Var olan ama bağlı olmayan socket'i temizle
-  if (lobbySocket) {
-    try { lobbySocket.disconnect(); } catch(e) {}
-    lobbySocket = null;
-  }
-
+  if (lobbySocket) { try { lobbySocket.disconnect(); } catch(e) {} lobbySocket = null; }
   _lobbyConnecting = true;
-
   try {
     lobbySocket = io(RENDER_SERVER_URL, {
-      transports: ['websocket', 'polling'], // Önce WebSocket dene, olmadı polling'e düş
-      upgrade: true,                         // Bağlantı sağlayınca WebSocket'e yükselt
-      reconnectionAttempts: 5,              // Kopunca 5 kez tekrar dene
-      reconnectionDelay: 2000,              // 2s ara ile
-      timeout: 60000                        // Render cold-start için 60s bağlantı toleransı
+      transports: ['websocket', 'polling'],
+      upgrade: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 2000,
+      timeout: 60000
     });
-
     lobbySocket.on('connect', () => {
       _lobbyConnecting = false;
-      // Kuyrukta bekleyen tüm callback'leri çalıştır
       const queue = _lobbyConnectQueue.splice(0);
       queue.forEach(fn => { try { fn(); } catch(e) {} });
     });
-
     lobbySocket.on('connect_error', (err) => {
       console.warn('[Lobby] Bağlantı hatası:', err && err.message);
-      // Durum mesajlarını güncelle (varsa)
       const browseEl = document.getElementById('browse-status-inline');
       if (browseEl && browseEl.style.display !== 'none') {
         browseEl.textContent = '⏳ Sunucu uyandırılıyor, lütfen bekleyin...';
       }
       const csEl = document.getElementById('cs-status');
       if (csEl && csEl.textContent && csEl.textContent.includes('Creating')) {
-        csEl.textContent = '⏳ Sunucu uyandırılıyor...';
+        csEl.textContent = '⏳ Sunucu uyandırılıyor, lütfen bekleyin...';
       }
     });
-
-    lobbySocket.on('disconnect', () => {
-      _lobbyConnecting = false;
-    });
-
+    lobbySocket.on('disconnect', () => { _lobbyConnecting = false; });
   } catch(e) {
     _lobbyConnecting = false;
     console.warn('[Lobby] Socket.IO yüklenemedi:', e);
     const st = document.getElementById('browse-status-inline');
     if (st) st.textContent = '⚠ Socket.IO failed to load.';
-    // Kuyruğu temizle — callback'leri çağırmıyoruz, bağlantı olmadı
     _lobbyConnectQueue = [];
   }
 }
@@ -1540,36 +1512,24 @@ function fetchBrowseListInline() {
   statusEl.style.display = 'block';
   emptyEl.style.display = 'none';
   listEl.querySelectorAll('.browse-row').forEach(r => r.remove());
-
-  // Bağlantı durumuna göre mesajı güncelle
   let _wakeupTimer = null;
   if (!lobbySocket || !lobbySocket.connected) {
-    // Sunucu uyku modundaysa sabırla bekle mesajı göster
     _wakeupTimer = setTimeout(() => {
       if (statusEl.style.display !== 'none') {
         statusEl.textContent = '⏳ Sunucu uyandırılıyor, lütfen bekleyin (~30s)...';
       }
     }, 4000);
   }
-
   connectLobbySocket(() => {
-    // Uyandırma mesajını iptal et, bağlandık
     if (_wakeupTimer) { clearTimeout(_wakeupTimer); _wakeupTimer = null; }
     statusEl.textContent = langData[currentLang].slConnecting;
-
     lobbySocket.emit('lobby:list');
     lobbySocket.once('lobby:list:response', (rooms) => {
       _browseData = Array.isArray(rooms) ? rooms : [];
       statusEl.style.display = 'none';
       renderBrowseListInline(_browseData);
     });
-
-    // Bağlantı kurulduktan sonra 10s'de yanıt gelmezse uyar
-    setTimeout(() => {
-      if (statusEl.style.display !== 'none') {
-        statusEl.textContent = langData[currentLang].slNoResponse;
-      }
-    }, 10000);
+    setTimeout(() => { if (statusEl.style.display !== 'none') statusEl.textContent = langData[currentLang].slNoResponse; }, 10000);
   });
 }
 document.getElementById('btn-browse-refresh-inline').addEventListener('click', fetchBrowseListInline);
@@ -1857,7 +1817,9 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
 
   connectLobbySocket(() => {
     lobbySocket.emit('lobby:create', serverConfig);
+    let _createDone = false;
     lobbySocket.once('lobby:create:response', (res) => {
+      _createDone = true;
       if (res && res.success) {
         document.getElementById('create-server-modal').classList.remove('active');
         document.getElementById('host-code-display').textContent = code;
@@ -1876,10 +1838,9 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         }, 1500);
       }
     });
-
-    // Bağlantı kurulduktan sonra sunucu yanıt vermezse 10s'de timeout
-    const _createTimeout = setTimeout(() => {
-      if (statusEl.textContent.includes('Creating') || statusEl.textContent.includes('Sunucu')) {
+    // Bağlantı kurulduktan sonra 10s'de yanıt gelmezse fallback
+    setTimeout(() => {
+      if (!_createDone) {
         statusEl.textContent = '⚠ Lobby server timeout. Starting locally.';
         setTimeout(() => {
           document.getElementById('create-server-modal').classList.remove('active');
@@ -1889,9 +1850,6 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         }, 1500);
       }
     }, 10000);
-
-    // Başarılı yanıtta timeout'u iptal et
-    lobbySocket.once('lobby:create:response', () => clearTimeout(_createTimeout));
   });
 });
 
@@ -4847,19 +4805,6 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
     worldSeed=(Math.random()*2147483647)|0||42317;
     st.textContent='Oda hazır!';isMP=true;amHost=true;hostConns={};connTokens.clear();
 
-    // ── 15 saniye boş kalırsa oda kapansın ──
-    let _emptyRoomTimer = null;
-    function _startEmptyTimer(){
-      if(_emptyRoomTimer) clearTimeout(_emptyRoomTimer);
-      _emptyRoomTimer = setTimeout(()=>{
-        if(isMP && amHost && Object.keys(hostConns).length === 0){
-          addChat(null,'[Sunucu]: 15 saniye boyunca kimse girmedi. Sunucu kapatılıyor.',true,'warn');
-          setTimeout(()=>goToMainMenu(), 1500);
-        }
-      }, 15000);
-    }
-    _startEmptyTimer(); // Sunucu açılır açılmaz sayaç başlar
-
     // ── Lobby'e oyuncu sayısı bildir ──
     function _updateLobbyPlayerCount(){
       const cnt = 1 + Object.keys(hostConns).length; // host + guests
@@ -4881,8 +4826,6 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             if(hostConns[pid]){return;}
             connTokens.set(pid,safeName);
             hostConns[pid]={conn,name:safeName,x:8,y:2.1,z:8,ry:0,rank:safeRank,rankColor:safeRankColor};
-            // Oyuncu girdi → boş oda sayacını iptal et
-            if(_emptyRoomTimer){ clearTimeout(_emptyRoomTimer); _emptyRoomTimer=null; }
             _updateLobbyPlayerCount();
             const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,rank:playerRank,rankColor:playerRankColor}];
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry,rank:p.rank,rankColor:p.rankColor});});
@@ -5026,8 +4969,6 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
           addChat(null,nm+langData[currentLang].sysLeft,true);
           Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name:nm});});
           _updateLobbyPlayerCount();
-          // Eğer sunucu boşaldıysa 15 saniyelik sayacı başlat
-          if(Object.keys(hostConns).length === 0) _startEmptyTimer();
         });
       });
     });
