@@ -1377,8 +1377,18 @@ document.getElementById('btn-back-host').addEventListener('click',()=>{cleanupMP
 // ═══════════════════════════════════════════════════════════════
 const RENDER_SERVER_URL = 'https://playlegends.onrender.com';
 let lobbySocket = null;
-let _testModePendingAction = null; // Holds callback for after test mode confirmation
+let _testModePendingAction = null;
 let _csSettings = { cheats: 'off', pvp: 'on' };
+
+// ── PRE-WARM: Sayfa yüklendiği anda sunucuyu arka planda uyandır ──
+// Render.com ücretsiz plan uyku modundan çıkması ~1dk sürebilir.
+// Oyuncu henüz ana menüdeyken biz sunucuya gizli bir HTTP isteği atıyoruz.
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    fetch(RENDER_SERVER_URL, { method: 'GET', mode: 'no-cors', cache: 'no-store' })
+      .catch(() => {}); // Hata olursa sessizce geç — bu sadece ön ısıtma
+  }, 2000); // 2 sn bekle, önce sayfa render etsin
+});
 
 // ── Test Mode Modal ──
 function showTestModeModal(onContinue) {
@@ -1400,20 +1410,73 @@ function requireAccountOrTestMode(action) {
   showTestModeModal(action);
 }
 
-// ── Connect to lobby socket ──
+// ── Connect to lobby socket (Gelişmiş bağlantı + 60s timeout toleransı) ──
+// - Hem WebSocket hem Polling desteklenir (upgrade: true ile önce WS dener)
+// - reconnectionAttempts: 5 ile bağlantı kesilirse tekrar dener
+// - timeout: 60000 — Render cold-start için 1dk tolerans
+let _lobbyConnectQueue = []; // Bağlantı gelene kadar bekleyen callback'ler
+let _lobbyConnecting = false; // Çift bağlantı girişimini önler
+
 function connectLobbySocket(cb) {
-  if (lobbySocket && lobbySocket.connected) { if(cb) cb(); return; }
+  // Zaten bağlıysa direkt devam et
+  if (lobbySocket && lobbySocket.connected) {
+    if (cb) cb();
+    return;
+  }
+  // Callback kuyruğa ekle
+  if (cb) _lobbyConnectQueue.push(cb);
+
+  // Zaten bağlanmaya çalışılıyorsa yeni socket açma — sadece kuyruğa ekledik, bekle
+  if (_lobbyConnecting) return;
+
+  // Var olan ama bağlı olmayan socket'i temizle
+  if (lobbySocket) {
+    try { lobbySocket.disconnect(); } catch(e) {}
+    lobbySocket = null;
+  }
+
+  _lobbyConnecting = true;
+
   try {
-    lobbySocket = io(RENDER_SERVER_URL, { transports: ['websocket','polling'], reconnectionAttempts: 3 });
-    lobbySocket.on('connect', () => { if(cb) cb(); });
-    lobbySocket.on('connect_error', () => {
-      const st = document.getElementById('browse-status');
-      if(st) st.textContent = '⚠ Could not connect to lobby server.';
+    lobbySocket = io(RENDER_SERVER_URL, {
+      transports: ['websocket', 'polling'], // Önce WebSocket dene, olmadı polling'e düş
+      upgrade: true,                         // Bağlantı sağlayınca WebSocket'e yükselt
+      reconnectionAttempts: 5,              // Kopunca 5 kez tekrar dene
+      reconnectionDelay: 2000,              // 2s ara ile
+      timeout: 60000                        // Render cold-start için 60s bağlantı toleransı
     });
+
+    lobbySocket.on('connect', () => {
+      _lobbyConnecting = false;
+      // Kuyrukta bekleyen tüm callback'leri çalıştır
+      const queue = _lobbyConnectQueue.splice(0);
+      queue.forEach(fn => { try { fn(); } catch(e) {} });
+    });
+
+    lobbySocket.on('connect_error', (err) => {
+      console.warn('[Lobby] Bağlantı hatası:', err && err.message);
+      // Durum mesajlarını güncelle (varsa)
+      const browseEl = document.getElementById('browse-status-inline');
+      if (browseEl && browseEl.style.display !== 'none') {
+        browseEl.textContent = '⏳ Sunucu uyandırılıyor, lütfen bekleyin...';
+      }
+      const csEl = document.getElementById('cs-status');
+      if (csEl && csEl.textContent && csEl.textContent.includes('Creating')) {
+        csEl.textContent = '⏳ Sunucu uyandırılıyor...';
+      }
+    });
+
+    lobbySocket.on('disconnect', () => {
+      _lobbyConnecting = false;
+    });
+
   } catch(e) {
-    console.warn('Socket.IO not available:', e);
-    const st = document.getElementById('browse-status');
-    if(st) st.textContent = '⚠ Socket.IO failed to load.';
+    _lobbyConnecting = false;
+    console.warn('[Lobby] Socket.IO yüklenemedi:', e);
+    const st = document.getElementById('browse-status-inline');
+    if (st) st.textContent = '⚠ Socket.IO failed to load.';
+    // Kuyruğu temizle — callback'leri çağırmıyoruz, bağlantı olmadı
+    _lobbyConnectQueue = [];
   }
 }
 
@@ -1477,14 +1540,36 @@ function fetchBrowseListInline() {
   statusEl.style.display = 'block';
   emptyEl.style.display = 'none';
   listEl.querySelectorAll('.browse-row').forEach(r => r.remove());
+
+  // Bağlantı durumuna göre mesajı güncelle
+  let _wakeupTimer = null;
+  if (!lobbySocket || !lobbySocket.connected) {
+    // Sunucu uyku modundaysa sabırla bekle mesajı göster
+    _wakeupTimer = setTimeout(() => {
+      if (statusEl.style.display !== 'none') {
+        statusEl.textContent = '⏳ Sunucu uyandırılıyor, lütfen bekleyin (~30s)...';
+      }
+    }, 4000);
+  }
+
   connectLobbySocket(() => {
+    // Uyandırma mesajını iptal et, bağlandık
+    if (_wakeupTimer) { clearTimeout(_wakeupTimer); _wakeupTimer = null; }
+    statusEl.textContent = langData[currentLang].slConnecting;
+
     lobbySocket.emit('lobby:list');
     lobbySocket.once('lobby:list:response', (rooms) => {
       _browseData = Array.isArray(rooms) ? rooms : [];
       statusEl.style.display = 'none';
       renderBrowseListInline(_browseData);
     });
-    setTimeout(() => { if (statusEl.style.display !== 'none') statusEl.textContent = langData[currentLang].slNoResponse; }, 6000);
+
+    // Bağlantı kurulduktan sonra 10s'de yanıt gelmezse uyar
+    setTimeout(() => {
+      if (statusEl.style.display !== 'none') {
+        statusEl.textContent = langData[currentLang].slNoResponse;
+      }
+    }, 10000);
   });
 }
 document.getElementById('btn-browse-refresh-inline').addEventListener('click', fetchBrowseListInline);
@@ -1776,7 +1861,6 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
       if (res && res.success) {
         document.getElementById('create-server-modal').classList.remove('active');
         document.getElementById('host-code-display').textContent = code;
-        // Apply settings to local host state
         mpHostWorld = worldType;
         mpGameMode = gameMode;
         cheatsEnabled = cheats;
@@ -1784,7 +1868,6 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         showScreen('screen-host');
       } else {
         statusEl.textContent = '⚠ ' + (res&&res.error||'Server unreachable. Starting locally.');
-        // Fallback: still allow local P2P hosting
         setTimeout(() => {
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
@@ -1793,9 +1876,10 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         }, 1500);
       }
     });
-    // Timeout fallback
-    setTimeout(() => {
-      if (statusEl.textContent === 'Creating server...') {
+
+    // Bağlantı kurulduktan sonra sunucu yanıt vermezse 10s'de timeout
+    const _createTimeout = setTimeout(() => {
+      if (statusEl.textContent.includes('Creating') || statusEl.textContent.includes('Sunucu')) {
         statusEl.textContent = '⚠ Lobby server timeout. Starting locally.';
         setTimeout(() => {
           document.getElementById('create-server-modal').classList.remove('active');
@@ -1804,7 +1888,10 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
           showScreen('screen-host');
         }, 1500);
       }
-    }, 60000);
+    }, 10000);
+
+    // Başarılı yanıtta timeout'u iptal et
+    lobbySocket.once('lobby:create:response', () => clearTimeout(_createTimeout));
   });
 });
 
