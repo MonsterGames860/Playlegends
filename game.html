@@ -843,6 +843,58 @@ function getMaxPlayersByRank(rank){
   if(['Veteran','VIP','Champion'].includes(r)) return 25;
   return 20;
 }
+
+// ─── 🏗️ Rütbeye göre maksimum SUNUCU OLUŞTURMA sayısı ───
+// Ranksız: 5 | Veteran/VIP/Champion: 10 | MVP/Tiktoker: 15 | Twitch/YouTube/OG: 25
+// Beta Tester/Helper/Mod/Admin/Developer/Admin Dev/Owner Dev: 40
+function getMaxServersByRank(rank){
+  if(!rank||typeof rank!=='string') return 5;
+  const r=rank.trim();
+  const rl=r.toLowerCase();
+  if(['owner / developer','admin / developer','developer','admin','mod','helper','beta tester','owner/developer','admin/developer'].includes(rl)) return 40;
+  if(['twitch','youtube','og'].includes(rl)) return 25;
+  if(['mvp','tiktoker','tiktokter'].includes(rl)) return 15;
+  if(['veteran','vip','champion'].includes(rl)) return 10;
+  return 5;
+}
+
+// ─── Sunucu oluşturma sayacı (localStorage) ───
+const SERVER_COUNT_KEY='legends_server_count_';
+const SERVER_COUNT_DATE_KEY='legends_server_count_date_';
+function getTodayKey(){return new Date().toISOString().slice(0,10);}
+function getServerCountToday(username){
+  try{
+    const today=getTodayKey();
+    const savedDate=localStorage.getItem(SERVER_COUNT_DATE_KEY+username);
+    if(savedDate!==today){
+      localStorage.setItem(SERVER_COUNT_DATE_KEY+username,today);
+      localStorage.setItem(SERVER_COUNT_KEY+username,'0');
+      return 0;
+    }
+    return parseInt(localStorage.getItem(SERVER_COUNT_KEY+username)||'0');
+  }catch(e){return 0;}
+}
+function incrementServerCount(username){
+  try{
+    const today=getTodayKey();
+    localStorage.setItem(SERVER_COUNT_DATE_KEY+username,today);
+    const cur=getServerCountToday(username);
+    localStorage.setItem(SERVER_COUNT_KEY+username,String(cur+1));
+  }catch(e){}
+}
+function checkServerLimit(){
+  if(isGuestUser()) return {ok:false,msg:currentLang==='tr'?'🔒 Sunucu oluşturmak için hesap gereklidir.':'🔒 An account is required to create a server.'};
+  const limit=getMaxServersByRank(playerRank);
+  const used=getServerCountToday(myUsername);
+  if(used>=limit){
+    const rankName=playerRank||'Ranksız';
+    const msg=currentLang==='tr'
+      ?`⛔ Günlük sunucu limitinize ulaştınız! (${used}/${limit}) [${rankName}]`
+      :`⛔ Daily server limit reached! (${used}/${limit}) [${rankName}]`;
+    return{ok:false,msg};
+  }
+  return{ok:true,remaining:limit-used,limit};
+}
 // ─── 📢 /shout komutu için izinli rütbeler ───
 // Twitch ve üzeri: Twitch, YouTube, Beta Tester, Helper, Mod, Admin, Dev, Admin/Dev, Owner
 const SHOUT_ALLOWED_RANKS=new Set([
@@ -1555,7 +1607,13 @@ function renderBrowseListInline(rooms) {
     row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       const code = e.target.dataset.code;
-      if (code) { document.getElementById('join-code-input').value = code; showScreen('screen-join'); document.getElementById('join-status').textContent = `Katılıyor: ${room.name||code}`; }
+      if (code) {
+        document.getElementById('join-code-input').value = code;
+        showScreen('screen-join');
+        document.getElementById('join-status').textContent = `Katılıyor: ${room.name||code}`;
+        // Otomatik bağlan
+        setTimeout(() => { document.getElementById('btn-do-join').click(); }, 200);
+      }
     });
     listEl.appendChild(row);
   });
@@ -1593,6 +1651,13 @@ function populateLoadListInline() {
 }
 document.getElementById('btn-do-load-inline').addEventListener('click', () => {
   if (!_selectedLoadKeyInline) return;
+  // ─── Sunucu limiti kontrolü ───
+  const limitCheck = checkServerLimit();
+  if(!limitCheck.ok){
+    const statusEl = document.getElementById('load-status-inline');
+    if(statusEl){ statusEl.textContent = limitCheck.msg; statusEl.style.color='#ff6666'; }
+    return;
+  }
   const statusEl = document.getElementById('load-status-inline');
   statusEl.textContent = langData[currentLang].slWorldLoading;
   let worldData = null;
@@ -1602,7 +1667,14 @@ document.getElementById('btn-do-load-inline').addEventListener('click', () => {
     const code = genCode();
     lobbySocket.emit('lobby:load-world', { code, host: myUsername, worldData, gameMode: worldData.mode||'survival', worldType: worldData.worldType||'infinite' });
     lobbySocket.once('lobby:load-world:response', (res) => {
-      if (res && res.success) { statusEl.textContent = '✅ '+(currentLang==='tr'?'Yüklendi! Kod: ':'Loaded! Code: ')+code; document.getElementById('host-code-display').textContent=code; showScreen('screen-host'); }
+      if (res && res.success) {
+        incrementServerCount(myUsername);
+        statusEl.textContent = '✅ '+(currentLang==='tr'?'Yüklendi! Kod: ':'Loaded! Code: ')+code;
+        document.getElementById('host-code-display').textContent=code;
+        showScreen('screen-host');
+        // Otomatik host başlat
+        setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
+      }
       else { statusEl.textContent = langData[currentLang].slServerError+(res&&res.error||(currentLang==='tr'?'Bilinmeyen':'Unknown')); }
     });
   });
@@ -1619,7 +1691,22 @@ document.getElementById('btn-open-create-server-inline').addEventListener('click
     }
     return;
   }
-  document.getElementById('cs-status').textContent = '';
+  // Limit bilgisini göster
+  const limitCheck = checkServerLimit();
+  const statusEl = document.getElementById('cs-status');
+  if(!limitCheck.ok){
+    if(statusEl){ statusEl.textContent = limitCheck.msg; statusEl.style.color='#ff6666'; }
+    document.getElementById('create-server-modal').classList.add('active');
+    return;
+  }
+  if(statusEl){
+    const limit = getMaxServersByRank(playerRank);
+    const used = getServerCountToday(myUsername);
+    statusEl.textContent = currentLang==='tr'
+      ? `📊 Günlük limit: ${used}/${limit} sunucu kullanıldı`
+      : `📊 Daily limit: ${used}/${limit} servers used`;
+    statusEl.style.color = '#75a7ff';
+  }
   document.getElementById('cs-world-name').value = '';
   document.getElementById('cs-seed').value = '';
   document.getElementById('create-server-modal').classList.add('active');
@@ -1691,6 +1778,8 @@ function renderBrowseList(rooms) {
         document.getElementById('join-code-input').value = code;
         showScreen('screen-join');
         document.getElementById('join-status').textContent = `Joining: ${room.name||code}`;
+        // Auto-connect
+        setTimeout(() => { document.getElementById('btn-do-join').click(); }, 200);
       }
     });
     listEl.appendChild(row);
@@ -1755,7 +1844,16 @@ function populateLoadList() {
 
 document.getElementById('btn-do-load').addEventListener('click', () => {
   if (!_selectedLoadKey) return;
+  // ─── Sunucu limiti kontrolü ───
+  const limitCheck = checkServerLimit();
+  if(!limitCheck.ok){
+    const statusEl = document.getElementById('load-status');
+    statusEl.textContent = limitCheck.msg;
+    statusEl.style.color = '#ff6666';
+    return;
+  }
   const statusEl = document.getElementById('load-status');
+  statusEl.style.color = '';
   statusEl.textContent = 'Uploading world data to server...';
   let worldData = null;
   try { worldData = JSON.parse(localStorage.getItem(_selectedLoadKey)); } catch(e) {}
@@ -1771,9 +1869,12 @@ document.getElementById('btn-do-load').addEventListener('click', () => {
     });
     lobbySocket.once('lobby:load-world:response', (res) => {
       if (res && res.success) {
+        incrementServerCount(myUsername);
         statusEl.textContent = '✅ World loaded! Code: ' + code;
         document.getElementById('host-code-display').textContent = code;
         showScreen('screen-host');
+        // Otomatik host başlat
+        setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
       } else {
         statusEl.textContent = '⚠ Server error: ' + (res&&res.error||'Unknown');
       }
@@ -1810,6 +1911,14 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
   const code = genCode();
   const statusEl = document.getElementById('cs-status');
 
+  // ─── Sunucu limiti kontrolü ───
+  const limitCheck = checkServerLimit();
+  if(!limitCheck.ok){
+    statusEl.textContent = limitCheck.msg;
+    statusEl.style.color = '#ff6666';
+    return;
+  }
+  statusEl.style.color = '';
   statusEl.textContent = 'Creating server...';
 
   const maxPlayers = getMaxPlayersByRank(playerRank);
@@ -1821,6 +1930,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
     lobbySocket.once('lobby:create:response', (res) => {
       _createDone = true;
       if (res && res.success) {
+        incrementServerCount(myUsername); // sayacı artır
         document.getElementById('create-server-modal').classList.remove('active');
         document.getElementById('host-code-display').textContent = code;
         mpHostWorld = worldType;
@@ -1828,13 +1938,18 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         cheatsEnabled = cheats;
         document.getElementById('host-status').textContent = '✅ Server registered! Share code: ' + code;
         showScreen('screen-host');
+        // Otomatik olarak host başlat
+        setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
       } else {
         statusEl.textContent = '⚠ ' + (res&&res.error||'Server unreachable. Starting locally.');
         setTimeout(() => {
+          incrementServerCount(myUsername); // yerel sunucu da sayılır
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
           showScreen('screen-host');
+          // Otomatik olarak host başlat
+          setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
         }, 1500);
       }
     });
@@ -1843,10 +1958,13 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
       if (!_createDone) {
         statusEl.textContent = '⚠ Lobby server timeout. Starting locally.';
         setTimeout(() => {
+          incrementServerCount(myUsername);
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
           showScreen('screen-host');
+          // Otomatik olarak host başlat
+          setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
         }, 1500);
       }
     }, 10000);
