@@ -68,13 +68,13 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
 /* ── KALP & AÇLIK BARLARI (Minecraft tarzı) ─────────────────────── */
 #bars-wrap{
-  position:absolute;bottom:90px;left:0;right:0;
+  position:absolute;bottom:80px;left:0;right:0;
   display:none;
   flex-direction:row;
   justify-content:space-between;
   align-items:flex-end;
   padding:0 8px;
-  z-index:11;pointer-events:none;
+  z-index:101;pointer-events:none;
   gap:0;
 }
 #hearts-row,#hunger-row{
@@ -139,6 +139,36 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.72);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:900;color:#fff;}
 #pause-overlay.active{display:flex;}
 #pause-box{display:flex;flex-direction:column;align-items:center;width:100%;max-width:320px;padding:0 24px;}
+
+/* ─── MANAGE SERVER PANEL ─── */
+#manage-server-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);display:none;justify-content:center;align-items:center;z-index:950;color:#fff;}
+#manage-server-overlay.active{display:flex;}
+#manage-server-box{background:rgba(10,16,30,.97);border:2px solid rgba(117,167,255,.35);border-radius:10px;padding:16px;max-width:440px;width:96%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;}
+#manage-server-title{font-size:15px;font-weight:bold;color:#75a7ff;letter-spacing:3px;text-align:center;margin-bottom:10px;text-shadow:0 0 10px rgba(117,167,255,.4);}
+.ms-tabs{display:flex;gap:0;border-bottom:2px solid rgba(117,167,255,.2);margin-bottom:10px;}
+.ms-tab{flex:1;padding:7px 4px;background:transparent;border:none;color:rgba(255,255,255,.4);font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.ms-tab.active{color:#75a7ff;border-bottom-color:#75a7ff;}
+.ms-tab-content{display:none;flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
+.ms-tab-content.active{display:block;}
+.ms-player-row{display:flex;align-items:center;padding:7px 8px;background:rgba(255,255,255,.04);border-radius:5px;margin-bottom:4px;gap:6px;}
+.ms-player-name{flex:1;font-size:12px;color:#fff;font-family:'Minecraft',monospace;}
+.ms-player-rank{font-size:9px;padding:2px 5px;border-radius:3px;font-family:'Minecraft',monospace;font-weight:bold;margin-right:4px;}
+.ms-btn{padding:5px 8px;border:none;border-radius:3px;font-size:9px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;}
+.ms-btn.promote{background:linear-gradient(180deg,#2a7a2a,#1a5a1a);color:#7fff7f;}
+.ms-btn.demote{background:linear-gradient(180deg,#7a5a00,#5a3a00);color:#ffd700;}
+.ms-btn.kick{background:linear-gradient(180deg,#7a3a00,#5a2a00);color:#ffaa44;}
+.ms-btn.ban{background:linear-gradient(180deg,#7a1a1a,#5a0a0a);color:#ff6666;}
+.ms-btn.unban{background:linear-gradient(180deg,#2a5a9f,#1a3a7f);color:#75c7ff;}
+.ms-section-label{font-size:9px;letter-spacing:2px;color:rgba(255,255,255,.35);margin:8px 0 4px;text-transform:uppercase;}
+.ms-admin-row{display:flex;align-items:center;padding:6px 8px;background:rgba(117,167,255,.06);border-radius:5px;margin-bottom:3px;gap:6px;}
+.ms-banned-row{display:flex;align-items:center;padding:6px 8px;background:rgba(255,60,60,.06);border-radius:5px;margin-bottom:3px;gap:6px;}
+.ms-setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:5px;margin-bottom:5px;}
+.ms-setting-label{font-size:11px;color:#ccc;}
+.ms-toggle-btn{padding:5px 12px;border:none;border-radius:3px;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;}
+.ms-toggle-btn.on{background:linear-gradient(180deg,#2a7a2a,#1a5a1a);color:#7fff7f;}
+.ms-toggle-btn.off{background:linear-gradient(180deg,#4a1a1a,#3a0a0a);color:#ff8888;}
+#ms-close-btn{width:100%;padding:9px;margin-top:10px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #1a1a1a;border-top:3px solid #5a5a5a;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#ms-close-btn:hover{filter:brightness(1.2);}
 #pause-title{font-size:19px;font-weight:bold;color:#75a7ff;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;text-shadow:0 0 12px rgba(117,167,255,.5),2px 2px #000;}
 #pause-version{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:18px;}
 .pause-setting{width:100%;display:flex;align-items:center;justify-content:space-between;margin:4px 0;padding:7px 10px;background:rgba(255,255,255,.06);border-radius:5px;font-size:12px;color:#ccc;}
@@ -227,7 +257,7 @@ body.low-health::after {
   #btn-mobile-chat{bottom:20px;left:20px;right:auto;}
   #btn-mobile-inv{bottom:145px;right:25px;}
   #btn-mobile-cam{top:8px;right:8px;width:38px;height:38px;font-size:16px;}
-  #bars-wrap{bottom:76px;padding:0 6px;}
+  #bars-wrap{bottom:62px;padding:0 6px;}
   #inv-grid{grid-template-columns:repeat(5,1fr);}
   #inv-hotbar-row{gap:3px;flex-wrap:wrap;}
   .inv-hslot{max-width:36px;}
@@ -781,11 +811,61 @@ body.low-health::after {
     <div id="pause-version">v1.6.1</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <button class="mbtn" id="btn-pause-settings"></button>
+    <button class="mbtn" id="btn-manage-server" style="display:none;background:linear-gradient(180deg,#1a4a2a,#0a3a1a);border-top-color:#2a8a4a;border-left-color:#2a8a4a;border-bottom-color:#042a0a;border-right-color:#042a0a;"></button>
     <button class="mbtn quit-btn" id="btn-quit"></button>
   </div>
 </div>
- 
+<div id="manage-server-overlay">
+  <div id="manage-server-box">
+    <div id="manage-server-title">⚙ MANAGE SERVER</div>
+    <div class="ms-tabs">
+      <button class="ms-tab active" data-ms-tab="players" id="ms-tab-players">👥 PLAYERS</button>
+      <button class="ms-tab" data-ms-tab="admins" id="ms-tab-admins">🛡 ADMINS & BANS</button>
+      <button class="ms-tab" data-ms-tab="server" id="ms-tab-server" id="ms-tab-server-btn">⚙ SERVER</button>
+    </div>
+
+    <!-- TAB: PLAYERS -->
+    <div class="ms-tab-content active" id="ms-content-players">
+      <div id="ms-player-list"></div>
+    </div>
+
+    <!-- TAB: ADMINS & BANS -->
+    <div class="ms-tab-content" id="ms-content-admins">
+      <div class="ms-section-label" id="ms-lbl-admins">ADMINS</div>
+      <div id="ms-admin-list"></div>
+      <div class="ms-section-label" id="ms-lbl-banned">BANNED</div>
+      <div id="ms-banned-list"></div>
+    </div>
+
+    <!-- TAB: SERVER (sadece host) -->
+    <div class="ms-tab-content" id="ms-content-server">
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-access">Access</span>
+        <select id="ms-access-select" class="cs-select" style="width:140px;font-size:10px;padding:4px 6px;">
+          <option value="public" id="ms-opt-public">🌐 Public</option>
+          <option value="registered" id="ms-opt-registered">🔑 Registered Only</option>
+          <option value="private" id="ms-opt-private">🔒 Private</option>
+        </select>
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-pvp">PvP</span>
+        <button class="ms-toggle-btn on" id="ms-pvp-toggle"></button>
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-cheats">Cheats</span>
+        <button class="ms-toggle-btn" id="ms-cheats-toggle"></button>
+      </div>
+      <div style="margin-top:12px;">
+        <button class="mbtn quit-btn" id="ms-shutdown-btn" style="width:100%;font-size:12px;padding:10px;"></button>
+      </div>
+    </div>
+
+    <button id="ms-close-btn">← CLOSE</button>
+  </div>
+</div>
+
 <script>
+
 // ─── [FIX] Güvenlik: İsim sanitizasyonu ───
 function sanitizeName(n){
   if(!n||typeof n!=='string') return 'Guest_'+(Math.floor(1000+Math.random()*9000));
@@ -880,6 +960,27 @@ function incrementServerCount(username){
     localStorage.setItem(SERVER_COUNT_DATE_KEY+username,today);
     const cur=getServerCountToday(username);
     localStorage.setItem(SERVER_COUNT_KEY+username,String(cur+1));
+  }catch(e){}
+}
+
+// ─── Oluşturulan sunucuyu Yükle listesine kaydet ───
+function saveCreatedServerToLoad(serverConfig){
+  try{
+    const key='legends_world_'+serverConfig.code+'_'+Date.now();
+    const worldData={
+      name: serverConfig.name,
+      mode: serverConfig.gameMode,
+      worldType: serverConfig.worldType,
+      seed: serverConfig.seed,
+      code: serverConfig.code,
+      host: serverConfig.host,
+      cheats: serverConfig.cheats,
+      pvp: serverConfig.pvp,
+      difficulty: serverConfig.difficulty,
+      access: serverConfig.access,
+      createdAt: new Date().toISOString(),
+    };
+    localStorage.setItem(key, JSON.stringify(worldData));
   }catch(e){}
 }
 function checkServerLimit(){
@@ -1056,6 +1157,31 @@ const langData={
       slNoResponse:'⚠ Sunucudan yanıt gelmedi.',
       slNoServers:'Aktif sunucu bulunamadı.',
       slCreateServer:'⚙️ SUNUCU OLUŞTUR',
+      msTitle:'⚙ SUNUCUYU YÖNET',
+      msTabPlayers:'👥 OYUNCULAR',
+      msTabAdmins:'🛡 ADMİNLER & BANLILAR',
+      msTabServer:'⚙ SUNUCU',
+      msBtnManage:'🛡 SUNUCUYU YÖNET',
+      msLblAdmins:'ADMİNLER',
+      msLblBanned:'BANLILAR',
+      msLblAccess:'Erişim',
+      msLblPvp:'PvP',
+      msLblCheats:'Hileler',
+      msOptPublic:'🌐 Herkese Açık',
+      msOptRegistered:'🔑 Sadece Hesaplılar',
+      msOptPrivate:'🔒 Özel',
+      msBtnPromote:'Promote',
+      msBtnDemote:'Demote',
+      msBtnKick:'At',
+      msBtnBan:'Banla',
+      msBtnUnban:'Banı Kaldır',
+      msBtnShutdown:'🛑 SUNUCUYU KAPAT',
+      msBtnClose:'← KAPAT',
+      msNoPlayers:'Sunucuda oyuncu yok.',
+      msNoAdmins:'Admin yok.',
+      msNoBanned:'Banlı oyuncu yok.',
+      msPvpOn:'AÇIK',msPvpOff:'KAPALI',
+      msCheatsOn:'AÇIK',msCheatsOff:'KAPALI',
   },
   en:{title:'LEGENDS INDEV',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
       deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',worldTitle:'SELECT WORLD',
@@ -1154,6 +1280,31 @@ const langData={
       slNoResponse:'⚠ No response from server.',
       slNoServers:'No active servers found.',
       slCreateServer:'⚙️ CREATE SERVER',
+      msTitle:'⚙ MANAGE SERVER',
+      msTabPlayers:'👥 PLAYERS',
+      msTabAdmins:'🛡 ADMINS & BANS',
+      msTabServer:'⚙ SERVER',
+      msBtnManage:'🛡 MANAGE SERVER',
+      msLblAdmins:'ADMINS',
+      msLblBanned:'BANNED',
+      msLblAccess:'Access',
+      msLblPvp:'PvP',
+      msLblCheats:'Cheats',
+      msOptPublic:'🌐 Public',
+      msOptRegistered:'🔑 Registered Only',
+      msOptPrivate:'🔒 Private',
+      msBtnPromote:'Promote',
+      msBtnDemote:'Demote',
+      msBtnKick:'Kick',
+      msBtnBan:'Ban',
+      msBtnUnban:'Unban',
+      msBtnShutdown:'🛑 SHUTDOWN SERVER',
+      msBtnClose:'← CLOSE',
+      msNoPlayers:'No players in server.',
+      msNoAdmins:'No admins.',
+      msNoBanned:'No banned players.',
+      msPvpOn:'ON',msPvpOff:'OFF',
+      msCheatsOn:'ON',msCheatsOff:'OFF',
   }
 };
 let currentLang='en';
@@ -1239,6 +1390,24 @@ function setLanguage(l){
   const skinNoteEl=document.getElementById('txt-skin-note');
   if(skinNoteEl) skinNoteEl.innerHTML=d.skinNote.replace(/\n/g,'<br>');
   if(typeof updateSkinScreenGuestState==='function') updateSkinScreenGuestState();
+  // Manage Server panel dil desteği
+  const ms=d;
+  const _mss=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
+  _mss('manage-server-title',ms.msTitle);
+  _mss('ms-tab-players',ms.msTabPlayers);
+  _mss('ms-tab-admins',ms.msTabAdmins);
+  const msTabSrv=document.getElementById('ms-tab-server');if(msTabSrv) msTabSrv.textContent=ms.msTabServer;
+  _mss('ms-lbl-admins',ms.msLblAdmins);
+  _mss('ms-lbl-banned',ms.msLblBanned);
+  _mss('ms-lbl-access',ms.msLblAccess);
+  _mss('ms-lbl-pvp',ms.msLblPvp);
+  _mss('ms-lbl-cheats',ms.msLblCheats);
+  const msAccess=document.getElementById('ms-access-select');
+  if(msAccess){msAccess.options[0].text=ms.msOptPublic;msAccess.options[1].text=ms.msOptRegistered;msAccess.options[2].text=ms.msOptPrivate;}
+  _mss('ms-shutdown-btn',ms.msBtnShutdown);
+  _mss('ms-close-btn',ms.msBtnClose);
+  _mss('btn-manage-server',ms.msBtnManage);
+  // PvP / Cheats toggle butonları mevcut duruma göre güncellenecek (renderManageServer'da)
 }
 document.getElementById('lang-tr').addEventListener('click',e=>{e.stopPropagation();setLanguage('tr');});
 document.getElementById('lang-en').addEventListener('click',e=>{e.stopPropagation();setLanguage('en');});
@@ -1931,6 +2100,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
       _createDone = true;
       if (res && res.success) {
         incrementServerCount(myUsername); // sayacı artır
+        saveCreatedServerToLoad(serverConfig); // Yükle listesine kaydet
         document.getElementById('create-server-modal').classList.remove('active');
         document.getElementById('host-code-display').textContent = code;
         mpHostWorld = worldType;
@@ -1944,6 +2114,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         statusEl.textContent = '⚠ ' + (res&&res.error||'Server unreachable. Starting locally.');
         setTimeout(() => {
           incrementServerCount(myUsername); // yerel sunucu da sayılır
+          saveCreatedServerToLoad(serverConfig);
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
@@ -1959,6 +2130,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         statusEl.textContent = '⚠ Lobby server timeout. Starting locally.';
         setTimeout(() => {
           incrementServerCount(myUsername);
+          saveCreatedServerToLoad(serverConfig);
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
@@ -4333,6 +4505,7 @@ const SuffocationManager = {
 const CombatManager = {
     attackPlayer(targetPlayerId, damage, attackerPos) {
         if (gameMode === 'creative') return false;
+        if (!serverPvpEnabled) return false; // PvP kapalıysa saldırı engelle
         const target = remPlayers[targetPlayerId];
         if (!target || target.mode === 'creative') return false;
 
@@ -4807,6 +4980,202 @@ function cleanupMP(){
   isMP=false;amHost=false;opPlayers.clear();myOp=false;
   // Lobby socket: only disconnect on full quit, not on back navigation
 }
+
+// ─── Sunucu PvP ve sunucu erişim ayarları ───
+let serverPvpEnabled=true;
+let serverAccess='public';
+
+// ─── MANAGE SERVER ───
+function updateManageServerBtn(){
+  const btn=document.getElementById('btn-manage-server');
+  if(!btn) return;
+  btn.style.display=(isMP&&(amHost||myOp))?'block':'none';
+}
+
+function openManageServer(){
+  document.getElementById('manage-server-overlay').classList.add('active');
+  renderMSPlayers();
+  renderMSAdmins();
+  renderMSServerTab();
+  // Sadece sunucu sahibi Server sekmesini görebilir
+  const serverTab=document.getElementById('ms-tab-server');
+  if(serverTab) serverTab.style.display=amHost?'block':'none';
+  // Sadece sunucu sahibi Admins&Bans sekmesinde adminleri görebilir
+  switchMSTab('players');
+}
+
+function switchMSTab(tab){
+  document.querySelectorAll('.ms-tab').forEach(t=>t.classList.toggle('active',t.dataset.msTab===tab));
+  document.querySelectorAll('.ms-tab-content').forEach(c=>c.classList.remove('active'));
+  const content=document.getElementById('ms-content-'+tab);
+  if(content) content.classList.add('active');
+}
+
+document.querySelectorAll('.ms-tab').forEach(btn=>{
+  btn.addEventListener('click',()=>switchMSTab(btn.dataset.msTab));
+});
+
+function renderMSPlayers(){
+  const d=langData[currentLang];
+  const list=document.getElementById('ms-player-list');
+  list.innerHTML='';
+  // Host kendisi
+  const allPlayers=[{id:'__host__',name:myName,rank:playerRank,rankColor:playerRankColor,isHost:true}];
+  Object.entries(hostConns).forEach(([id,p])=>allPlayers.push({id,name:p.name,rank:p.rank,rankColor:p.rankColor,isHost:false}));
+  if(allPlayers.length<=1&&!amHost){
+    list.innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.4);text-align:center;padding:10px;">${d.msNoPlayers}</div>`;
+    return;
+  }
+  allPlayers.forEach(pl=>{
+    if(pl.id==='__host__') return; // kendini gösterme
+    const isAdmin=opPlayers.has(pl.name);
+    const row=document.createElement('div');
+    row.className='ms-player-row';
+    const rankColor=pl.rankColor||resolveRankColor(pl.rank,null);
+    const rankTag=pl.rank?`<span class="ms-player-rank" style="color:${rankColor};border:1px solid ${rankColor}40;">[${pl.rank.toUpperCase()}]</span>`:'';
+    row.innerHTML=`<span class="ms-player-name">${rankTag}${sanitizeText(pl.name)}</span>`;
+    // Promote/Demote (sadece host)
+    if(amHost){
+      const promBtn=document.createElement('button');
+      promBtn.className='ms-btn '+(isAdmin?'demote':'promote');
+      promBtn.textContent=isAdmin?d.msBtnDemote:d.msBtnPromote;
+      promBtn.addEventListener('click',()=>{
+        if(isAdmin){processCmd('unop '+pl.name);}
+        else{processCmd('op '+pl.name);}
+        setTimeout(renderMSPlayers,200);
+      });
+      row.appendChild(promBtn);
+    }
+    // Kick (host + admin)
+    if(amHost||myOp){
+      const kickBtn=document.createElement('button');
+      kickBtn.className='ms-btn kick';
+      kickBtn.textContent=d.msBtnKick;
+      kickBtn.addEventListener('click',()=>{processCmd('kick '+pl.name);setTimeout(renderMSPlayers,300);});
+      row.appendChild(kickBtn);
+      const banBtn=document.createElement('button');
+      banBtn.className='ms-btn ban';
+      banBtn.textContent=d.msBtnBan;
+      banBtn.addEventListener('click',()=>{processCmd('ban '+pl.name);setTimeout(renderMSPlayers,300);});
+      row.appendChild(banBtn);
+    }
+    list.appendChild(row);
+  });
+  if(list.children.length===0){
+    list.innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.4);text-align:center;padding:10px;">${d.msNoPlayers}</div>`;
+  }
+}
+
+function renderMSAdmins(){
+  const d=langData[currentLang];
+  const adminList=document.getElementById('ms-admin-list');
+  const bannedList=document.getElementById('ms-banned-list');
+  adminList.innerHTML='';bannedList.innerHTML='';
+  // Adminler (sadece host görebilir)
+  if(amHost){
+    if(opPlayers.size===0){
+      adminList.innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.4);padding:6px 8px;">${d.msNoAdmins}</div>`;
+    } else {
+      opPlayers.forEach(name=>{
+        const row=document.createElement('div');
+        row.className='ms-admin-row';
+        row.innerHTML=`<span class="ms-player-name" style="color:#75a7ff;">🛡 ${sanitizeText(name)}</span>`;
+        const demBtn=document.createElement('button');
+        demBtn.className='ms-btn demote';
+        demBtn.textContent=d.msBtnDemote;
+        demBtn.addEventListener('click',()=>{processCmd('unop '+name);setTimeout(renderMSAdmins,200);});
+        row.appendChild(demBtn);
+        adminList.appendChild(row);
+      });
+    }
+  } else {
+    adminList.style.display='none';
+    document.getElementById('ms-lbl-admins').style.display='none';
+  }
+  // Banlılar
+  if(bannedPlayers.size===0){
+    bannedList.innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.4);padding:6px 8px;">${d.msNoBanned}</div>`;
+  } else {
+    bannedPlayers.forEach(name=>{
+      const row=document.createElement('div');
+      row.className='ms-banned-row';
+      row.innerHTML=`<span class="ms-player-name" style="color:#ff8888;">🚫 ${sanitizeText(name)}</span>`;
+      if(amHost||myOp){
+        const unbanBtn=document.createElement('button');
+        unbanBtn.className='ms-btn unban';
+        unbanBtn.textContent=d.msBtnUnban;
+        unbanBtn.addEventListener('click',()=>{processCmd('unban '+name);setTimeout(renderMSAdmins,200);});
+        row.appendChild(unbanBtn);
+      }
+      bannedList.appendChild(row);
+    });
+  }
+}
+
+function renderMSServerTab(){
+  if(!amHost) return;
+  const d=langData[currentLang];
+  // PvP toggle
+  const pvpBtn=document.getElementById('ms-pvp-toggle');
+  if(pvpBtn){
+    pvpBtn.textContent=serverPvpEnabled?d.msPvpOn:d.msPvpOff;
+    pvpBtn.className='ms-toggle-btn '+(serverPvpEnabled?'on':'off');
+  }
+  // Cheats toggle
+  const cheatsBtn=document.getElementById('ms-cheats-toggle');
+  if(cheatsBtn){
+    cheatsBtn.textContent=cheatsEnabled?d.msCheatsOn:d.msCheatsOff;
+    cheatsBtn.className='ms-toggle-btn '+(cheatsEnabled?'on':'off');
+  }
+  // Access select
+  const accessSel=document.getElementById('ms-access-select');
+  if(accessSel) accessSel.value=serverAccess;
+}
+
+// PvP toggle
+document.getElementById('ms-pvp-toggle').addEventListener('click',()=>{
+  if(!amHost) return;
+  serverPvpEnabled=!serverPvpEnabled;
+  sendToAll({type:'server_pvp',enabled:serverPvpEnabled});
+  renderMSServerTab();
+});
+// Cheats toggle
+document.getElementById('ms-cheats-toggle').addEventListener('click',()=>{
+  if(!amHost) return;
+  processCmd('cheats '+(cheatsEnabled?'off':'on'));
+  setTimeout(renderMSServerTab,100);
+});
+// Access change
+document.getElementById('ms-access-select').addEventListener('change',e=>{
+  if(!amHost) return;
+  serverAccess=e.target.value;
+  if(lobbySocket&&lobbySocket.connected){
+    const code=document.getElementById('host-code-display').textContent;
+    lobbySocket.emit('lobby:update',{code,access:serverAccess});
+  }
+});
+// Shutdown
+document.getElementById('ms-shutdown-btn').addEventListener('click',()=>{
+  if(!amHost) return;
+  sendToAll({type:'kicked',by:'Server'});
+  setTimeout(()=>{
+    document.getElementById('manage-server-overlay').classList.remove('active');
+    document.getElementById('pause-overlay').classList.remove('active');
+    document.getElementById('btn-quit').click();
+  },300);
+});
+// Close
+document.getElementById('ms-close-btn').addEventListener('click',()=>{
+  document.getElementById('manage-server-overlay').classList.remove('active');
+});
+// Manage Server butonuna bas
+document.getElementById('btn-manage-server').addEventListener('click',()=>{
+  document.getElementById('pause-overlay').classList.remove('active');
+  openManageServer();
+});
+
+// guest: server_pvp mesajını dinle
+// (guestConn.on('data') içine ekleniyor aşağıda)
 function goToMainMenu(){
   if(document.pointerLockElement===document.body) document.exitPointerLock();
   document.getElementById('crosshair').classList.remove('show');
@@ -4947,7 +5316,7 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             _updateLobbyPlayerCount();
             const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,rank:playerRank,rankColor:playerRankColor}];
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry,rank:p.rank,rankColor:p.rankColor});});
-            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName)});
+            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName),pvp:serverPvpEnabled,access:serverAccess});
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName,rank:safeRank,rankColor:safeRankColor});});
             addRP(pid,safeName,8,2.1,8,0,'survival',safeRank,safeRankColor);addChat(null,safeName+langData[currentLang].sysJoin,true);
             sendMySkinToNewPlayer(conn);
@@ -5103,6 +5472,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
 // Join
 document.getElementById('btn-do-join').addEventListener('click',()=>{
   if(myPeer){try{myPeer.destroy();}catch(e){}myPeer=null;guestConn=null;}
+  // Önce mevcut bağlantıyı tamamen temizle
+  if(guestConn){try{guestConn.close();}catch(e){}guestConn=null;}
+  cleanupMP();
   const name=sanitizeName(myUsername||'Oyuncu');
   const code=document.getElementById('join-code-input').value.trim().toUpperCase();
   if(code.length!==4){document.getElementById('join-status').textContent='4 harfli şifre!';return;}
@@ -5124,12 +5496,14 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       if(data.type==='welcome'){
         st.textContent='Bağlandı!';isMP=true;amHost=false;worldSeed=data.seed||0;
         myOp=data.isOp||false;
+        if(data.pvp!==undefined) serverPvpEnabled=!!data.pvp;
+        if(data.access) serverAccess=data.access;
         data.players.forEach(p=>{
           if(p.id===myPeer.id) return; // kendimizi ekleme
           addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
         });
         startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
-        setTimeout(()=>broadcastSkin(activeSkinCanvas),500);
+        setTimeout(()=>{broadcastSkin(activeSkinCanvas);updateManageServerBtn();},500);
       } else if(data.type==='pos'){
         if(data.id&&data.id!==myPeer.id) updRP(data.id,data.x,data.y,data.z,data.ry,data.mode);
       }
@@ -5171,6 +5545,7 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       }
       else if(data.type==='kicked'){showKickScreen(sanitizeName(data.by)||'Sunucu');}
       else if(data.type==='banned'){showBanScreen(sanitizeName(data.by)||'Sunucu');}
+      else if(data.type==='server_pvp'){serverPvpEnabled=!!data.enabled;}
       else if(data.type==='pvp_attack') {
         if(data.target === myPeer.id) {
             CombatManager.applyLocalDamage(data.dmg, new THREE.Vector3(data.fromPos.x, data.fromPos.y, data.fromPos.z));
@@ -5859,6 +6234,7 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
   else document.getElementById('btn-mobile-chat').style.display='flex';
   if(mp){
     startBC();
+    setTimeout(updateManageServerBtn,100);
   }
   document.getElementById('btn-do-host').disabled=false;
   document.getElementById('btn-do-join').disabled=false;
