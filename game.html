@@ -1925,7 +1925,9 @@ document.getElementById('btn-do-load-inline').addEventListener('click', () => {
   if (!worldData) { statusEl.textContent = langData[currentLang].slWorldReadError; return; }
   connectLobbySocket(() => {
     const code = genCode();
-    lobbySocket.emit('lobby:load-world', { code, host: myUsername, worldData, name: worldData.name||myUsername+"'s Server", gameMode: worldData.mode||'survival', worldType: worldData.worldType||'infinite' });
+    const _loadMaxP = getMaxPlayersByRank(playerRank);
+    const _loadName = worldData.name || myUsername+"'s Server";
+    lobbySocket.emit('lobby:load-world', { code, host: myUsername, worldData, name: _loadName, maxPlayers: _loadMaxP, gameMode: worldData.mode||'survival', worldType: worldData.worldType||'infinite' });
     lobbySocket.once('lobby:load-world:response', (res) => {
       if (res && res.success) {
         incrementServerCount(myUsername);
@@ -1935,7 +1937,7 @@ document.getElementById('btn-do-load-inline').addEventListener('click', () => {
         mpHostWorld = worldData.worldType || 'infinite';
         mpGameMode = worldData.mode || 'survival';
         cheatsEnabled = worldData.cheats || false;
-        mpServerName = worldData.name || ''; // FIX: sunucu ismi
+        mpServerName = worldData.name || myUsername+"'s Server"; // FIX: sunucu ismi
         // FIX: Kayıtlı ban/admin listelerini yükle
         _currentWorldSaveKey = _selectedLoadKeyInline;
         loadServerBansAndAdmins(worldData);
@@ -2128,11 +2130,13 @@ document.getElementById('btn-do-load').addEventListener('click', () => {
   if (!worldData) { statusEl.textContent = '⚠ Could not read world data.'; return; }
   connectLobbySocket(() => {
     const code = genCode();
+    const _legMaxP = getMaxPlayersByRank(playerRank);
     lobbySocket.emit('lobby:load-world', {
       code,
       host: myUsername,
       worldData,
       name: worldData.name || myUsername+"'s Server",
+      maxPlayers: _legMaxP,
       gameMode: worldData.mode || 'survival',
       worldType: worldData.worldType || 'infinite',
     });
@@ -2145,7 +2149,7 @@ document.getElementById('btn-do-load').addEventListener('click', () => {
         mpHostWorld = worldData.worldType || 'infinite';
         mpGameMode = worldData.mode || 'survival';
         cheatsEnabled = worldData.cheats || false;
-        mpServerName = worldData.name || ''; // FIX: sunucu ismi
+        mpServerName = worldData.name || myUsername+"'s Server"; // FIX: sunucu ismi
         // FIX: Kayıtlı ban/admin listelerini yükle
         _currentWorldSaveKey = _selectedLoadKey;
         loadServerBansAndAdmins(worldData);
@@ -2260,8 +2264,8 @@ const _origDoHostBtn = document.getElementById('btn-do-host');
 _origDoHostBtn.addEventListener('click', () => {
   const code = document.getElementById('host-code-display').textContent;
   if (lobbySocket && lobbySocket.connected && code && code !== '----') {
-    // FIX: Sunucu ismini de gönder
-    lobbySocket.emit('lobby:update', { code, players: 1, status: 'open', name: mpServerName||undefined });
+    const _maxP = getMaxPlayersByRank(playerRank);
+    lobbySocket.emit('lobby:update', { code, players: 1, status: 'open', name: mpServerName || myUsername+"'s Server", maxPlayers: _maxP });
   }
 });
 
@@ -5404,8 +5408,9 @@ function startBC(){
       const serverCode=document.getElementById('host-code-display')?.textContent;
       if(lobbySocket&&lobbySocket.connected&&serverCode&&serverCode!=='----'){
         const cnt=1+Object.keys(hostConns).length;
-        const _upd={code:serverCode,players:cnt,status:'open'};
-        if(mpServerName) _upd.name=mpServerName;
+        const _maxP=getMaxPlayersByRank(playerRank);
+        const _upd={code:serverCode,players:cnt,status:'open',maxPlayers:_maxP};
+        _upd.name = mpServerName || myUsername+"'s Server";
         lobbySocket.emit('lobby:update',_upd);
       }
     },20000);
@@ -5430,8 +5435,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
       const cnt = 1 + Object.keys(hostConns).length; // host + guests
       const serverCode = document.getElementById('host-code-display').textContent;
       if(lobbySocket && lobbySocket.connected && serverCode && serverCode !== '----'){
-        const _upd = { code: serverCode, players: cnt, status: 'open' };
-        if(mpServerName) _upd.name = mpServerName; // FIX: sunucu ismini gönder
+        const _maxP = getMaxPlayersByRank(playerRank);
+        const _upd = { code: serverCode, players: cnt, status: 'open', maxPlayers: _maxP };
+        _upd.name = mpServerName || myUsername+"'s Server";
         lobbySocket.emit('lobby:update', _upd);
       }
     }

@@ -94,22 +94,25 @@ io.on('connection', (socket) => {
     });
 
     // 3. lobby:update → oyuncu sayısı / durum güncelle
-    socket.on('lobby:update', ({ code, players, status }) => {
+    socket.on('lobby:update', ({ code, players, status, name, maxPlayers, access }) => {
         if (activeRooms[code]) {
-            if (players !== undefined) activeRooms[code].players = players;
-            if (status  !== undefined) activeRooms[code].status  = status;
+            if (players    !== undefined) activeRooms[code].players    = players;
+            if (status     !== undefined) activeRooms[code].status     = status;
+            if (name       !== undefined) activeRooms[code].name       = name;
+            if (maxPlayers !== undefined) activeRooms[code].maxPlayers = maxPlayers;
+            if (access     !== undefined) activeRooms[code].access     = access;
 
             // Odada artık oyuncu var → zamanlayıcıyı iptal et
             const connected = io.sockets.adapter.rooms.get(code);
             const count = connected ? connected.size : 0;
             if (count > 0) cancelEmptyClose(code);
 
-            console.log(`[LOBBY] Güncellendi: ${code} → oyuncular=${players}, durum=${status}`);
+            console.log(`[LOBBY] Güncellendi: ${code} → oyuncular=${players}, durum=${status}, isim=${name}, maxOyuncu=${maxPlayers}`);
         }
     });
 
     // 4. lobby:load-world → kayıtlı dünya ile sunucu aç
-    socket.on('lobby:load-world', ({ code, host, worldData, gameMode, worldType }) => {
+    socket.on('lobby:load-world', ({ code, host, worldData, gameMode, worldType, name, maxPlayers }) => {
         if (!code || !worldData) {
             return socket.emit('lobby:load-world:response', { success: false, error: 'Eksik veri.' });
         }
@@ -118,23 +121,23 @@ io.on('connection', (socket) => {
 
         activeRooms[code] = {
             code,
-            name:         (host || 'Host') + "'s World",
-            host:         host || 'Unknown',
+            name:         name       || worldData.name || (host || 'Host') + "'s World",
+            host:         host       || 'Unknown',
             hostSocketId: socket.id,
-            worldType:    worldType || 'infinite',
-            gameMode:     gameMode  || 'survival',
-            difficulty:   'normal',
-            access:       'public',
-            cheats:       false,
-            pvp:          true,
+            worldType:    worldType  || worldData.worldType || 'infinite',
+            gameMode:     gameMode   || worldData.mode || 'survival',
+            difficulty:   worldData.difficulty || 'normal',
+            access:       worldData.access     || 'public',
+            cheats:       worldData.cheats     || false,
+            pvp:          worldData.pvp !== undefined ? worldData.pvp : true,
             players:      1,
-            maxPlayers:   20,
+            maxPlayers:   maxPlayers || worldData.maxPlayers || 20,
             status:       'open',
             createdAt:    Date.now()
         };
 
         socket.join(code);
-        console.log(`[LOBBY] Dünya yüklendi: ${code} — host: ${host}`);
+        console.log(`[LOBBY] Dünya yüklendi: ${code} — host: ${host} — isim: ${activeRooms[code].name} — maxOyuncu: ${activeRooms[code].maxPlayers}`);
         socket.emit('lobby:load-world:response', { success: true, code });
 
         // Hiç kimse girmezse 5 dakika sonra kapat
