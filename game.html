@@ -3694,9 +3694,9 @@ const WorldGen = (function(){
     return {biome, surfY};
   }
 
-  // Ağaç üretici
-  function placeTree(wx,wz,surfY,blk){
-    const th=4+Math.floor(Math.random()*2);
+  // Ağaç üretici – rng seed'li, Math.random() kullanmaz
+  function placeTree(wx,wz,surfY,blk,rng){
+    const th=4+Math.floor(rng()*2);
     for(let h=1;h<=th;h++) blk.push({id:'log',pos:new THREE.Vector3(wx,surfY+h,wz),mat:matLog});
     for(let lx=-2;lx<=2;lx++){for(let lz=-2;lz<=2;lz++){for(let ly=0;ly<=1;ly++){
       if(Math.abs(lx)===2&&Math.abs(lz)===2) continue;
@@ -3732,7 +3732,7 @@ const WorldGen = (function(){
       const treeChance = biome==='forest'?0.022:(biome==='hills'?0.01:0.007);
       if(rng()<treeChance){
         const wx=sx+x,wz=sz+z;
-        placeTree(wx,wz,surfY,blk);
+        placeTree(wx,wz,surfY,blk,rng);
       }
     }}
     return blk;
@@ -6477,12 +6477,10 @@ if (device === 'pc') {
     const spS=getSpawnY(8,8);
     camera.position.set(spS.x,spS.y,spS.z);
   } else if(world==='flat'){
-    // Düz dünya: çimen Y=8 → göz Y=10.22
     genChunk(0,0);
     camera.position.set(8,10.22,8);
     updateChunks();
   } else {
-    // Once spawn chunk'i uret, sonra gercek Y'yi hesapla
     genChunk(0,0);
     const spI=getSpawnY(8,8);
     camera.position.set(spI.x,spI.y,spI.z);
