@@ -990,6 +990,62 @@ function saveCreatedServerToLoad(serverConfig){
     localStorage.setItem(key, JSON.stringify(worldData));
   }catch(e){}
 }
+// ─── Dünya Doğum Noktası (World Spawn) ───
+let worldSpawnPoint = null; // {x, y, z} — null ise varsayılan spawn kullanılır
+
+function setWorldSpawn(x, y, z) {
+  worldSpawnPoint = { x: Math.round(x * 10) / 10, y: Math.round(y * 10) / 10, z: Math.round(z * 10) / 10 };
+  if (_currentWorldSaveKey) {
+    try {
+      const raw = localStorage.getItem(_currentWorldSaveKey);
+      if (raw) { const data = JSON.parse(raw); data.worldSpawn = worldSpawnPoint; localStorage.setItem(_currentWorldSaveKey, JSON.stringify(data)); }
+    } catch(e) {}
+  }
+}
+
+function loadWorldSpawn(worldData) {
+  worldSpawnPoint = (worldData && worldData.worldSpawn) ? worldData.worldSpawn : null;
+}
+
+// ─── Oyuncu Verisi Kayıt / Yükleme (MP) ───
+function _playerDataKey(serverCode, username) { return `lgnd_player_${serverCode}_${username}`; }
+
+function savePlayerData(serverCode) {
+  if (!serverCode || serverCode === '----' || !myUsername) return;
+  try {
+    const data = {
+      x: Math.round(camera.position.x * 100) / 100,
+      y: Math.round(camera.position.y * 100) / 100,
+      z: Math.round(camera.position.z * 100) / 100,
+      hotbar: hotbarSlots.slice(),
+      savedAt: Date.now()
+    };
+    localStorage.setItem(_playerDataKey(serverCode, myUsername), JSON.stringify(data));
+  } catch(e) {}
+}
+
+function loadPlayerData(serverCode) {
+  if (!serverCode || serverCode === '----' || !myUsername) return null;
+  try {
+    const raw = localStorage.getItem(_playerDataKey(serverCode, myUsername));
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data.savedAt || Date.now() - data.savedAt > 7 * 24 * 60 * 60 * 1000) return null;
+    return data;
+  } catch(e) { return null; }
+}
+
+function applyPlayerData(data) {
+  if (!data) return;
+  if (typeof data.x === 'number' && typeof data.y === 'number' && typeof data.z === 'number') {
+    camera.position.set(data.x, data.y, data.z);
+  }
+  if (Array.isArray(data.hotbar) && data.hotbar.length === 9) {
+    hotbarSlots = data.hotbar.slice();
+    initHotbar();
+  }
+}
+
 // Ban/Admin listelerini kayıtlı dünyaya yaz
 function saveServerBansAndAdmins(){
   if(!_currentWorldSaveKey||!amHost) return;
@@ -1007,6 +1063,7 @@ function loadServerBansAndAdmins(worldData){
   if(!worldData) return;
   if(Array.isArray(worldData.bannedPlayers)) worldData.bannedPlayers.forEach(n=>bannedPlayers.add(n));
   if(Array.isArray(worldData.admins)) worldData.admins.forEach(n=>opPlayers.add(n));
+  loadWorldSpawn(worldData);
 }
 
 // ─── Blok Kayıt Sistemi ───
@@ -1030,13 +1087,19 @@ function flushBlockSave(){
     if(!raw) return;
     const data=JSON.parse(raw);
     if(!Array.isArray(data.blockChanges)) data.blockChanges=[];
-    // Gelen değişiklikleri birleştir (aynı konumda çakışanları en son olanla değiştir)
+    // Gelen değişiklikleri birleştir: aynı konumda çakışanları en son olanla değiştir
     const changeMap=new Map();
-    data.blockChanges.forEach(c=>changeMap.set(c.bx+'_'+c.by+'_'+c.bz,c));
+    // Önce var olan kayıtlı değişimleri yükle
+    data.blockChanges.forEach(c=>changeMap.set(`${c.bx}_${c.by}_${c.bz}`,c));
+    // Yeni değişimleri uygula: kır → kaydı sil, koy → kaydı güncelle
     while(_pendingBlockChanges.length>0){
       const c=_pendingBlockChanges.shift();
-      if(c.action==='break') changeMap.delete(c.bx+'_'+c.by+'_'+c.bz);
-      else changeMap.set(c.bx+'_'+c.by+'_'+c.bz,c);
+      const key=`${c.bx}_${c.by}_${c.bz}`;
+      if(c.action==='break'){
+        changeMap.delete(key); // Kırılan blok = varsayılan arazi → kaydı sil
+      } else {
+        changeMap.set(key,c);  // Konan blok → kaydet (Y negatif de dahil)
+      }
     }
     data.blockChanges=Array.from(changeMap.values()).slice(-MAX_BLOCK_SAVES);
     localStorage.setItem(_currentWorldSaveKey,JSON.stringify(data));
@@ -1050,10 +1113,14 @@ function applyStoredBlockChanges(worldData){
   worldData.blockChanges.forEach(c=>{
     try{
       const {bx,by,bz,slot:s}=c;
+      // Chunk yoksa oluştur (yeraltı kazıları için gerekli)
+      const cxIdx=~~(bx/CS), czIdx=~~(bz/CS);
+      if(!chunks[ck(cxIdx,czIdx)]) genChunk(cxIdx,czIdx);
+      const ch=chunks[ck(cxIdx,czIdx)];
       if(c.action==='break'){
         const bd=blockMap[pk(bx,by,bz)];if(!bd) return;
         hideBlock(bd);delete blockMap[pk(bx,by,bz)];
-        const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+        if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
         refreshNbr(bx,by,bz);instancesDirty=true;
       } else if(c.action==='place'){
         const safeSlot=Math.max(0,Math.min(99,parseInt(s)||0));
@@ -1067,7 +1134,7 @@ function applyStoredBlockChanges(worldData){
         else if(safeSlot===99){bd={id:'barrier',pos:new THREE.Vector3(bx,by,bz),mat:texBarrier,visible:false};}
         else{bd={id:blockIds[safeSlot]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[safeSlot]||texWood,visible:false};}
         blockMap[pk(bx,by,bz)]=bd;
-        const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
+        if(ch) ch.blocks.push(bd);
         showBlock(bd);refreshNbr(bx,by,bz);instancesDirty=true;
         if(safeSlot===9) waterPendingSet.add(pk(bx,by,bz));
         if(safeSlot===11) lavaPendingSet.add(pk(bx,by,bz));
@@ -1163,7 +1230,9 @@ const langData={
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
       codeLabel:'ODA ŞİFRESİ',wmcInf:'NORMAL',wmcFlat:'DÜZ',wmcSm:'KÜÇÜK',gmcSurv:'HAY. KALMA',gmcCrea:'YARATICI',gmcAdv:'MACERA',
       chatHint:'⌨  Enter → Sohbet',chatPh:'Mesajınızı yazın...',
-      sysJoin:' odaya katıldı',sysLeft:' ayrıldı',sysDisc:'Bağlantı kesildi',
+      sysJoin:' odaya katıldı',sysLeft:' ayrıldı',sysDisc:'Bağlantı kesildi',sysNewHost:'Yeni sunucu sahibi: ',
+      sysSpawnSet:'✅ Dünya doğum noktası güncellendi!',sysSpawnSetUsage:'Kullanım: /setworldspawn (host olman gerekir)',
+      sysPlayerSaved:'💾 Konum ve envanter kaydedildi.',
       modeCreative:'Yaratıcı Mod',modeSurvival:'Hayatta Kalma',modeAdventure:'Macera Modu',rdLabel:'Görüş Mesafesi',rdPcLabel:'Görüş Mesafesi',rdMLabel:'Görüş Mesafesi',
       spSurv:'HAY. KALMA',spCrea:'YARATICI',spAdv:'MACERA',crouchBtn:'ÇÖMEL',cheatsLabel:'HİLELER',cheatOff:'KAPALI',cheatOn:'AÇIK',
       deathTitle:'Öldün!',respawnBtn:'Yeniden Doğ',pauseSettings:'AYARLAR',
@@ -1223,6 +1292,7 @@ const langData={
         '/ban <isim>  →  Banla',
         '/unban <isim>  →  Banı kaldır',
         '/cheats on|off  →  Hile aç/kapat',
+        '/setworldspawn  →  Doğma noktasını ayarla',
         '/friend <isim>  →  Arkadaşlık isteği',
         '/shout <mesaj>  →  Global mesaj',
         '/help  →  Bu menüyü göster',
@@ -1286,7 +1356,9 @@ const langData={
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
       codeLabel:'ROOM CODE',wmcInf:'NORMAL',wmcFlat:'FLAT',wmcSm:'SMALL',gmcSurv:'SURVIVAL',gmcCrea:'CREATIVE',gmcAdv:'ADVENTURE',
       chatHint:'⌨  Enter → Chat',chatPh:'Type a message...',
-      sysJoin:' joined',sysLeft:' left',sysDisc:'Connection lost',
+      sysJoin:' joined',sysLeft:' left',sysDisc:'Connection lost',sysNewHost:'New server owner: ',
+      sysSpawnSet:'✅ World spawn point updated!',sysSpawnSetUsage:'Usage: /setworldspawn (must be host)',
+      sysPlayerSaved:'💾 Position and inventory saved.',
       modeCreative:'Creative Mode',modeSurvival:'Survival Mode',modeAdventure:'Adventure Mode',rdLabel:'Render Distance',rdPcLabel:'Render Distance',rdMLabel:'Render Distance',
       spSurv:'SURVIVAL',spCrea:'CREATIVE',spAdv:'ADVENTURE',crouchBtn:'CROUCH',cheatsLabel:'CHEATS',cheatOff:'OFF',cheatOn:'ON',
       deathTitle:'You Died!',respawnBtn:'Respawn',pauseSettings:'SETTINGS',
@@ -1346,6 +1418,7 @@ const langData={
         '/ban <name>  →  Ban player',
         '/unban <name>  →  Unban player',
         '/cheats on|off  →  Toggle cheats',
+        '/setworldspawn  →  Set world spawn point',
         '/friend <name>  →  Friend request',
         '/shout <msg>  →  Global message',
         '/help  →  Show this menu',
@@ -1696,13 +1769,8 @@ let lobbySocket = null;
 let _testModePendingAction = null;
 let _csSettings = { cheats: 'off', pvp: 'on' };
 
-// ── PRE-WARM: Sayfa yüklenince sunucuyu arka planda uyandır ──
-document.addEventListener('DOMContentLoaded', () => {
-  setTimeout(() => {
-    fetch(RENDER_SERVER_URL, { method: 'GET', mode: 'no-cors', cache: 'no-store' })
-      .catch(() => {});
-  }, 2000);
-});
+// ── PRE-WARM: Sayfa yüklenince sunucuyu arka planda uyandır (hemen, DOMContentLoaded bekleme) ──
+fetch(RENDER_SERVER_URL, { method: 'GET', mode: 'no-cors', cache: 'no-store' }).catch(() => {});
 
 // ── Test Mode Modal ──
 function showTestModeModal(onContinue) {
@@ -1738,14 +1806,47 @@ function connectLobbySocket(cb) {
     lobbySocket = io(RENDER_SERVER_URL, {
       transports: ['websocket', 'polling'],
       upgrade: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 2000,
-      timeout: 60000
+      reconnectionAttempts: 8,
+      reconnectionDelay: 3000,
+      timeout: 90000
     });
     lobbySocket.on('connect', () => {
       _lobbyConnecting = false;
+      // Eğer aktif bir odadaysak (guest olarak katıldık), sıra kaydını gönder
+      const activeCode = document.getElementById('host-code-display')?.textContent;
+      if (activeCode && activeCode !== '----' && isMP) {
+        lobbySocket.emit('lobby:register-player', { code: activeCode });
+      }
       const queue = _lobbyConnectQueue.splice(0);
       queue.forEach(fn => { try { fn(); } catch(e) {} });
+    });
+
+    // ── Host Devri: sunucu bize yeni host olduğumuzu söyledi ──
+    lobbySocket.on('lobby:you-are-host', ({ code, msgTR, msgEN }) => {
+      amHost = true;
+      updateManageServerBtn();
+      // Host heartbeat'i başlat
+      if (_lobbyHeartbeatTimer) { clearInterval(_lobbyHeartbeatTimer); _lobbyHeartbeatTimer = null; }
+      _lobbyHeartbeatTimer = setInterval(() => {
+        if (!isMP || !amHost) return;
+        const serverCode = document.getElementById('host-code-display')?.textContent;
+        if (lobbySocket && lobbySocket.connected && serverCode && serverCode !== '----') {
+          const cnt = 1 + Object.keys(hostConns || {}).length;
+          const _maxP = getMaxPlayersByRank(playerRank);
+          lobbySocket.emit('lobby:update', { code: serverCode, players: cnt, status: 'open', maxPlayers: _maxP, name: mpServerName || myUsername+"'s Server" });
+        }
+      }, 20000);
+      const msg = currentLang === 'tr' ? msgTR : msgEN;
+      addChat(null, msg, true, 'srv');
+    });
+
+    // ── Host Devri: odadaki herkese yeni host duyurusu ──
+    lobbySocket.on('lobby:host-migrated', ({ newHostSocketId, msgTR, msgEN }) => {
+      if (lobbySocket.id !== newHostSocketId) {
+        // Biz yeni host değiliz; chat'te duyuru göster
+        const msg = currentLang === 'tr' ? msgTR : msgEN;
+        addChat(null, msg, true, 'sys');
+      }
     });
     lobbySocket.on('connect_error', (err) => {
       console.warn('[Lobby] Bağlantı hatası:', err && err.message);
@@ -1881,11 +1982,11 @@ function renderBrowseListInline(rooms) {
       e.stopPropagation();
       const code = e.target.dataset.code;
       if (code) {
+        // Direkt bağlan: join ekranını göstermeden doğrudan join başlat
         document.getElementById('join-code-input').value = code;
+        document.getElementById('join-status').textContent = currentLang === 'tr' ? `Bağlanılıyor: ${room.name||code}` : `Connecting: ${room.name||code}`;
         showScreen('screen-join');
-        document.getElementById('join-status').textContent = `Katılıyor: ${room.name||code}`;
-        // Otomatik bağlan
-        setTimeout(() => { document.getElementById('btn-do-join').click(); }, 200);
+        setTimeout(() => { document.getElementById('btn-do-join').click(); }, 100);
       }
     });
     listEl.appendChild(row);
@@ -4857,7 +4958,12 @@ function showChatLog(){
 function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
   const log=document.getElementById('chat-log');
   const d=document.createElement('div');
+  // Sistem mesajları (join/left vb.) sarı renkle göster
+  const isSysEvent = sys && !cls;
   d.className='chat-msg'+(sys?' sys':'')+(cls?' '+cls:'');
+  if(isSysEvent && (typeof msg==='string') && (msg.includes(' katıldı')||msg.includes(' ayrıldı')||msg.includes(' joined')||msg.includes(' left')||msg.includes('sunucu sahibi')||msg.includes('server owner'))) {
+    d.style.color='#ffd27a';
+  }
   if(sys){
     d.textContent=msg;
   } else {
@@ -4879,10 +4985,10 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
     }
     d.appendChild(document.createTextNode(`${safeName}: ${safeMsg}`));
   }
-  log.appendChild(d);while(log.children.length>150) log.removeChild(log.firstChild);
-  // Kullanıcı en altta değilse otomatik kaydırma yapma (eski mesajları okuyabilsin)
-  const isAtBottom=(log.scrollHeight-log.scrollTop-log.clientHeight)<40;
-  if(isAtBottom) log.scrollTop=log.scrollHeight;
+  log.appendChild(d);
+  while(log.children.length>150) log.removeChild(log.firstChild);
+  // Her zaman en alta kaydır (chat açık veya kapalı fark etmez)
+  requestAnimationFrame(()=>{ log.scrollTop=log.scrollHeight; });
   showChatLog();
 }
  
@@ -4916,8 +5022,7 @@ function addShoutChat(name,msg,rank,rankColor){
   }
   d.appendChild(document.createTextNode(safeName+': '+safeMsg));
   log.appendChild(d);while(log.children.length>150) log.removeChild(log.firstChild);
-  const isAtBottom2=(log.scrollHeight-log.scrollTop-log.clientHeight)<40;
-  if(isAtBottom2) log.scrollTop=log.scrollHeight;
+  requestAnimationFrame(()=>{ log.scrollTop=log.scrollHeight; });
   showChatLog();
 }
 function grantOpHost(name){
@@ -5128,6 +5233,15 @@ function processCmd(raw){
     addChat(null,d.giveSuccess+givenName,true,'srv');
     return;
   }
+  if(cmd==='setworldspawn'){
+    if(!isMP){addChat(null,d.sysSpawnSetUsage,true,'warn');return;}
+    if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
+    setWorldSpawn(camera.position.x, camera.position.y, camera.position.z);
+    addChat(null,d.sysSpawnSet,true,'srv');
+    // Tüm guestlere yeni spawn noktasını bildir
+    Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'worldspawn',x:worldSpawnPoint.x,y:worldSpawnPoint.y,z:worldSpawnPoint.z});});
+    return;
+  }
   if(cmd==='help'){
     addChat(null,d.helpTitle,true,'srv');
     d.helpLines.forEach(line=>addChat(null,line,true,'srv'));
@@ -5137,6 +5251,11 @@ function processCmd(raw){
 }
  
 function cleanupMP(){
+  // Çıkıştan önce oyuncu konumunu ve envanterini kaydet
+  if(isMP && myUsername) {
+    const serverCode = document.getElementById('host-code-display')?.textContent || document.getElementById('join-code-input')?.value?.trim()?.toUpperCase();
+    if(serverCode && serverCode !== '----') savePlayerData(serverCode);
+  }
   if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
   if(_lobbyHeartbeatTimer){clearInterval(_lobbyHeartbeatTimer);_lobbyHeartbeatTimer=null;}
   Object.values(remPlayers).forEach(p=>scene.remove(p.g));remPlayers={};
@@ -5477,6 +5596,12 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
     mpHostSeed = worldSeed; // geri yaz (heartbeat vb. için)
     st.textContent='Oda hazır!';isMP=true;amHost=true;hostConns={};connTokens.clear();
 
+    // Host'u sunucu sırasına kaydet (host migration için)
+    if (lobbySocket && lobbySocket.connected) {
+      const _hCode = document.getElementById('host-code-display').textContent;
+      if (_hCode && _hCode !== '----') lobbySocket.emit('lobby:register-player', { code: _hCode });
+    }
+
     // ── Lobby'e oyuncu sayısı bildir ──
     function _updateLobbyPlayerCount(){
       const cnt = 1 + Object.keys(hostConns).length; // host + guests
@@ -5508,7 +5633,7 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             _updateLobbyPlayerCount();
             const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,rank:playerRank,rankColor:playerRankColor}];
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry,rank:p.rank,rankColor:p.rankColor});});
-            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName),pvp:serverPvpEnabled,access:serverAccess});
+            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName),pvp:serverPvpEnabled,access:serverAccess,worldSpawn:worldSpawnPoint||null});
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName,rank:safeRank,rankColor:safeRankColor});});
             addRP(pid,safeName,8,2.1,8,0,'survival',safeRank,safeRankColor);addChat(null,safeName+langData[currentLang].sysJoin,true);
             sendMySkinToNewPlayer(conn);
@@ -5533,8 +5658,10 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             const nmRank=hostConns[pid]?.rank||null;
             const nmRankColor=hostConns[pid]?.rankColor||null;
             const safeMsg=String(data.msg||'').substring(0,200);
+            // Host ekranında göster
             addChat(nm,safeMsg,false,'',nmRank,nmRankColor);
-            Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'chat',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});});
+            // Diğer guestlere ilet (mesajı gönderen guest'e GÖNDERİLMEZ – çift mesajı önler)
+            Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'chat',name:nm,msg:safeMsg,rank:nmRank,rankColor:nmRankColor});});
           }
           else if(data.type==='shout'){
             if(!connTokens.has(pid)) return;
@@ -5644,7 +5771,8 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
         conn.on('close',()=>{
           const pid=conn.peer,nm=connTokens.get(pid)||hostConns[pid]?.name||'Oyuncu';
           connTokens.delete(pid);
-          remRP(pid);delete hostConns[pid];
+          remRP(pid); // Hayalet modeli hemen Three.js sahnesinden sil
+          delete hostConns[pid];
           addChat(null,nm+langData[currentLang].sysLeft,true);
           Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name:nm});});
           _updateLobbyPlayerCount();
@@ -5656,7 +5784,7 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
     if(_currentWorldSaveKey){
       try{
         const _wdRaw=localStorage.getItem(_currentWorldSaveKey);
-        if(_wdRaw){const _wd=JSON.parse(_wdRaw);setTimeout(()=>applyStoredBlockChanges(_wd),500);}
+        if(_wdRaw){const _wd=JSON.parse(_wdRaw);loadWorldSpawn(_wd);setTimeout(()=>applyStoredBlockChanges(_wd),500);}
       }catch(e){}
     }
   });
@@ -5697,6 +5825,12 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         myOp=data.isOp||false;
         if(data.pvp!==undefined) serverPvpEnabled=!!data.pvp;
         if(data.access) serverAccess=data.access;
+        if(data.worldSpawn) worldSpawnPoint=data.worldSpawn; else worldSpawnPoint=null;
+        // Sunucuya oyuncu sırasını bildir (host devri için)
+        const _jCode = document.getElementById('join-code-input').value.trim().toUpperCase();
+        if (lobbySocket && lobbySocket.connected && _jCode) {
+          lobbySocket.emit('lobby:register-player', { code: _jCode });
+        }
         data.players.forEach(p=>{
           if(p.id===myPeer.id) return; // kendimizi ekleme
           addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
@@ -5745,13 +5879,18 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       else if(data.type==='kicked'){showKickScreen(sanitizeName(data.by)||'Sunucu');}
       else if(data.type==='banned'){showBanScreen(sanitizeName(data.by)||'Sunucu');}
       else if(data.type==='server_pvp'){serverPvpEnabled=!!data.enabled;}
+      else if(data.type==='worldspawn'){worldSpawnPoint={x:data.x,y:data.y,z:data.z};}
       else if(data.type==='pvp_attack') {
         if(data.target === myPeer.id) {
             CombatManager.applyLocalDamage(data.dmg, new THREE.Vector3(data.fromPos.x, data.fromPos.y, data.fromPos.z));
         }
       }
     });
-    guestConn.on('close',()=>addChat(null,langData[currentLang].sysDisc,true));
+    guestConn.on('close',()=>{
+      // Tüm uzak oyuncu modellerini sil (hayalet önleme)
+      Object.keys(remPlayers).forEach(id=>remRP(id));
+      addChat(null,langData[currentLang].sysDisc,true);
+    });
     guestConn.on('error',()=>{
       if(document.getElementById('join-status')) st.textContent='Bağlantı hatası';
       document.getElementById('btn-do-join').disabled=false;
@@ -6485,6 +6624,14 @@ if (device === 'pc') {
     const spI=getSpawnY(8,8);
     camera.position.set(spI.x,spI.y,spI.z);
     updateChunks();
+  }
+  // Özel dünya doğum noktası varsa uygula
+  if(worldSpawnPoint) camera.position.set(worldSpawnPoint.x, worldSpawnPoint.y, worldSpawnPoint.z);
+  // MP: kayıtlı oyuncu verisi (konum + envanter) varsa uygula
+  if(mp){
+    const serverCode=document.getElementById('host-code-display')?.textContent||document.getElementById('join-code-input')?.value?.trim()?.toUpperCase();
+    const pd=loadPlayerData(serverCode);
+    if(pd) setTimeout(()=>applyPlayerData(pd),200); // biraz bekle, dünya yüklensin
   }
 }
 function selSlot(i){slot=i;document.querySelectorAll('.hotbar-slot').forEach((s,j)=>s.classList.toggle('active',j===i));}
