@@ -1006,6 +1006,73 @@ function loadServerBansAndAdmins(worldData){
   if(Array.isArray(worldData.bannedPlayers)) worldData.bannedPlayers.forEach(n=>bannedPlayers.add(n));
   if(Array.isArray(worldData.admins)) worldData.admins.forEach(n=>opPlayers.add(n));
 }
+
+// ─── Blok Kayıt Sistemi ───
+// Oyunda yapılan blok değişikliklerini (kır/koy) localStorage'a yazar.
+// Sadece host'ta çalışır; otomatik debounce ile 3 saniyede bir kaydeder.
+let _blockSaveTimer=null;
+const _pendingBlockChanges=[]; // {action:'break'|'place', bx,by,bz, slot?}
+const MAX_BLOCK_SAVES=2000; // kaydedilen maksimum blok değişikliği sayısı
+function queueBlockSave(data){
+  if(!_currentWorldSaveKey||!amHost) return;
+  _pendingBlockChanges.push({action:data.action,bx:data.bx,by:data.by,bz:data.bz,slot:data.slot});
+  if(_pendingBlockChanges.length>MAX_BLOCK_SAVES) _pendingBlockChanges.shift();
+  if(_blockSaveTimer) clearTimeout(_blockSaveTimer);
+  _blockSaveTimer=setTimeout(flushBlockSave,3000);
+}
+function flushBlockSave(){
+  _blockSaveTimer=null;
+  if(!_currentWorldSaveKey||!amHost||_pendingBlockChanges.length===0) return;
+  try{
+    const raw=localStorage.getItem(_currentWorldSaveKey);
+    if(!raw) return;
+    const data=JSON.parse(raw);
+    if(!Array.isArray(data.blockChanges)) data.blockChanges=[];
+    // Gelen değişiklikleri birleştir (aynı konumda çakışanları en son olanla değiştir)
+    const changeMap=new Map();
+    data.blockChanges.forEach(c=>changeMap.set(c.bx+'_'+c.by+'_'+c.bz,c));
+    while(_pendingBlockChanges.length>0){
+      const c=_pendingBlockChanges.shift();
+      if(c.action==='break') changeMap.delete(c.bx+'_'+c.by+'_'+c.bz);
+      else changeMap.set(c.bx+'_'+c.by+'_'+c.bz,c);
+    }
+    data.blockChanges=Array.from(changeMap.values()).slice(-MAX_BLOCK_SAVES);
+    localStorage.setItem(_currentWorldSaveKey,JSON.stringify(data));
+  }catch(e){}
+}
+// Kayıtlı blok değişikliklerini dünyaya uygula (host sunucu başladıktan sonra)
+function applyStoredBlockChanges(worldData){
+  if(!worldData||!Array.isArray(worldData.blockChanges)) return;
+  const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock,matLava,texObsidian];
+  const blockIds=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock','lava','obsidian'];
+  worldData.blockChanges.forEach(c=>{
+    try{
+      const {bx,by,bz,slot:s}=c;
+      if(c.action==='break'){
+        const bd=blockMap[pk(bx,by,bz)];if(!bd) return;
+        hideBlock(bd);delete blockMap[pk(bx,by,bz)];
+        const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks=ch.blocks.filter(b=>!(Math.round(b.pos.x)===bx&&Math.round(b.pos.y)===by&&Math.round(b.pos.z)===bz));
+        refreshNbr(bx,by,bz);instancesDirty=true;
+      } else if(c.action==='place'){
+        const safeSlot=Math.max(0,Math.min(99,parseInt(s)||0));
+        const existingBd=blockMap[pk(bx,by,bz)];
+        if(existingBd&&!isAnyWater(existingBd)&&!existingBd.isLiquid) return;
+        if(existingBd) {hideBlock(existingBd);delete blockMap[pk(bx,by,bz)];}
+        let bd;
+        if(safeSlot===9){bd={id:'water',pos:new THREE.Vector3(bx,by,bz),mat:matWater,isWater:true,waterLevel:8,isSource:true,visible:false};}
+        else if(safeSlot===10){bd={id:'bedrock',pos:new THREE.Vector3(bx,by,bz),mat:texBedrock,visible:false};}
+        else if(safeSlot===11){bd={id:'lava',pos:new THREE.Vector3(bx,by,bz),mat:matLava,isLava:true,lavaLevel:8,isSource:true,isSolid:false,solid:false,visible:false};}
+        else if(safeSlot===99){bd={id:'barrier',pos:new THREE.Vector3(bx,by,bz),mat:texBarrier,visible:false};}
+        else{bd={id:blockIds[safeSlot]||'planks',pos:new THREE.Vector3(bx,by,bz),mat:mats[safeSlot]||texWood,visible:false};}
+        blockMap[pk(bx,by,bz)]=bd;
+        const ch=chunks[ck(~~(bx/CS),~~(bz/CS))];if(ch) ch.blocks.push(bd);
+        showBlock(bd);refreshNbr(bx,by,bz);instancesDirty=true;
+        if(safeSlot===9) waterPendingSet.add(pk(bx,by,bz));
+        if(safeSlot===11) lavaPendingSet.add(pk(bx,by,bz));
+      }
+    }catch(e){}
+  });
+}
 function checkServerLimit(){
   if(isGuestUser()) return {ok:false,msg:currentLang==='tr'?'🔒 Sunucu oluşturmak için hesap gereklidir.':'🔒 An account is required to create a server.'};
   const limit=getMaxServersByRank(playerRank);
@@ -1509,6 +1576,7 @@ document.getElementById('mobile-pause-btn').addEventListener('click',e=>{e.stopP
 // ─── Menü Nav ───
 let selectedDevice=null,worldType=null,mpHostWorld='infinite';
 let spGameMode='survival',mpGameMode='survival',cheatsEnabled=false,spCheatsEnabled=false;
+let mpServerName=''; // Sunucu adı (lobby'de gösterilir)
 function showScreen(id){document.querySelectorAll('.menu-screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function selMini(g,id){g.forEach(el=>document.getElementById(el).classList.toggle('sel',el===id));}
 let settingsFromPause=false;
@@ -1857,7 +1925,7 @@ document.getElementById('btn-do-load-inline').addEventListener('click', () => {
   if (!worldData) { statusEl.textContent = langData[currentLang].slWorldReadError; return; }
   connectLobbySocket(() => {
     const code = genCode();
-    lobbySocket.emit('lobby:load-world', { code, host: myUsername, worldData, gameMode: worldData.mode||'survival', worldType: worldData.worldType||'infinite' });
+    lobbySocket.emit('lobby:load-world', { code, host: myUsername, worldData, name: worldData.name||myUsername+"'s Server", gameMode: worldData.mode||'survival', worldType: worldData.worldType||'infinite' });
     lobbySocket.once('lobby:load-world:response', (res) => {
       if (res && res.success) {
         incrementServerCount(myUsername);
@@ -1867,6 +1935,7 @@ document.getElementById('btn-do-load-inline').addEventListener('click', () => {
         mpHostWorld = worldData.worldType || 'infinite';
         mpGameMode = worldData.mode || 'survival';
         cheatsEnabled = worldData.cheats || false;
+        mpServerName = worldData.name || ''; // FIX: sunucu ismi
         // FIX: Kayıtlı ban/admin listelerini yükle
         _currentWorldSaveKey = _selectedLoadKeyInline;
         loadServerBansAndAdmins(worldData);
@@ -2063,6 +2132,7 @@ document.getElementById('btn-do-load').addEventListener('click', () => {
       code,
       host: myUsername,
       worldData,
+      name: worldData.name || myUsername+"'s Server",
       gameMode: worldData.mode || 'survival',
       worldType: worldData.worldType || 'infinite',
     });
@@ -2075,6 +2145,7 @@ document.getElementById('btn-do-load').addEventListener('click', () => {
         mpHostWorld = worldData.worldType || 'infinite';
         mpGameMode = worldData.mode || 'survival';
         cheatsEnabled = worldData.cheats || false;
+        mpServerName = worldData.name || ''; // FIX: sunucu ismi
         // FIX: Kayıtlı ban/admin listelerini yükle
         _currentWorldSaveKey = _selectedLoadKey;
         loadServerBansAndAdmins(worldData);
@@ -2143,6 +2214,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         mpHostWorld = worldType;
         mpGameMode = gameMode;
         cheatsEnabled = cheats;
+        mpServerName = name; // FIX: sunucu ismini sakla
         document.getElementById('host-status').textContent = '✅ Server registered! Share code: ' + code;
         showScreen('screen-host');
         // Otomatik olarak host başlat
@@ -2155,6 +2227,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
+          mpServerName = name; // FIX: sunucu ismini sakla
           showScreen('screen-host');
           // Otomatik olarak host başlat
           setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
@@ -2171,6 +2244,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
+          mpServerName = name; // FIX: sunucu ismini sakla
           showScreen('screen-host');
           // Otomatik olarak host başlat
           setTimeout(() => { document.getElementById('btn-do-host').click(); }, 300);
@@ -2186,7 +2260,8 @@ const _origDoHostBtn = document.getElementById('btn-do-host');
 _origDoHostBtn.addEventListener('click', () => {
   const code = document.getElementById('host-code-display').textContent;
   if (lobbySocket && lobbySocket.connected && code && code !== '----') {
-    lobbySocket.emit('lobby:update', { code, players: 1, status: 'open' });
+    // FIX: Sunucu ismini de gönder
+    lobbySocket.emit('lobby:update', { code, players: 1, status: 'open', name: mpServerName||undefined });
   }
 });
 
@@ -4654,6 +4729,8 @@ const connTokens=new Map();
 function genCode(){return Array.from({length:4},()=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[~~(Math.random()*26)]).join('');}
 function autoDevice(){return('ontouchstart' in window||navigator.maxTouchPoints>0)?'mobile':'pc';}
 function sendBlock(data){
+  // Blok değişikliğini kaydet (host veya SP)
+  if(amHost||!isMP) queueBlockSave(data);
   if(!checkRate('block',10)) return;
   if(!isMP) return;
   if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send(data);});
@@ -5012,6 +5089,7 @@ function processCmd(raw){
  
 function cleanupMP(){
   if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
+  if(_lobbyHeartbeatTimer){clearInterval(_lobbyHeartbeatTimer);_lobbyHeartbeatTimer=null;}
   Object.values(remPlayers).forEach(p=>scene.remove(p.g));remPlayers={};
   connTokens.clear();
   if(guestConn){try{guestConn.close();}catch(e){}guestConn=null;}
@@ -5309,6 +5387,7 @@ function sendMySkinToNewPlayer(conn){
   if(conn&&conn.open) conn.send({type:'skin',data:b64,fromHost:amHost});
 }
 
+let _lobbyHeartbeatTimer=null;
 function startBC(){
   if(bcTimer){clearInterval(bcTimer);bcTimer=null;}
   bcTimer=setInterval(()=>{
@@ -5317,6 +5396,20 @@ function startBC(){
     if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({...p,id:'host'});});
     else if(guestConn?.open) guestConn.send(p);
   },100);
+  // Lobby heartbeat: sunucunun listeden düşmemesi için 20 saniyede bir güncelle
+  if(_lobbyHeartbeatTimer){clearInterval(_lobbyHeartbeatTimer);_lobbyHeartbeatTimer=null;}
+  if(amHost){
+    _lobbyHeartbeatTimer=setInterval(()=>{
+      if(!isMP||!amHost) return;
+      const serverCode=document.getElementById('host-code-display')?.textContent;
+      if(lobbySocket&&lobbySocket.connected&&serverCode&&serverCode!=='----'){
+        const cnt=1+Object.keys(hostConns).length;
+        const _upd={code:serverCode,players:cnt,status:'open'};
+        if(mpServerName) _upd.name=mpServerName;
+        lobbySocket.emit('lobby:update',_upd);
+      }
+    },20000);
+  }
 }
  
 // Host
@@ -5337,7 +5430,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
       const cnt = 1 + Object.keys(hostConns).length; // host + guests
       const serverCode = document.getElementById('host-code-display').textContent;
       if(lobbySocket && lobbySocket.connected && serverCode && serverCode !== '----'){
-        lobbySocket.emit('lobby:update', { code: serverCode, players: cnt, status: 'open' });
+        const _upd = { code: serverCode, players: cnt, status: 'open' };
+        if(mpServerName) _upd.name = mpServerName; // FIX: sunucu ismini gönder
+        lobbySocket.emit('lobby:update', _upd);
       }
     }
 
@@ -5504,6 +5599,13 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
       });
     });
     startGame(autoDevice(),mpHostWorld,true,mpGameMode,cheatsEnabled);
+    // FIX: Kayıtlı blok değişikliklerini dünyaya uygula
+    if(_currentWorldSaveKey){
+      try{
+        const _wdRaw=localStorage.getItem(_currentWorldSaveKey);
+        if(_wdRaw){const _wd=JSON.parse(_wdRaw);setTimeout(()=>applyStoredBlockChanges(_wd),500);}
+      }catch(e){}
+    }
   });
   myPeer.on('error',err=>{
     document.getElementById('btn-do-host').disabled=false;
