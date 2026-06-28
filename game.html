@@ -505,6 +505,36 @@ body.low-health::after {
 }
 .fx-shiny{animation:fxShiny 1.8s ease-in-out infinite;}
 
+/* ── *sweep* CSS Text Sweep Efekti ─────────────────────────────────── */
+/* rank-tag.rank-sweep → rütbe yazılarına uygulanan soldan sağa parıltı */
+/* chat-sweep-text → chat/server-list *sweep* etiketli metin parçaları */
+.chat-sweep-text{
+  display:inline;
+  background-image:linear-gradient(
+    105deg,
+    var(--sweep-color,#fff) 0%,
+    var(--sweep-color,#fff) 35%,
+    rgba(255,255,255,0.92) 43%,
+    rgba(255,255,255,1)    50%,
+    rgba(255,255,255,0.92) 57%,
+    var(--sweep-color,#fff) 65%,
+    var(--sweep-color,#fff) 100%
+  );
+  background-size:300% 100%;
+  background-position:200% 0;
+  -webkit-background-clip:text;
+  background-clip:text;
+  -webkit-text-fill-color:transparent;
+  animation:chatSweepAnim 5s linear infinite;
+  filter:drop-shadow(0 0 4px var(--sweep-color,#fff));
+}
+@keyframes chatSweepAnim{
+  0%   {background-position:200% 0;}
+  28%  {background-position:-40% 0;}
+  28.001%{background-position:200% 0;}
+  100% {background-position:200% 0;}
+}
+
 /* ══════════════════════════════════════════════
    SERVER LIST SEKME DÜZELTMESİ – v1.6.2
    ══════════════════════════════════════════════ */
@@ -2053,6 +2083,13 @@ function connectLobbySocket(cb) {
       }
     });
     lobbySocket.on('disconnect', () => { _lobbyConnecting = false; });
+
+    // ── Dünya doğum noktası güncellendi (Socket.io sunucusundan) ──
+    lobbySocket.on('server:worldspawn-updated', ({ x, y, z, msgTR, msgEN }) => {
+      worldSpawnPoint = { x, y, z };
+      const msg = currentLang === 'tr' ? msgTR : msgEN;
+      if(msg) addChat(null, msg, true, 'srv');
+    });
   } catch(e) {
     _lobbyConnecting = false;
     console.warn('[Lobby] Socket.IO yüklenemedi:', e);
@@ -5124,10 +5161,97 @@ function applyBlockSync(data){
  
 function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.70,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
 function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.70,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
-function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;scene.remove(g);const idx=allPlayerModels.indexOf(g);if(idx>-1)allPlayerModels.splice(idx,1);delete remPlayers[id];}}
+function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;
+  // Flash timer varsa iptal et (kalan kırmızı materyaller sızdırmasın)
+  if(g._p2FlashTimer){clearTimeout(g._p2FlashTimer);g._p2FlashTimer=null;}
+  scene.remove(g);const idx=allPlayerModels.indexOf(g);if(idx>-1)allPlayerModels.splice(idx,1);delete remPlayers[id];}}
  
 let chatHideTimer=null;
-// Chat log'u geçici göster (yeni mesaj gelince)
+
+// ── *Tag* Sistemi: Yıldızlı etiket ayrıştırıcı ───────────────────────────
+// Desteklenen etiketler: *#RRGGBB* (hex renk), *sweep* (parıltı efekti), *reset* (sıfırla)
+// Geçersiz veya bilinmeyen etiketler olduğu gibi gösterilir (yıldızlarıyla birlikte).
+// Sadece yetkili rank sahipleri (canUseShout) etiket kullanabilir; normal oyuncuların
+// chat mesajlarındaki *...* etiketleri düz metin olarak gösterilir.
+const _VALID_HEX = /^#[0-9A-Fa-f]{6}$/;
+const _VALID_TAGS = /^\*(#[0-9A-Fa-f]{6}|sweep|reset)\*$/;
+
+function _isValidTag(token){
+  // token: '*something*' formatında
+  if(!token.startsWith('*')||!token.endsWith('*')) return false;
+  const inner = token.slice(1,-1);
+  return _VALID_HEX.test(inner) || inner === 'sweep' || inner === 'reset';
+}
+
+/**
+ * Bir metni *tag* sistemine göre DOM parçalarına dönüştürür.
+ * @param {string} text - İşlenecek metin
+ * @param {boolean} canUseTags - Kullanıcı etiketi kullanabilir mi?
+ * @returns {DocumentFragment} - Oluşturulan DOM parçaları
+ */
+function parseTaggedText(text, canUseTags){
+  const frag = document.createDocumentFragment();
+  if(!canUseTags || !text.includes('*')){
+    frag.appendChild(document.createTextNode(text));
+    return frag;
+  }
+
+  // Metni *...*  bloklarına böl
+  const parts = text.split(/(\*[^*]*\*)/g);
+  let currentColor = null;  // null = beyaz/varsayılan
+  let sweepActive = false;
+
+  for(const part of parts){
+    if(part.startsWith('*') && part.endsWith('*') && part.length > 2){
+      const inner = part.slice(1,-1);
+      if(_VALID_HEX.test(inner)){
+        currentColor = inner;
+        sweepActive = false;
+        continue;
+      }
+      if(inner === 'sweep'){
+        sweepActive = true;
+        continue;
+      }
+      if(inner === 'reset'){
+        currentColor = null;
+        sweepActive = false;
+        continue;
+      }
+      // Geçersiz etiket → düz metin olarak göster
+      frag.appendChild(document.createTextNode(part));
+    } else if(part.length > 0){
+      if(sweepActive){
+        const span = document.createElement('span');
+        span.className = 'chat-sweep-text';
+        span.style.setProperty('--sweep-color', currentColor || '#ffffff');
+        if(currentColor) span.style.color = currentColor;
+        span.textContent = part;
+        frag.appendChild(span);
+      } else if(currentColor){
+        const span = document.createElement('span');
+        span.style.color = currentColor;
+        span.textContent = part;
+        frag.appendChild(span);
+      } else {
+        frag.appendChild(document.createTextNode(part));
+      }
+    }
+  }
+  return frag;
+}
+
+/**
+ * Server list başlığındaki *tag* etiketlerini işler ve HTML string döndürür.
+ * (Güvenli: sadece renk/sweep etiketleri — XSS yok)
+ */
+function parseTaggedTextToHTML(text){
+  const frag = parseTaggedText(text, true);
+  const div = document.createElement('div');
+  div.appendChild(frag);
+  return div.innerHTML;
+}
+// ─────────────────────────────────────────────────────────────────────────
 function showChatLog(){
   if(!deviceMode||isChatOpen) return;
   const c=document.getElementById('chat-container');
@@ -5158,11 +5282,19 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
     d.style.color='#ffd27a';
   }
   if(sys){
-    d.textContent=msg;
+    // Sistem mesajlarında *sweep* etiketlerini işle (örn. /setworldspawn bildirimi)
+    const safeSysMsg = msg ? String(msg).substring(0,200) : '';
+    if(safeSysMsg.includes('*')){
+      d.appendChild(parseTaggedText(safeSysMsg, true));
+    } else {
+      d.textContent = safeSysMsg;
+    }
   } else {
     const safeName=sanitizeName(name||'?');
     const safeMsg=msg?String(msg).substring(0,200):'';
     const tag=formatRankTag(rank);
+    // Sadece yetkili rank sahipleri *tag* etiket kullanabilir
+    const userCanTag = canUseShout(rank);
     if(tag){
       const color=resolveRankColor(rank,rankColor);
       const tagSpan=document.createElement('span');
@@ -5176,7 +5308,10 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
       d.appendChild(tagSpan);
       d.appendChild(document.createTextNode('\u00a0'));
     }
-    d.appendChild(document.createTextNode(`${safeName}: ${safeMsg}`));
+    // İsim: her zaman düz
+    d.appendChild(document.createTextNode(safeName+': '));
+    // Mesaj: yetkili ise *tag* ayrıştır, değilse düz metin
+    d.appendChild(parseTaggedText(safeMsg, userCanTag));
   }
   log.appendChild(d);
   while(log.children.length>150) log.removeChild(log.firstChild);
@@ -8308,6 +8443,8 @@ function drawSkinHead2D(canvas, skinB64, onDone){
 
 let _tabVisible = false;
 let _tabMobileOpen = false;
+// TAB ikon önbelleği: host.png ve admin.png render döngüsünde tekrar yüklenmez
+const _tabIconCache = {};
 
 function buildTabRow(playerInfo){
   // playerInfo: {name, rank, rankColor, isHost, isGuest, skinB64}
@@ -8321,7 +8458,7 @@ function buildTabRow(playerInfo){
   drawSkinHead2D(headCanvas, playerInfo.skinB64 || null, null);
   row.appendChild(headCanvas);
 
-  // Yetki ikonu (host.png, admin.png veya boş)
+  // Yetki ikonu (host.png, admin.png) — DOM'a bir kez eklenir, src bir kez set edilir
   const isOwner = (playerInfo.isHost);
   const isAdmin = !isOwner && playerInfo.rank && (
     playerInfo.rank.toLowerCase().includes('admin') ||
@@ -8330,13 +8467,21 @@ function buildTabRow(playerInfo){
     playerInfo.rank.toLowerCase().includes('mod')
   );
   if(isOwner || isAdmin){
-    const iconImg = document.createElement('img');
-    iconImg.className = 'tab-auth-icon';
-    iconImg.src = isOwner ? 'assets/host.png' : 'assets/admin.png';
-    iconImg.alt = '';
-    iconImg.style.verticalAlign = 'middle';
-    iconImg.onerror = function(){ this.style.display='none'; };
-    row.appendChild(iconImg);
+    const iconSrc = isOwner ? 'assets/host.png' : 'assets/admin.png';
+    // Önce önbellekte var mı bak
+    let cachedImg = _tabIconCache[iconSrc];
+    if(!cachedImg){
+      cachedImg = document.createElement('img');
+      cachedImg.className = 'tab-auth-icon';
+      cachedImg.alt = '';
+      cachedImg.style.verticalAlign = 'middle';
+      cachedImg.onerror = function(){ this.style.display='none'; };
+      cachedImg.src = iconSrc;
+      _tabIconCache[iconSrc] = cachedImg;
+    }
+    // Önbellekteki img klonlanarak satıra eklenir (src tekrar set edilmez)
+    const iconClone = cachedImg.cloneNode(false);
+    row.appendChild(iconClone);
   } else {
     // Boşluk placeholder (hizalama için)
     const ph = document.createElement('span');
@@ -8377,9 +8522,14 @@ function renderTabList(){
 
   grid.innerHTML = '';
 
-  // Sunucu ismi
+  // Sunucu ismi — *tag* etiketleri desteklenir
   const srvName = (typeof mpServerName!=='undefined' && mpServerName) ? mpServerName : (myName ? myName+"'s Server" : 'LEGENDS INDEV');
-  serverNameEl.textContent = srvName.toUpperCase();
+  if(srvName.includes('*')){
+    serverNameEl.innerHTML = '';
+    serverNameEl.appendChild(parseTaggedText(srvName.toUpperCase(), true));
+  } else {
+    serverNameEl.textContent = srvName.toUpperCase();
+  }
 
   // Oyuncu listesi oluştur
   let players = [];
@@ -8419,11 +8569,22 @@ function renderTabList(){
     });
   }
 
-  // Sıralama: Yetki sahipleri üstte, sonra girişe göre, guestler en altta
+  // Sıralama: Owner/OG → Admin → VIP → Normal kayıtlı (en son giren üstte) → Hesapsız/Misafir (en altta)
+  function _rankPriority(pl){
+    const r = (pl.rank || '').toLowerCase();
+    if(r.includes('owner') || r.includes('og')) return 0;
+    if(r.includes('admin') || r.includes('developer') || r.includes('mod')) return 1;
+    if(r.includes('vip')) return 2;
+    if(pl.isGuest) return 100;
+    if(pl.rank) return 3; // diğer rütbeler
+    return 4; // rütbesiz kayıtlı
+  }
   players.sort((a,b)=>{
-    const pa = a.isHost ? -2 : (a.isGuest ? 9999 : (a.rank ? -1 : 0));
-    const pb = b.isHost ? -2 : (b.isGuest ? 9999 : (b.rank ? -1 : 0));
+    const pa = _rankPriority(a);
+    const pb = _rankPriority(b);
     if(pa !== pb) return pa - pb;
+    // Aynı öncelik grubunda: en son katılan en üstte (order küçük = daha önce katıldı)
+    // Guest grubunda da sıra korunur
     return a.order - b.order;
   });
 
@@ -8681,12 +8842,22 @@ document.addEventListener('mozpointerlockchange',function(){
       const msg=d.sysSpawnSet+' '+coordStr;
       addChat(null,msg,true,'srv');
       if(isMP&&amHost){
+        // P2P: tüm guest'lere gönder
         Object.values(hostConns).forEach(function(p){
           if(p&&p.conn&&p.conn.open){
             p.conn.send({type:'worldspawn',x:sp.x,y:sp.y,z:sp.z});
             p.conn.send({type:'chat',name:null,msg:msg,sys:true,cls:'srv'});
           }
         });
+        // Socket.io server'ına da bildir (kalıcı saklama için)
+        const serverCode=document.getElementById('host-code-display')?.textContent;
+        if(lobbySocket&&lobbySocket.connected&&serverCode&&serverCode!=='----'){
+          lobbySocket.emit('server:setworldspawn',{
+            code:serverCode,
+            x:sp.x, y:sp.y, z:sp.z,
+            requestedBy: myUsername||myName
+          });
+        }
       }
       return;
     }
@@ -8818,38 +8989,52 @@ document.addEventListener('mozpointerlockchange',function(){
 // PATCH 5 & 6: Vuruş Efekti (hedef kırmızı) + Knockback Lerp
 // ──────────────────────────────────────────────────────────────────────
 (function _p2Combat(){
-  // Hedef mesh'ini geçici kırmızı yap
+  // Hedef mesh'ini geçici kırmızı yap — 200ms sonra eski haline döner, timer zırhlanır
   window._p2HitFlash=function(targetId){
     const rp=remPlayers[targetId];
     if(!rp||!rp.g) return;
+    // Önceki timer varsa iptal et (kalıcı kırmızı kalmasın)
+    if(rp.g._p2FlashTimer){
+      clearTimeout(rp.g._p2FlashTimer);
+      rp.g._p2FlashTimer=null;
+      // Eski materyalleri geri yükle (yarım kalmış flash'ı temizle)
+      rp.g.traverse(function(child){
+        if(!child.isMesh||!child._p2origMats) return;
+        child.material=Array.isArray(child._p2origMats)?child._p2origMats:child._p2origMats[0];
+        delete child._p2origMats;
+      });
+    }
+    // Kırmızı flash uygula
     rp.g.traverse(function(child){
       if(!child.isMesh) return;
       const mats=Array.isArray(child.material)?child.material:[child.material];
-      child._p2origMats=mats.slice();
+      child._p2origMats=mats.map(m=>m); // referans klonla değil orijinal sakla
       child.material=mats.map(function(m){
         const f=m.clone();
         f.transparent=true;f.opacity=0.65;
-        f.color.set(0xff2020);
+        f.color.set(0xff0000);
         if(f.emissive) f.emissive.set(0xff0000);
-        if(f.emissiveIntensity!==undefined) f.emissiveIntensity=0.9;
+        if(f.emissiveIntensity!==undefined) f.emissiveIntensity=1.0;
         return f;
       });
-      if(!Array.isArray(child.material)) child.material=child.material[0]||child.material;
+      if(!Array.isArray(child.material)) child.material=[child.material];
     });
-    setTimeout(function(){
+    // Kesinlikle 200ms sonra geri dön
+    rp.g._p2FlashTimer=setTimeout(function(){
+      rp.g._p2FlashTimer=null;
       if(!rp.g) return;
       rp.g.traverse(function(child){
         if(!child.isMesh||!child._p2origMats) return;
-        child.material=Array.isArray(child.material)?child._p2origMats:child._p2origMats[0];
+        child.material=Array.isArray(child._p2origMats)?child._p2origMats:child._p2origMats[0];
         delete child._p2origMats;
       });
-    },190);
+    }, 200);
   };
 
   // Knockback lerp state
   let _kbVx=0,_kbVz=0,_kbT=0;
 
-  // CombatManager.applyLocalDamage override — knockback lerp ekle
+  // CombatManager.applyLocalDamage override — knockback lerp ekle (yumuşatılmış)
   const _origALD=CombatManager.applyLocalDamage.bind(CombatManager);
   CombatManager.applyLocalDamage=function(damage,fromPos,attackerName){
     if(gameMode==='creative') return;
@@ -8858,14 +9043,17 @@ document.addEventListener('mozpointerlockchange',function(){
       const dx=camera.position.x-fromPos.x;
       const dz=camera.position.z-fromPos.z;
       const len=Math.sqrt(dx*dx+dz*dz)||1;
-      const str=4.8;
-      _kbVx=(dx/len)*str; _kbVz=(dz/len)*str; _kbT=0.22;
-      if(grounded) velY=Math.max(velY,3.6);
+      // Makul knockback: 1-2 blok geri iter, haritanın dışına uçurmaz
+      const str=2.2; // önceki 4.8 → 2.2 (yarıdan az)
+      _kbVx=(dx/len)*str; _kbVz=(dz/len)*str;
+      _kbT=0.14; // önceki 0.22 → 0.14 (daha kısa süre)
+      // Yukarı zıplamayı sınırla (uçma önleme)
+      if(grounded) velY=Math.max(velY, Math.min(JUMP * 0.5, 0.044));
     }
     this.flashRed(); // BİZİM ekranımız (doğru)
   };
 
-  // Knockback rAF loop
+  // Knockback rAF loop — exponential decay ile hızla söner
   let _kbLast=performance.now();
   (function _kbLoop(){
     const now=performance.now();
@@ -8911,76 +9099,22 @@ document.addEventListener('mozpointerlockchange',function(){
 })();
 
 // ──────────────────────────────────────────────────────────────────────
-// PATCH 10: OG Rank — Sweep (Geniş Alan) Vuruş Efekti + Alan Hasarı
+// PATCH 10: OG Rank — Geniş Alan Vuruş (sweep ring/daire UI KALDIRILDI)
+// *sweep* artık yalnızca rütbe yazılarında CSS text-sweep efektidir.
+// OG vuruşu ise birincil + yakın hedeflere hasar verir; sarı daire yok.
 // ──────────────────────────────────────────────────────────────────────
 (function _p2OGSetup(){
-  // UI dairesi
-  const sweepEl=document.createElement('div');
-  sweepEl.id='_p2SweepRing';
-  document.body.appendChild(sweepEl);
-
-  function _showSweepUI(){
-    sweepEl.style.display='block';
-    sweepEl.style.animation='none';
-    void sweepEl.offsetWidth;
-    sweepEl.style.animation='_p2SweepAnim 0.44s ease-out forwards';
-    setTimeout(function(){sweepEl.style.display='none';},460);
-  }
-
-  // Three.js ring mesh (sahnede)
-  let _ringMesh=null,_ringT=0;
-  function _getOrCreateRing(){
-    if(_ringMesh) return _ringMesh;
-    if(!scene||!THREE) return null;
-    const geo=new THREE.RingGeometry(0.1,3.5,32);
-    const mat=new THREE.MeshBasicMaterial({
-      color:0xffd700,transparent:true,opacity:0.72,
-      side:THREE.DoubleSide,depthWrite:false
-    });
-    _ringMesh=new THREE.Mesh(geo,mat);
-    _ringMesh.rotation.x=-Math.PI/2;
-    _ringMesh.visible=false;
-    scene.add(_ringMesh);
-    return _ringMesh;
-  }
-  function _showRing(x,y,z){
-    const r=_getOrCreateRing();
-    if(!r) return;
-    r.position.set(x,y-1.62,z);
-    r.scale.set(0.08,0.08,0.08);
-    r.material.opacity=0.72;
-    r.visible=true;
-    _ringT=0.4;
-  }
-  // Ring animasyon loop
-  let _ringLast=performance.now();
-  (function _ringLoop(){
-    const now=performance.now();
-    const dt=Math.min((now-_ringLast)/1000,0.05);
-    _ringLast=now;
-    if(_ringMesh&&_ringMesh.visible&&_ringT>0){
-      _ringT-=dt;
-      const t=1-(_ringT/0.4);
-      _ringMesh.scale.set(1+t*4,1+t*4,1);
-      _ringMesh.material.opacity=0.72*(1-t);
-      if(_ringT<=0) _ringMesh.visible=false;
-    }
-    requestAnimationFrame(_ringLoop);
-  })();
-
-  // OG Sweep saldırı fonksiyonu
+  // OG Sweep saldırı fonksiyonu — sarı daire/ring YOK
   window._p2OGSweep=function(primaryEntity,baseDmg){
     if(!camera) return;
     const RADIUS=3.5;
     const DMG_PRI=baseDmg+1, DMG_AREA=Math.max(1,baseDmg-1);
-    _showSweepUI();
-    _showRing(camera.position.x,camera.position.y,camera.position.z);
 
     // Birincil hedef
     CombatManager.attackPlayer(primaryEntity.id,DMG_PRI,camera.position.clone());
     window._p2HitFlash(primaryEntity.id);
 
-    // Alan hasarı: diğer oyuncular
+    // Alan hasarı: yakındaki diğer oyuncular
     Object.entries(remPlayers).forEach(function(e){
       const id=e[0],rp=e[1];
       if(id===primaryEntity.id||!rp.g) return;
@@ -8992,7 +9126,7 @@ document.addEventListener('mozpointerlockchange',function(){
       }
     });
 
-    // Alan hasarı: hayvanlar
+    // Alan hasarı: yakındaki hayvanlar
     animals.forEach(function(a){
       if(a.hp<=0) return;
       const dx=a.x-camera.position.x, dz=a.z-camera.position.z;

@@ -240,7 +240,8 @@ io.on('connection', (socket) => {
             createdAt:        Date.now(),
             ops:              new Set(),        // OP kullanıcı adları
             bannedPlayers:    new Set(),        // banlı kullanıcı adları
-            connectedPlayers: new Map()         // socketId → { username, joinedAt }
+            connectedPlayers: new Map(),        // socketId → { username, joinedAt }
+            worldSpawn:       null              // { x, y, z } – /setworldspawn ile ayarlanan nokta
         };
 
         socket.join(cfg.code);
@@ -323,7 +324,8 @@ io.on('connection', (socket) => {
             createdAt:        Date.now(),
             ops:              new Set(),
             bannedPlayers:    new Set(),
-            connectedPlayers: new Map()
+            connectedPlayers: new Map(),
+            worldSpawn:       null              // { x, y, z } – /setworldspawn ile ayarlanan nokta
         };
 
         socket.join(code);
@@ -394,6 +396,7 @@ io.on('connection', (socket) => {
             success:  true,
             code,
             isOp:     opStatus,
+            worldSpawn: room.worldSpawn || null,
             roomInfo: roomPublicInfo(room)
         });
 
@@ -712,7 +715,45 @@ io.on('connection', (socket) => {
     });
 
     // ─────────────────────────────────────────────────────────────────────
-    // 13. lobby:close  →  Kurucunun sunucuyu açıkça kapatması
+    // 13. server:setworldspawn  →  Dünya doğum noktasını kaydet (OP/kurucu)
+    //     { code, x, y, z, requestedBy }
+    // ─────────────────────────────────────────────────────────────────────
+    socket.on('server:setworldspawn', ({ code, x, y, z, requestedBy }) => {
+        const room = activeRooms[code];
+        if (!room) return;
+
+        const requester = requestedBy || socket.data.username || '';
+        const isCreator  = room.creatorSocketId === socket.id;
+        const hasOp      = isOp(code, requester);
+
+        if (!isCreator && !hasOp) {
+            return socket.emit('server:setworldspawn:response', {
+                success: false,
+                error:   'OP yetkisi gerekli. / OP permission required.'
+            });
+        }
+
+        const spawnX = parseFloat(x) || 8;
+        const spawnY = parseFloat(y) || 10;
+        const spawnZ = parseFloat(z) || 8;
+
+        room.worldSpawn = { x: spawnX, y: spawnY, z: spawnZ };
+        console.log(`[SPAWN] ${code} → worldSpawn ayarlandı: ${JSON.stringify(room.worldSpawn)} (${requester})`);
+
+        // Odadaki tüm oyunculara bildir
+        const msgTR = `✅ Dünya doğum noktası ayarlandı: [${Math.round(spawnX)}, ${Math.round(spawnY)}, ${Math.round(spawnZ)}]`;
+        const msgEN = `✅ World spawn point set: [${Math.round(spawnX)}, ${Math.round(spawnY)}, ${Math.round(spawnZ)}]`;
+
+        io.to(code).emit('server:worldspawn-updated', {
+            x: spawnX, y: spawnY, z: spawnZ,
+            msgTR, msgEN
+        });
+
+        socket.emit('server:setworldspawn:response', { success: true, x: spawnX, y: spawnY, z: spawnZ });
+    });
+
+    // ─────────────────────────────────────────────────────────────────────
+    // lobby:close  →  Kurucunun sunucuyu açıkça kapatması
     //     { code }  –  Sadece creatorSocketId eşleşirse kabul edilir.
     // ─────────────────────────────────────────────────────────────────────
     socket.on('lobby:close', ({ code }) => {
