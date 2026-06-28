@@ -1576,6 +1576,7 @@ document.getElementById('mobile-pause-btn').addEventListener('click',e=>{e.stopP
 // ─── Menü Nav ───
 let selectedDevice=null,worldType=null,mpHostWorld='infinite';
 let spGameMode='survival',mpGameMode='survival',cheatsEnabled=false,spCheatsEnabled=false;
+let mpHostSeed=0; // Sunucu seed'i (create/load'dan gelir)
 let mpServerName=''; // Sunucu adı (lobby'de gösterilir)
 function showScreen(id){document.querySelectorAll('.menu-screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
 function selMini(g,id){g.forEach(el=>document.getElementById(el).classList.toggle('sel',el===id));}
@@ -2218,6 +2219,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
         mpHostWorld = worldType;
         mpGameMode = gameMode;
         cheatsEnabled = cheats;
+        mpHostSeed = (parseInt(seed)||0) || ((Math.random()*2147483647)|0||42317);
         mpServerName = name; // FIX: sunucu ismini sakla
         document.getElementById('host-status').textContent = '✅ Server registered! Share code: ' + code;
         showScreen('screen-host');
@@ -2231,6 +2233,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
+          mpHostSeed = (parseInt(seed)||0) || ((Math.random()*2147483647)|0||42317);
           mpServerName = name; // FIX: sunucu ismini sakla
           showScreen('screen-host');
           // Otomatik olarak host başlat
@@ -2248,6 +2251,7 @@ document.getElementById('btn-cs-create').addEventListener('click', () => {
           document.getElementById('create-server-modal').classList.remove('active');
           document.getElementById('host-code-display').textContent = code;
           mpHostWorld = worldType; mpGameMode = gameMode; cheatsEnabled = cheats;
+          mpHostSeed = (parseInt(seed)||0) || ((Math.random()*2147483647)|0||42317);
           mpServerName = name; // FIX: sunucu ismini sakla
           showScreen('screen-host');
           // Otomatik olarak host başlat
@@ -2784,12 +2788,13 @@ function updateWater(dt){
     }
 
     // ── Adım 2: Yayılma ─────────────────────────────────────────────────────
-    // ─── Bedrock Sınırı: Y=-11 (bedrock katmanı) – su tamamen durur ───
-    if(by <= -11) continue; // Bedrock seviyesinde su hiç yayılmaz
+    // ─── Bedrock Sınırı: düz dünyada Y=-1, normal dünyada Y=-11 ───
+    const _wFloor = worldType==='flat' ? -1 : -11;
+    if(by <= _wFloor) continue; // Bedrock seviyesinde su hiç yayılmaz
     const belowK=pk(bx,by-1,bz);
     const belowBd=blockMap[belowK];
-    // Bedrock'ın hemen üstündeyse (-10) aşağı akma ama yatay yayılabilir
-    if(by-1 < -11){
+    // Bedrock'ın hemen üstündeyse aşağı akma ama yatay yayılabilir
+    if(by-1 < _wFloor){
       // Aşağısı bedrock – aşağı akma, yatay yayılmaya geç
     } else if(!belowBd){
       // Altı boş → önce aşağı ak (level aynı kalır, gravity)
@@ -2966,13 +2971,14 @@ function updateLava(dt){
     }
 
     // Y sınırı
-    if(by<=-11) continue;
+    const _lFloor = worldType==='flat' ? -1 : -11;
+    if(by<=_lFloor) continue;
 
     // Yayılma: ÖNCE AŞAĞI BAK
     // Altı boşsa → aşağıya ak (level sıfırlanmaz, tam lav seviyesiyle iner)
     const belowK=pk(bx,by-1,bz);
     const belowBd=blockMap[belowK];
-    const canFlowDown = !belowBd && by-1 >= -11;
+    const canFlowDown = !belowBd && by-1 >= _lFloor;
 
     if(canFlowDown){
       // Aşağıya akar — level LAVA_MAX_SPREAD olarak iner (Minecraft davranışı: aşağıda tam yayılma)
@@ -3721,19 +3727,20 @@ function genChunk(cx,cz){
   if(typeof cx!=='number'||typeof cz!=='number'||!isFinite(cx)||!isFinite(cz)) return; // NaN guard
   const rng=chRng(cx,cz);
   let blk;
-  // ─── Düz Dünya (Flat) üretimi ───
+  // ─── Düz Dünya (Flat) üretimi — sonsuz, doğru katmanlar ───
   if(worldType==='flat'){
     blk=[];
     const sx=cx*CS,sz=cz*CS;
     for(let x=0;x<CS;x++){for(let z=0;z<CS;z++){
       const wx=sx+x,wz=sz+z;
-      // Y=0: Bedrock
-      blk.push({id:'bedrock',pos:new THREE.Vector3(wx,0,wz),mat:texBedrock});
-      // Y=1,2: Dirt
-      blk.push({id:'dirt',pos:new THREE.Vector3(wx,1,wz),mat:texDirt});
-      blk.push({id:'dirt',pos:new THREE.Vector3(wx,2,wz),mat:texDirt});
-      // Y=3: Grass
-      blk.push({id:'grass',pos:new THREE.Vector3(wx,3,wz),mat:matGrass});
+      // Y=-1: Bedrock (zemin)
+      blk.push({id:'bedrock',pos:new THREE.Vector3(wx,-1,wz),mat:texBedrock,unbreakable:true});
+      // Y=0..7: Toprak (8 katman)
+      for(let y=0;y<8;y++){
+        blk.push({id:'dirt',pos:new THREE.Vector3(wx,y,wz),mat:texDirt});
+      }
+      // Y=8: Çimen
+      blk.push({id:'grass',pos:new THREE.Vector3(wx,8,wz),mat:matGrass});
     }}
   } else {
     try { blk=WorldGen.generate(cx,cz,rng); }
@@ -4427,15 +4434,19 @@ function updateBars(){
     hr.appendChild(cv);
   }
 
-  // Açlık: soldan dolu, sağdan azalır
-  // i=0 en sol (her zaman dolu eğer hunger>=2), i=9 en sağ (ilk boşalan)
+  // Açlık: sağdan azalır — i=0 en SAĞ (ilk boşalan), i=9 en SOL (en son boşalan)
+  // Görsel olarak soldan dolup sağdan eksilmesi için ters sırada ekle
+  const hungerItems=[];
   for(let i=0;i<10;i++){
-    const fp=hunger-(i*2);
+    const fp=hunger-((9-i)*2); // i=0 sol (son dolan), i=9 sağ (ilk boşalan)
     const cv=document.createElement('canvas');cv.width=9;cv.height=9;
     cv.style.cssText='width:16px;height:16px;image-rendering:pixelated;display:block;';
     drawMCHunger(cv.getContext('2d'), fp>=2, fp===1);
-    hnr.appendChild(cv);
+    hungerItems.push(cv);
   }
+  // Sağdan sola: en sağdaki (i=9, en az dolu) önce eklenir ama flex-direction normal
+  // Sırayı ters çevir: i=9 sağa
+  hungerItems.forEach(cv=>hnr.appendChild(cv));
 
   document.body.classList.toggle('low-health', health <= 6);
 }
@@ -4573,8 +4584,14 @@ const DeathManager = {
         extinguishPlayer();
         hunger = 20;
         updateBars();
-        // Respawn: gercek yuzey Y'sine gore konumlan
-        const _rb=WorldGen.getBiome(8,8),_ry=WorldGen.getSurfaceY(8,8,_rb)+2.6;
+        // Respawn: düz dünyada çimen Y=8, normal dünyada gerçek yüzey
+        let _ry;
+        if(worldType==='flat'){
+          _ry = 10.22; // çimen Y=8 → üst yüzey Y=8.5 → ayak Y=8.5 → göz Y=8.5+1.72=10.22
+        } else {
+          const _rb=WorldGen.getBiome(8,8);
+          _ry=WorldGen.getSurfaceY(8,8,_rb)+2.6;
+        }
         camera.position.set(8, _ry, 8);
         velY = 0;
         grounded = false;
@@ -5427,7 +5444,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
   document.getElementById('btn-do-host').disabled=true;
   myPeer=new Peer('lgnd'+code.toLowerCase(),{debug:0,config:{iceServers:[{urls:'stun:stun.l.google.com:19302'},{urls:'stun:stun1.l.google.com:19302'},{urls:'stun:stun2.l.google.com:19302'},{urls:'stun:stun.cloudflare.com:3478'}]}});
   myPeer.on('open',()=>{
-    worldSeed=(Math.random()*2147483647)|0||42317;
+    // Seed: create/load'dan geldiyse onu kullan, yoksa rastgele üret
+    worldSeed = mpHostSeed || ((Math.random()*2147483647)|0||42317);
+    mpHostSeed = worldSeed; // geri yaz (heartbeat vb. için)
     st.textContent='Oda hazır!';isMP=true;amHost=true;hostConns={};connTokens.clear();
 
     // ── Lobby'e oyuncu sayısı bildir ──
@@ -6430,9 +6449,9 @@ if (device === 'pc') {
     const spS=getSpawnY(8,8);
     camera.position.set(spS.x,spS.y,spS.z);
   } else if(world==='flat'){
-    // Düz dünya: spawn noktası Y=3 üstü (Y=4 + oyuncu boyu ~2.6)
+    // Düz dünya: çimen Y=8 → göz Y=10.22
     genChunk(0,0);
-    camera.position.set(8,5.6,8);
+    camera.position.set(8,10.22,8);
     updateChunks();
   } else {
     // Once spawn chunk'i uret, sonra gercek Y'yi hesapla
@@ -6619,7 +6638,9 @@ function placeB(x,y,isc){
   const mats=[texWood,matGrass,texDirt,texStone,matLog,texCob,texGlass,texLeaves,texSand,matWater,texBedrock,matLava,texObsidian];
   const ids=['planks','grass','dirt','stone','log','cobblestone','glass','leaves','sand','water','bedrock','lava','obsidian'];
   const k=pk(bx,by,bz);
-  if(by <= -11) return;
+  // Düz dünyada bedrock Y=-1'in altı, normal dünyada Y=-11'in altı engellenir
+  const _yFloor = worldType==='flat' ? -1 : -11;
+  if(by <= _yFloor) return;
   if(by >= 250){ addChat(null, langData[currentLang].heightLimitMsg, true, 'warn'); return; }
   if(actualBlock===9){
     // Su kaynağı yerleştir — lav varsa önce kaldır (su-lav etkileşimi)
