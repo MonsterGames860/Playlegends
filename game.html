@@ -477,6 +477,8 @@ body.low-health::after {
       <div class="mini-card" id="sp-mode-creative"><div class="mc2-icon">✨</div><div class="mc2-title" id="txt-sp-crea">YARATICI</div></div>
       <div class="mini-card" id="sp-mode-adventure"><div class="mc2-icon">🗺️</div><div class="mc2-title" id="txt-sp-adv">MACERA</div></div>
     </div>
+    <div class="sub-title" id="txt-sp-seed-label">SEED</div>
+    <input class="menu-input name-input" id="sp-seed-input" type="number" min="0" max="2147483647" placeholder="Random" autocomplete="off" spellcheck="false" style="margin-bottom:6px;">
     <div class="sub-title" id="txt-sp-cheats-label">HİLELER</div>
     <div class="mini-cards">
       <div class="mini-card sel" id="sp-cheat-off"><div class="mc2-icon">🔒</div><div class="mc2-title" id="txt-sp-cheat-off">KAPALI</div></div>
@@ -505,26 +507,26 @@ body.low-health::after {
       <button class="sl-tab-btn" data-tab="load" id="tab-btn-load">💾 <span id="txt-mp-load">YÜKLE</span></button>
       <button class="sl-tab-btn" data-tab="create" id="tab-btn-create">⚙️ <span id="txt-mp-create">OLUŞTUR</span></button>
     </div>
-    <div style="border:2px solid rgba(117,167,255,.25);border-radius:0 0 5px 5px;padding:10px 10px 8px;background:rgba(0,0,0,.3);width:100%;margin-bottom:6px;">
+    <div style="border:2px solid rgba(117,167,255,.25);border-radius:0 0 5px 5px;padding:10px 10px 8px;background:rgba(0,0,0,.3);width:100%;margin-bottom:6px;min-height:240px;display:flex;flex-direction:column;">
       <!-- BROWSE -->
-      <div class="sl-tab-pane" id="sl-pane-browse">
-        <div style="display:flex;gap:8px;margin-bottom:8px;">
+      <div class="sl-tab-pane" id="sl-pane-browse" style="display:flex;flex-direction:column;flex:1;">
+        <div style="display:flex;gap:8px;margin-bottom:8px;flex-shrink:0;">
           <input id="browse-search-inline" type="text" placeholder="Sunucu ara..." autocomplete="off" spellcheck="false" style="flex:1;padding:7px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:11px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;">
           <button id="btn-browse-refresh-inline" style="padding:7px 10px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:2px solid #0a1030;border-right:2px solid #0a1030;border-top:2px solid #4a6aba;border-left:2px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;">🔄</button>
         </div>
-        <div id="browse-list-inline" style="max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
+        <div id="browse-list-inline" style="height:170px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
           <div id="browse-status-inline" style="font-size:11px;color:rgba(255,255,255,.45);text-align:center;padding:20px 0;">Sunucu listesine bağlanılıyor...</div>
           <div id="browse-empty-inline" style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:22px 0;display:none;">Aktif sunucu bulunamadı.</div>
         </div>
       </div>
       <!-- LOAD -->
-      <div class="sl-tab-pane" id="sl-pane-load" style="display:none;">
-        <div style="font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;">KAYITLI DÜNYA SEÇ</div>
-        <div id="load-list-inline" style="max-height:200px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
+      <div class="sl-tab-pane" id="sl-pane-load" style="display:none;flex-direction:column;flex:1;">
+        <div style="font-size:9px;color:rgba(255,255,255,.3);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;flex-shrink:0;">KAYITLI DÜNYA SEÇ</div>
+        <div id="load-list-inline" style="height:130px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
           <div id="load-empty-inline" style="font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:22px 0;">Tarayıcıda kayıtlı dünya bulunamadı.</div>
         </div>
-        <div id="load-status-inline" style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin:4px 0;min-height:14px;"></div>
-        <button class="mbtn primary" id="btn-do-load-inline" disabled style="opacity:.4;cursor:not-allowed;margin-top:4px;padding:10px;">YÜKLE & HOST</button>
+        <div id="load-status-inline" style="font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin:4px 0;min-height:14px;flex-shrink:0;"></div>
+        <button class="mbtn primary" id="btn-do-load-inline" disabled style="opacity:.4;cursor:not-allowed;margin-top:4px;padding:10px;flex-shrink:0;">YÜKLE & HOST</button>
       </div>
       <!-- CREATE -->
       <div class="sl-tab-pane" id="sl-pane-create" style="display:none;">
@@ -1598,9 +1600,10 @@ document.getElementById('btn-back-device').addEventListener('click',()=>showScre
 document.getElementById('btn-back-world').addEventListener('click',()=>showScreen('screen-device'));
 document.getElementById('btn-pc').addEventListener('click',()=>{selectedDevice='pc';showScreen('screen-world');});
 document.getElementById('btn-mobile').addEventListener('click',()=>{selectedDevice='mobile';showScreen('screen-world');});
-document.getElementById('btn-world-infinite').addEventListener('click',()=>startGame(selectedDevice,'infinite',false,spGameMode,spCheatsEnabled));
-document.getElementById('btn-world-flat').addEventListener('click',()=>startGame(selectedDevice,'flat',false,spGameMode,spCheatsEnabled));
-document.getElementById('btn-world-small').addEventListener('click',()=>startGame(selectedDevice,'small',false,spGameMode,spCheatsEnabled));
+function _getSpSeed(){const v=document.getElementById('sp-seed-input')?.value?.trim();if(v&&v!==''&&!isNaN(v)){const n=parseInt(v);if(n>0&&n<=2147483647)return n;}return((Math.random()*2147483647)|0||42317);}
+document.getElementById('btn-world-infinite').addEventListener('click',()=>{worldSeed=_getSpSeed();startGame(selectedDevice,'infinite',false,spGameMode,spCheatsEnabled);});
+document.getElementById('btn-world-flat').addEventListener('click',()=>{worldSeed=_getSpSeed();startGame(selectedDevice,'flat',false,spGameMode,spCheatsEnabled);});
+document.getElementById('btn-world-small').addEventListener('click',()=>{worldSeed=_getSpSeed();startGame(selectedDevice,'small',false,spGameMode,spCheatsEnabled);});
 document.getElementById('sp-mode-survival').addEventListener('click',()=>{spGameMode='survival';selMini(['sp-mode-survival','sp-mode-creative','sp-mode-adventure'],'sp-mode-survival');});
 document.getElementById('sp-mode-creative').addEventListener('click',()=>{spGameMode='creative';selMini(['sp-mode-survival','sp-mode-creative','sp-mode-adventure'],'sp-mode-creative');});
 document.getElementById('sp-mode-adventure').addEventListener('click',()=>{spGameMode='adventure';selMini(['sp-mode-survival','sp-mode-creative','sp-mode-adventure'],'sp-mode-adventure');});
@@ -1898,11 +1901,17 @@ function populateLoadListInline() {
     let meta = '';
     try { const d = JSON.parse(localStorage.getItem(key)||'{}'); if(d.name) displayName=d.name; if(d.mode) meta+=d.mode+' '; if(d.worldType) meta+=d.worldType; } catch(e) {}
     const row = document.createElement('div');
-    row.className = 'load-row';
-    row.innerHTML = `<div class="load-row-info"><div class="load-world-name">${sanitizeText(displayName)}</div><div class="load-world-meta">${sanitizeText(meta||'Kayıtlı Dünya')}</div></div><span style="font-size:18px;">🌍</span>`;
+    const isActive = isMP && amHost && _currentWorldSaveKey === key;
+    row.className = 'load-row' + (isActive ? ' active-hosted' : '');
+    if (isActive) {
+      row.style.border = '2px solid #44cc66';
+      row.style.background = 'linear-gradient(180deg,rgba(20,80,40,.7),rgba(10,50,25,.7))';
+    }
+    row.innerHTML = `<div class="load-row-info"><div class="load-world-name">${sanitizeText(displayName)}</div><div class="load-world-meta">${sanitizeText(meta||'Kayıtlı Dünya')}${isActive?'<span style="color:#44cc66;margin-left:6px;font-size:9px;">● AKTİF</span>':''}</div></div><span style="font-size:18px;">${isActive?'🟢':'🌍'}</span>`;
     row.dataset.key = key;
     row.addEventListener('click', () => {
-      listEl.querySelectorAll('.load-row').forEach(r => r.classList.remove('selected'));
+      if (isActive) return; // Aktif sunucu tekrar açılamaz
+      listEl.querySelectorAll('.load-row').forEach(r => { if(!r.classList.contains('active-hosted')) r.classList.remove('selected'); });
       row.classList.add('selected');
       _selectedLoadKeyInline = key;
       loadBtn.disabled = false; loadBtn.style.opacity = '1'; loadBtn.style.cursor = 'pointer';
@@ -1912,6 +1921,12 @@ function populateLoadListInline() {
 }
 document.getElementById('btn-do-load-inline').addEventListener('click', () => {
   if (!_selectedLoadKeyInline) return;
+  // Aynı sunucu zaten açıksa engelle
+  if (isMP && amHost && _currentWorldSaveKey === _selectedLoadKeyInline) {
+    const statusEl = document.getElementById('load-status-inline');
+    if(statusEl){ statusEl.textContent = currentLang==='tr'?'⚠ Bu sunucu zaten açık!':'⚠ This server is already running!'; statusEl.style.color='#ffbb44'; }
+    return;
+  }
   // ─── Sunucu limiti kontrolü ───
   const limitCheck = checkServerLimit();
   if(!limitCheck.ok){
@@ -6420,8 +6435,8 @@ if (device === 'pc') {
   HealthManager.reset();
   hunger=20;fallStartY=null;lastGrounded=true;voidDamageTimer=0;updateBars();
   isFlying=false;isCrouching=false;velY=0;spaceDown=false;
-  // SP: her yeni oyunda farklı seed; MP join: host'tan gelir (zaten set edildi)
-  if(!isMP) worldSeed=(Math.random()*2147483647)|0||42317;
+  // SP: seed input'tan geliyorsa onu kullan, yoksa rastgele; MP join: host'tan gelir (zaten set edildi)
+  if(!isMP) { /* worldSeed already set by _getSpSeed() before startGame call */ }
   WorldGen.clearBiomeCache(); // seed değişti, önbelleği temizle
   initImatKeys();
   buildFireOverlay();
