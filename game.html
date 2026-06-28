@@ -1815,7 +1815,16 @@ document.querySelectorAll('.sl-tab-btn').forEach(btn => {
     }
     slSwitchTab(btn.dataset.tab);
     if (btn.dataset.tab === 'browse') fetchBrowseListInline();
-    else if (btn.dataset.tab === 'load') populateLoadListInline();
+    else if (btn.dataset.tab === 'load') {
+      populateLoadListInline();
+      // Zaten host isek yükleme butonunu kilitle
+      if (isMP && amHost) {
+        const st = document.getElementById('load-status-inline');
+        const lb = document.getElementById('btn-do-load-inline');
+        if(st){ st.textContent = currentLang==='tr'?'⚠ Zaten bir sunucu açık. Önce çık.':'⚠ A server is already running. Quit first.'; st.style.color='#ffbb44'; }
+        if(lb){ lb.disabled=true; lb.style.opacity='0.4'; lb.style.cursor='not-allowed'; }
+      }
+    }
   });
 });
 
@@ -1901,16 +1910,20 @@ function populateLoadListInline() {
     let meta = '';
     try { const d = JSON.parse(localStorage.getItem(key)||'{}'); if(d.name) displayName=d.name; if(d.mode) meta+=d.mode+' '; if(d.worldType) meta+=d.worldType; } catch(e) {}
     const row = document.createElement('div');
+    // Aktif: bu key açık olan sunucunun key'i VE şu an host olarak oyundayız
     const isActive = isMP && amHost && _currentWorldSaveKey === key;
     row.className = 'load-row' + (isActive ? ' active-hosted' : '');
     if (isActive) {
       row.style.border = '2px solid #44cc66';
       row.style.background = 'linear-gradient(180deg,rgba(20,80,40,.7),rgba(10,50,25,.7))';
+      row.style.cursor = 'default';
     }
     row.innerHTML = `<div class="load-row-info"><div class="load-world-name">${sanitizeText(displayName)}</div><div class="load-world-meta">${sanitizeText(meta||'Kayıtlı Dünya')}${isActive?'<span style="color:#44cc66;margin-left:6px;font-size:9px;">● AKTİF</span>':''}</div></div><span style="font-size:18px;">${isActive?'🟢':'🌍'}</span>`;
     row.dataset.key = key;
     row.addEventListener('click', () => {
-      if (isActive) return; // Aktif sunucu tekrar açılamaz
+      if (isActive) return; // Aktif sunucu tekrar seçilemesin
+      // Zaten başka bir sunucu açıksa hiçbiri seçilemesin
+      if (isMP && amHost) return;
       listEl.querySelectorAll('.load-row').forEach(r => { if(!r.classList.contains('active-hosted')) r.classList.remove('selected'); });
       row.classList.add('selected');
       _selectedLoadKeyInline = key;
@@ -1921,10 +1934,10 @@ function populateLoadListInline() {
 }
 document.getElementById('btn-do-load-inline').addEventListener('click', () => {
   if (!_selectedLoadKeyInline) return;
-  // Aynı sunucu zaten açıksa engelle
-  if (isMP && amHost && _currentWorldSaveKey === _selectedLoadKeyInline) {
+  // Zaten bir sunucu açıksa hiçbir dünyayı yeniden açma
+  if (isMP && amHost) {
     const statusEl = document.getElementById('load-status-inline');
-    if(statusEl){ statusEl.textContent = currentLang==='tr'?'⚠ Bu sunucu zaten açık!':'⚠ This server is already running!'; statusEl.style.color='#ffbb44'; }
+    if(statusEl){ statusEl.textContent = currentLang==='tr'?'⚠ Zaten bir sunucu açık! Önce mevcut sunucudan çık.':'⚠ A server is already running! Quit first.'; statusEl.style.color='#ffbb44'; }
     return;
   }
   // ─── Sunucu limiti kontrolü ───
