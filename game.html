@@ -206,22 +206,22 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .pause-setting{width:100%;display:flex;align-items:center;justify-content:space-between;margin:4px 0;padding:7px 10px;background:rgba(255,255,255,.06);border-radius:5px;font-size:12px;color:#ccc;}
 .pause-setting input[type=range]{width:50%;accent-color:#75a7ff;}
 .pause-setting span.val{color:#75a7ff;font-weight:bold;min-width:20px;text-align:right;}
-#chat-container{position:absolute;bottom:90px;left:10px;width:300px;max-width:calc(100vw - 20px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
-#chat-log{max-height:130px;overflow-y:hidden;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;pointer-events:none;touch-action:none;}
+#chat-container{position:absolute;bottom:100px;left:12px;width:420px;max-width:calc(100vw - 24px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
+#chat-log{max-height:200px;overflow-y:hidden;display:flex;flex-direction:column;gap:3px;scrollbar-width:none;pointer-events:none;touch-action:none;}
 #chat-log.scrollable{overflow-y:scroll;pointer-events:all;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.25) transparent;}
 #chat-log.scrollable::-webkit-scrollbar{width:4px;}
 #chat-log.scrollable::-webkit-scrollbar-track{background:transparent;}
 #chat-log.scrollable::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:2px;}
-.chat-msg{color:#fff;font-size:12px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.5;letter-spacing:.3px;}
+.chat-msg{color:#fff;font-size:14px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:3px;word-break:break-word;line-height:1.6;letter-spacing:.3px;}
 .chat-msg.sys{color:#acd4ff;}
 .chat-msg.srv{color:#2effdc;}
 .chat-msg.warn{color:#ffbb44;}
 .rank-tag{display:inline;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace!important;}
 .rank-tag.rank-sweep{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-image:linear-gradient(105deg,var(--rtc,#fff) 0%,var(--rtc,#fff) 36%,#fff 44%,#fff 52%,var(--rtc,#fff) 60%,var(--rtc,#fff) 100%);background-size:280% 100%;background-position:200% 0;animation:rankSweep 5s linear infinite;filter:drop-shadow(0 0 5px var(--rtc,#fff));}
 @keyframes rankSweep{0%{background-position:200% 0;}30%{background-position:-30% 0;}30.001%{background-position:200% 0;}100%{background-position:200% 0;}}
-#chat-input-row{display:none;margin-top:4px;pointer-events:all;}
-#chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:'Minecraft','VT323','Courier New',monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
-#chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
+#chat-input-row{display:none;margin-top:5px;pointer-events:all;}
+#chat-input{width:100%;background:rgba(0,0,0,.88);border:2px solid rgba(117,167,255,.6);color:#fff;font-family:'Minecraft','VT323','Courier New',monospace;font-size:15px;padding:8px 11px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
+#chat-hint{position:absolute;bottom:72px;left:12px;color:rgba(255,255,255,.45);font-size:12px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
 #btn-mobile-chat{position:absolute;bottom:20px;left:20px;width:54px;height:54px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:22px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #death-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(180,0,0,0.52);z-index:850;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding-top:18%;}
 #death-screen.active{display:flex;}
@@ -284,8 +284,12 @@ body.low-health::after {
   #mobile-jump-container{bottom:25px;right:25px;}
   .world-cards,.device-cards,.mp-cards{flex-direction:column;}
   .game-logo{font-size:26px;}
-  #chat-container{bottom:76px;}
-  #chat-hint{bottom:55px;}
+  /* Mobil chat: daha geniş, daha okunur */
+  #chat-container{bottom:82px;left:8px;width:calc(100vw - 16px);max-width:400px;}
+  #chat-log{max-height:160px;}
+  .chat-msg{font-size:13px;padding:3px 7px;}
+  #chat-input{font-size:14px!important;padding:7px 10px;}
+  #chat-hint{bottom:60px;left:8px;font-size:11px;}
   #btn-mobile-chat{bottom:20px;left:20px;right:auto;}
   #btn-mobile-inv{bottom:145px;right:25px;}
   #btn-mobile-cam{top:8px;right:8px;width:38px;height:38px;font-size:16px;}
@@ -2207,7 +2211,10 @@ function renderBrowseListInline(rooms) {
     const max = room.maxPlayers||20;
     const row = document.createElement('div');
     row.className = 'browse-row';
-    row.innerHTML = `<div class="browse-row-info"><div class="browse-server-name">${sanitizeText(room.name||'Unnamed Server')}</div><div class="browse-server-host">Host: ${sanitizeText(room.host||'Unknown')}</div><div class="browse-server-meta"><span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span><span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>${room.access==='registered'?'<span class="browse-tag" style="color:#ffbb44;">🔑</span>':''}${room.access==='private'?'<span class="browse-tag" style="color:#ff6666;">🔒</span>':''}</div></div><div class="browse-players">${cur}/${max} 👥</div><button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">GİR</button>`;
+    row.innerHTML = `<div class="browse-row-info"><div class="browse-server-name"></div><div class="browse-server-host">Host: ${sanitizeText(room.creatorName||room.host||'Unknown')}</div><div class="browse-server-meta"><span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span><span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>${room.access==='registered'?'<span class="browse-tag" style="color:#ffbb44;">🔑</span>':''}${room.access==='private'?'<span class="browse-tag" style="color:#ff6666;">🔒</span>':''}</div></div><div class="browse-players">${cur}/${max} 👥</div><button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">GİR</button>`;
+    // Sunucu ismini *tag* sistemiyle işle
+    const _nameEl = row.querySelector('.browse-server-name');
+    if(_nameEl){ const _sn = room.name||'Unnamed Server'; if(_sn.includes('*')){ _nameEl.appendChild(parseTaggedText(_sn,true)); } else { _nameEl.textContent=_sn; } }
     row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       const code = e.target.dataset.code;
@@ -2389,8 +2396,8 @@ function renderBrowseList(rooms) {
     row.className = 'browse-row';
     row.innerHTML = `
       <div class="browse-row-info">
-        <div class="browse-server-name">${sanitizeText(room.name||'Unnamed Server')}</div>
-        <div class="browse-server-host">Host: ${sanitizeText(room.host||'Unknown')}</div>
+        <div class="browse-server-name"></div>
+        <div class="browse-server-host">Host: ${sanitizeText(room.creatorName||room.host||'Unknown')}</div>
         <div class="browse-server-meta">
           <span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span>
           <span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>
@@ -2401,6 +2408,9 @@ function renderBrowseList(rooms) {
       <div class="browse-players">${cur}/${max} 👥</div>
       <button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">JOIN</button>
     `;
+    // Sunucu ismini *tag* sistemiyle işle
+    const _nameEl2 = row.querySelector('.browse-server-name');
+    if(_nameEl2){ const _sn2=room.name||'Unnamed Server'; if(_sn2.includes('*')){ _nameEl2.appendChild(parseTaggedText(_sn2,true)); } else { _nameEl2.textContent=_sn2; } }
     row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       const code = e.target.dataset.code;
@@ -5159,7 +5169,7 @@ function applyBlockSync(data){
   }
 }
  
-function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.70,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
+function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null,isHost=false){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.70,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor,isHost};}
 function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.70,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
 function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;
   // Flash timer varsa iptal et (kalan kırmızı materyaller sızdırmasın)
@@ -5562,12 +5572,27 @@ function processCmd(raw){
     return;
   }
   if(cmd==='setworldspawn'){
-    if(!isMP){addChat(null,d.sysSpawnSetUsage,true,'warn');return;}
-    if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
+    // SP'de de host'ta da çalışır
+    if(isMP&&!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
     setWorldSpawn(camera.position.x, camera.position.y, camera.position.z);
-    addChat(null,d.sysSpawnSet,true,'srv');
-    // Tüm guestlere yeni spawn noktasını bildir
-    Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'worldspawn',x:worldSpawnPoint.x,y:worldSpawnPoint.y,z:worldSpawnPoint.z});});
+    const _sp=worldSpawnPoint;
+    const _coordStr='['+Math.round(_sp.x)+', '+Math.round(_sp.y)+', '+Math.round(_sp.z)+']';
+    const _spawnMsg=d.sysSpawnSet+' '+_coordStr;
+    addChat(null,_spawnMsg,true,'srv');
+    // MP: tüm guestlere bildir
+    if(isMP&&amHost){
+      Object.values(hostConns).forEach(({conn})=>{
+        if(conn.open){
+          conn.send({type:'worldspawn',x:_sp.x,y:_sp.y,z:_sp.z});
+          conn.send({type:'chat',name:null,msg:_spawnMsg,sys:true,cls:'srv'});
+        }
+      });
+      // Socket.io sunucusuna da kalıcı kayıt için bildir
+      const _sCode=document.getElementById('host-code-display')?.textContent;
+      if(lobbySocket&&lobbySocket.connected&&_sCode&&_sCode!=='----'){
+        lobbySocket.emit('server:setworldspawn',{code:_sCode,x:_sp.x,y:_sp.y,z:_sp.z,requestedBy:myUsername||myName});
+      }
+    }
     return;
   }
   if(cmd==='help'){
@@ -6161,7 +6186,8 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         }
         data.players.forEach(p=>{
           if(p.id===myPeer.id) return; // kendimizi ekleme
-          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
+          const _pIsHost = (p.id==='host'); // host'un id'si 'host'
+          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null,_pIsHost);
         });
         startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
         setTimeout(()=>{broadcastSkin(activeSkinCanvas);updateManageServerBtn();},500);
@@ -6215,9 +6241,13 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       }
     });
     guestConn.on('close',()=>{
-      // Tüm uzak oyuncu modellerini sil (hayalet önleme)
+      // Host P2P bağlantısı kapandı — oyuncuyu atmak yerine uyarı göster
+      // Sunucu Socket.io üzerinden yaşamaya devam eder; yeni host bağlandığında yeniden P2P kurulur
+      addChat(null, currentLang==='tr'
+        ? '⚠ Host bağlantısı kesildi. Sunucu devam edebilir...'
+        : '⚠ Host disconnected. Server may still be running...', true, 'warn');
+      // Uzak oyuncu modellerini temizle
       Object.keys(remPlayers).forEach(id=>remRP(id));
-      addChat(null,langData[currentLang].sysDisc,true);
     });
     guestConn.on('error',()=>{
       if(document.getElementById('join-status')) st.textContent='Bağlantı hatası';
@@ -8419,22 +8449,27 @@ function drawSkinHead2D(canvas, skinB64, onDone){
   const ctx = canvas.getContext('2d');
   ctx.imageSmoothingEnabled = false;
   if(!skinB64){
-    // Varsayılan: gri kare
-    ctx.fillStyle = '#888';
+    // Varsayılan Steve kafa rengi
+    ctx.fillStyle = '#c8a068';
     ctx.fillRect(0,0,16,16);
     if(onDone) onDone();
     return;
   }
   const img = new Image();
   img.onload = function(){
-    // Steve skin: kafa bölgesi 8x8 @(8,8) ana katman
-    ctx.drawImage(img, 8,8,8,8, 0,0,16,16);
-    // Hat katmanı (overlay) 8x8 @(40,8)
-    ctx.drawImage(img, 40,8,8,8, 0,0,16,16);
+    // 64x64 veya 128x128 skin boyutunu algıla
+    const scale = img.width >= 128 ? 2 : 1;
+    const s = scale;
+    ctx.clearRect(0,0,16,16);
+    // Kafa iç katmanı: 8x8 piksel @ (8*s, 8*s) — ön yüz
+    ctx.drawImage(img, 8*s, 8*s, 8*s, 8*s, 0, 0, 16, 16);
+    // Hat/dış katman: 8x8 piksel @ (40*s, 8*s) — ön yüz overlay
+    // globalAlpha ile şeffaf pikselleri koruyarak üzerine çiz
+    ctx.drawImage(img, 40*s, 8*s, 8*s, 8*s, 0, 0, 16, 16);
     if(onDone) onDone();
   };
   img.onerror = function(){
-    ctx.fillStyle = '#555';
+    ctx.fillStyle = '#c8a068';
     ctx.fillRect(0,0,16,16);
     if(onDone) onDone();
   };
@@ -8447,52 +8482,42 @@ let _tabMobileOpen = false;
 const _tabIconCache = {};
 
 function buildTabRow(playerInfo){
-  // playerInfo: {name, rank, rankColor, isHost, isGuest, skinB64}
   const row = document.createElement('div');
   row.className = 'tab-row' + (playerInfo.isGuest ? ' tab-guest' : '');
 
-  // Skin kafası (16x16 canvas)
+  // ── Skin kafası (16x16 canvas) ──
   const headCanvas = document.createElement('canvas');
   headCanvas.width = 16; headCanvas.height = 16;
   headCanvas.className = 'tab-skin-head';
+  // skinB64 yoksa daha sonra güncellenmek üzere varsayılan
   drawSkinHead2D(headCanvas, playerInfo.skinB64 || null, null);
   row.appendChild(headCanvas);
 
-  // Yetki ikonu (host.png, admin.png) — DOM'a bir kez eklenir, src bir kez set edilir
-  const isOwner = (playerInfo.isHost);
-  const isAdmin = !isOwner && playerInfo.rank && (
-    playerInfo.rank.toLowerCase().includes('admin') ||
-    playerInfo.rank.toLowerCase().includes('owner') ||
-    playerInfo.rank.toLowerCase().includes('developer') ||
-    playerInfo.rank.toLowerCase().includes('mod')
+  // ── Yetki ikonu: sadece gerçekten host veya admin ise göster, yoksa HIÇBIR ŞEY ekleme ──
+  const rkLower = (playerInfo.rank || '').toLowerCase();
+  const isOwnerRank = rkLower.includes('owner') || rkLower.includes('og') || playerInfo.isHost;
+  const isAdminRank = !isOwnerRank && (
+    rkLower.includes('admin') ||
+    rkLower.includes('developer') ||
+    rkLower.includes('mod')
   );
-  if(isOwner || isAdmin){
-    const iconSrc = isOwner ? 'assets/host.png' : 'assets/admin.png';
-    // Önce önbellekte var mı bak
+
+  if(isOwnerRank || isAdminRank){
+    const iconSrc = isOwnerRank ? 'assets/host.png' : 'assets/admin.png';
     let cachedImg = _tabIconCache[iconSrc];
     if(!cachedImg){
       cachedImg = document.createElement('img');
       cachedImg.className = 'tab-auth-icon';
       cachedImg.alt = '';
-      cachedImg.style.verticalAlign = 'middle';
       cachedImg.onerror = function(){ this.style.display='none'; };
       cachedImg.src = iconSrc;
       _tabIconCache[iconSrc] = cachedImg;
     }
-    // Önbellekteki img klonlanarak satıra eklenir (src tekrar set edilmez)
-    const iconClone = cachedImg.cloneNode(false);
-    row.appendChild(iconClone);
-  } else {
-    // Boşluk placeholder (hizalama için)
-    const ph = document.createElement('span');
-    ph.style.display = 'inline-block';
-    ph.style.width = '14px';
-    ph.style.height = '14px';
-    ph.style.flexShrink = '0';
-    row.appendChild(ph);
+    row.appendChild(cachedImg.cloneNode(false));
   }
+  // Placeholder YOK — ikon olmayan satırlarda boşluk açılmaz
 
-  // Rank etiketi (varsa)
+  // ── Rank etiketi (varsa) ──
   const tag = formatRankTag(playerInfo.rank);
   if(tag){
     const color = resolveRankColor(playerInfo.rank, playerInfo.rankColor);
@@ -8504,7 +8529,7 @@ function buildTabRow(playerInfo){
     row.appendChild(tagSpan);
   }
 
-  // Kullanıcı adı
+  // ── Kullanıcı adı ──
   const nameSpan = document.createElement('span');
   nameSpan.textContent = sanitizeName(playerInfo.name || 'Oyuncu');
   if(playerInfo.isHost) nameSpan.style.color = '#ffd700';
@@ -8535,7 +8560,6 @@ function renderTabList(){
   let players = [];
 
   if(!isMP){
-    // Tek oyunculu: sadece kendimiz
     players.push({
       name: myUsername || myName || 'Oyuncu',
       rank: playerRank, rankColor: playerRankColor,
@@ -8544,23 +8568,26 @@ function renderTabList(){
       order: 0
     });
   } else {
-    // Host
+    // Ben
     players.push({
       name: myName || myUsername,
       rank: playerRank, rankColor: playerRankColor,
-      isHost: amHost, isGuest: false,
+      isHost: amHost, // kendi host durumum
+      isGuest: !!(myUsername && myUsername.startsWith('Guest_')),
       skinB64: (typeof activeSkinCanvas!=='undefined' && activeSkinCanvas) ? activeSkinCanvas.toDataURL('image/png') : null,
       order: 0
     });
     // Uzak oyuncular
     let idx = 1;
     Object.values(remPlayers).forEach(rp => {
-      const isGuest = rp.name && rp.name.startsWith('Guest_');
+      const isGuest = !!(rp.name && rp.name.startsWith('Guest_'));
+      // remPlayers'da host flag'i saklanmışsa kullan (addRP'de set edilmeli)
+      const rpIsHost = !!(rp.isHost);
       players.push({
         name: rp.name,
         rank: rp.rank || null,
         rankColor: rp.rankColor || null,
-        isHost: false,
+        isHost: rpIsHost,
         isGuest: isGuest,
         skinB64: rp.skinB64 || null,
         order: isGuest ? 9999 + idx : idx
@@ -8715,48 +8742,7 @@ document.addEventListener('DOMContentLoaded', function(){
   });
 });
 
-// ─── 4. /setworldspawn GELİŞTİRİLMİŞ MESAJLAŞMA ──────────────────────────
-// processCmd içinde setworldspawn zaten var; burada guest tarafı için worldspawn
-// mesajını herkese sistem mesajı olarak gösteriyoruz (socket mesajı gelince)
-// Bu kanca guest tarafında worldspawn alındığında sistem mesajı ekler
-const _origGuestOnData_wsfix = guestConn;
-// Not: guestConn henüz oluşmadı, bunu join sırasında hook'layacağız
-// processCmd'deki setworldspawn artık şunu yapıyor:
-//   - host: setWorldSpawn + addChat(sysSpawnSet) + guestlere worldspawn mesajı gönder
-//   - guest: yetkisiz uyarı
-// Ek: guest worldspawn paketi alındığında mesajı göster
-// Bu zaten guestConn.on('data') içinde data.type==='worldspawn' ile işleniyor
-// Eksik olan: guestlere sistem mesajı gönderilmesi
-// → processCmd setworldspawn bloğunu genişlet:
-(function patchSetWorldSpawnCmd(){
-  // processCmd'i intercept ederek setworldspawn'ı geliştiriyoruz
-  // Host tarafında guestlere chat mesajı da gönder
-  const origProcessCmd = processCmd;
-  processCmd = function(raw){
-    const parts = raw.trim().split(/\s+/);
-    const cmd = parts[0].toLowerCase();
-    if(cmd === 'setworldspawn'){
-      const d = langData[currentLang];
-      if(!isMP){ addChat(null, d.sysSpawnSetUsage, true, 'warn'); return; }
-      if(!amHost){ addChat(null, d.srvHostOnly, true, 'warn'); return; }
-      setWorldSpawn(camera.position.x, camera.position.y, camera.position.z);
-      const spawnMsg = d.sysSpawnSet + ' [' +
-        Math.round(worldSpawnPoint.x) + ', ' +
-        Math.round(worldSpawnPoint.y) + ', ' +
-        Math.round(worldSpawnPoint.z) + ']';
-      addChat(null, spawnMsg, true, 'srv');
-      // Tüm guestlere worldspawn koordinatı + sistem mesajı gönder
-      Object.values(hostConns).forEach(({conn}) => {
-        if(conn.open){
-          conn.send({type:'worldspawn', x:worldSpawnPoint.x, y:worldSpawnPoint.y, z:worldSpawnPoint.z});
-          conn.send({type:'chat', name:null, msg:spawnMsg, sys:true, cls:'srv'});
-        }
-      });
-      return;
-    }
-    origProcessCmd(raw);
-  };
-})();
+// ─── /setworldspawn ana processCmd içinde tek yerde tanımlıdır — ek override yok ───
 
 setLanguage('en');
 animate();
@@ -8813,10 +8799,9 @@ document.addEventListener('mozpointerlockchange',function(){
 });
 
 // ──────────────────────────────────────────────────────────────────────
-// PATCH 1: /setworldspawn — SP + MP Host entegrasyonu
+// PATCH 1: langData eksik anahtarlarını tamamla
 // ──────────────────────────────────────────────────────────────────────
 (function _p2WorldSpawn(){
-  // langData'ya eksik anahtar ekle (zaten varsa dokunma)
   ['tr','en'].forEach(function(lang){
     if(!langData||!langData[lang]) return;
     if(!langData[lang].sysSpawnSet)
@@ -8825,44 +8810,9 @@ document.addEventListener('mozpointerlockchange',function(){
         : '✅ World spawn point set';
     if(!langData[lang].sysSpawnSetUsage)
       langData[lang].sysSpawnSetUsage = lang==='tr'
-        ? '⚠ Kullanım: /setworldspawn (oyun içinde, sadece host)'
-        : '⚠ Usage: /setworldspawn (in-game, host only)';
+        ? '⚠ Kullanım: /setworldspawn'
+        : '⚠ Usage: /setworldspawn';
   });
-
-  const _origCmd=processCmd;
-  processCmd=function(raw){
-    const parts=(raw||'').trim().split(/\s+/);
-    if(parts[0].toLowerCase()==='setworldspawn'){
-      const d=langData[currentLang];
-      if(!deviceMode){ addChat(null,d.sysSpawnSetUsage,true,'warn'); return; }
-      if(isMP&&!amHost){ addChat(null,d.srvHostOnly,true,'warn'); return; }
-      setWorldSpawn(camera.position.x,camera.position.y,camera.position.z);
-      const sp=worldSpawnPoint;
-      const coordStr='['+Math.round(sp.x)+', '+Math.round(sp.y)+', '+Math.round(sp.z)+']';
-      const msg=d.sysSpawnSet+' '+coordStr;
-      addChat(null,msg,true,'srv');
-      if(isMP&&amHost){
-        // P2P: tüm guest'lere gönder
-        Object.values(hostConns).forEach(function(p){
-          if(p&&p.conn&&p.conn.open){
-            p.conn.send({type:'worldspawn',x:sp.x,y:sp.y,z:sp.z});
-            p.conn.send({type:'chat',name:null,msg:msg,sys:true,cls:'srv'});
-          }
-        });
-        // Socket.io server'ına da bildir (kalıcı saklama için)
-        const serverCode=document.getElementById('host-code-display')?.textContent;
-        if(lobbySocket&&lobbySocket.connected&&serverCode&&serverCode!=='----'){
-          lobbySocket.emit('server:setworldspawn',{
-            code:serverCode,
-            x:sp.x, y:sp.y, z:sp.z,
-            requestedBy: myUsername||myName
-          });
-        }
-      }
-      return;
-    }
-    return _origCmd.apply(this,arguments);
-  };
 })();
 
 // ──────────────────────────────────────────────────────────────────────
