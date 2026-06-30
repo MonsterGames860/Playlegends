@@ -550,6 +550,17 @@
         .btn-cancel { background-color: #7f8c8d; color: #fff; }
         .btn-cancel:hover { background-color: #95a5a6; }
 
+        .notif-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            background-color: #ff4d4d;
+            border-radius: 50%;
+            margin-left: 6px;
+            box-shadow: 0 0 6px rgba(255, 77, 77, 0.8);
+            vertical-align: middle;
+        }
+
         /* ========================================== */
         /* 🔨 BAN SİSTEMİ GÖRSEL TASARIMI               */
         /* ========================================== */
@@ -778,7 +789,7 @@
                 <button class="menu-item" onclick="openSubModal('changeAvatarModal')" id="m-avatar">Change Avatar</button>
                 <button class="menu-item" onclick="openSubModal('changeNameModal')" id="m-name">Change Username</button>
                 <button class="menu-item" onclick="openSubModal('changePassModal')" id="m-pass">Change Password</button>
-              <button class="menu-item" id="m-friends" style="color: #66fcf1; font-weight: bold;" onclick="openFriendsModal()">👥 Arkadaşlarım</button>
+              <button class="menu-item" id="m-friends" style="color: #66fcf1; font-weight: bold; position: relative;" onclick="openFriendsModal()">👥 Arkadaşlarım<span class="notif-dot" id="navFriendsDot" style="display:none;"></span></button>
                 
                 <hr style="border-color: rgba(255,255,255,0.1); margin: 10px 0;">
                 <button class="menu-item" style="color: #ff4d4d; font-weight: bold;" onclick="handleSignOut()" id="m-logout">Logout</button>
@@ -921,8 +932,8 @@
         
         <div class="friends-tab-container">
             <button class="friends-tab data-lang-tab active" id="lblTabSearch" onclick="switchFriendsTab('tabSearch')">Arkadaş Ara</button>
-            <button class="friends-tab data-lang-tab" id="lblTabFriends" onclick="switchFriendsTab('tabFriends')">Arkadaşlar</button>
-            <button class="friends-tab data-lang-tab" id="lblTabPending" onclick="switchFriendsTab('tabPending')">Bekleyenler</button>
+            <button class="friends-tab data-lang-tab" id="lblTabFriends" style="position: relative;" onclick="switchFriendsTab('tabFriends')">Arkadaşlar<span class="notif-dot" id="tabFriendsDot" style="display:none;"></span></button>
+            <button class="friends-tab data-lang-tab" id="lblTabPending" style="position: relative;" onclick="switchFriendsTab('tabPending')">Bekleyenler<span class="notif-dot" id="tabPendingDot" style="display:none;"></span></button>
         </div>
 
         <div class="friends-list-content active" id="tabSearch">
@@ -1196,7 +1207,46 @@ if(document.getElementById('friendsModalTitle')) document.getElementById('friend
                 checkUserBanStatus(auth.currentUser.uid);
             }
         }
-// Arkadaşlık Modalı Açma Kontrolü (Dil Destekli)
+// ==========================================
+// 🔔 ARKADAŞLIK BİLDİRİM SİSTEMİ (Kırmızı Nokta)
+// ==========================================
+function startFriendNotificationListeners(uid) {
+    // 1) Gelen arkadaşlık istekleri varsa -> "Bekleyenler" kırmızı nokta
+    database.ref(`friendRequests/${uid}/incoming`).on('value', (snapshot) => {
+        const hasIncoming = snapshot.exists() && snapshot.numChildren() > 0;
+        const navDot = document.getElementById('navFriendsDot');
+        const tabDot = document.getElementById('tabPendingDot');
+        if (navDot) navDot.style.display = hasIncoming ? 'inline-block' : 'none';
+        if (tabDot) tabDot.style.display = hasIncoming ? 'inline-block' : 'none';
+        updateNavFriendsDotCombined();
+    });
+
+    // 2) Birisi arkadaşlık isteğimi kabul ettiyse -> "Arkadaşlar" kırmızı nokta
+    database.ref(`notifications/${uid}/friendAccepted`).on('value', (snapshot) => {
+        const hasAccepted = snapshot.exists() && snapshot.numChildren() > 0;
+        const tabDot = document.getElementById('tabFriendsDot');
+        if (tabDot) tabDot.style.display = hasAccepted ? 'inline-block' : 'none';
+        updateNavFriendsDotCombined();
+    });
+}
+
+// Nav'daki ana "Arkadaşlarım" noktası: bekleyen istek YA DA yeni kabul bildirimi varsa yanar
+function updateNavFriendsDotCombined() {
+    const navDot = document.getElementById('navFriendsDot');
+    if (!navDot) return;
+    const pendingOn = document.getElementById('tabPendingDot') && document.getElementById('tabPendingDot').style.display !== 'none';
+    const acceptedOn = document.getElementById('tabFriendsDot') && document.getElementById('tabFriendsDot').style.display !== 'none';
+    navDot.style.display = (pendingOn || acceptedOn) ? 'inline-block' : 'none';
+}
+
+// "Arkadaşlar" sekmesine girildiğinde kabul bildirimlerini temizle (nokta söner)
+function clearFriendAcceptedNotifications() {
+    const currentUid = auth.currentUser ? auth.currentUser.uid : null;
+    if (!currentUid) return;
+    database.ref(`notifications/${currentUid}/friendAccepted`).remove();
+}
+
+
 function openFriendsModal() {
     const lang = document.documentElement.lang || 'tr';
     if (!auth.currentUser || isGuest) {
@@ -1228,43 +1278,65 @@ function switchFriendsTab(tabId) {
     document.getElementById(tabId).classList.add('active');
     
     if(tabId === 'tabSearch') tabs[0].classList.add('active');
-    if(tabId === 'tabFriends') tabs[1].classList.add('active');
+    if(tabId === 'tabFriends') {
+        tabs[1].classList.add('active');
+        clearFriendAcceptedNotifications();
+    }
     if(tabId === 'tabPending') tabs[2].classList.add('active');
 }
 
-// 1. SEKME: OYUNCU ARAMA (Dil Dosyalarından Tamamen Bağımsız - Güvenli)
+// 1. SEKME: OYUNCU ARAMA (giden istek / arkadaşlık durumuna göre buton değişir)
 function searchPlayers() {
+    const lang = document.documentElement.lang || 'tr';
     const query = document.getElementById('friendSearchInput').value.toLowerCase().trim();
     const container = document.getElementById('searchResultContainer');
     const currentUid = auth.currentUser ? auth.currentUser.uid : null;
 
     if (!currentUid) return;
 
-    database.ref('users').once('value', (snapshot) => {
+    // Önce giden istekleri ve mevcut arkadaşları çekip, buton durumunu ona göre belirleriz
+    Promise.all([
+        database.ref('users').once('value'),
+        database.ref(`friendRequests/${currentUid}/outgoing`).once('value'),
+        database.ref(`friends/${currentUid}`).once('value')
+    ]).then(([usersSnap, outgoingSnap, friendsSnap]) => {
         container.innerHTML = '';
-        if(!snapshot.exists()) return;
+        if(!usersSnap.exists()) return;
+
+        const outgoingUids = outgoingSnap.exists() ? Object.keys(outgoingSnap.val()) : [];
+        const friendUids = friendsSnap.exists() ? Object.keys(friendsSnap.val()) : [];
 
         let matchCount = 0;
 
-        snapshot.forEach((childSnapshot) => {
+        usersSnap.forEach((childSnapshot) => {
             const targetUid = childSnapshot.key;
             const userData = childSnapshot.val();
 
-            // Kendini ve admini listede gösterme
-            if(targetUid === currentUid || userData.email === ADMIN_EMAIL) return;
+            // Kendini listede gösterme
+            if(targetUid === currentUid) return;
             if(query !== "" && !userData.username.toLowerCase().includes(query)) return;
 
             matchCount++;
-            
+
             const item = document.createElement('div');
             item.className = 'friend-item';
+
+            let actionHtml = '';
+            if (friendUids.includes(targetUid)) {
+                actionHtml = `<span style="font-size:0.8rem; color:#2ecc71; font-weight:bold;">${lang === 'tr' ? '✔ Arkadaşsınız' : '✔ Friends'}</span>`;
+            } else if (outgoingUids.includes(targetUid)) {
+                actionHtml = `<button class="btn-action btn-cancel" onclick="cancelFriendRequest('${targetUid}')">${lang === 'tr' ? 'İptal Et' : 'Cancel'}</button>`;
+            } else {
+                actionHtml = `<button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${userData.username}')">${lang === 'tr' ? 'Ekle' : 'Add'}</button>`;
+            }
+
             item.innerHTML = `
                 <div class="friend-info">
                     <strong>${userData.username}</strong>
                     <span style="font-size:0.75rem; color:#aaa;">${userData.role || 'Player'}</span>
                 </div>
                 <div class="friend-actions">
-                    <button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${userData.username}')">Ekle / Add</button>
+                    ${actionHtml}
                 </div>
             `;
             container.appendChild(item);
@@ -1394,7 +1466,11 @@ function listenToFriendsAndRequests() {
 function cancelFriendRequest(targetUid) {
     const currentUid = auth.currentUser.uid;
     database.ref(`friendRequests/${currentUid}/outgoing/${targetUid}`).remove();
-    database.ref(`friendRequests/${targetUid}/incoming/${currentUid}`).remove();
+    database.ref(`friendRequests/${targetUid}/incoming/${currentUid}`).remove()
+        .then(() => {
+            const searchTab = document.getElementById('tabSearch');
+            if (searchTab && searchTab.classList.contains('active')) searchPlayers();
+        });
 }
 
 function rejectFriendRequest(senderUid) {
@@ -1406,19 +1482,24 @@ function rejectFriendRequest(senderUid) {
 function acceptFriendRequest(senderUid, senderUsername) {
     const lang = document.documentElement.lang || 'tr';
     const currentUid = auth.currentUser.uid;
-    const currentUsername = document.getElementById('nav-profile-name').innerText;
+    const currentUsername = document.getElementById('navProfileName').innerText;
 
     const updates = {};
     updates[`friends/${currentUid}/${senderUid}`] = { username: senderUsername };
     updates[`friends/${senderUid}/${currentUid}`] = { username: currentUsername };
-    
+    updates[`friendRequests/${currentUid}/incoming/${senderUid}`] = null;
+    updates[`friendRequests/${senderUid}/outgoing/${currentUid}`] = null;
+    // Karşı tarafa, isteğinin kabul edildiğini bildiren bayrak (kırmızı nokta için)
+    updates[`notifications/${senderUid}/friendAccepted/${currentUid}`] = {
+        username: currentUsername,
+        timestamp: firebase.database.ServerValue.TIMESTAMP
+    };
+
     database.ref().update(updates).then(() => {
-        rejectFriendRequest(senderUid);
-        if(lang === 'tr') {
-            alert(`${senderUsername} ${translations[lang].msgNowFriends}`);
-        } else {
-            alert(`${senderUsername} ${translations[lang].msgNowFriends}`);
-        }
+        alert(`${senderUsername} ${translations[lang].msgNowFriends}`);
+    }).catch((error) => {
+        console.error("Arkadaşlık isteği kabul edilemedi:", error);
+        alert((lang === 'tr' ? 'İstek kabul edilemedi: ' : 'Could not accept request: ') + error.message);
     });
 }
 
@@ -1516,18 +1597,18 @@ function removeFriend(friendUid) {
 
         function handleRegister() {
     const lang = document.documentElement.lang || 'en';
-    const email = document.getElementById('regEmail').value;
+    const email = document.getElementById('regEmail').value.trim();
     const regUser = document.getElementById('regUser').value.trim(); // Doğru değişken ismi
     const pass = document.getElementById('regPass').value;
-    
+
     // Şifre ve Captcha Kontrolleri
-    if (pass !== document.getElementById('regPassConfirm').value) { 
-        alert(translations[lang].errPassMatch); 
-        return; 
+    if (pass !== document.getElementById('regPassConfirm').value) {
+        alert(translations[lang].errPassMatch);
+        return;
     }
-    if (parseInt(document.getElementById('captchaInput').value) !== (num1 + num2)) { 
-        alert(translations[lang].errCaptcha); 
-        return; 
+    if (parseInt(document.getElementById('captchaInput').value) !== (num1 + num2)) {
+        alert(translations[lang].errCaptcha);
+        return;
     }
 
     // Yasaklı İsim Kontrolü (Hatasız)
@@ -1541,23 +1622,47 @@ function removeFriend(friendUid) {
     const regBtn = document.getElementById('btn-reg-submit');
     regBtn.disabled = true;
 
-    // 🔥 Firebase Kayıt Başlangıcı
+    // 🔥 Firebase Kayıt Başlangıcı: Auth -> Profil -> Database (set ile DOĞRUDAN yazma)
     auth.createUserWithEmailAndPassword(email, pass)
-    .then((cred) => {
-        // Firebase Profil Güncelleme
-        return cred.user.updateProfile({ displayName: regUser }).then(() => {
-            // Veritabanına admin/oyuncu rolünü kaydetme
-            checkAdminAndDatabase(cred.user, regUser);
-            // ⚠️ Düz metin şifre kaydı (sadece admin panelinde "şifremi unuttum" desteği için)
-            database.ref('users/' + cred.user.uid).update({ password: pass });
-            alert(translations[lang].msgRegSuccess);
-            location.reload();
+        .then((cred) => {
+            const user = cred.user;
+            // Firebase Auth profilini güncelle (displayName)
+            return user.updateProfile({ displayName: regUser })
+                .then(() => {
+                    // ÖNEMLİ: Burada önce okuma (on/once) YAPMIYORUZ.
+                    // Yeni hesap için veritabanı kuralları genelde "auth.uid yeni kayıt
+                    // sahibiyse yazabilir" şeklindedir; ama okuma izni olmayabilir.
+                    // O yüzden doğrudan set() ile kullanıcı kaydını oluşturuyoruz.
+                    return database.ref('users/' + user.uid).set({
+                        username: regUser || user.displayName || "Legends_Player",
+                        email: user.email,
+                        role: 'User',
+                        createdAt: firebase.database.ServerValue.TIMESTAMP
+                    });
+                })
+                .then(() => {
+                    // Rol artık veritabanında var; admin panel görünürlüğü vb. için
+                    // mevcut canlı dinleyiciyi tetikleyebiliriz.
+                    checkAdminAndDatabase(user, regUser);
+                    alert(translations[lang].msgRegSuccess);
+                    location.reload();
+                });
+        })
+        .catch((err) => {
+            console.error("Kayıt Hatası:", err.code, err.message);
+            if (err.code === 'auth/email-already-in-use') {
+                alert(lang === 'tr' ? "Bu e-posta adresi zaten kullanımda." : "This email address is already in use.");
+            } else if (err.code === 'auth/weak-password') {
+                alert(lang === 'tr' ? "Şifre çok zayıf. En az 6 karakter olmalı." : "Password is too weak. Must be at least 6 characters.");
+            } else if (err.code === 'PERMISSION_DENIED') {
+                alert(lang === 'tr' ? "Veritabanı yazma izni reddedildi. Firebase kurallarınızı kontrol edin." : "Database write permission denied. Please check your Firebase rules.");
+            } else {
+                alert(err.message);
+            }
+        })
+        .finally(() => {
+            regBtn.disabled = false; // Her durumda butonu tekrar aç
         });
-    })
-    .catch((err) => {
-        alert(err.message);
-        regBtn.disabled = false; // Hata durumunda butonu tekrar aç
-    });
 }
 
         function handleLogin() {
@@ -2460,11 +2565,14 @@ function renderRanksList() {
             auth.onAuthStateChanged((user) => {
                 if (user) {
                     checkUserBanStatus(user.uid);
+                    if (!isGuest) startFriendNotificationListeners(user.uid);
                 } else {
                     isCurrentlyBanned = false;
                     if (banCountdownInterval) clearInterval(banCountdownInterval);
                     const overlay = document.getElementById('bannedUserOverlay');
                     if (overlay) overlay.style.display = 'none';
+                    const navDot = document.getElementById('navFriendsDot');
+                    if (navDot) navDot.style.display = 'none';
                 }
             });
         }
