@@ -1310,11 +1310,14 @@ function searchPlayers() {
 
         usersSnap.forEach((childSnapshot) => {
             const targetUid = childSnapshot.key;
-            const userData = childSnapshot.val();
+            const userData = childSnapshot.val() || {};
+            const username = userData.username || '';
 
             // Kendini listede gösterme
             if(targetUid === currentUid) return;
-            if(query !== "" && !userData.username.toLowerCase().includes(query)) return;
+            // Kullanıcı adı olmayan bozuk kayıtları atla (arama çökmesin diye)
+            if(!username) return;
+            if(query !== "" && !username.toLowerCase().includes(query)) return;
 
             matchCount++;
 
@@ -1327,13 +1330,15 @@ function searchPlayers() {
             } else if (outgoingUids.includes(targetUid)) {
                 actionHtml = `<button class="btn-action btn-cancel" onclick="cancelFriendRequest('${targetUid}')">${lang === 'tr' ? 'İptal Et' : 'Cancel'}</button>`;
             } else {
-                actionHtml = `<button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${userData.username}')">${lang === 'tr' ? 'Ekle' : 'Add'}</button>`;
+                actionHtml = `<button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${username}')">${lang === 'tr' ? 'Ekle' : 'Add'}</button>`;
             }
+
+            const targetRole = userData.role || 'Player';
+            const rankTagHtml = formatRankTagHtml(targetRole);
 
             item.innerHTML = `
                 <div class="friend-info">
-                    <strong>${userData.username}</strong>
-                    <span style="font-size:0.75rem; color:#aaa;">${userData.role || 'Player'}</span>
+                    <strong>${rankTagHtml}${username}</strong>
                 </div>
                 <div class="friend-actions">
                     ${actionHtml}
@@ -1400,19 +1405,29 @@ function listenToFriendsAndRequests() {
             container.innerHTML = `<p style="color:#aaa; font-size:0.85rem;">${translations[lang].noIncoming}</p>`;
             return;
         }
-        snapshot.forEach((child) => {
-            const senderUid = child.key;
-            const data = child.val();
-            const item = document.createElement('div');
-            item.className = 'friend-item';
-            item.innerHTML = `
-                <span><strong>${data.username}</strong></span>
-                <div class="friend-actions">
-                    <button class="btn-action btn-accept" onclick="acceptFriendRequest('${senderUid}', '${data.username}')">${translations[lang].btnAccept}</button>
-                    <button class="btn-action btn-reject" onclick="rejectFriendRequest('${senderUid}')">${translations[lang].btnReject}</button>
-                </div>
-            `;
-            container.appendChild(item);
+        const entries = [];
+        snapshot.forEach((child) => entries.push({ senderUid: child.key, data: child.val() || {} }));
+
+        Promise.all(entries.map(entry =>
+            database.ref(`users/${entry.senderUid}/role`).once('value').then(roleSnap => ({
+                ...entry,
+                role: roleSnap.exists() ? roleSnap.val() : 'Player'
+            }))
+        )).then((entriesWithRole) => {
+            container.innerHTML = '';
+            entriesWithRole.forEach(({ senderUid, data, role }) => {
+                const item = document.createElement('div');
+                item.className = 'friend-item';
+                const rankTagHtml = formatRankTagHtml(role);
+                item.innerHTML = `
+                    <span>${rankTagHtml}<strong>${data.username}</strong></span>
+                    <div class="friend-actions">
+                        <button class="btn-action btn-accept" onclick="acceptFriendRequest('${senderUid}', '${data.username}')">${translations[lang].btnAccept}</button>
+                        <button class="btn-action btn-reject" onclick="rejectFriendRequest('${senderUid}')">${translations[lang].btnReject}</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
         });
     });
 
@@ -1447,18 +1462,31 @@ function listenToFriendsAndRequests() {
             container.innerHTML = `<p style="color:#aaa; text-align:center; padding:10px;">${translations[lang].noFriends}</p>`;
             return;
         }
+        const friendEntries = [];
         snapshot.forEach((child) => {
-            const friendUid = child.key;
-            const data = child.val();
-            const item = document.createElement('div');
-            item.className = 'friend-item';
-            item.innerHTML = `
-                <span>🟢 <strong>${data.username}</strong></span>
-                <div class="friend-actions">
-                    <button class="btn-action btn-reject" onclick="removeFriend('${friendUid}')">${translations[lang].btnRemove}</button>
-                </div>
-            `;
-            container.appendChild(item);
+            friendEntries.push({ friendUid: child.key, data: child.val() || {} });
+        });
+
+        // Her arkadaşın güncel rütbesini users/ tablosundan çekip etiketi oyundaki gibi gösteriyoruz
+        Promise.all(friendEntries.map(entry =>
+            database.ref(`users/${entry.friendUid}/role`).once('value').then(roleSnap => ({
+                ...entry,
+                role: roleSnap.exists() ? roleSnap.val() : 'Player'
+            }))
+        )).then((entriesWithRole) => {
+            container.innerHTML = '';
+            entriesWithRole.forEach(({ friendUid, data, role }) => {
+                const item = document.createElement('div');
+                item.className = 'friend-item';
+                const rankTagHtml = formatRankTagHtml(role);
+                item.innerHTML = `
+                    <span>🟢 ${rankTagHtml}<strong>${data.username}</strong></span>
+                    <div class="friend-actions">
+                        <button class="btn-action btn-reject" onclick="removeFriend('${friendUid}')">${translations[lang].btnRemove}</button>
+                    </div>
+                `;
+                container.appendChild(item);
+            });
         });
     });
 }
@@ -1484,19 +1512,24 @@ function acceptFriendRequest(senderUid, senderUsername) {
     const currentUid = auth.currentUser.uid;
     const currentUsername = document.getElementById('navProfileName').innerText;
 
-    const updates = {};
-    updates[`friends/${currentUid}/${senderUid}`] = { username: senderUsername };
-    updates[`friends/${senderUid}/${currentUid}`] = { username: currentUsername };
-    updates[`friendRequests/${currentUid}/incoming/${senderUid}`] = null;
-    updates[`friendRequests/${senderUid}/outgoing/${currentUid}`] = null;
-    // Karşı tarafa, isteğinin kabul edildiğini bildiren bayrak (kırmızı nokta için)
-    updates[`notifications/${senderUid}/friendAccepted/${currentUid}`] = {
-        username: currentUsername,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-    };
+    // Asıl arkadaşlık kaydı + istek temizliği: bu işlem her durumda izinli olmalı (rules: friends + friendRequests)
+    const coreUpdates = {};
+    coreUpdates[`friends/${currentUid}/${senderUid}`] = { username: senderUsername };
+    coreUpdates[`friends/${senderUid}/${currentUid}`] = { username: currentUsername };
+    coreUpdates[`friendRequests/${currentUid}/incoming/${senderUid}`] = null;
+    coreUpdates[`friendRequests/${senderUid}/outgoing/${currentUid}`] = null;
 
-    database.ref().update(updates).then(() => {
+    database.ref().update(coreUpdates).then(() => {
         alert(`${senderUsername} ${translations[lang].msgNowFriends}`);
+
+        // Bildirim (kırmızı nokta) ayrı bir yazma işlemi: Realtime Database kurallarında
+        // "notifications" yolu tanımlı değilse bu adım reddedilir ama arkadaşlık zaten kurulmuş olur.
+        database.ref(`notifications/${senderUid}/friendAccepted/${currentUid}`).set({
+            username: currentUsername,
+            timestamp: firebase.database.ServerValue.TIMESTAMP
+        }).catch((notifyError) => {
+            console.warn("Bildirim yazılamadı (rules.json içinde 'notifications' yolu tanımlı değil olabilir):", notifyError);
+        });
     }).catch((error) => {
         console.error("Arkadaşlık isteği kabul edilemedi:", error);
         alert((lang === 'tr' ? 'İstek kabul edilemedi: ' : 'Could not accept request: ') + error.message);
@@ -2372,6 +2405,24 @@ function renderRanksList() {
                 'Beta Tester': '#9e9e9e'
             };
             return map[role] || '#ffffff';
+        }
+
+        // Oyun içindeki rütbe kısaltmaları ile birebir aynı (game.html -> RANK_ABBREVIATIONS)
+        const RANK_ABBREVIATIONS = {
+            'Owner / Developer': 'OWNER',
+            'Admin / Developer': 'ADMIN/DEV',
+            'Developer': 'DEV'
+        };
+
+        // Rütbeyi, oyun içindeki gibi "[TAG] " formatında, ismin BAŞINA gelecek HTML parçası olarak üretir.
+        // Player/Guest/rütbesiz durumlarda hiçbir şey döndürmez (oyun içiyle birebir aynı davranış).
+        function formatRankTagHtml(role) {
+            if (!role || typeof role !== 'string') return '';
+            const trimmed = role.trim();
+            if (!trimmed || trimmed.toLowerCase() === 'guest' || trimmed.toLowerCase() === 'player') return '';
+            const abbr = RANK_ABBREVIATIONS[trimmed] || trimmed.toUpperCase();
+            const color = getRankColor(trimmed);
+            return `<span style="color:${color}; font-weight:bold; text-shadow:0 0 5px ${color}88; margin-right:5px;">[${abbr}]</span>`;
         }
 
         function openGame() {
