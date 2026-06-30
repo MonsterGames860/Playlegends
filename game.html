@@ -3,46 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Indev v1.6.2 - Perlin World</title>
+<title>Legends Indev v1.6.1 - Perlin World</title>
 <style>
-/* ── Minecraft Font: çoklu kaynak + güvenilir fallback ── */
-@font-face {
-  font-family: 'Minecraft';
-  src: url('https://fonts.cdnfonts.com/s/27498/Minecraft.woff') format('woff'),
-       url('https://cdn.jsdelivr.net/npm/minecraft-fonts@1.0.0/Minecraft.woff') format('woff'),
-       url('https://raw.githubusercontent.com/South-Paw/typeface-minecraft/master/files/minecraft.woff') format('woff');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+@import url('https://fonts.cdnfonts.com/css/minecraft-4');
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-@font-face{font-family:'MatrixSans-Rg';src:url('https://fonts.cdnfonts.com/s/15286/MatrixSans-Rg.woff') format('woff'),url('https://db.onlinewebfonts.com/t/5dcece65040a96cd79edde8c29e1c67d.woff2') format('woff2');font-weight:normal;font-style:normal;font-display:swap;}*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
+@font-face{font-family:'Minecraft';src:url('https://db.onlinewebfonts.com/t/6ab539c6fc2b21ff0b149b3d06d7f97c.woff2') format('woff2'),url('https://db.onlinewebfonts.com/t/6ab539c6fc2b21ff0b149b3d06d7f97c.woff') format('woff'),url('https://db.onlinewebfonts.com/t/6ab539c6fc2b21ff0b149b3d06d7f97c.ttf') format('truetype');font-weight:normal;font-style:normal;font-display:swap;}
+@font-face{font-family:'MatrixSans-Rg';src:url('https://fonts.cdnfonts.com/s/15286/MatrixSans-Rg.woff') format('woff'),url('https://db.onlinewebfonts.com/t/5dcece65040a96cd79edde8c29e1c67d.woff2') format('woff2');font-weight:normal;font-style:normal;}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none}
 body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:'Minecraft','VT323','Courier New',monospace}
-/* Minecraft font yüklenemezse VT323 devreye girer; tüm Minecraft-stili elementlerde
-   letter-spacing açık tutulur ki harfler birbirine yapışmasın */
-.mbtn,.game-logo,.game-version,.screen-title,.sub-title,.code-display,.code-label,
-.mini-card .mc2-title,.world-card .wc-title,.device-card .dc-title,.mp-card .mc-title,
-#pause-title,#pause-version,#death-title,#death-msg,#btn-respawn,
-#ban-title,#kick-title,#manage-server-title,.ms-tab,.ms-btn,.ms-player-name,.ms-setting-label,.ms-toggle-btn,
-#inv-title,.inv-section-label,.kb-key,.kb-label,.inv-item-name,.inv-hslot-name,.inv-hslot-num,
-.sl-tab-btn,.cs-title,.cs-label,.cs-toggle-label,.cs-subtitle,
-#tab-list-server-name,#tab-list-count,.tab-row,
-.setting-label,.setting-value,.status-msg,.load-world-name,.load-world-meta,
-.chat-msg,.shout-msg,#chat-input,#chat-hint,
-#ms-close-btn,#btn-cs-create,#btn-cs-cancel,#cs-status,
-.browse-row,.load-row,#browse-status,#browse-empty,#load-status,
-#manage-server-title,#manage-server-box *,
-.pause-setting,#pause-box *{
-  font-family:'Minecraft','VT323','Courier New',monospace;
-  letter-spacing:.5px;
-}
-/* rank-tag'e dokunma — kendi font-family'si !important ile korunuyor */
-/* Büyük başlıklarda biraz daha geniş aralık */
-.game-logo,#pause-title,#death-title,#ban-title,#kick-title,.cs-title{letter-spacing:2px;}
-.screen-title,.sub-title,.code-label,#inv-title{letter-spacing:3px;}
-.code-display{letter-spacing:10px;}
-/* chat input force override */
-#chat-input,#chat-hint{font-family:'Minecraft','VT323','Courier New',monospace!important;font-size:13px!important;letter-spacing:.5px!important;}
 #menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;overflow:hidden;}
 .menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px 18px;max-height:96vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
 .menu-screen::-webkit-scrollbar{width:4px;}
@@ -51,11 +19,29 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .menu-screen.active{display:flex;}
 .game-logo{font-size:34px;font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:2px;margin-bottom:4px;}
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
-.mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
+.mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
 .mbtn:hover{filter:brightness(1.2);}
 .mbtn:active{border-top-color:#1a1a1a;border-left-color:#1a1a1a;border-bottom-color:#7a7a7a;border-right-color:#7a7a7a;filter:brightness(.9);}
 .mbtn:disabled,.mbtn.disabled{opacity:.4;cursor:not-allowed;filter:none!important;}
 .mbtn.back{background:linear-gradient(180deg,#3a3a3a,#222);font-size:12px;padding:9px;margin-top:14px;width:55%;}
+.friends-tab-btn{background:rgba(0,0,0,.4)!important;border:1px solid rgba(117,167,255,.25)!important;border-bottom:1px solid rgba(117,167,255,.25)!important;border-top:1px solid rgba(117,167,255,.25)!important;border-left:1px solid rgba(117,167,255,.25)!important;border-right:1px solid rgba(117,167,255,.25)!important;}
+.friends-tab-btn.active{background:linear-gradient(180deg,#2a5a9f,#1a3a7f)!important;border-color:#4a8acf!important;}
+.friend-notif-dot{position:absolute;top:-4px;right:-4px;width:9px;height:9px;background:#ff4d4d;border-radius:50%;box-shadow:0 0 4px #ff4d4d;}
+.friend-row{display:flex;align-items:center;justify-content:space-between;gap:8px;background:rgba(0,0,0,.35);border:1px solid rgba(117,167,255,.15);border-radius:6px;padding:8px 10px;margin-bottom:7px;}
+.friend-row-left{display:flex;align-items:center;gap:8px;min-width:0;}
+.friend-head-box{width:28px;height:28px;border-radius:5px;flex-shrink:0;box-sizing:border-box;border:2px solid #777;background:#222;image-rendering:pixelated;overflow:hidden;}
+.friend-head-box.presence-online{border-color:#3ddc6f;box-shadow:0 0 6px rgba(61,220,111,.5);}
+.friend-head-box.presence-offline{border-color:#e84444;box-shadow:0 0 6px rgba(232,68,68,.35);}
+.friend-head-box canvas,.friend-head-box img{width:100%;height:100%;image-rendering:pixelated;}
+.friend-name-wrap{display:flex;flex-direction:column;min-width:0;}
+.friend-name-wrap strong{color:#fff;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.friend-row-actions{display:flex;gap:5px;flex-shrink:0;}
+.friend-btn{padding:5px 9px;font-size:10px;border-radius:4px;border:1px solid rgba(255,255,255,.2);cursor:pointer;font-family:'Minecraft',monospace;font-weight:bold;}
+.friend-btn-add{background:#2a5a9f;color:#fff;}
+.friend-btn-cancel{background:#5a5a2a;color:#fff;}
+.friend-btn-accept{background:#2a8a4f;color:#fff;}
+.friend-btn-reject{background:#8a2a2a;color:#fff;}
+.friend-empty-msg{color:rgba(255,255,255,.4);font-size:11px;text-align:center;padding:14px 6px;}
 .mbtn.primary{background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border-top-color:#4a8acf;border-left-color:#4a8acf;border-bottom-color:#0a1a4f;border-right-color:#0a1a4f;}
 .mbtn.quit-btn{background:linear-gradient(180deg,#9f2a2a,#7a1a1a);border-top-color:#cf4a4a;border-left-color:#cf4a4a;border-bottom-color:#4f0a0a;border-right-color:#4f0a0a;}
 .world-cards,.device-cards,.mp-cards{display:flex;gap:12px;width:100%;margin-bottom:4px;}
@@ -72,11 +58,11 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #lang-select{position:absolute;top:16px;right:20px;font-size:14px;font-weight:bold;color:#fff;z-index:1010;background:rgba(0,0,0,.4);padding:5px 10px;border-radius:16px;border:1px solid rgba(255,255,255,.2);}
 .lang-opt{cursor:pointer;opacity:.4;padding:2px 5px;}
 .lang-opt.active{opacity:1;color:#75a7ff;}
-.menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:'Minecraft','VT323','Courier New',monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
+.menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
 .menu-input::placeholder{letter-spacing:1px;color:rgba(255,255,255,.3);}
 .menu-input:focus{border-color:rgba(117,167,255,.6);}
 .name-input{letter-spacing:1px;text-align:left;font-size:13px;}
-.code-display{font-size:38px;font-weight:bold;letter-spacing:10px;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;margin:4px 0 2px;font-family:'Minecraft','VT323','Courier New',monospace;}
+.code-display{font-size:38px;font-weight:bold;letter-spacing:10px;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;margin:4px 0 2px;font-family:'Minecraft',monospace;}
 .code-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
 .mini-cards{display:flex;gap:8px;width:100%;margin:3px 0 5px;}
 .mini-card{flex:1;padding:8px 6px;background:linear-gradient(180deg,#1e2e3e,#121e2e);border:2px solid #2a3a4a;border-radius:5px;cursor:pointer;text-align:center;transition:border-color .15s;}
@@ -96,7 +82,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #game-title{position:absolute;top:12px;left:50%;transform:translateX(-50%);color:#fff;font-size:15px;font-weight:bold;text-shadow:2px 2px #000;z-index:10;pointer-events:none;display:none;}
 #crosshair{position:absolute;top:50%;left:50%;width:20px;height:20px;transform:translate(-50%,-50%);color:#fff;font-size:24px;font-weight:bold;display:none !important;justify-content:center;align-items:center;pointer-events:none;z-index:10;text-shadow:1px 1px #000;}
 #crosshair.show{display:flex !important;}
-#mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
+#mode-indicator{position:absolute;top:32px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;z-index:10;display:none;pointer-events:none;}
 /* ── KALP & AÇLIK BARLARI (Minecraft tarzı) ─────────────────────── */
 #bars-wrap{
   position:absolute;bottom:80px;left:50%;transform:translateX(-50%);
@@ -165,7 +151,7 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .hotbar-slot{width:42px;height:42px;background:rgba(255,255,255,.1);border:2px solid #aaa;border-radius:5px;overflow:hidden;cursor:pointer;display:flex;justify-content:center;align-items:center;transition:all .15s;}
 .hotbar-slot canvas{width:100%;height:100%;image-rendering:pixelated;}
 .hotbar-slot.active{border-color:#75a7ff;background:rgba(117,167,255,.3);box-shadow:0 0 10px #75a7ff;}
-#mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;letter-spacing:1px;}
+#mobile-pause-btn{position:absolute;top:12px;left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:5px 15px;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:1px;}
 #error-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,40,40,.95);color:#fff;padding:20px;border-radius:12px;text-align:center;z-index:1100;border:2px solid #fff;display:none;}
 /* ─── Kırma Çatlak Overlay ─── */
 #pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.72);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:900;color:#fff;}
@@ -178,14 +164,14 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 #manage-server-box{background:rgba(10,16,30,.97);border:2px solid rgba(117,167,255,.35);border-radius:10px;padding:16px;max-width:440px;width:96%;max-height:88vh;overflow:hidden;display:flex;flex-direction:column;}
 #manage-server-title{font-size:15px;font-weight:bold;color:#75a7ff;letter-spacing:3px;text-align:center;margin-bottom:10px;text-shadow:0 0 10px rgba(117,167,255,.4);}
 .ms-tabs{display:flex;gap:0;border-bottom:2px solid rgba(117,167,255,.2);margin-bottom:10px;}
-.ms-tab{flex:1;padding:7px 4px;background:transparent;border:none;color:rgba(255,255,255,.4);font-size:10px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;letter-spacing:.5px;border-bottom:2px solid transparent;margin-bottom:-2px;}
+.ms-tab{flex:1;padding:7px 4px;background:transparent;border:none;color:rgba(255,255,255,.4);font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;border-bottom:2px solid transparent;margin-bottom:-2px;}
 .ms-tab.active{color:#75a7ff;border-bottom-color:#75a7ff;}
 .ms-tab-content{display:none;flex:1;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
 .ms-tab-content.active{display:block;}
 .ms-player-row{display:flex;align-items:center;padding:7px 8px;background:rgba(255,255,255,.04);border-radius:5px;margin-bottom:4px;gap:6px;}
-.ms-player-name{flex:1;font-size:12px;color:#fff;font-family:'Minecraft','VT323','Courier New',monospace;}
-.ms-player-rank{font-size:9px;padding:2px 5px;border-radius:3px;font-family:'Minecraft','VT323','Courier New',monospace;font-weight:bold;margin-right:4px;}
-.ms-btn{padding:5px 8px;border:none;border-radius:3px;font-size:9px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;letter-spacing:.5px;}
+.ms-player-name{flex:1;font-size:12px;color:#fff;font-family:'Minecraft',monospace;}
+.ms-player-rank{font-size:9px;padding:2px 5px;border-radius:3px;font-family:'Minecraft',monospace;font-weight:bold;margin-right:4px;}
+.ms-btn{padding:5px 8px;border:none;border-radius:3px;font-size:9px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;}
 .ms-btn.promote{background:linear-gradient(180deg,#2a7a2a,#1a5a1a);color:#7fff7f;}
 .ms-btn.demote{background:linear-gradient(180deg,#7a5a00,#5a3a00);color:#ffd700;}
 .ms-btn.kick{background:linear-gradient(180deg,#7a3a00,#5a2a00);color:#ffaa44;}
@@ -196,50 +182,50 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .ms-banned-row{display:flex;align-items:center;padding:6px 8px;background:rgba(255,60,60,.06);border-radius:5px;margin-bottom:3px;gap:6px;}
 .ms-setting-row{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:rgba(255,255,255,.04);border-radius:5px;margin-bottom:5px;}
 .ms-setting-label{font-size:11px;color:#ccc;}
-.ms-toggle-btn{padding:5px 12px;border:none;border-radius:3px;font-size:10px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;}
+.ms-toggle-btn{padding:5px 12px;border:none;border-radius:3px;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;}
 .ms-toggle-btn.on{background:linear-gradient(180deg,#2a7a2a,#1a5a1a);color:#7fff7f;}
 .ms-toggle-btn.off{background:linear-gradient(180deg,#4a1a1a,#3a0a0a);color:#ff8888;}
-#ms-close-btn{width:100%;padding:9px;margin-top:10px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #1a1a1a;border-top:3px solid #5a5a5a;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#ms-close-btn{width:100%;padding:9px;margin-top:10px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #1a1a1a;border-top:3px solid #5a5a5a;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #ms-close-btn:hover{filter:brightness(1.2);}
 #pause-title{font-size:19px;font-weight:bold;color:#75a7ff;letter-spacing:3px;text-transform:uppercase;margin-bottom:4px;text-shadow:0 0 12px rgba(117,167,255,.5),2px 2px #000;}
 #pause-version{font-size:11px;color:rgba(255,255,255,.4);margin-bottom:18px;}
 .pause-setting{width:100%;display:flex;align-items:center;justify-content:space-between;margin:4px 0;padding:7px 10px;background:rgba(255,255,255,.06);border-radius:5px;font-size:12px;color:#ccc;}
 .pause-setting input[type=range]{width:50%;accent-color:#75a7ff;}
 .pause-setting span.val{color:#75a7ff;font-weight:bold;min-width:20px;text-align:right;}
-#chat-container{position:absolute;bottom:100px;left:12px;width:420px;max-width:calc(100vw - 24px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
-#chat-log{max-height:200px;overflow-y:hidden;display:flex;flex-direction:column;gap:3px;scrollbar-width:none;pointer-events:none;touch-action:none;}
+#chat-container{position:absolute;bottom:90px;left:10px;width:300px;max-width:calc(100vw - 20px);z-index:50;display:none;flex-direction:column;pointer-events:none;}
+#chat-log{max-height:130px;overflow-y:hidden;display:flex;flex-direction:column;gap:2px;scrollbar-width:none;pointer-events:none;touch-action:none;}
 #chat-log.scrollable{overflow-y:scroll;pointer-events:all;touch-action:pan-y;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,0.25) transparent;}
 #chat-log.scrollable::-webkit-scrollbar{width:4px;}
 #chat-log.scrollable::-webkit-scrollbar-track{background:transparent;}
 #chat-log.scrollable::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.25);border-radius:2px;}
-.chat-msg{color:#fff;font-size:14px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.55);padding:3px 8px;border-radius:3px;word-break:break-word;line-height:1.6;letter-spacing:.3px;}
+.chat-msg{color:#fff;font-size:12px;font-family:'MatrixSans-Rg','VT323',monospace;text-shadow:1px 1px #000;background:rgba(0,0,0,.5);padding:2px 6px;border-radius:3px;word-break:break-word;line-height:1.4;}
 .chat-msg.sys{color:#acd4ff;}
 .chat-msg.srv{color:#2effdc;}
 .chat-msg.warn{color:#ffbb44;}
-.rank-tag{display:inline;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace!important;}
+.rank-tag{display:inline;font-weight:bold;font-family:'Minecraft',monospace!important;}
 .rank-tag.rank-sweep{-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;background-image:linear-gradient(105deg,var(--rtc,#fff) 0%,var(--rtc,#fff) 36%,#fff 44%,#fff 52%,var(--rtc,#fff) 60%,var(--rtc,#fff) 100%);background-size:280% 100%;background-position:200% 0;animation:rankSweep 5s linear infinite;filter:drop-shadow(0 0 5px var(--rtc,#fff));}
 @keyframes rankSweep{0%{background-position:200% 0;}30%{background-position:-30% 0;}30.001%{background-position:200% 0;}100%{background-position:200% 0;}}
-#chat-input-row{display:none;margin-top:5px;pointer-events:all;}
-#chat-input{width:100%;background:rgba(0,0,0,.88);border:2px solid rgba(117,167,255,.6);color:#fff;font-family:'Minecraft','VT323','Courier New',monospace;font-size:15px;padding:8px 11px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
-#chat-hint{position:absolute;bottom:72px;left:12px;color:rgba(255,255,255,.45);font-size:12px;font-family:'Minecraft','VT323','Courier New',monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
+#chat-input-row{display:none;margin-top:4px;pointer-events:all;}
+#chat-input{width:100%;background:rgba(0,0,0,.85);border:2px solid rgba(117,167,255,.55);color:#fff;font-family:'Minecraft',monospace;font-size:13px;padding:6px 9px;border-radius:4px;outline:none;user-select:text;-webkit-user-select:text;}
+#chat-hint{position:absolute;bottom:67px;left:10px;color:rgba(255,255,255,.4);font-size:10px;font-family:'Minecraft',monospace;text-shadow:1px 1px #000;pointer-events:none;z-index:50;display:none;}
 #btn-mobile-chat{position:absolute;bottom:20px;left:20px;width:54px;height:54px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:12px;color:#fff;font-size:22px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #death-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(180,0,0,0.52);z-index:850;display:none;flex-direction:column;justify-content:flex-start;align-items:center;padding-top:18%;}
 #death-screen.active{display:flex;}
-#death-title{font-size:44px;font-weight:bold;color:#fff;text-shadow:0 0 24px rgba(255,0,0,.9),3px 3px #000;letter-spacing:5px;margin-bottom:12px;font-family:'Minecraft','VT323','Courier New',monospace;}
-#death-msg{font-size:18px;color:#fff;text-shadow:2px 2px #000;margin-bottom:28px;background:rgba(0,0,0,0.5);padding:6px 20px;border-radius:30px;font-family:'Minecraft','VT323','Courier New',monospace;}
-#btn-respawn{padding:14px 32px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:16px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:2px;}
+#death-title{font-size:44px;font-weight:bold;color:#fff;text-shadow:0 0 24px rgba(255,0,0,.9),3px 3px #000;letter-spacing:5px;margin-bottom:12px;font-family:'Minecraft',monospace;}
+#death-msg{font-size:18px;color:#fff;text-shadow:2px 2px #000;margin-bottom:28px;background:rgba(0,0,0,0.5);padding:6px 20px;border-radius:30px;font-family:'Minecraft',monospace;}
+#btn-respawn{padding:14px 32px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:16px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:2px;}
 #btn-respawn:hover{filter:brightness(1.2);}
 #ban-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(60,0,0,0.95);z-index:960;display:none;flex-direction:column;justify-content:center;align-items:center;}
 #ban-screen.active{display:flex;}
-#ban-title{font-size:36px;font-weight:bold;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:'Minecraft','VT323','Courier New',monospace;text-align:center;padding:0 20px;}
-#ban-by{font-size:14px;color:rgba(255,190,190,.75);text-shadow:1px 1px #000;font-family:'Minecraft','VT323','Courier New',monospace;margin-bottom:28px;}
-#btn-ban-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#ban-title{font-size:36px;font-weight:bold;color:#ff4444;text-shadow:0 0 30px rgba(255,0,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:'Minecraft',monospace;text-align:center;padding:0 20px;}
+#ban-by{font-size:14px;color:rgba(255,190,190,.75);text-shadow:1px 1px #000;font-family:'Minecraft',monospace;margin-bottom:28px;}
+#btn-ban-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-ban-menu:hover{filter:brightness(1.2);}
 #kick-screen{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(20,20,60,0.95);z-index:960;display:none;flex-direction:column;justify-content:center;align-items:center;}
 #kick-screen.active{display:flex;}
-#kick-title{font-size:36px;font-weight:bold;color:#ffaa44;text-shadow:0 0 30px rgba(255,160,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:'Minecraft','VT323','Courier New',monospace;text-align:center;padding:0 20px;}
-#kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:'Minecraft','VT323','Courier New',monospace;margin-bottom:28px;}
-#btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#kick-title{font-size:36px;font-weight:bold;color:#ffaa44;text-shadow:0 0 30px rgba(255,160,0,.8),3px 3px #000;letter-spacing:3px;margin-bottom:14px;font-family:'Minecraft',monospace;text-align:center;padding:0 20px;}
+#kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:'Minecraft',monospace;margin-bottom:28px;}
+#btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-kick-menu:hover{filter:brightness(1.2);}
 #inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:800;color:#fff;}
 #inv-overlay.active{display:flex;}
@@ -252,14 +238,14 @@ body,html{width:100%;height:100%;overflow:hidden;background:#1a1e29;font-family:
 .inv-item.selected{border-color:#75a7ff;background:rgba(117,167,255,.18);}
 .inv-item canvas{width:40px;height:40px;image-rendering:pixelated;}
 .inv-item-name{font-size:7px;color:rgba(255,255,255,.6);margin-top:2px;text-align:center;line-height:1.1;}
-#inv-hint{font-size:8px;color:rgba(255,255,255,.32);letter-spacing:.5px;text-align:center;margin:4px 0 8px;font-family:'Minecraft','VT323','Courier New',monospace;}
+#inv-hint{font-size:8px;color:rgba(255,255,255,.32);letter-spacing:.5px;text-align:center;margin:4px 0 8px;font-family:'Minecraft',monospace;}
 #inv-hotbar-row{display:flex;gap:4px;width:100%;justify-content:center;margin-bottom:5px;}
 .inv-hslot{display:flex;flex-direction:column;align-items:center;padding:4px 2px 3px;background:rgba(255,255,255,.07);border:2px solid rgba(255,255,255,.14);border-radius:5px;cursor:pointer;flex:1;max-width:58px;transition:border-color .1s;}
 .inv-hslot:hover{border-color:rgba(117,167,255,.5);}
 .inv-hslot canvas{width:38px;height:38px;image-rendering:pixelated;}
 .inv-hslot-num{font-size:8px;color:rgba(255,255,255,.38);margin-bottom:1px;}
 .inv-hslot-name{font-size:7px;color:rgba(255,255,255,.55);margin-top:2px;text-align:center;}
-#inv-close-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:5px;font-family:'Minecraft','VT323','Courier New',monospace;}
+#inv-close-hint{font-size:10px;color:rgba(255,255,255,.3);margin-top:5px;font-family:'Minecraft',monospace;}
 #btn-mobile-inv{position:absolute;bottom:164px;right:45px;width:50px;height:38px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:8px;color:#fff;font-size:14px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #btn-mobile-cam{position:absolute;top:12px;right:12px;width:44px;height:44px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.5);border-radius:50%;color:#fff;font-size:19px;display:none;justify-content:center;align-items:center;z-index:20;cursor:pointer;pointer-events:all;}
 #btn-mobile-cam:active{background:rgba(102,252,241,.35);}
@@ -284,12 +270,8 @@ body.low-health::after {
   #mobile-jump-container{bottom:25px;right:25px;}
   .world-cards,.device-cards,.mp-cards{flex-direction:column;}
   .game-logo{font-size:26px;}
-  /* Mobil chat: daha geniş, daha okunur */
-  #chat-container{bottom:82px;left:8px;width:calc(100vw - 16px);max-width:400px;}
-  #chat-log{max-height:160px;}
-  .chat-msg{font-size:13px;padding:3px 7px;}
-  #chat-input{font-size:14px!important;padding:7px 10px;}
-  #chat-hint{bottom:60px;left:8px;font-size:11px;}
+  #chat-container{bottom:76px;}
+  #chat-hint{bottom:55px;}
   #btn-mobile-chat{bottom:20px;left:20px;right:auto;}
   #btn-mobile-inv{bottom:145px;right:25px;}
   #btn-mobile-cam{top:8px;right:8px;width:38px;height:38px;font-size:16px;}
@@ -301,7 +283,7 @@ body.low-health::after {
 
 /* ── Multiplayer Server List Section ── */
 .mp-server-list-section{width:100%;margin-top:6px;}
-.sl-tab-btn{flex:1;padding:8px 4px;background:rgba(0,0,0,.35);border:none;color:rgba(255,255,255,.5);font-size:10px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;letter-spacing:.5px;transition:background .15s,color .15s;border-right:1px solid rgba(117,167,255,.15);}
+.sl-tab-btn{flex:1;padding:8px 4px;background:rgba(0,0,0,.35);border:none;color:rgba(255,255,255,.5);font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;transition:background .15s,color .15s;border-right:1px solid rgba(117,167,255,.15);}
 .sl-tab-btn:last-child{border-right:none;}
 .sl-tab-btn:hover:not(.active){background:rgba(117,167,255,.08);color:rgba(255,255,255,.75);}
 .sl-tab-btn.active{background:linear-gradient(180deg,#1a3a7f,#0e2255);color:#fff;}
@@ -331,16 +313,16 @@ body.low-health::after {
 #testmode-box .tm-title{font-size:15px;font-weight:bold;color:#ffc84a;letter-spacing:2px;margin-bottom:8px;text-shadow:0 0 12px rgba(255,200,0,.4);}
 #testmode-box .tm-desc{font-size:11px;color:rgba(255,255,255,.65);line-height:1.6;margin-bottom:18px;}
 #testmode-box .tm-btns{display:flex;gap:10px;justify-content:center;}
-#btn-testmode-continue{padding:10px 20px;background:linear-gradient(180deg,#c47a00,#8a5200);border:none;border-bottom:3px solid #4a2a00;border-right:3px solid #4a2a00;border-top:3px solid #ffb030;border-left:3px solid #ffb030;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-testmode-continue{padding:10px 20px;background:linear-gradient(180deg,#c47a00,#8a5200);border:none;border-bottom:3px solid #4a2a00;border-right:3px solid #4a2a00;border-top:3px solid #ffb030;border-left:3px solid #ffb030;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-testmode-continue:hover{filter:brightness(1.15);}
-#btn-testmode-cancel{padding:10px 20px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #111;border-right:3px solid #111;border-top:3px solid #555;border-left:3px solid #555;color:#aaa;font-size:13px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-testmode-cancel{padding:10px 20px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #111;border-right:3px solid #111;border-top:3px solid #555;border-left:3px solid #555;color:#aaa;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-testmode-cancel:hover{filter:brightness(1.1);}
 
 /* ── Browse Screen ── */
 #screen-browse .browse-toolbar{width:100%;display:flex;gap:8px;margin-bottom:10px;align-items:center;}
-#browse-search{flex:1;padding:8px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:12px;font-family:'Minecraft','VT323','Courier New',monospace;outline:none;user-select:text;-webkit-user-select:text;}
+#browse-search{flex:1;padding:8px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:12px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;}
 #browse-search:focus{border-color:rgba(117,167,255,.5);}
-#btn-browse-refresh{padding:8px 12px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:3px solid #0a1030;border-right:3px solid #0a1030;border-top:3px solid #4a6aba;border-left:3px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
+#btn-browse-refresh{padding:8px 12px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:3px solid #0a1030;border-right:3px solid #0a1030;border-top:3px solid #4a6aba;border-left:3px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
 #btn-browse-refresh:hover{filter:brightness(1.15);}
 #browse-list{width:100%;max-height:260px;overflow-y:auto;margin-bottom:6px;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
 #browse-list::-webkit-scrollbar{width:4px;}
@@ -353,7 +335,7 @@ body.low-health::after {
 .browse-server-meta{display:flex;gap:8px;margin-top:3px;flex-wrap:wrap;}
 .browse-tag{font-size:9px;color:#75a7ff;background:rgba(117,167,255,.1);padding:1px 6px;border-radius:10px;border:1px solid rgba(117,167,255,.2);}
 .browse-players{font-size:11px;color:#aaffaa;font-weight:bold;white-space:nowrap;}
-.browse-join-btn{padding:6px 12px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:2px solid #0a1a4f;border-right:2px solid #0a1a4f;border-top:2px solid #4a8acf;border-left:2px solid #4a8acf;color:#fff;font-size:10px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
+.browse-join-btn{padding:6px 12px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:2px solid #0a1a4f;border-right:2px solid #0a1a4f;border-top:2px solid #4a8acf;border-left:2px solid #4a8acf;color:#fff;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
 .browse-join-btn:hover{filter:brightness(1.15);}
 #browse-status{font-size:11px;color:rgba(255,255,255,.45);text-align:center;padding:20px 0;}
 #browse-empty{font-size:11px;color:rgba(255,255,255,.3);text-align:center;padding:22px 0;display:none;}
@@ -390,10 +372,10 @@ body.low-health::after {
 .cs-subtitle{font-size:10px;color:rgba(255,255,255,.35);letter-spacing:2px;margin-top:3px;}
 .cs-section{margin-bottom:14px;}
 .cs-label{font-size:10px;color:rgba(255,255,255,.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
-.cs-input{width:100%;padding:9px 12px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:13px;font-family:'Minecraft','VT323','Courier New',monospace;outline:none;user-select:text;-webkit-user-select:text;}
+.cs-input{width:100%;padding:9px 12px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:13px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;}
 .cs-input:focus{border-color:rgba(117,167,255,.55);}
 .cs-input::placeholder{color:rgba(255,255,255,.25);font-size:11px;}
-.cs-select{width:100%;padding:9px 12px;background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:12px;font-family:'Minecraft','VT323','Courier New',monospace;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
+.cs-select{width:100%;padding:9px 12px;background:rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:12px;font-family:'Minecraft',monospace;outline:none;cursor:pointer;appearance:none;-webkit-appearance:none;}
 .cs-select:focus{border-color:rgba(117,167,255,.55);}
 .cs-select option{background:#1a2540;color:#fff;}
 .cs-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
@@ -402,151 +384,24 @@ body.low-health::after {
 .cs-toggle.sel{border-color:#75a7ff;background:rgba(117,167,255,.15);}
 .cs-toggle:hover:not(.sel){border-color:rgba(117,167,255,.3);}
 .cs-toggle-icon{font-size:14px;margin-bottom:2px;}
-.cs-toggle-label{font-size:9px;font-weight:bold;color:#fff;font-family:'Minecraft','VT323','Courier New',monospace;}
+.cs-toggle-label{font-size:9px;font-weight:bold;color:#fff;font-family:'Minecraft',monospace;}
 .cs-footer{display:flex;gap:10px;margin-top:20px;}
-#btn-cs-create{flex:2;padding:13px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-cs-create{flex:2;padding:13px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-cs-create:hover{filter:brightness(1.15);}
-#btn-cs-cancel{flex:1;padding:13px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:4px solid #111;border-right:4px solid #111;border-top:4px solid #555;border-left:4px solid #555;color:#aaa;font-size:13px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
+#btn-cs-cancel{flex:1;padding:13px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:4px solid #111;border-right:4px solid #111;border-top:4px solid #555;border-left:4px solid #555;color:#aaa;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-cs-cancel:hover{filter:brightness(1.1);}
 #cs-status{font-size:11px;color:rgba(255,255,255,.55);text-align:center;margin-top:8px;min-height:14px;}
 
-/* ══════════════════════════════════════════════
-   TAB OYUNCU LİSTESİ – v1.6.2
-   ══════════════════════════════════════════════ */
-#tab-list-overlay{
-  position:fixed;top:0;left:50%;transform:translateX(-50%);
-  z-index:800;display:none;
-  flex-direction:column;align-items:center;
-  pointer-events:none;
-  padding-top:8px;
-  max-width:min(680px,94vw);width:100%;
-}
-#tab-list-overlay.show{display:flex;}
-#tab-list-box{
-  background:rgba(10,14,26,.82);
-  border:2px solid rgba(117,167,255,.28);
-  border-radius:8px;
-  padding:10px 14px 12px;
-  width:100%;
-  box-shadow:0 4px 32px rgba(0,0,0,.6);
-  backdrop-filter:blur(4px);
-}
-#tab-list-server-name{
-  font-size:14px;font-weight:bold;color:#75a7ff;
-  letter-spacing:2px;text-align:center;
-  text-shadow:0 0 10px rgba(117,167,255,.4);
-  margin-bottom:2px;
-  font-family:'Minecraft','VT323','Courier New',monospace;
-}
-#tab-list-count{
-  font-size:10px;color:rgba(255,255,255,.45);
-  text-align:center;letter-spacing:2px;
-  margin-bottom:8px;font-family:'Minecraft','VT323','Courier New',monospace;
-}
-#tab-list-divider{
-  border:none;border-top:1px solid rgba(117,167,255,.18);
-  margin:0 0 8px;
-}
-#tab-list-grid{
-  display:grid;
-  grid-template-columns:1fr;
-  gap:3px;
-}
-/* 12+ oyuncu → 2 sütun */
-#tab-list-grid.cols2{grid-template-columns:1fr 1fr;}
-.tab-row{
-  display:flex;align-items:center;gap:5px;
-  padding:4px 7px;
-  background:rgba(255,255,255,.05);
-  border-radius:4px;
-  font-family:'Minecraft','VT323','Courier New',monospace;
-  font-size:11px;color:#fff;
-  white-space:nowrap;overflow:hidden;
-}
-.tab-row.tab-guest{opacity:.55;}
-.tab-skin-head{
-  width:16px;height:16px;flex-shrink:0;
-  image-rendering:pixelated;
-  border-radius:1px;
-  vertical-align:middle;
-}
-.tab-auth-icon{
-  width:14px;height:14px;flex-shrink:0;
-  image-rendering:pixelated;
-  vertical-align:middle;
-}
-.tab-rank-tag{
-  font-weight:bold;font-size:10px;
-  padding:0 3px;border-radius:2px;
-  font-family:'Minecraft','VT323','Courier New',monospace;
-}
-/* Mobil TAB toggle butonu */
-#btn-mobile-tablist{
-  position:absolute;top:12px;
-  /* F5 butonunun soluna (F5 right:52px, genişliği ~44px → bu 100px) */
-  right:100px;
-  width:44px;height:44px;
-  background:rgba(0,0,0,.45);
-  border:2px solid rgba(255,255,255,.5);
-  border-radius:50%;
-  color:#fff;font-size:18px;
-  display:none;justify-content:center;align-items:center;
-  z-index:20;cursor:pointer;pointer-events:all;
-  font-family:'Minecraft','VT323','Courier New',monospace;
-  user-select:none;
-}
-#btn-mobile-tablist:active{background:rgba(117,167,255,.35);}
-
-/* ══════════════════════════════════════════════
-   YAZI RENK / EFEKT SİSTEMİ – v1.6.2
-   ══════════════════════════════════════════════ */
-.fx-glow{text-shadow:0 0 6px currentColor,0 0 12px currentColor;}
-.fx-bold{font-weight:bold;}
-@keyframes fxShiny{
-  0%{filter:brightness(1);}
-  50%{filter:brightness(1.6) saturate(1.4);}
-  100%{filter:brightness(1);}
-}
-.fx-shiny{animation:fxShiny 1.8s ease-in-out infinite;}
-
-/* ── *sweep* CSS Text Sweep Efekti ─────────────────────────────────── */
-/* rank-tag.rank-sweep → rütbe yazılarına uygulanan soldan sağa parıltı */
-/* chat-sweep-text → chat/server-list *sweep* etiketli metin parçaları */
-.chat-sweep-text{
-  display:inline;
-  background-image:linear-gradient(
-    105deg,
-    var(--sweep-color,#fff) 0%,
-    var(--sweep-color,#fff) 35%,
-    rgba(255,255,255,0.92) 43%,
-    rgba(255,255,255,1)    50%,
-    rgba(255,255,255,0.92) 57%,
-    var(--sweep-color,#fff) 65%,
-    var(--sweep-color,#fff) 100%
-  );
-  background-size:300% 100%;
-  background-position:200% 0;
-  -webkit-background-clip:text;
-  background-clip:text;
-  -webkit-text-fill-color:transparent;
-  animation:chatSweepAnim 5s linear infinite;
-  filter:drop-shadow(0 0 4px var(--sweep-color,#fff));
-}
-@keyframes chatSweepAnim{
-  0%   {background-position:200% 0;}
-  28%  {background-position:-40% 0;}
-  28.001%{background-position:200% 0;}
-  100% {background-position:200% 0;}
+/* ════════════════════════════════════════════════════════════
+   GLOBAL FONT OVERRIDE — Tarayıcıların buton/input/select gibi
+   elementlere uyguladığı varsayılan sistem fontunu eziyoruz ki
+   pikselli Minecraft fontu chat, TAB (pause menü sekmeleri) ve
+   tüm butonlarda tutarlı şekilde görünsün.
+   ════════════════════════════════════════════════════════════ */
+*{
+  font-family:'Minecraft','MatrixSans-Rg','VT323','Courier New',monospace !important;
 }
 
-/* ══════════════════════════════════════════════
-   SERVER LIST SEKME DÜZELTMESİ – v1.6.2
-   ══════════════════════════════════════════════ */
-#tab-btn-load,#tab-btn-create{
-  display:flex !important;
-  pointer-events:auto !important;
-  opacity:1 !important;
-}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/three@0.128.0/build/three.min.js';document.head.appendChild(s);"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s);"></script>
@@ -557,9 +412,10 @@ body.low-health::after {
 
 <div id="menu-overlay">
   <div id="lang-select"><span class="lang-opt active" id="lang-tr">TR</span> | <span class="lang-opt" id="lang-en">EN</span></div>
+  <button id="btn-friends-menu" title="Arkadaşlar" style="position:absolute;top:16px;left:20px;width:38px;height:38px;font-size:18px;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:#fff;cursor:pointer;z-index:1010;display:flex;align-items:center;justify-content:center;padding:0;">👥</button>
   <div class="menu-screen active" id="screen-main">
     <div class="game-logo" id="txt-title">LEGENDS INDEV</div>
-    <div class="game-version">v1.6.2 - Perlin World</div>
+    <div class="game-version">v1.6.1 - Perlin World</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-skin-menu"></button>
@@ -684,8 +540,8 @@ body.low-health::after {
       <!-- BROWSE -->
       <div class="sl-tab-pane" id="sl-pane-browse" style="display:flex;flex-direction:column;flex:1;">
         <div style="display:flex;gap:8px;margin-bottom:8px;flex-shrink:0;">
-          <input id="browse-search-inline" type="text" placeholder="Sunucu ara..." autocomplete="off" spellcheck="false" style="flex:1;padding:7px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:11px;font-family:'Minecraft','VT323','Courier New',monospace;outline:none;user-select:text;-webkit-user-select:text;">
-          <button id="btn-browse-refresh-inline" style="padding:7px 10px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:2px solid #0a1030;border-right:2px solid #0a1030;border-top:2px solid #4a6aba;border-left:2px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;">🔄</button>
+          <input id="browse-search-inline" type="text" placeholder="Sunucu ara..." autocomplete="off" spellcheck="false" style="flex:1;padding:7px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:11px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;">
+          <button id="btn-browse-refresh-inline" style="padding:7px 10px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:2px solid #0a1030;border-right:2px solid #0a1030;border-top:2px solid #4a6aba;border-left:2px solid #4a6aba;color:#fff;font-size:11px;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;">🔄</button>
         </div>
         <div id="browse-list-inline" style="height:170px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;">
           <div id="browse-status-inline" style="font-size:11px;color:rgba(255,255,255,.45);text-align:center;padding:20px 0;">Sunucu listesine bağlanılıyor...</div>
@@ -793,7 +649,7 @@ body.low-health::after {
           <span id="txt-skin-upload-hint">📁 Minecraft skin PNG yükle</span><br>
           <span id="txt-skin-upload-size" style="color:rgba(255,255,255,.35);">64×64, 64×32 veya 128×128 piksel</span>
         </div>
-        <label id="skin-file-label" style="width:100%;padding:11px 14px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft','VT323','Courier New',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;display:block;">
+        <label id="skin-file-label" style="width:100%;padding:11px 14px;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:4px solid #0a1a4f;border-right:4px solid #0a1a4f;border-top:4px solid #4a8acf;border-left:4px solid #4a8acf;color:#fff;font-size:13px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;display:block;">
           <span id="txt-skin-choose">📂 DOSYA SEÇ</span>
           <input type="file" id="skin-file-input" accept="image/png" style="display:none;">
         </label>
@@ -810,6 +666,35 @@ body.low-health::after {
       </div>
     </div>
     <button class="mbtn back" id="btn-back-skin"></button>
+  </div>
+  <!-- ─── ARKADAŞLAR EKRANI ─── -->
+  <div class="menu-screen" id="screen-friends">
+    <div class="game-logo">LEGENDS INDEV</div>
+    <div class="screen-title" id="txt-friends-title">👥 ARKADAŞLIK SİSTEMİ</div>
+    <div id="friends-guest-warning" style="display:none;font-size:11px;color:#ffbb44;text-align:center;background:rgba(255,180,0,.1);border:1px solid rgba(255,180,0,.3);border-radius:5px;padding:10px;line-height:1.6;margin-bottom:10px;width:100%;">
+      <div id="txt-friends-guest-warning"></div>
+    </div>
+    <div id="friends-main-content" style="width:100%;">
+      <div style="display:flex;gap:6px;margin-bottom:10px;width:100%;">
+        <button class="mbtn friends-tab-btn active" data-ftab="search" id="ftab-search" style="margin:0;font-size:11px;padding:8px 4px;flex:1;"></button>
+        <button class="mbtn friends-tab-btn" data-ftab="list" id="ftab-list" style="margin:0;font-size:11px;padding:8px 4px;flex:1;position:relative;"></button>
+        <button class="mbtn friends-tab-btn" data-ftab="pending" id="ftab-pending" style="margin:0;font-size:11px;padding:8px 4px;flex:1;position:relative;"></button>
+      </div>
+      <div class="ftab-pane" id="ftab-pane-search" style="width:100%;">
+        <input type="text" id="friends-search-input" placeholder="" style="width:100%;box-sizing:border-box;padding:9px 12px;border-radius:5px;border:1px solid rgba(117,167,255,.3);background:rgba(0,0,0,.4);color:#fff;font-size:12px;margin-bottom:8px;">
+        <div id="friends-search-results" style="max-height:230px;overflow-y:auto;"></div>
+      </div>
+      <div class="ftab-pane" id="ftab-pane-list" style="width:100%;display:none;">
+        <div id="friends-list-results" style="max-height:260px;overflow-y:auto;"></div>
+      </div>
+      <div class="ftab-pane" id="ftab-pane-pending" style="width:100%;display:none;">
+        <div id="txt-friends-incoming-label" style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin:4px 0;"></div>
+        <div id="friends-incoming-results" style="max-height:120px;overflow-y:auto;"></div>
+        <div id="txt-friends-outgoing-label" style="font-size:10px;color:rgba(255,255,255,.4);letter-spacing:1px;text-transform:uppercase;margin:8px 0 4px;"></div>
+        <div id="friends-outgoing-results" style="max-height:120px;overflow-y:auto;"></div>
+      </div>
+    </div>
+    <button class="mbtn back" id="btn-back-friends"></button>
   </div>
 </div>
  
@@ -922,19 +807,6 @@ body.low-health::after {
 
 <div id="game-title"></div>
 <div id="crosshair">+</div>
-
-<!-- ═══ TAB OYUNCU LİSTESİ ═══ -->
-<div id="tab-list-overlay">
-  <div id="tab-list-box">
-    <div id="tab-list-server-name">LEGENDS INDEV</div>
-    <div id="tab-list-count">0/50</div>
-    <hr id="tab-list-divider">
-    <div id="tab-list-grid"></div>
-  </div>
-</div>
-
-<!-- Mobil TAB butonu (☰ liste sembolü, emoji yok) -->
-<button id="btn-mobile-tablist" title="Oyuncu Listesi">&#9776;</button>
 <div id="mode-indicator"></div>
 <div id="water-vignette"></div>
 <div id="lava-vignette"></div>
@@ -997,7 +869,7 @@ body.low-health::after {
 <div id="pause-overlay">
   <div id="pause-box">
     <div id="pause-title">OYUN MENÜSÜ</div>
-    <div id="pause-version">v1.6.2</div>
+    <div id="pause-version">v1.6.1</div>
     <button class="mbtn primary" id="btn-resume"></button>
     <button class="mbtn" id="btn-pause-settings"></button>
     <button class="mbtn" id="btn-manage-server" style="display:none;background:linear-gradient(180deg,#1a4a2a,#0a3a1a);border-top-color:#2a8a4a;border-left-color:#2a8a4a;border-bottom-color:#042a0a;border-right-color:#042a0a;"></button>
@@ -1391,46 +1263,6 @@ if(_shoutBC){
 }
  
 if(typeof THREE==='undefined'){document.getElementById('error-msg').style.display='block';throw new Error('Three.js yüklenemedi');}
-
-// ── Minecraft Font Yükleme Garantisi ──────────────────────────────────────
-// FontFace API ile fontu önce yüklemeye çalış; başarısız olursa VT323'ü
-// body font-family'sine birincil olarak geçir (harflerin yapışması önlenir).
-(function ensureMinecraftFont(){
-  if(typeof FontFace === 'undefined') return;
-  // Kaynaklar sırasıyla denenir
-  const sources = [
-    "url('https://fonts.cdnfonts.com/s/27498/Minecraft.woff') format('woff')",
-    "url('https://cdn.jsdelivr.net/npm/minecraft-fonts@1.0.0/Minecraft.woff') format('woff')",
-  ];
-  let loaded = false;
-  function trySource(i){
-    if(i >= sources.length){
-      if(!loaded){
-        // Hiçbir kaynak çalışmadı → VT323 birincil yap
-        document.documentElement.style.setProperty('--mc-font', "'VT323','Courier New',monospace");
-        document.querySelectorAll('.mbtn,.game-logo,.screen-title,.code-display,.mini-card .mc2-title,.ms-tab,#pause-title,#death-title,.sl-tab-btn,.cs-title').forEach(el=>{
-          el.style.fontFamily = "VT323,'Courier New',monospace";
-          // VT323 ile letter-spacing biraz daha açılmalı
-          const cur = parseFloat(getComputedStyle(el).letterSpacing)||0;
-          if(cur < 1) el.style.letterSpacing = '1px';
-        });
-      }
-      return;
-    }
-    const ff = new FontFace('Minecraft', sources[i]);
-    ff.load().then(function(font){
-      if(!loaded){
-        loaded = true;
-        document.fonts.add(font);
-      }
-    }).catch(function(){
-      trySource(i+1);
-    });
-  }
-  // 3 saniye sonra hâlâ yüklenmediyse VT323'e geç
-  setTimeout(()=>{ if(!loaded) trySource(sources.length); }, 3000);
-  trySource(0);
-})();
  
 // ─── Rate Limiting ───
 const rateLimits={};
@@ -1450,7 +1282,7 @@ const langData={
       wInfTitle:'NORMAL DÜNYA',wInfDesc:'Perlin Noise arazi, dinamik chunk',wSmTitle:'KÜÇÜK DÜNYA',wSmDesc:'Hafif ve hızlı',
       wFlatTitle:'DÜZ DÜNYA',wFlatDesc:'Tamamen düz zemin',back:'← GERİ',
       errTitle:'Grafik Motoru Hatası!',errDesc:'İnternet bağlantınızı kontrol edin.',
-      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.6.2',jumpBtn:'ZIPLA',
+      resume:'DEVAM ET',quit:'ÇIK',pauseTitle:'OYUN MENÜSÜ',gameTitle:'Legends Indev v1.6.1',jumpBtn:'ZIPLA',
       mpTitle:'ÇOK OYUNCULU',mpJoin:'KATIL',mpHost:'ODA KUR',settingsTitle:'AYARLAR',
       joinTitle:'ODAYA KATIL',joinNamePh:'Oyuncu adınız',joinCodePh:'4 HARFLİ ŞİFRE',joinBtn:'KATIL',
       hostTitle:'ODA KUR',hostNamePh:'Oyuncu adınız',hostStart:'ODAYI BAŞLAT',
@@ -1576,7 +1408,7 @@ const langData={
       wInfTitle:'NORMAL WORLD',wInfDesc:'Perlin Noise terrain',wSmTitle:'SMALL WORLD',wSmDesc:'Lightweight and fast',
       wFlatTitle:'FLAT WORLD',wFlatDesc:'Completely flat terrain',back:'← BACK',
       errTitle:'Graphics Engine Error!',errDesc:'Please check your internet connection.',
-      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.6.2',jumpBtn:'JUMP',
+      resume:'RESUME',quit:'QUIT',pauseTitle:'GAME MENU',gameTitle:'Legends Indev v1.6.1',jumpBtn:'JUMP',
       mpTitle:'MULTIPLAYER',mpJoin:'JOIN',mpHost:'HOST',settingsTitle:'SETTINGS',
       joinTitle:'JOIN ROOM',joinNamePh:'Your player name',joinCodePh:'4-LETTER CODE',joinBtn:'JOIN',
       hostTitle:'HOST ROOM',hostNamePh:'Your player name',hostStart:'START ROOM',
@@ -1699,6 +1531,31 @@ const langData={
   }
 };
 let currentLang='en';
+const FRIENDS_UI={
+  tr:{menuBtn:'👥 ARKADAŞLAR',title:'👥 ARKADAŞLIK SİSTEMİ',tabSearch:'ARA',tabList:'ARKADAŞLAR',tabPending:'BEKLEYEN',
+      searchPh:'Oyuncu ara...',guestWarning:'🔒 Arkadaşlık sistemini kullanmak için hesabınla giriş yapmalısın.',
+      noResults:'Oyuncu bulunamadı.',noFriends:'Henüz arkadaşın yok.',noIncoming:'Gelen istek yok.',noOutgoing:'Giden istek yok.',
+      incomingLabel:'GELEN İSTEKLER',outgoingLabel:'GÖNDERİLEN İSTEKLER',
+      btnAdd:'Ekle',btnCancel:'İptal',btnAccept:'Kabul',btnReject:'Reddet',btnRemove:'Çıkar',alreadyFriends:'✔ Arkadaş',loading:'Yükleniyor...'},
+  en:{menuBtn:'👥 FRIENDS',title:'👥 FRIENDSHIP SYSTEM',tabSearch:'SEARCH',tabList:'FRIENDS',tabPending:'PENDING',
+      searchPh:'Search player...',guestWarning:'🔒 You must log in with an account to use the friendship system.',
+      noResults:'No player found.',noFriends:'You have no friends yet.',noIncoming:'No incoming requests.',noOutgoing:'No outgoing requests.',
+      incomingLabel:'INCOMING REQUESTS',outgoingLabel:'OUTGOING REQUESTS',
+      btnAdd:'Add',btnCancel:'Cancel',btnAccept:'Accept',btnReject:'Reject',btnRemove:'Remove',alreadyFriends:'✔ Friends',loading:'Loading...'}
+};
+function applyFriendsUILang(){
+  const d=FRIENDS_UI[currentLang]||FRIENDS_UI.tr;
+  const s=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
+  s('txt-friends-title',d.title);
+  s('ftab-search',d.tabSearch);s('ftab-list',d.tabList);s('ftab-pending',d.tabPending);
+  s('txt-friends-guest-warning',d.guestWarning);
+  s('txt-friends-incoming-label',d.incomingLabel);s('txt-friends-outgoing-label',d.outgoingLabel);
+  const si=document.getElementById('friends-search-input');
+  if(si) si.placeholder=d.searchPh;
+  const bf=document.getElementById('btn-back-friends');
+  if(bf) bf.textContent=(currentLang==='tr'?'← GERİ':'← BACK');
+}
+
 function setLanguage(l){
   currentLang=l;
   document.getElementById('lang-tr').classList.toggle('active',l==='tr');
@@ -1706,6 +1563,8 @@ function setLanguage(l){
   const d=langData[l];
   const s=(id,t)=>{const el=document.getElementById(id);if(el)el.textContent=t;};
   const sh=(id,h)=>{const el=document.getElementById(id);if(el)el.innerHTML=h;};
+  applyFriendsUILang();
+  if(typeof renderFriendsCurrentTab==='function') renderFriendsCurrentTab();
   // Test mode modal
   s('txt-tm-title',d.tmTitle);
   sh('txt-tm-desc',d.tmDesc);
@@ -1863,9 +1722,8 @@ document.getElementById('btn-quit').addEventListener('click',()=>{
   cleanupMP();isPaused=false;DeathManager.isDead=false;deviceMode=null;isFlying=false;isCrouching=false;spaceDown=false;
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('death-screen').classList.remove('active');
-  const _tlo=document.getElementById('tab-list-overlay');if(_tlo)_tlo.classList.remove('show');
   ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
-   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam','btn-mobile-tablist']
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   const mo=document.getElementById('menu-overlay');
   mo.style.display='flex';
@@ -1928,6 +1786,188 @@ function updateSkinScreenGuestState(){
 }
 document.getElementById('btn-skin-menu').addEventListener('click',()=>{showScreen('screen-skin');updateSkinPreview(activeSkinCanvas);updateSkinScreenGuestState();});
 document.getElementById('btn-back-skin').addEventListener('click',()=>showScreen('screen-main'));
+
+// ════════════════════════════════════════════════════════
+// 👥 ARKADAŞLIK SİSTEMİ (game.html içi UI)
+// Tüm Firebase işlemleri parent (index.html) üzerinden postMessage ile yapılır,
+// çünkü Firebase auth/SDK sadece index.html'de kurulu.
+// ════════════════════════════════════════════════════════
+let _friendsActiveTab='search';
+let _friendsData={search:[],list:[],incoming:[],outgoing:[]};
+let _friendsSearchQuery='';
+
+function isGuestUser2(){ return !myUsername || myUsername.startsWith('Guest_'); }
+
+function updateFriendsScreenGuestState(){
+  const warn=document.getElementById('friends-guest-warning');
+  const content=document.getElementById('friends-main-content');
+  const guest=isGuestUser2();
+  if(warn) warn.style.display=guest?'block':'none';
+  if(content) content.style.display=guest?'none':'block';
+}
+
+function openFriendsScreen(){
+  showScreen('screen-friends');
+  applyFriendsUILang();
+  updateFriendsScreenGuestState();
+  if(!isGuestUser2()){
+    friendsSwitchTab('search');
+    requestFriendsData();
+  }
+}
+
+function friendsSwitchTab(tab){
+  _friendsActiveTab=tab;
+  document.querySelectorAll('.friends-tab-btn').forEach(b=>b.classList.toggle('active',b.dataset.ftab===tab));
+  document.getElementById('ftab-pane-search').style.display=tab==='search'?'block':'none';
+  document.getElementById('ftab-pane-list').style.display=tab==='list'?'block':'none';
+  document.getElementById('ftab-pane-pending').style.display=tab==='pending'?'block':'none';
+  renderFriendsCurrentTab();
+}
+
+function requestFriendsData(){
+  if(isGuestUser2()) return;
+  window.parent.postMessage({type:'friends:getData'},'*');
+}
+
+// Parent (index.html)'den gelen arkadaşlık verisi cevaplarını dinle
+window.addEventListener('message',function(event){
+  const data=event.data;
+  if(!data||typeof data.type!=='string') return;
+  if(data.type==='friends:data'){
+    _friendsData.list=data.friends||[];
+    _friendsData.incoming=data.incoming||[];
+    _friendsData.outgoing=data.outgoing||[];
+    if(_friendsActiveTab!=='search') renderFriendsCurrentTab();
+    updateFriendsNotifDots();
+  }
+  if(data.type==='friends:searchResult'){
+    _friendsData.search=data.results||[];
+    if(_friendsActiveTab==='search') renderFriendsCurrentTab();
+  }
+  if(data.type==='friends:actionResult'){
+    // Başarılı/başarısız bağımsız olarak veriyi tazele
+    requestFriendsData();
+    if(data.msg) addChat(null,data.msg,true,data.success?'srv':'warn');
+  }
+});
+
+function updateFriendsNotifDots(){
+  const btn=document.getElementById('btn-friends-menu');
+  const hasIncoming=(_friendsData.incoming||[]).length>0;
+  let dot=document.getElementById('friends-menu-notif-dot');
+  if(hasIncoming){
+    if(!dot){
+      dot=document.createElement('span');
+      dot.id='friends-menu-notif-dot';
+      dot.className='friend-notif-dot';
+      if(btn) btn.appendChild(dot);
+    }
+  } else if(dot){
+    dot.remove();
+  }
+  let pendingDot=document.getElementById('ftab-pending-notif-dot');
+  const pendingBtn=document.getElementById('ftab-pending');
+  if(hasIncoming){
+    if(!pendingDot && pendingBtn){
+      pendingDot=document.createElement('span');
+      pendingDot.id='ftab-pending-notif-dot';
+      pendingDot.className='friend-notif-dot';
+      pendingBtn.appendChild(pendingDot);
+    }
+  } else if(pendingDot){
+    pendingDot.remove();
+  }
+}
+
+function friendsHeadImg(headB64){
+  return headB64 || ('data:image/svg+xml;utf8,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"><rect width="16" height="16" fill="#444"/></svg>'));
+}
+
+function friendsRankTag(role){
+  if(!role||role==='Player') return '';
+  const color=resolveRankColor?resolveRankColor(role,null):'#fff';
+  return `<span style="color:${color};font-weight:bold;text-shadow:0 0 4px ${color}88;margin-right:4px;">[${role}]</span>`;
+}
+
+function renderFriendsCurrentTab(){
+  const d=FRIENDS_UI[currentLang]||FRIENDS_UI.tr;
+  if(_friendsActiveTab==='search'){
+    const container=document.getElementById('friends-search-results');
+    if(!container) return;
+    container.innerHTML='';
+    const q=_friendsSearchQuery.toLowerCase().trim();
+    const results=(_friendsData.search||[]).filter(r=>!q||(r.username||'').toLowerCase().includes(q));
+    if(results.length===0){
+      container.innerHTML=`<div class="friend-empty-msg">${q?d.noResults:''}</div>`;
+      return;
+    }
+    results.forEach(r=>{
+      const row=document.createElement('div');
+      row.className='friend-row';
+      let actionHtml='';
+      if(r.isFriend) actionHtml=`<span style="font-size:10px;color:#3ddc6f;font-weight:bold;">${d.alreadyFriends}</span>`;
+      else if(r.outgoing) actionHtml=`<button class="friend-btn friend-btn-cancel" onclick="friendsCancelRequest('${r.uid}')">${d.btnCancel}</button>`;
+      else actionHtml=`<button class="friend-btn friend-btn-add" onclick="friendsSendRequest('${r.uid}','${(r.username||'').replace(/'/g,"\\'")}')">${d.btnAdd}</button>`;
+      row.innerHTML=`<div class="friend-row-left"><span class="friend-head-box"><img src="${friendsHeadImg(r.headB64)}" alt=""></span><div class="friend-name-wrap"><strong>${friendsRankTag(r.role)}${sanitizeText(r.username||'')}</strong></div></div><div class="friend-row-actions">${actionHtml}</div>`;
+      container.appendChild(row);
+    });
+  } else if(_friendsActiveTab==='list'){
+    const container=document.getElementById('friends-list-results');
+    if(!container) return;
+    container.innerHTML='';
+    const list=_friendsData.list||[];
+    if(list.length===0){ container.innerHTML=`<div class="friend-empty-msg">${d.noFriends}</div>`; return; }
+    list.forEach(f=>{
+      const row=document.createElement('div');
+      row.className='friend-row';
+      const presenceClass=f.online?'presence-online':'presence-offline';
+      row.innerHTML=`<div class="friend-row-left"><span class="friend-head-box ${presenceClass}"><img src="${friendsHeadImg(f.headB64)}" alt=""></span><div class="friend-name-wrap"><strong>${friendsRankTag(f.role)}${sanitizeText(f.username||'')}</strong></div></div><div class="friend-row-actions"><button class="friend-btn friend-btn-reject" onclick="friendsRemove('${f.uid}')">${d.btnRemove}</button></div>`;
+      container.appendChild(row);
+    });
+  } else if(_friendsActiveTab==='pending'){
+    const inEl=document.getElementById('friends-incoming-results');
+    const outEl=document.getElementById('friends-outgoing-results');
+    if(inEl){
+      inEl.innerHTML='';
+      const incoming=_friendsData.incoming||[];
+      if(incoming.length===0) inEl.innerHTML=`<div class="friend-empty-msg">${d.noIncoming}</div>`;
+      incoming.forEach(r=>{
+        const row=document.createElement('div');
+        row.className='friend-row';
+        row.innerHTML=`<div class="friend-row-left"><span class="friend-head-box"><img src="${friendsHeadImg(r.headB64)}" alt=""></span><div class="friend-name-wrap"><strong>${sanitizeText(r.username||'')}</strong></div></div><div class="friend-row-actions"><button class="friend-btn friend-btn-accept" onclick="friendsAccept('${r.uid}','${(r.username||'').replace(/'/g,"\\'")}')">${d.btnAccept}</button><button class="friend-btn friend-btn-reject" onclick="friendsReject('${r.uid}')">${d.btnReject}</button></div>`;
+        inEl.appendChild(row);
+      });
+    }
+    if(outEl){
+      outEl.innerHTML='';
+      const outgoing=_friendsData.outgoing||[];
+      if(outgoing.length===0) outEl.innerHTML=`<div class="friend-empty-msg">${d.noOutgoing}</div>`;
+      outgoing.forEach(r=>{
+        const row=document.createElement('div');
+        row.className='friend-row';
+        row.innerHTML=`<div class="friend-row-left"><span class="friend-head-box"><img src="${friendsHeadImg(r.headB64)}" alt=""></span><div class="friend-name-wrap"><strong>${sanitizeText(r.username||'')}</strong></div></div><div class="friend-row-actions"><button class="friend-btn friend-btn-cancel" onclick="friendsCancelRequest('${r.uid}')">${d.btnCancel}</button></div>`;
+        outEl.appendChild(row);
+      });
+    }
+  }
+}
+
+function friendsSendRequest(uid,username){ window.parent.postMessage({type:'friends:send',targetUid:uid,targetUsername:username},'*'); }
+function friendsCancelRequest(uid){ window.parent.postMessage({type:'friends:cancel',targetUid:uid},'*'); }
+function friendsAccept(uid,username){ window.parent.postMessage({type:'friends:accept',senderUid:uid,senderUsername:username},'*'); }
+function friendsReject(uid){ window.parent.postMessage({type:'friends:reject',senderUid:uid},'*'); }
+function friendsRemove(uid){ window.parent.postMessage({type:'friends:remove',friendUid:uid},'*'); }
+
+document.getElementById('btn-friends-menu').addEventListener('click',openFriendsScreen);
+document.getElementById('btn-back-friends').addEventListener('click',()=>showScreen('screen-main'));
+document.querySelectorAll('.friends-tab-btn').forEach(btn=>{
+  btn.addEventListener('click',()=>friendsSwitchTab(btn.dataset.ftab));
+});
+document.getElementById('friends-search-input').addEventListener('input',function(){
+  _friendsSearchQuery=this.value;
+  window.parent.postMessage({type:'friends:search',query:_friendsSearchQuery},'*');
+});
 document.getElementById('btn-skin-steve').addEventListener('click',()=>{
   loadSkinFromB64(STEVE_SKIN_B64,function(cv){
     activeSkinCanvas=cv;applyNewSkin(cv);broadcastSkin(cv);
@@ -2087,13 +2127,6 @@ function connectLobbySocket(cb) {
       }
     });
     lobbySocket.on('disconnect', () => { _lobbyConnecting = false; });
-
-    // ── Dünya doğum noktası güncellendi (Socket.io sunucusundan) ──
-    lobbySocket.on('server:worldspawn-updated', ({ x, y, z, msgTR, msgEN }) => {
-      worldSpawnPoint = { x, y, z };
-      const msg = currentLang === 'tr' ? msgTR : msgEN;
-      if(msg) addChat(null, msg, true, 'srv');
-    });
   } catch(e) {
     _lobbyConnecting = false;
     console.warn('[Lobby] Socket.IO yüklenemedi:', e);
@@ -2211,10 +2244,7 @@ function renderBrowseListInline(rooms) {
     const max = room.maxPlayers||20;
     const row = document.createElement('div');
     row.className = 'browse-row';
-    row.innerHTML = `<div class="browse-row-info"><div class="browse-server-name"></div><div class="browse-server-host">Host: ${sanitizeText(room.creatorName||room.host||'Unknown')}</div><div class="browse-server-meta"><span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span><span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>${room.access==='registered'?'<span class="browse-tag" style="color:#ffbb44;">🔑</span>':''}${room.access==='private'?'<span class="browse-tag" style="color:#ff6666;">🔒</span>':''}</div></div><div class="browse-players">${cur}/${max} 👥</div><button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">GİR</button>`;
-    // Sunucu ismini *tag* sistemiyle işle
-    const _nameEl = row.querySelector('.browse-server-name');
-    if(_nameEl){ const _sn = room.name||'Unnamed Server'; if(_sn.includes('*')){ _nameEl.appendChild(parseTaggedText(_sn,true)); } else { _nameEl.textContent=_sn; } }
+    row.innerHTML = `<div class="browse-row-info"><div class="browse-server-name">${sanitizeText(room.name||'Unnamed Server')}</div><div class="browse-server-host">Host: ${sanitizeText(room.host||'Unknown')}</div><div class="browse-server-meta"><span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span><span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>${room.access==='registered'?'<span class="browse-tag" style="color:#ffbb44;">🔑</span>':''}${room.access==='private'?'<span class="browse-tag" style="color:#ff6666;">🔒</span>':''}</div></div><div class="browse-players">${cur}/${max} 👥</div><button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">GİR</button>`;
     row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       const code = e.target.dataset.code;
@@ -2396,8 +2426,8 @@ function renderBrowseList(rooms) {
     row.className = 'browse-row';
     row.innerHTML = `
       <div class="browse-row-info">
-        <div class="browse-server-name"></div>
-        <div class="browse-server-host">Host: ${sanitizeText(room.creatorName||room.host||'Unknown')}</div>
+        <div class="browse-server-name">${sanitizeText(room.name||'Unnamed Server')}</div>
+        <div class="browse-server-host">Host: ${sanitizeText(room.host||'Unknown')}</div>
         <div class="browse-server-meta">
           <span class="browse-tag">${sanitizeText(room.gameMode||'Survival')}</span>
           <span class="browse-tag">${sanitizeText(room.worldType||'Normal')}</span>
@@ -2408,9 +2438,6 @@ function renderBrowseList(rooms) {
       <div class="browse-players">${cur}/${max} 👥</div>
       <button class="browse-join-btn" data-code="${sanitizeText(room.code||'')}">JOIN</button>
     `;
-    // Sunucu ismini *tag* sistemiyle işle
-    const _nameEl2 = row.querySelector('.browse-server-name');
-    if(_nameEl2){ const _sn2=room.name||'Unnamed Server'; if(_sn2.includes('*')){ _nameEl2.appendChild(parseTaggedText(_sn2,true)); } else { _nameEl2.textContent=_sn2; } }
     row.querySelector('.browse-join-btn').addEventListener('click', (e) => {
       e.stopPropagation();
       const code = e.target.dataset.code;
@@ -4477,6 +4504,27 @@ function applyNewSkin(skinCv){
   }
   updateSkinPreview(skinCv);
   if(typeof saveSkinToStorage==='function') saveSkinToStorage(skinCv);
+  broadcastHeadToParent(skinCv);
+}
+
+// Skinin kafa (ön yüz) kısmını küçük bir PNG'ye kesip parent (index.html) üzerinden Firebase'e kaydeder.
+// Bu sayede arkadaşlık listesinde diğer oyuncuların 2D kafası gösterilebilir.
+let _lastBroadcastHeadB64 = null;
+function broadcastHeadToParent(skinCv){
+  try{
+    if(!skinCv) return;
+    const hc = document.createElement('canvas');
+    hc.width = 16; hc.height = 16;
+    const hctx = hc.getContext('2d');
+    hctx.imageSmoothingEnabled = false;
+    hctx.drawImage(skinCv, 8, 8, 8, 8, 0, 0, 16, 16);
+    const b64 = hc.toDataURL('image/png');
+    if(b64 === _lastBroadcastHeadB64) return; // değişmediyse tekrar yazma
+    _lastBroadcastHeadB64 = b64;
+    if(myUsername && !myUsername.startsWith('Guest_')){
+      window.parent.postMessage({ type:'updatePlayerHead', headB64:b64 }, '*');
+    }
+  }catch(e){}
 }
 
 function updateSkinPreview(skinCv){
@@ -4604,7 +4652,7 @@ function mkSprite(name,rank,rankColor){
 
   // Genişliği içeriğe göre ölçmek için geçici context
   const measure=document.createElement('canvas').getContext('2d');
-  measure.font='bold 20px "Minecraft", "VT323", monospace';
+  measure.font='bold 22px "MatrixSans-Rg", monospace';
   const tagW=tag?measure.measureText(tag+' ').width:0;
   const nameW=measure.measureText(safeN).width;
   const padding=24;
@@ -4617,7 +4665,7 @@ function mkSprite(name,rank,rankColor){
   if(ctx.roundRect){ctx.beginPath();ctx.roundRect(2,4,cW-4,cH-8,6);ctx.fill();}
   else {ctx.fillRect(2,4,cW-4,cH-8);}
 
-  ctx.font='bold 20px "Minecraft", "VT323", monospace';ctx.textBaseline='middle';
+  ctx.font='bold 22px "MatrixSans-Rg", monospace';ctx.textBaseline='middle';
   const totalW=tagW+nameW;
   let x=(cW-totalW)/2;
   const yMid=cH/2-1;
@@ -5169,99 +5217,12 @@ function applyBlockSync(data){
   }
 }
  
-function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null,isHost=false){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.70,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor,isHost};}
+function addRP(id,name,x,y,z,ry,mode='survival',rank=null,rankColor=null){if(remPlayers[id]) return;const g=mkPlayer(name,rank,rankColor);g.position.set(x,y-1.70,z);g.rotation.y=ry;remPlayers[id]={g,name,mode,rank,rankColor};}
 function updRP(id,x,y,z,ry,mode){if(remPlayers[id]){remPlayers[id].g.position.set(x,y-1.70,z);remPlayers[id].g.rotation.y=ry;if(mode) remPlayers[id].mode=mode;}}
-function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;
-  // Flash timer varsa iptal et (kalan kırmızı materyaller sızdırmasın)
-  if(g._p2FlashTimer){clearTimeout(g._p2FlashTimer);g._p2FlashTimer=null;}
-  scene.remove(g);const idx=allPlayerModels.indexOf(g);if(idx>-1)allPlayerModels.splice(idx,1);delete remPlayers[id];}}
+function remRP(id){if(remPlayers[id]){const g=remPlayers[id].g;scene.remove(g);const idx=allPlayerModels.indexOf(g);if(idx>-1)allPlayerModels.splice(idx,1);delete remPlayers[id];}}
  
 let chatHideTimer=null;
-
-// ── *Tag* Sistemi: Yıldızlı etiket ayrıştırıcı ───────────────────────────
-// Desteklenen etiketler: *#RRGGBB* (hex renk), *sweep* (parıltı efekti), *reset* (sıfırla)
-// Geçersiz veya bilinmeyen etiketler olduğu gibi gösterilir (yıldızlarıyla birlikte).
-// Sadece yetkili rank sahipleri (canUseShout) etiket kullanabilir; normal oyuncuların
-// chat mesajlarındaki *...* etiketleri düz metin olarak gösterilir.
-const _VALID_HEX = /^#[0-9A-Fa-f]{6}$/;
-const _VALID_TAGS = /^\*(#[0-9A-Fa-f]{6}|sweep|reset)\*$/;
-
-function _isValidTag(token){
-  // token: '*something*' formatında
-  if(!token.startsWith('*')||!token.endsWith('*')) return false;
-  const inner = token.slice(1,-1);
-  return _VALID_HEX.test(inner) || inner === 'sweep' || inner === 'reset';
-}
-
-/**
- * Bir metni *tag* sistemine göre DOM parçalarına dönüştürür.
- * @param {string} text - İşlenecek metin
- * @param {boolean} canUseTags - Kullanıcı etiketi kullanabilir mi?
- * @returns {DocumentFragment} - Oluşturulan DOM parçaları
- */
-function parseTaggedText(text, canUseTags){
-  const frag = document.createDocumentFragment();
-  if(!canUseTags || !text.includes('*')){
-    frag.appendChild(document.createTextNode(text));
-    return frag;
-  }
-
-  // Metni *...*  bloklarına böl
-  const parts = text.split(/(\*[^*]*\*)/g);
-  let currentColor = null;  // null = beyaz/varsayılan
-  let sweepActive = false;
-
-  for(const part of parts){
-    if(part.startsWith('*') && part.endsWith('*') && part.length > 2){
-      const inner = part.slice(1,-1);
-      if(_VALID_HEX.test(inner)){
-        currentColor = inner;
-        sweepActive = false;
-        continue;
-      }
-      if(inner === 'sweep'){
-        sweepActive = true;
-        continue;
-      }
-      if(inner === 'reset'){
-        currentColor = null;
-        sweepActive = false;
-        continue;
-      }
-      // Geçersiz etiket → düz metin olarak göster
-      frag.appendChild(document.createTextNode(part));
-    } else if(part.length > 0){
-      if(sweepActive){
-        const span = document.createElement('span');
-        span.className = 'chat-sweep-text';
-        span.style.setProperty('--sweep-color', currentColor || '#ffffff');
-        if(currentColor) span.style.color = currentColor;
-        span.textContent = part;
-        frag.appendChild(span);
-      } else if(currentColor){
-        const span = document.createElement('span');
-        span.style.color = currentColor;
-        span.textContent = part;
-        frag.appendChild(span);
-      } else {
-        frag.appendChild(document.createTextNode(part));
-      }
-    }
-  }
-  return frag;
-}
-
-/**
- * Server list başlığındaki *tag* etiketlerini işler ve HTML string döndürür.
- * (Güvenli: sadece renk/sweep etiketleri — XSS yok)
- */
-function parseTaggedTextToHTML(text){
-  const frag = parseTaggedText(text, true);
-  const div = document.createElement('div');
-  div.appendChild(frag);
-  return div.innerHTML;
-}
-// ─────────────────────────────────────────────────────────────────────────
+// Chat log'u geçici göster (yeni mesaj gelince)
 function showChatLog(){
   if(!deviceMode||isChatOpen) return;
   const c=document.getElementById('chat-container');
@@ -5292,19 +5253,11 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
     d.style.color='#ffd27a';
   }
   if(sys){
-    // Sistem mesajlarında *sweep* etiketlerini işle (örn. /setworldspawn bildirimi)
-    const safeSysMsg = msg ? String(msg).substring(0,200) : '';
-    if(safeSysMsg.includes('*')){
-      d.appendChild(parseTaggedText(safeSysMsg, true));
-    } else {
-      d.textContent = safeSysMsg;
-    }
+    d.textContent=msg;
   } else {
     const safeName=sanitizeName(name||'?');
     const safeMsg=msg?String(msg).substring(0,200):'';
     const tag=formatRankTag(rank);
-    // Sadece yetkili rank sahipleri *tag* etiket kullanabilir
-    const userCanTag = canUseShout(rank);
     if(tag){
       const color=resolveRankColor(rank,rankColor);
       const tagSpan=document.createElement('span');
@@ -5318,10 +5271,7 @@ function addChat(name,msg,sys=false,cls='',rank=null,rankColor=null){
       d.appendChild(tagSpan);
       d.appendChild(document.createTextNode('\u00a0'));
     }
-    // İsim: her zaman düz
-    d.appendChild(document.createTextNode(safeName+': '));
-    // Mesaj: yetkili ise *tag* ayrıştır, değilse düz metin
-    d.appendChild(parseTaggedText(safeMsg, userCanTag));
+    d.appendChild(document.createTextNode(`${safeName}: ${safeMsg}`));
   }
   log.appendChild(d);
   while(log.children.length>150) log.removeChild(log.firstChild);
@@ -5572,27 +5522,12 @@ function processCmd(raw){
     return;
   }
   if(cmd==='setworldspawn'){
-    // SP'de de host'ta da çalışır
-    if(isMP&&!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
+    if(!isMP){addChat(null,d.sysSpawnSetUsage,true,'warn');return;}
+    if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
     setWorldSpawn(camera.position.x, camera.position.y, camera.position.z);
-    const _sp=worldSpawnPoint;
-    const _coordStr='['+Math.round(_sp.x)+', '+Math.round(_sp.y)+', '+Math.round(_sp.z)+']';
-    const _spawnMsg=d.sysSpawnSet+' '+_coordStr;
-    addChat(null,_spawnMsg,true,'srv');
-    // MP: tüm guestlere bildir
-    if(isMP&&amHost){
-      Object.values(hostConns).forEach(({conn})=>{
-        if(conn.open){
-          conn.send({type:'worldspawn',x:_sp.x,y:_sp.y,z:_sp.z});
-          conn.send({type:'chat',name:null,msg:_spawnMsg,sys:true,cls:'srv'});
-        }
-      });
-      // Socket.io sunucusuna da kalıcı kayıt için bildir
-      const _sCode=document.getElementById('host-code-display')?.textContent;
-      if(lobbySocket&&lobbySocket.connected&&_sCode&&_sCode!=='----'){
-        lobbySocket.emit('server:setworldspawn',{code:_sCode,x:_sp.x,y:_sp.y,z:_sp.z,requestedBy:myUsername||myName});
-      }
-    }
+    addChat(null,d.sysSpawnSet,true,'srv');
+    // Tüm guestlere yeni spawn noktasını bildir
+    Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'worldspawn',x:worldSpawnPoint.x,y:worldSpawnPoint.y,z:worldSpawnPoint.z});});
     return;
   }
   if(cmd==='help'){
@@ -5824,7 +5759,7 @@ function goToMainMenu(){
   document.getElementById('ban-screen').classList.remove('active');
   document.getElementById('kick-screen').classList.remove('active');
   ['game-title','hotbar','crosshair','joystick-container','mobile-jump-container','mobile-pause-btn',
-   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam','btn-mobile-tablist']
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   const mo=document.getElementById('menu-overlay');
   mo.style.display='flex';
@@ -5834,7 +5769,7 @@ function goToMainMenu(){
 }
 function hideGameHUD(){
   ['game-title','hotbar','crosshair','joystick-zone','joystick-container','mobile-jump-container','mobile-pause-btn',
-   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam','btn-mobile-tablist']
+   'chat-container','chat-hint','btn-mobile-chat','bars-wrap','mode-indicator','btn-mobile-inv','btn-mobile-cam']
    .forEach(id=>{const el=document.getElementById(id);if(el)el.style.display='none';});
   document.getElementById('pause-overlay').classList.remove('active');
   document.getElementById('death-screen').classList.remove('active');
@@ -6186,8 +6121,7 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         }
         data.players.forEach(p=>{
           if(p.id===myPeer.id) return; // kendimizi ekleme
-          const _pIsHost = (p.id==='host'); // host'un id'si 'host'
-          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null,_pIsHost);
+          addRP(p.id,sanitizeName(p.name),p.x,p.y,p.z,p.ry,p.mode||'survival',p.rank||null,p.rankColor||null);
         });
         startGame(autoDevice(),data.world,true,data.gameMode||'survival',data.cheats||false);
         setTimeout(()=>{broadcastSkin(activeSkinCanvas);updateManageServerBtn();},500);
@@ -6241,13 +6175,9 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       }
     });
     guestConn.on('close',()=>{
-      // Host P2P bağlantısı kapandı — oyuncuyu atmak yerine uyarı göster
-      // Sunucu Socket.io üzerinden yaşamaya devam eder; yeni host bağlandığında yeniden P2P kurulur
-      addChat(null, currentLang==='tr'
-        ? '⚠ Host bağlantısı kesildi. Sunucu devam edebilir...'
-        : '⚠ Host disconnected. Server may still be running...', true, 'warn');
-      // Uzak oyuncu modellerini temizle
+      // Tüm uzak oyuncu modellerini sil (hayalet önleme)
       Object.keys(remPlayers).forEach(id=>remRP(id));
+      addChat(null,langData[currentLang].sysDisc,true);
     });
     guestConn.on('error',()=>{
       if(document.getElementById('join-status')) st.textContent='Bağlantı hatası';
@@ -6923,7 +6853,6 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
     document.getElementById('mobile-pause-btn').style.display='block';
     document.getElementById('btn-mobile-inv').style.display='flex';
     document.getElementById('btn-mobile-cam').style.display='flex';
-    const _btnTabMob=document.getElementById('btn-mobile-tablist');if(_btnTabMob)_btnTabMob.style.display='flex';
     setupMobile();
   }
   document.getElementById('chat-container').style.display='none';
@@ -8302,790 +8231,8 @@ function playDamageSound(){
   },{capture:true, passive:true});
 })();
 window.addEventListener('beforeunload',()=>cleanupMP());
-
-// ══════════════════════════════════════════════════════════════
-// ███ v1.6.2 ENTEGRASYONU ███
-// 1. TAB Oyuncu Listesi + Piksel İkonları
-// 2. /setworldspawn Geliştirilmiş İstemci Entegrasyonu (zaten processCmd'de var, iyileştirildi)
-// 3. Sunucu Listesi Sekme Düzeltmesi
-// 4. Gelişmiş Yazı Renk/Efekt Sistemi
-// ══════════════════════════════════════════════════════════════
-
-// ─── 1. GELİŞMİŞ YAZI RENK / EFEKT SİSTEMİ ────────────────────────────────
-// Geçerli efekt/renk kodları (sıkı regex)
-const FX_COLOR_RE = /^\*#([0-9A-Fa-f]{6})\*$/;
-const FX_EFFECT_RE = /^\*(bold|glow|shiny|reset)\*$/;
-
-// Rank'ı renk efektlerine yetkili mi?
-// OG, VIP, ve üzeri ranklar + sistem/sunucu mesajları için aktif
-const FX_ALLOWED_RANKS = new Set([
-  'og','vip','mvp','champion','veteran',
-  'youtube','twitch','tiktoker','tiktokter',
-  'beta tester','helper','mod','admin','dev','developer',
-  'admin/dev','admin / dev','admin / developer',
-  'owner','owner / developer','owner/dev','owner/developer'
-]);
-function canUseFx(rank){
-  if(!rank||typeof rank!=='string') return false;
-  return FX_ALLOWED_RANKS.has(rank.trim().toLowerCase());
-}
-
-/**
- * Mesaj içinde *#RRGGBB*, *bold*, *glow*, *shiny*, *reset* kodlarını işler.
- * - Geçersiz kodlar (örn *merhaba*, *#GGG*) OLDUĞU GİBİ bırakılır.
- * - Her yeni chat satırı temiz başlar (state dışarıdan sızmaz).
- * @param {string} raw  - Ham mesaj metni
- * @param {boolean} allow - Bu mesaj için efekt yetkisi var mı?
- * @returns {HTMLSpanElement[]} - Oluşturulan span dizisi
- */
-function parseFxMessage(raw, allow){
-  const result = [];
-  // Yıldız bölücü; yıldız çiftleri arası token'ları yakala
-  // Strateji: *...*  bloklarını bul, geçerliyse efekt uygula; değilse düz metin bırak
-  const parts = raw.split(/(\*[^*]+\*)/g);
-
-  let curColor = null;    // aktif hex renk (#RRGGBB veya null)
-  let curBold = false;
-  let curGlow = false;
-  let curShiny = false;
-
-  function makeSpan(text){
-    const sp = document.createElement('span');
-    sp.textContent = text;
-    if(curColor) sp.style.color = curColor;
-    if(curBold)  sp.classList.add('fx-bold');
-    if(curGlow)  sp.classList.add('fx-glow');
-    if(curShiny) sp.classList.add('fx-shiny');
-    return sp;
-  }
-
-  for(const part of parts){
-    if(!part) continue;
-    // Token mu?
-    if(part.startsWith('*') && part.endsWith('*') && part.length > 2){
-      const colorM = part.match(FX_COLOR_RE);
-      const effectM = part.match(FX_EFFECT_RE);
-      if(allow && colorM){
-        curColor = '#' + colorM[1];
-        continue; // kodu gizle, düz metin basma
-      }
-      if(allow && effectM){
-        const eff = effectM[1];
-        if(eff === 'reset'){ curColor=null; curBold=false; curGlow=false; curShiny=false; }
-        else if(eff === 'bold')  curBold = true;
-        else if(eff === 'glow')  curGlow = true;
-        else if(eff === 'shiny') curShiny = true;
-        continue;
-      }
-      // Geçersiz → olduğu gibi düz metin
-      result.push(makeSpan(part));
-    } else {
-      // Normal metin parçası
-      result.push(makeSpan(part));
-    }
-  }
-  return result;
-}
-
-// addChat'i FX sistemini destekleyecek şekilde güncelle
-// Orijinalini kaydedip yeni sürümü atıyoruz
-const _addChatFxOriginal = addChat;
-addChat = function(name, msg, sys=false, cls='', rank=null, rankColor=null){
-  const log = document.getElementById('chat-log');
-  const d = document.createElement('div');
-  const isSysEvent = sys && !cls;
-  d.className = 'chat-msg' + (sys?' sys':'') + (cls?' '+cls:'');
-  if(isSysEvent && (typeof msg==='string') && (msg.includes(' katıldı')||msg.includes(' ayrıldı')||msg.includes(' joined')||msg.includes(' left')||msg.includes('sunucu sahibi')||msg.includes('server owner'))){
-    d.style.color='#ffd27a';
-  }
-  if(sys){
-    // Sistem mesajları efekt kullanabilir (sunucu/yetki mesajları)
-    const allowFx = (cls==='srv'||cls==='warn');
-    if(allowFx && msg && /\*/.test(msg)){
-      const spans = parseFxMessage(String(msg), true);
-      spans.forEach(sp => d.appendChild(sp));
-    } else {
-      d.textContent = msg;
-    }
-  } else {
-    const safeName = sanitizeName(name||'?');
-    const safeMsg = msg ? String(msg).substring(0,200) : '';
-    const tag = formatRankTag(rank);
-    if(tag){
-      const color = resolveRankColor(rank,rankColor);
-      const tagSpan = document.createElement('span');
-      tagSpan.className = 'rank-tag' + (canUseShout(rank)?' rank-sweep':'');
-      tagSpan.style.setProperty('--rtc',color);
-      tagSpan.style.color = color;
-      tagSpan.style.fontWeight = 'bold';
-      if(canUseShout(rank)) tagSpan.style.animationDelay = '-'+(performance.now()%5000/1000).toFixed(3)+'s';
-      if(!canUseShout(rank)) tagSpan.style.textShadow = '0 0 5px '+color+',0 0 9px '+color;
-      tagSpan.textContent = tag;
-      d.appendChild(tagSpan);
-      d.appendChild(document.createTextNode('\u00a0'));
-    }
-    // İsim kısmı
-    d.appendChild(document.createTextNode(safeName + ': '));
-    // Mesaj kısmı: FX yetkisi olan ranklar için ayrıştır
-    const allowFx = canUseFx(rank);
-    if(allowFx && /\*/.test(safeMsg)){
-      const spans = parseFxMessage(safeMsg, true);
-      spans.forEach(sp => d.appendChild(sp));
-    } else {
-      // Yetkisiz: yıldız kodları olduğu gibi basılır
-      d.appendChild(document.createTextNode(safeMsg));
-    }
-  }
-  log.appendChild(d);
-  while(log.children.length>150) log.removeChild(log.firstChild);
-  requestAnimationFrame(()=>{ log.scrollTop=log.scrollHeight; });
-  showChatLog();
-}
-
-// ─── 2. TAB OYUNCU LİSTESİ SİSTEMİ ────────────────────────────────────────
-
-// 2D skin kafası çiz (16x16 canvas, skin base64'ten)
-function drawSkinHead2D(canvas, skinB64, onDone){
-  const ctx = canvas.getContext('2d');
-  ctx.imageSmoothingEnabled = false;
-  if(!skinB64){
-    // Varsayılan Steve kafa rengi
-    ctx.fillStyle = '#c8a068';
-    ctx.fillRect(0,0,16,16);
-    if(onDone) onDone();
-    return;
-  }
-  const img = new Image();
-  img.onload = function(){
-    // 64x64 veya 128x128 skin boyutunu algıla
-    const scale = img.width >= 128 ? 2 : 1;
-    const s = scale;
-    ctx.clearRect(0,0,16,16);
-    // Kafa iç katmanı: 8x8 piksel @ (8*s, 8*s) — ön yüz
-    ctx.drawImage(img, 8*s, 8*s, 8*s, 8*s, 0, 0, 16, 16);
-    // Hat/dış katman: 8x8 piksel @ (40*s, 8*s) — ön yüz overlay
-    // globalAlpha ile şeffaf pikselleri koruyarak üzerine çiz
-    ctx.drawImage(img, 40*s, 8*s, 8*s, 8*s, 0, 0, 16, 16);
-    if(onDone) onDone();
-  };
-  img.onerror = function(){
-    ctx.fillStyle = '#c8a068';
-    ctx.fillRect(0,0,16,16);
-    if(onDone) onDone();
-  };
-  img.src = skinB64;
-}
-
-let _tabVisible = false;
-let _tabMobileOpen = false;
-// TAB ikon önbelleği: host.png ve admin.png render döngüsünde tekrar yüklenmez
-const _tabIconCache = {};
-
-function buildTabRow(playerInfo){
-  const row = document.createElement('div');
-  row.className = 'tab-row' + (playerInfo.isGuest ? ' tab-guest' : '');
-
-  // ── Skin kafası (16x16 canvas) ──
-  const headCanvas = document.createElement('canvas');
-  headCanvas.width = 16; headCanvas.height = 16;
-  headCanvas.className = 'tab-skin-head';
-  // skinB64 yoksa daha sonra güncellenmek üzere varsayılan
-  drawSkinHead2D(headCanvas, playerInfo.skinB64 || null, null);
-  row.appendChild(headCanvas);
-
-  // ── Yetki ikonu: sadece gerçekten host veya admin ise göster, yoksa HIÇBIR ŞEY ekleme ──
-  const rkLower = (playerInfo.rank || '').toLowerCase();
-  const isOwnerRank = rkLower.includes('owner') || rkLower.includes('og') || playerInfo.isHost;
-  const isAdminRank = !isOwnerRank && (
-    rkLower.includes('admin') ||
-    rkLower.includes('developer') ||
-    rkLower.includes('mod')
-  );
-
-  if(isOwnerRank || isAdminRank){
-    const iconSrc = isOwnerRank ? 'assets/host.png' : 'assets/admin.png';
-    let cachedImg = _tabIconCache[iconSrc];
-    if(!cachedImg){
-      cachedImg = document.createElement('img');
-      cachedImg.className = 'tab-auth-icon';
-      cachedImg.alt = '';
-      cachedImg.onerror = function(){ this.style.display='none'; };
-      cachedImg.src = iconSrc;
-      _tabIconCache[iconSrc] = cachedImg;
-    }
-    row.appendChild(cachedImg.cloneNode(false));
-  }
-  // Placeholder YOK — ikon olmayan satırlarda boşluk açılmaz
-
-  // ── Rank etiketi (varsa) ──
-  const tag = formatRankTag(playerInfo.rank);
-  if(tag){
-    const color = resolveRankColor(playerInfo.rank, playerInfo.rankColor);
-    const tagSpan = document.createElement('span');
-    tagSpan.className = 'tab-rank-tag';
-    tagSpan.style.color = color;
-    tagSpan.style.border = '1px solid ' + color + '60';
-    tagSpan.textContent = tag;
-    row.appendChild(tagSpan);
-  }
-
-  // ── Kullanıcı adı ──
-  const nameSpan = document.createElement('span');
-  nameSpan.textContent = sanitizeName(playerInfo.name || 'Oyuncu');
-  if(playerInfo.isHost) nameSpan.style.color = '#ffd700';
-  row.appendChild(nameSpan);
-
-  return row;
-}
-
-function renderTabList(){
-  if(!_tabVisible && !_tabMobileOpen) return;
-  const overlay = document.getElementById('tab-list-overlay');
-  const grid = document.getElementById('tab-list-grid');
-  const countEl = document.getElementById('tab-list-count');
-  const serverNameEl = document.getElementById('tab-list-server-name');
-
-  grid.innerHTML = '';
-
-  // Sunucu ismi — *tag* etiketleri desteklenir
-  const srvName = (typeof mpServerName!=='undefined' && mpServerName) ? mpServerName : (myName ? myName+"'s Server" : 'LEGENDS INDEV');
-  if(srvName.includes('*')){
-    serverNameEl.innerHTML = '';
-    serverNameEl.appendChild(parseTaggedText(srvName.toUpperCase(), true));
-  } else {
-    serverNameEl.textContent = srvName.toUpperCase();
-  }
-
-  // Oyuncu listesi oluştur
-  let players = [];
-
-  if(!isMP){
-    players.push({
-      name: myUsername || myName || 'Oyuncu',
-      rank: playerRank, rankColor: playerRankColor,
-      isHost: true, isGuest: false,
-      skinB64: (typeof activeSkinCanvas!=='undefined' && activeSkinCanvas) ? activeSkinCanvas.toDataURL('image/png') : null,
-      order: 0
-    });
-  } else {
-    // Ben
-    players.push({
-      name: myName || myUsername,
-      rank: playerRank, rankColor: playerRankColor,
-      isHost: amHost, // kendi host durumum
-      isGuest: !!(myUsername && myUsername.startsWith('Guest_')),
-      skinB64: (typeof activeSkinCanvas!=='undefined' && activeSkinCanvas) ? activeSkinCanvas.toDataURL('image/png') : null,
-      order: 0
-    });
-    // Uzak oyuncular
-    let idx = 1;
-    Object.values(remPlayers).forEach(rp => {
-      const isGuest = !!(rp.name && rp.name.startsWith('Guest_'));
-      // remPlayers'da host flag'i saklanmışsa kullan (addRP'de set edilmeli)
-      const rpIsHost = !!(rp.isHost);
-      players.push({
-        name: rp.name,
-        rank: rp.rank || null,
-        rankColor: rp.rankColor || null,
-        isHost: rpIsHost,
-        isGuest: isGuest,
-        skinB64: rp.skinB64 || null,
-        order: isGuest ? 9999 + idx : idx
-      });
-      idx++;
-    });
-  }
-
-  // Sıralama: Owner/OG → Admin → VIP → Normal kayıtlı (en son giren üstte) → Hesapsız/Misafir (en altta)
-  function _rankPriority(pl){
-    const r = (pl.rank || '').toLowerCase();
-    if(r.includes('owner') || r.includes('og')) return 0;
-    if(r.includes('admin') || r.includes('developer') || r.includes('mod')) return 1;
-    if(r.includes('vip')) return 2;
-    if(pl.isGuest) return 100;
-    if(pl.rank) return 3; // diğer rütbeler
-    return 4; // rütbesiz kayıtlı
-  }
-  players.sort((a,b)=>{
-    const pa = _rankPriority(a);
-    const pb = _rankPriority(b);
-    if(pa !== pb) return pa - pb;
-    // Aynı öncelik grubunda: en son katılan en üstte (order küçük = daha önce katıldı)
-    // Guest grubunda da sıra korunur
-    return a.order - b.order;
-  });
-
-  const maxPlayers = (typeof getMaxPlayersByRank!=='undefined') ? getMaxPlayersByRank(playerRank) : 50;
-  countEl.textContent = players.length + '/' + maxPlayers;
-
-  // Grid sütun sayısı
-  if(players.length > 11){
-    grid.classList.add('cols2');
-  } else {
-    grid.classList.remove('cols2');
-  }
-
-  players.forEach(pl => {
-    grid.appendChild(buildTabRow(pl));
-  });
-}
-
-function showTabList(){
-  if(!deviceMode) return;
-  _tabVisible = true;
-  const overlay = document.getElementById('tab-list-overlay');
-  overlay.classList.add('show');
-  renderTabList();
-}
-
-function hideTabList(){
-  _tabVisible = false;
-  if(_tabMobileOpen) return; // mobil toggle açıksa gizleme
-  const overlay = document.getElementById('tab-list-overlay');
-  overlay.classList.remove('show');
-}
-
-// PC: TAB tuşuna basılı tut
-document.addEventListener('keydown', function(e){
-  if(e.code === 'Tab' && deviceMode && !isChatOpen && !isPaused && !invOpen){
-    e.preventDefault();
-    showTabList();
-  }
-});
-document.addEventListener('keyup', function(e){
-  if(e.code === 'Tab'){
-    if(!_tabMobileOpen) hideTabList();
-  }
-});
-
-// Mobil toggle butonu
-const _btnMobileTab = document.getElementById('btn-mobile-tablist');
-if(_btnMobileTab){
-  _btnMobileTab.addEventListener('click', function(e){
-    e.stopPropagation();
-    _tabMobileOpen = !_tabMobileOpen;
-    const overlay = document.getElementById('tab-list-overlay');
-    if(_tabMobileOpen){
-      overlay.classList.add('show');
-      renderTabList();
-      _btnMobileTab.style.background = 'rgba(117,167,255,.35)';
-    } else {
-      overlay.classList.remove('show');
-      _tabVisible = false;
-      _btnMobileTab.style.background = '';
-    }
-  });
-}
-
-// startGame hook: mobil butonu göster (startGame fonksiyon bildirimi zaten var)
-// game başladığında mobil tab butonunu göster - hideGameHUD/showGameHUD ile senkronize
-const _origBtnMobileTabShow = function(){
-  const isMob = (deviceMode === 'mobile') || ('ontouchstart' in window && navigator.maxTouchPoints > 0);
-  if(_btnMobileTab){
-    _btnMobileTab.style.display = 'flex';
-  }
-};
-
-// ─── 3. SUNUCU LİSTESİ SEKME DÜZELTMESİ ───────────────────────────────────
-// Load ve Create sekmelerini + panellerini zorla görünür yap
-(function fixServerListTabs(){
-  function _fix(){
-    const tabLoad = document.getElementById('tab-btn-load');
-    const tabCreate = document.getElementById('tab-btn-create');
-    if(tabLoad){
-      tabLoad.style.display = '';
-      tabLoad.style.opacity = '';
-      tabLoad.style.pointerEvents = '';
-      tabLoad.disabled = false;
-    }
-    if(tabCreate){
-      tabCreate.style.display = '';
-      tabCreate.style.opacity = '';
-      tabCreate.style.pointerEvents = '';
-      tabCreate.disabled = false;
-    }
-    // Tab içerikleri zaten display:none ile başlıyor (JS toggle'ı doğru)
-    // Ama bazen JS başlatma sırasında erken gizleniyor; içerikleri kontrol et
-    const paneLoad = document.getElementById('sl-pane-load');
-    const paneCreate = document.getElementById('sl-pane-create');
-    const paneBrowse = document.getElementById('sl-pane-browse');
-    // Aktif sekme browse ise load/create gizli olmalı – zaten böyle başlıyor, sorun yok
-    // Sadece sekme butonları gizlenmişse düzeltelim
-  }
-  // DOM yüklendikten sonra uygula
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', _fix);
-  } else {
-    _fix();
-  }
-  // showScreen çağrısında tekrar uygula
-  const _origShowScreen = showScreen;
-  if(typeof showScreen === 'function'){
-    showScreen = function(id){
-      _origShowScreen(id);
-      if(id === 'screen-serverlist') _fix();
-    };
-  }
-})();
-
-// ─── Sunucu listesi sekme butonlarına JS event listener'larının çalışması için ek güvenlik ───
-// sl-tab-btn'lerin display durumu bazen başlangıçta yanlış set ediliyor
-// Buradaki kod zaten HTML'de .sl-tab-btn.active mantığıyla çalışıyor;
-// Load ve Create sekmelerinde pane switcher düzgün çalışıyor, sadece visibility fix gerekli
-document.addEventListener('DOMContentLoaded', function(){
-  // Tüm sl-tab-btn'lerin visible olduğundan emin ol
-  document.querySelectorAll('.sl-tab-btn').forEach(btn => {
-    btn.style.display = '';
-    btn.style.opacity = '';
-    btn.style.visibility = '';
-    btn.disabled = false;
-  });
-});
-
-// ─── /setworldspawn ana processCmd içinde tek yerde tanımlıdır — ek override yok ───
-
 setLanguage('en');
 animate();
-
-/* ═══════════════════════════════════════════════════════════════════════
-   LEGENDS PATCH 2 — Fizik · Skin Sync · Vuruş Efektleri · UI Koruması
-   /setworldspawn · OG Sweep · Knockback Lerp · Ses Düzeltmeleri
-   ═══════════════════════════════════════════════════════════════════════ */
-
-// ──────────────────────────────────────────────────────────────────────
-// CSS ENJEKSİYONU
-// ──────────────────────────────────────────────────────────────────────
-(function _p2css(){
-  const s=document.createElement('style');
-  s.textContent=`
-/* PATCH2: Pointer Lock aktifken arka plan elemanlarına tıklamayı engelle */
-body.ptr-locked #menu-overlay,
-body.ptr-locked #manage-server-overlay,
-body.ptr-locked #inv-overlay{pointer-events:none!important;}
-/* PATCH2: game-title responsive çakışma önleme */
-#game-title{
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-  max-width:58vw;font-size:clamp(9px,2vw,15px)!important;
-}
-@media(max-width:520px){
-  #game-title{font-size:9px!important;max-width:50vw;}
-  .game-logo{font-size:20px!important;}
-}
-/* PATCH2: OG sweep efekti */
-#_p2SweepRing{
-  position:fixed;top:50%;left:50%;
-  transform:translate(-50%,-50%);
-  pointer-events:none;z-index:300;
-  border-radius:50%;display:none;
-  border:3px solid rgba(255,215,0,.9);
-  box-shadow:0 0 22px rgba(255,215,0,.6),inset 0 0 14px rgba(255,150,0,.3);
-}
-@keyframes _p2SweepAnim{
-  0%  {width:18px;height:18px;opacity:.95;}
-  100%{width:200px;height:200px;opacity:0;}
-}
-`;
-  document.head.appendChild(s);
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 8: Pointer Lock → body class
-// ──────────────────────────────────────────────────────────────────────
-document.addEventListener('pointerlockchange',function(){
-  document.body.classList.toggle('ptr-locked', document.pointerLockElement===document.body);
-});
-document.addEventListener('mozpointerlockchange',function(){
-  document.body.classList.toggle('ptr-locked', document.mozPointerLockElement===document.body);
-});
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 1: langData eksik anahtarlarını tamamla
-// ──────────────────────────────────────────────────────────────────────
-(function _p2WorldSpawn(){
-  ['tr','en'].forEach(function(lang){
-    if(!langData||!langData[lang]) return;
-    if(!langData[lang].sysSpawnSet)
-      langData[lang].sysSpawnSet = lang==='tr'
-        ? '✅ Dünya doğum noktası ayarlandı'
-        : '✅ World spawn point set';
-    if(!langData[lang].sysSpawnSetUsage)
-      langData[lang].sysSpawnSetUsage = lang==='tr'
-        ? '⚠ Kullanım: /setworldspawn'
-        : '⚠ Usage: /setworldspawn';
-  });
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 2: Skin Senkronizasyonu — applyNewSkin'e broadcast kancası
-// ──────────────────────────────────────────────────────────────────────
-(function _p2SkinSync(){
-  const _origApply=applyNewSkin;
-  applyNewSkin=function(skinCv){
-    _origApply.call(this,skinCv);
-    // Değişince broadcast et
-    if(!isMP) return;
-    try{
-      const b64=skinCv.toDataURL('image/png');
-      if(amHost){
-        Object.values(hostConns).forEach(function(p){
-          if(p&&p.conn&&p.conn.open) p.conn.send({type:'skin',id:'host',data:b64});
-        });
-      } else if(guestConn&&guestConn.open){
-        guestConn.send({type:'skin',data:b64});
-      }
-    }catch(e){}
-  };
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 4: Kendi skinini karşıdakinde görme hatası
-// addRP çağrısında geçici olarak Steve'i set et, sonra geri al
-// ──────────────────────────────────────────────────────────────────────
-(function _p2SkinSep(){
-  const _origAddRP=addRP;
-  addRP=function(id,name,x,y,z,ry,mode,rank,rankColor){
-    // activeSkinCanvas'ı geçici olarak boş bir canvas ile değiştir
-    const realCanvas=activeSkinCanvas;
-    // Steve/Alex skin'ini geçici yükle
-    const tmpCv=document.createElement('canvas');
-    tmpCv.width=64;tmpCv.height=64;
-    const tmpCtx=tmpCv.getContext('2d');
-    tmpCtx.imageSmoothingEnabled=false;
-    const tmpImg=new Image();
-    tmpImg.onload=function(){
-      tmpCtx.drawImage(tmpImg,0,0,64,64);
-      activeSkinCanvas=tmpCv;
-      _origAddRP(id,name,x,y,z,ry,mode,rank,rankColor);
-      activeSkinCanvas=realCanvas;
-      // Eğer saklanmış skinB64 varsa hemen uygula
-      const rp=remPlayers[id];
-      if(rp&&rp.skinB64) applySkinFromB64ToPlayer(id,rp.skinB64);
-    };
-    tmpImg.onerror=function(){
-      _origAddRP(id,name,x,y,z,ry,mode,rank,rankColor);
-    };
-    tmpImg.src=STEVE_SKIN_B64;
-  };
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 3: Fizik — Tavan çarpışması glitch düzeltmesi (rAF hook)
-// Yan duvar çarpışmasında velY sıfırlanmaz (orijinal kod bunu zaten
-// yapmıyor; ek olarak tavan iç geçişi engelleniyoruz)
-// ──────────────────────────────────────────────────────────────────────
-(function _p2Physics(){
-  let _lastPhysT=performance.now();
-  function _physHook(){
-    const now=performance.now();
-    const dt=Math.min((now-_lastPhysT)/1000,0.05);
-    _lastPhysT=now;
-
-    if(deviceMode&&!isPaused&&!isChatOpen&&!isFlying&&!DeathManager.isDead&&camera){
-      // Tavan kontrolü: velY > 0 iken kafa blok içine girmesin
-      if(velY>0){
-        const hx=camera.position.x, hy=camera.position.y, hz=camera.position.z;
-        const r2=0.25, checkY=hy+velY+0.04;
-        const headBlocked=
-          isSolidBlock(blockMap[pk(Math.floor(hx),   Math.floor(checkY),Math.floor(hz))])||
-          isSolidBlock(blockMap[pk(Math.floor(hx-r2),Math.floor(checkY),Math.floor(hz-r2))])||
-          isSolidBlock(blockMap[pk(Math.floor(hx+r2),Math.floor(checkY),Math.floor(hz-r2))])||
-          isSolidBlock(blockMap[pk(Math.floor(hx-r2),Math.floor(checkY),Math.floor(hz+r2))])||
-          isSolidBlock(blockMap[pk(Math.floor(hx+r2),Math.floor(checkY),Math.floor(hz+r2))]);
-        if(headBlocked){
-          velY=0;
-          // Kafayı tavandan 2cm geri çek
-          const blockCeil=Math.floor(checkY)-0.5;
-          if(hy+0.06>blockCeil) camera.position.y=blockCeil-0.07;
-        }
-      }
-
-      // Zemin kontrol güçlendirmesi:
-      // Yan duvara çarparken grounded yanlış true olmasın
-      // → sadece dikey yönde (y-0.05) solid blok varsa grounded=true kabul et
-      // (Orijinal onGround zaten bu şekilde; ek guard yok, sadece velY koruması)
-    }
-    requestAnimationFrame(_physHook);
-  }
-  requestAnimationFrame(_physHook);
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 7: Havada / zeminsizken adım ve zıplama sesini kes
-// ──────────────────────────────────────────────────────────────────────
-(function _p2Sound(){
-  // tickStepSounds: grounded=false ise timer sıfırla (orijinde var ama güçlendir)
-  const _origTick=tickStepSounds;
-  tickStepSounds=function(dt,isMoving){
-    // Altımızda gerçek katı blok yoksa ses çıkarma
-    if(!grounded||!camera){ _stepTimer=0; return; }
-    const underBd=blockMap[pk(
-      Math.floor(camera.position.x),
-      Math.floor(camera.position.y-1.76),
-      Math.floor(camera.position.z)
-    )];
-    if(!isSolidBlock(underBd)){ _stepTimer=0; return; }
-    _origTick(dt,isMoving);
-  };
-
-  // playBlockSound: jump sesi sadece grounded iken
-  const _origPBS=playBlockSound;
-  playBlockSound=function(blockType,category){
-    if(category==='jump'&&!grounded) return;
-    return _origPBS.apply(this,arguments);
-  };
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 5 & 6: Vuruş Efekti (hedef kırmızı) + Knockback Lerp
-// ──────────────────────────────────────────────────────────────────────
-(function _p2Combat(){
-  // Hedef mesh'ini geçici kırmızı yap — 200ms sonra eski haline döner, timer zırhlanır
-  window._p2HitFlash=function(targetId){
-    const rp=remPlayers[targetId];
-    if(!rp||!rp.g) return;
-    // Önceki timer varsa iptal et (kalıcı kırmızı kalmasın)
-    if(rp.g._p2FlashTimer){
-      clearTimeout(rp.g._p2FlashTimer);
-      rp.g._p2FlashTimer=null;
-      // Eski materyalleri geri yükle (yarım kalmış flash'ı temizle)
-      rp.g.traverse(function(child){
-        if(!child.isMesh||!child._p2origMats) return;
-        child.material=Array.isArray(child._p2origMats)?child._p2origMats:child._p2origMats[0];
-        delete child._p2origMats;
-      });
-    }
-    // Kırmızı flash uygula
-    rp.g.traverse(function(child){
-      if(!child.isMesh) return;
-      const mats=Array.isArray(child.material)?child.material:[child.material];
-      child._p2origMats=mats.map(m=>m); // referans klonla değil orijinal sakla
-      child.material=mats.map(function(m){
-        const f=m.clone();
-        f.transparent=true;f.opacity=0.65;
-        f.color.set(0xff0000);
-        if(f.emissive) f.emissive.set(0xff0000);
-        if(f.emissiveIntensity!==undefined) f.emissiveIntensity=1.0;
-        return f;
-      });
-      if(!Array.isArray(child.material)) child.material=[child.material];
-    });
-    // Kesinlikle 200ms sonra geri dön
-    rp.g._p2FlashTimer=setTimeout(function(){
-      rp.g._p2FlashTimer=null;
-      if(!rp.g) return;
-      rp.g.traverse(function(child){
-        if(!child.isMesh||!child._p2origMats) return;
-        child.material=Array.isArray(child._p2origMats)?child._p2origMats:child._p2origMats[0];
-        delete child._p2origMats;
-      });
-    }, 200);
-  };
-
-  // Knockback lerp state
-  let _kbVx=0,_kbVz=0,_kbT=0;
-
-  // CombatManager.applyLocalDamage override — knockback lerp ekle (yumuşatılmış)
-  const _origALD=CombatManager.applyLocalDamage.bind(CombatManager);
-  CombatManager.applyLocalDamage=function(damage,fromPos,attackerName){
-    if(gameMode==='creative') return;
-    HealthManager.takeDamage(damage,'pvp',false,{attacker:attackerName});
-    if(fromPos&&camera){
-      const dx=camera.position.x-fromPos.x;
-      const dz=camera.position.z-fromPos.z;
-      const len=Math.sqrt(dx*dx+dz*dz)||1;
-      // Makul knockback: 1-2 blok geri iter, haritanın dışına uçurmaz
-      const str=2.2; // önceki 4.8 → 2.2 (yarıdan az)
-      _kbVx=(dx/len)*str; _kbVz=(dz/len)*str;
-      _kbT=0.14; // önceki 0.22 → 0.14 (daha kısa süre)
-      // Yukarı zıplamayı sınırla (uçma önleme)
-      if(grounded) velY=Math.max(velY, Math.min(JUMP * 0.5, 0.044));
-    }
-    this.flashRed(); // BİZİM ekranımız (doğru)
-  };
-
-  // Knockback rAF loop — exponential decay ile hızla söner
-  let _kbLast=performance.now();
-  (function _kbLoop(){
-    const now=performance.now();
-    const dt=Math.min((now-_kbLast)/1000,0.05);
-    _kbLast=now;
-    if(_kbT>0&&camera&&deviceMode){
-      const decay=Math.exp(-9*dt);
-      camera.position.x+=_kbVx*dt;
-      camera.position.z+=_kbVz*dt;
-      _kbVx*=decay; _kbVz*=decay;
-      _kbT-=dt;
-      if(_kbT<=0){_kbVx=0;_kbVz=0;}
-    }
-    requestAnimationFrame(_kbLoop);
-  })();
-
-  // doLeftClick override: player vururken BİZİM flashRed'imiz çağrılmasın
-  const _origDLC=doLeftClick;
-  doLeftClick=function(x,y,isc){
-    if(DeathManager.isDead) return;
-    triggerSwing();
-    const entity=findEntityInCrosshair(5);
-    if(entity){
-      if(entity.type==='animal'){
-        attackAnimal(entity.animal,5);
-      } else if(entity.type==='player'&&gameMode==='survival'){
-        const isOG=(playerRank||'').toLowerCase().includes('og');
-        const dmg=2+Math.floor(Math.random()*2);
-        if(isOG){
-          _p2OGSweep(entity,dmg);
-        } else {
-          CombatManager.attackPlayer(entity.id,dmg,camera.position.clone());
-          window._p2HitFlash(entity.id); // hedef kırmızı — BİZ değil
-        }
-      }
-      const t=document.getElementById('game-title');
-      if(t){t.style.color='#fa0';setTimeout(function(){t.style.color='#fff';},110);}
-    } else {
-      const t=document.getElementById('game-title');
-      if(t){t.style.color='#f44';setTimeout(function(){t.style.color='#fff';},110);}
-    }
-  };
-})();
-
-// ──────────────────────────────────────────────────────────────────────
-// PATCH 10: OG Rank — Geniş Alan Vuruş (sweep ring/daire UI KALDIRILDI)
-// *sweep* artık yalnızca rütbe yazılarında CSS text-sweep efektidir.
-// OG vuruşu ise birincil + yakın hedeflere hasar verir; sarı daire yok.
-// ──────────────────────────────────────────────────────────────────────
-(function _p2OGSetup(){
-  // OG Sweep saldırı fonksiyonu — sarı daire/ring YOK
-  window._p2OGSweep=function(primaryEntity,baseDmg){
-    if(!camera) return;
-    const RADIUS=3.5;
-    const DMG_PRI=baseDmg+1, DMG_AREA=Math.max(1,baseDmg-1);
-
-    // Birincil hedef
-    CombatManager.attackPlayer(primaryEntity.id,DMG_PRI,camera.position.clone());
-    window._p2HitFlash(primaryEntity.id);
-
-    // Alan hasarı: yakındaki diğer oyuncular
-    Object.entries(remPlayers).forEach(function(e){
-      const id=e[0],rp=e[1];
-      if(id===primaryEntity.id||!rp.g) return;
-      const dx=rp.g.position.x-camera.position.x;
-      const dz=rp.g.position.z-camera.position.z;
-      if(Math.sqrt(dx*dx+dz*dz)<=RADIUS){
-        CombatManager.attackPlayer(id,DMG_AREA,camera.position.clone());
-        window._p2HitFlash(id);
-      }
-    });
-
-    // Alan hasarı: yakındaki hayvanlar
-    animals.forEach(function(a){
-      if(a.hp<=0) return;
-      const dx=a.x-camera.position.x, dz=a.z-camera.position.z;
-      if(Math.sqrt(dx*dx+dz*dz)<=RADIUS) attackAnimal(a,DMG_AREA);
-    });
-  };
-})();
-
-console.log('%c[LEGENDS PATCH 2] ✅ Tüm yamalar yüklendi.','color:#75a7ff;font-weight:bold;');
 </script>
 </body>
 </html>
