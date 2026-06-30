@@ -1058,6 +1058,30 @@
             console.error("Firebase başlatılamadı:", e);
         }
 
+        // ==========================================
+        // 🟢 ONLINE / OFFLINE PRESENCE SİSTEMİ
+        // ==========================================
+        // Firebase'in standart .info/connected + onDisconnect() yöntemi: kullanıcı siteden
+        // ayrılınca (sekmeyi kapatma, internet kopması, çökme vb.) sunucu tarafı otomatik
+        // olarak "online: false" yazar; manuel bir "çıkış" tetiklemesine gerek kalmaz.
+        function initPresenceSystem(uid) {
+            if (!uid || !database) return;
+            const userStatusRef = database.ref('users/' + uid);
+            const connectedRef = database.ref('.info/connected');
+
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === false) return;
+                // Bağlantı koptuğunda (ya da sekme kapandığında) sunucu bu yazmayı otomatik yapar
+                userStatusRef.onDisconnect().update({
+                    online: false,
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP
+                }).then(() => {
+                    // Bağlantı kurulduğu an "online: true" yaz
+                    userStatusRef.update({ online: true, lastSeen: firebase.database.ServerValue.TIMESTAMP });
+                });
+            });
+        }
+
         // 🛡️ GÜVENLİK AYARLARI VE YASAKLI İSİMLER
         const ADMIN_EMAIL = "omerasaf243458@gmail.com"; 
         const forbiddenNames = [
@@ -1286,71 +1310,102 @@ function switchFriendsTab(tabId) {
 }
 
 // 1. SEKME: OYUNCU ARAMA (giden istek / arkadaşlık durumuna göre buton değişir)
-function searchPlayers() {
+// Gerçek zamanlı (realtime) çalışır: users / outgoing istekler / arkadaş listesinden herhangi biri
+// değiştiğinde (örn. arkadaş eklendiğinde, istek kabul edildiğinde) liste otomatik yeniden çizilir.
+// Böylece "arkadaş ekledim ama arama listesinden kalkmadı" sorunu çözülür.
+let _searchPlayersState = { users: null, outgoing: null, friends: null };
+let _searchPlayersListenersAttached = false;
+
+function renderSearchPlayers() {
     const lang = document.documentElement.lang || 'tr';
-    const query = document.getElementById('friendSearchInput').value.toLowerCase().trim();
+    const searchInputEl = document.getElementById('friendSearchInput');
+    const query = searchInputEl ? searchInputEl.value.toLowerCase().trim() : '';
     const container = document.getElementById('searchResultContainer');
     const currentUid = auth.currentUser ? auth.currentUser.uid : null;
+    if (!currentUid || !container) return;
 
+    const { users, outgoing, friends } = _searchPlayersState;
+    if (!users) return; // henüz veri gelmedi
+
+    container.innerHTML = '';
+
+    const outgoingUids = outgoing ? Object.keys(outgoing) : [];
+    const friendUids = friends ? Object.keys(friends) : [];
+
+    let matchCount = 0;
+
+    Object.keys(users).forEach((targetUid) => {
+        const userData = users[targetUid] || {};
+        const username = userData.username || '';
+
+        // Kendini listede gösterme
+        if (targetUid === currentUid) return;
+        // Kullanıcı adı olmayan bozuk kayıtları atla (arama çökmesin diye)
+        if (!username) return;
+        if (query !== "" && !username.toLowerCase().includes(query)) return;
+
+        matchCount++;
+
+        const item = document.createElement('div');
+        item.className = 'friend-item';
+
+        let actionHtml = '';
+        if (friendUids.includes(targetUid)) {
+            actionHtml = `<span style="font-size:0.8rem; color:#2ecc71; font-weight:bold;">${lang === 'tr' ? '✔ Arkadaşsınız' : '✔ Friends'}</span>`;
+        } else if (outgoingUids.includes(targetUid)) {
+            actionHtml = `<button class="btn-action btn-cancel" onclick="cancelFriendRequest('${targetUid}')">${lang === 'tr' ? 'İptal Et' : 'Cancel'}</button>`;
+        } else {
+            actionHtml = `<button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${username}')">${lang === 'tr' ? 'Ekle' : 'Add'}</button>`;
+        }
+
+        const targetRole = userData.role || 'Player';
+        const rankTagHtml = formatRankTagHtml(targetRole);
+        const presenceDot = userData.online === true ? '🟢' : '⚪';
+
+        item.innerHTML = `
+            <div class="friend-info">
+                <strong>${presenceDot} ${rankTagHtml}${username}</strong>
+            </div>
+            <div class="friend-actions">
+                ${actionHtml}
+            </div>
+        `;
+        container.appendChild(item);
+    });
+
+    if (matchCount === 0) {
+        container.innerHTML = `<p style="color:#aaa; text-align:center; padding:10px;">Oyuncu bulunamadı / No player found.</p>`;
+    }
+}
+
+function searchPlayers() {
+    const currentUid = auth.currentUser ? auth.currentUser.uid : null;
     if (!currentUid) return;
 
-    // Önce giden istekleri ve mevcut arkadaşları çekip, buton durumunu ona göre belirleriz
-    Promise.all([
-        database.ref('users').once('value'),
-        database.ref(`friendRequests/${currentUid}/outgoing`).once('value'),
-        database.ref(`friends/${currentUid}`).once('value')
-    ]).then(([usersSnap, outgoingSnap, friendsSnap]) => {
-        container.innerHTML = '';
-        if(!usersSnap.exists()) return;
+    if (!_searchPlayersListenersAttached) {
+        _searchPlayersListenersAttached = true;
 
-        const outgoingUids = outgoingSnap.exists() ? Object.keys(outgoingSnap.val()) : [];
-        const friendUids = friendsSnap.exists() ? Object.keys(friendsSnap.val()) : [];
-
-        let matchCount = 0;
-
-        usersSnap.forEach((childSnapshot) => {
-            const targetUid = childSnapshot.key;
-            const userData = childSnapshot.val() || {};
-            const username = userData.username || '';
-
-            // Kendini listede gösterme
-            if(targetUid === currentUid) return;
-            // Kullanıcı adı olmayan bozuk kayıtları atla (arama çökmesin diye)
-            if(!username) return;
-            if(query !== "" && !username.toLowerCase().includes(query)) return;
-
-            matchCount++;
-
-            const item = document.createElement('div');
-            item.className = 'friend-item';
-
-            let actionHtml = '';
-            if (friendUids.includes(targetUid)) {
-                actionHtml = `<span style="font-size:0.8rem; color:#2ecc71; font-weight:bold;">${lang === 'tr' ? '✔ Arkadaşsınız' : '✔ Friends'}</span>`;
-            } else if (outgoingUids.includes(targetUid)) {
-                actionHtml = `<button class="btn-action btn-cancel" onclick="cancelFriendRequest('${targetUid}')">${lang === 'tr' ? 'İptal Et' : 'Cancel'}</button>`;
-            } else {
-                actionHtml = `<button class="btn-action btn-add" onclick="sendFriendRequest('${targetUid}', '${username}')">${lang === 'tr' ? 'Ekle' : 'Add'}</button>`;
-            }
-
-            const targetRole = userData.role || 'Player';
-            const rankTagHtml = formatRankTagHtml(targetRole);
-
-            item.innerHTML = `
-                <div class="friend-info">
-                    <strong>${rankTagHtml}${username}</strong>
-                </div>
-                <div class="friend-actions">
-                    ${actionHtml}
-                </div>
-            `;
-            container.appendChild(item);
+        // Tüm kullanıcılar listesi: yeni biri kayıt olursa veya rolü/online durumu değişirse anlık güncellenir
+        database.ref('users').on('value', (snap) => {
+            _searchPlayersState.users = snap.exists() ? snap.val() : {};
+            renderSearchPlayers();
         });
 
-        if(matchCount === 0) {
-            container.innerHTML = `<p style="color:#aaa; text-align:center; padding:10px;">Oyuncu bulunamadı / No player found.</p>`;
-        }
-    });
+        // Giden arkadaşlık istekleri: istek gönderince/iptal edince buton anlık değişir
+        database.ref(`friendRequests/${currentUid}/outgoing`).on('value', (snap) => {
+            _searchPlayersState.outgoing = snap.exists() ? snap.val() : {};
+            renderSearchPlayers();
+        });
+
+        // Arkadaş listesi: arkadaş eklenince/silinince "Ekle" butonu yerine "Arkadaşsınız" anlık görünür
+        database.ref(`friends/${currentUid}`).on('value', (snap) => {
+            _searchPlayersState.friends = snap.exists() ? snap.val() : {};
+            renderSearchPlayers();
+        });
+    } else {
+        // Dinleyiciler zaten kurulu; sadece mevcut veriyle (örn. arama kutusu değişince) yeniden çiz
+        renderSearchPlayers();
+    }
 }
 
 // İSTEK GÖNDERME (Dil Nesnesini Pas Geçen - Asla Donmayan Sürüm)
@@ -1393,7 +1448,10 @@ function sendFriendRequest(targetUid, targetUsername) {
 }
 
 // 2. VE 3. SEKME: DİNAMİK LİSTELEME
+let _friendsListenersAttached = false;
 function listenToFriendsAndRequests() {
+    if (_friendsListenersAttached) return;
+    _friendsListenersAttached = true;
     const lang = document.documentElement.lang || 'tr';
     const currentUid = auth.currentUser.uid;
 
@@ -1455,38 +1513,64 @@ function listenToFriendsAndRequests() {
     });
 
     // Gerçek Arkadaşlar
+    // friends/{uid} listesi DEĞİŞTİĞİNDE (arkadaş eklendi/silindi) tüm arkadaşların user kayıtlarına
+    // tek tek dinleyici kurulur; her arkadaşın rolü veya online/offline durumu değiştiğinde de
+    // liste anlık olarak yeniden çizilir (rütbe değişimi, çevrimiçi olması vb.).
+    let _friendDetailListeners = {}; // friendUid -> unsubscribe ref
     database.ref(`friends/${currentUid}`).on('value', (snapshot) => {
         const container = document.getElementById('friendsListContainer');
-        container.innerHTML = '';
+
+        // Önceki tekil arkadaş dinleyicilerini temizle (liste değiştiyse eskileri bırakmayalım)
+        Object.keys(_friendDetailListeners).forEach((uid) => {
+            database.ref(`users/${uid}`).off('value', _friendDetailListeners[uid]);
+        });
+        _friendDetailListeners = {};
+
         if(!snapshot.exists()) {
             container.innerHTML = `<p style="color:#aaa; text-align:center; padding:10px;">${translations[lang].noFriends}</p>`;
             return;
         }
-        const friendEntries = [];
-        snapshot.forEach((child) => {
-            friendEntries.push({ friendUid: child.key, data: child.val() || {} });
-        });
 
-        // Her arkadaşın güncel rütbesini users/ tablosundan çekip etiketi oyundaki gibi gösteriyoruz
-        Promise.all(friendEntries.map(entry =>
-            database.ref(`users/${entry.friendUid}/role`).once('value').then(roleSnap => ({
-                ...entry,
-                role: roleSnap.exists() ? roleSnap.val() : 'Player'
-            }))
-        )).then((entriesWithRole) => {
+        const friendUsernames = {};
+        snapshot.forEach((child) => {
+            friendUsernames[child.key] = (child.val() || {}).username || '';
+        });
+        const friendUids = Object.keys(friendUsernames);
+        const friendUserData = {}; // friendUid -> {role, online, lastSeen}
+
+        function renderFriendsList() {
             container.innerHTML = '';
-            entriesWithRole.forEach(({ friendUid, data, role }) => {
+            friendUids.forEach((friendUid) => {
+                const info = friendUserData[friendUid] || {};
+                const role = info.role || 'Player';
+                const isOnline = info.online === true;
                 const item = document.createElement('div');
                 item.className = 'friend-item';
                 const rankTagHtml = formatRankTagHtml(role);
+                const presenceDot = isOnline
+                    ? `<span title="${lang === 'tr' ? 'Çevrimiçi' : 'Online'}">🟢</span>`
+                    : `<span title="${lang === 'tr' ? 'Çevrimdışı' : 'Offline'}">⚪</span>`;
                 item.innerHTML = `
-                    <span>🟢 ${rankTagHtml}<strong>${data.username}</strong></span>
+                    <span>${presenceDot} ${rankTagHtml}<strong>${friendUsernames[friendUid]}</strong></span>
                     <div class="friend-actions">
                         <button class="btn-action btn-reject" onclick="removeFriend('${friendUid}')">${translations[lang].btnRemove}</button>
                     </div>
                 `;
                 container.appendChild(item);
             });
+        }
+
+        // Her arkadaş için users/{uid} kaydını canlı dinle (rol + online + lastSeen)
+        friendUids.forEach((friendUid) => {
+            const cb = database.ref(`users/${friendUid}`).on('value', (userSnap) => {
+                const userData = userSnap.exists() ? userSnap.val() : {};
+                friendUserData[friendUid] = {
+                    role: userData.role || 'Player',
+                    online: userData.online === true
+                };
+                renderFriendsList();
+            });
+            _friendDetailListeners[friendUid] = cb;
         });
     });
 }
@@ -1564,6 +1648,7 @@ function removeFriend(friendUid) {
         }
 
         function closeSubModal(id) {
+            if (id === 'adminPanelModal') { stopAdminUsersListener(); }
             document.getElementById(id).style.display = 'none';
         }
 
@@ -1821,13 +1906,31 @@ function removeFriend(friendUid) {
             const container = document.getElementById('adminUsersContainer');
             const searchInput = document.getElementById('adminSearchInput');
             if (searchInput) searchInput.value = '';
-            const myUid = auth.currentUser ? auth.currentUser.uid : null;
-            const myRole = window.currentUserRole || 'Player';
             const lang = getActiveLang();
 
             container.innerHTML = `<p style="text-align:center; padding:20px; color:#aaa;" id="adminLoadingText">${lang === 'en' ? 'Loading...' : 'Yükleniyor...'}</p>`;
 
-            database.ref('users').once('value', (snapshot) => {
+            // Panel açık olduğu sürece 'users' tablosunu canlı dinler: yeni kayıt olan kullanıcı,
+            // rütbe değişimi veya online/offline durumu anlık olarak panelde yansır.
+            // Panel kapanınca dinleyici kapatılır (closeSubModal -> stopAdminUsersListener).
+            database.ref('users').on('value', renderAdminUsersSnapshot, (error) => {
+                console.error('loadUsersForAdmin hata:', error);
+                if (container) {
+                    container.innerHTML = `<p style="text-align:center; padding:20px; color:#ff4d4d; font-weight:bold;">❌ ${(lang === 'en') ? 'ACCESS DENIED: Security rules rejected the request.' : 'ERİŞİM ENGELLENDİ: Güvenlik Duvarı Reddetti!'}</p>`;
+                }
+            });
+        }
+
+        function stopAdminUsersListener() {
+            if (database) database.ref('users').off('value', renderAdminUsersSnapshot);
+        }
+
+        function renderAdminUsersSnapshot(snapshot) {
+                const container = document.getElementById('adminUsersContainer');
+                if (!container) return;
+                const myUid = auth.currentUser ? auth.currentUser.uid : null;
+                const myRole = window.currentUserRole || 'Player';
+                const lang = getActiveLang();
                 container.innerHTML = '';
                 if (!snapshot.exists()) {
                     container.innerHTML = `<p style="text-align:center; padding:20px; color:#aaa;">${lang === 'en' ? 'No registered users yet.' : 'Henüz kayıtlı kullanıcı yok.'}</p>`;
@@ -1927,7 +2030,7 @@ function removeFriend(friendUid) {
 
                     item.innerHTML = `
                         <div>
-                            <strong>${userData.username || 'N/A'}</strong> (${userEmail})
+                            <strong>${userData.online === true ? '🟢' : '⚪'} ${userData.username || 'N/A'}</strong> (${userEmail})
                             ${passwordRowHtml}
                             ${isBanned ? `<br><span style="color:#ff4d4d; font-size:0.75rem; font-weight:bold;">🔒 ${(lang === 'en') ? 'BANNED' : 'BANLI'}</span>` : ''}
                             ${banInfoHtml}
@@ -1941,10 +2044,6 @@ function removeFriend(friendUid) {
                     `;
                     container.appendChild(item);
                 });
-            }).catch((error) => {
-                console.error('loadUsersForAdmin hata:', error);
-                container.innerHTML = `<p style="text-align:center; padding:20px; color:#ff4d4d; font-weight:bold;">❌ ${(lang === 'en') ? 'ACCESS DENIED: Security rules rejected the request.' : 'ERİŞİM ENGELLENDİ: Güvenlik Duvarı Reddetti!'}</p>`;
-            });
         }
 
         // ✏️ Eski kullanıcılar için (password alanı eksik olanlar) Owner/Developer'ın elle şifre kaydı girmesini sağlayan fonksiyon
@@ -2342,7 +2441,16 @@ function renderRanksList() {
         }
 
         function handleSignOut() {
-            auth.signOut().then(() => { location.reload(); });
+            const uid = auth.currentUser ? auth.currentUser.uid : null;
+            const finishSignOut = () => auth.signOut().then(() => { location.reload(); });
+            if (uid && database) {
+                database.ref('users/' + uid).update({
+                    online: false,
+                    lastSeen: firebase.database.ServerValue.TIMESTAMP
+                }).finally(finishSignOut);
+            } else {
+                finishSignOut();
+            }
         }
 
         function triggerHiddenGame() {
@@ -2414,14 +2522,26 @@ function renderRanksList() {
             'Developer': 'DEV'
         };
 
+        // "Rütbeler" sayfasındaki ranksData listesiyle birebir aynı kaynaktan: hangi rütbelerde
+        // sweep (kayan ışık) efekti olduğunu burada da tutuyoruz ki arkadaş listesi / istek
+        // kutuları gibi yerlerde de aynı efekt görünsün.
+        const SWEEP_RANKS = [
+            'Owner / Developer', 'Admin / Developer', 'Developer', 'Admin',
+            'Mod', 'Helper', 'Beta Tester', 'YouTube', 'Twitch', 'OG'
+        ];
+
         // Rütbeyi, oyun içindeki gibi "[TAG] " formatında, ismin BAŞINA gelecek HTML parçası olarak üretir.
         // Player/Guest/rütbesiz durumlarda hiçbir şey döndürmez (oyun içiyle birebir aynı davranış).
+        // OG ve üzeri (sweep'li) rütbelerde etiket .rank-sweep-text class'ı ile kayan ışık efekti alır.
         function formatRankTagHtml(role) {
             if (!role || typeof role !== 'string') return '';
             const trimmed = role.trim();
             if (!trimmed || trimmed.toLowerCase() === 'guest' || trimmed.toLowerCase() === 'player') return '';
             const abbr = RANK_ABBREVIATIONS[trimmed] || trimmed.toUpperCase();
             const color = getRankColor(trimmed);
+            if (SWEEP_RANKS.includes(trimmed)) {
+                return `<span class="rank-sweep-text" style="--rtc:${color}; font-size:inherit; margin-right:5px;">[${abbr}]</span>`;
+            }
             return `<span style="color:${color}; font-weight:bold; text-shadow:0 0 5px ${color}88; margin-right:5px;">[${abbr}]</span>`;
         }
 
@@ -2616,7 +2736,14 @@ function renderRanksList() {
             auth.onAuthStateChanged((user) => {
                 if (user) {
                     checkUserBanStatus(user.uid);
-                    if (!isGuest) startFriendNotificationListeners(user.uid);
+                    if (!isGuest) {
+                        startFriendNotificationListeners(user.uid);
+                        // Arkadaş listesi / gelen-giden istekler artık modal açılmasını beklemeden
+                        // login olur olmaz dinlenir. Böylece karşı taraf isteği kabul ettiğinde
+                        // "Arkadaşlarım" sekmesi modal kapalıyken bile arka planda güncel kalır.
+                        listenToFriendsAndRequests();
+                        initPresenceSystem(user.uid);
+                    }
                 } else {
                     isCurrentlyBanned = false;
                     if (banCountdownInterval) clearInterval(banCountdownInterval);
