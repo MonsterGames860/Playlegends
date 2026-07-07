@@ -1,6 +1,6 @@
 {
   "name": "play-legends-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "PLAY LEGENDS Multiplayer Backend Sunucusu",
   "main": "server.js",
   "scripts": {
