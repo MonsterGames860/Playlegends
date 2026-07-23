@@ -3465,6 +3465,13 @@ body.low-health::after {
     <button class="mbtn-corner" id="btn-mods-corner">MODS</button>
   </div>
 
+  <div class="menu-screen" id="screen-reports">
+    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="screen-title">REPORTS</div>
+    <div class="mm-reports-panel" id="mm-reports-panel"></div>
+    <button class="mbtn" id="btn-reports-back">Back</button>
+  </div>
+
   <div class="menu-screen" id="screen-pc-settings">
     <div class="game-logo">LEGENDS EXPERIMENTAL</div>
     <div class="screen-title" id="txt-pc-settings-title">PC AYARLARI</div>
@@ -18729,6 +18736,7 @@ animate();
 .mm-report-btn-submit:disabled{ opacity:.4; cursor:not-allowed; }
 
 .mbtn-corner-reports{
+  position:fixed; right:16px; bottom:70px; z-index:60;
   background:#dc2828; color:#fff; border:1px solid #ff5555;
   font-weight:700; letter-spacing:.5px;
 }
@@ -18777,16 +18785,7 @@ animate();
       <button class="mm-report-btn-submit" id="mm-report-submit">Submit</button>
     </div>
   </div>
-</div>
 
-<div class="menu-screen" id="screen-reports">
-  <div class="game-logo">LEGENDS EXPERIMENTAL</div>
-  <div class="screen-title">REPORTS</div>
-  <div class="mm-reports-panel" id="mm-reports-panel"></div>
-  <button class="mbtn" id="btn-reports-back">Back</button>
-</div>
-
-<!-- ───────── JS ───────── -->
 <script>
 (function(){
   'use strict';
