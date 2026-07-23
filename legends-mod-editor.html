@@ -1,0 +1,3781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Legends — Mod Editor</title>
+<style>
+  /* ============================================================
+     LEGENDS MOD / SCRIPT EDITOR
+     A fullscreen, mobile-friendly, dark-mode content + code editor
+     for the "Legends" voxel game. Single self-contained file.
+     ============================================================ */
+
+  :root{
+    --bg-0:#0d0d0f;
+    --bg-1:#121212;
+    --bg-2:#1a1a1d;
+    --bg-3:#212124;
+    --bg-4:#28282c;
+    --bg-5:#313136;
+    --line:#2c2c31;
+    --line-soft:#232326;
+    --text-0:#eaeaec;
+    --text-1:#b7b7bd;
+    --text-2:#7d7d85;
+    --text-3:#4f4f57;
+    --accent:#5ee6a5;
+    --accent-dim:#2f7a58;
+    --accent-glow:rgba(94,230,165,0.16);
+    --blue:#6fb3ff;
+    --amber:#f2c14e;
+    --red:#ff6b6b;
+    --red-glow:rgba(255,107,107,0.16);
+    --purple:#c893ff;
+    --mono: "JetBrains Mono","Fira Code","SFMono-Regular",Consolas,"Roboto Mono",Menlo,monospace;
+    --sans: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+
+    --topbar-h:44px;
+    --statusbar-h:26px;
+    --fs-ui:13px;
+    --fs-code:14px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{
+    margin:0;padding:0;
+    width:100vw;height:100vh;
+    background:var(--bg-1);
+    color:var(--text-0);
+    font-family:var(--sans);
+    overflow:hidden;
+    -webkit-tap-highlight-color:transparent;
+    overscroll-behavior:none;
+  }
+  button{font-family:inherit;}
+  ::selection{background:var(--accent-glow);color:var(--text-0);}
+
+  ::-webkit-scrollbar{width:9px;height:9px;}
+  ::-webkit-scrollbar-track{background:transparent;}
+  ::-webkit-scrollbar-thumb{background:var(--bg-4);border-radius:5px;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--text-3);}
+
+  /* ============================================================
+     APP SHELL
+     ============================================================ */
+  #app{
+    position:fixed;inset:0;
+    width:100vw;height:100vh;
+    display:flex;flex-direction:column;
+    background:var(--bg-1);
+  }
+
+  /* ============================================================
+     TOP BAR
+     ============================================================ */
+  #topbar{
+    height:var(--topbar-h);
+    min-height:var(--topbar-h);
+    display:flex;
+    align-items:stretch;
+    background:var(--bg-0);
+    border-bottom:1px solid var(--line);
+    position:relative;
+    z-index:40;
+  }
+
+  #brand{
+    display:flex;align-items:center;gap:6px;
+    padding:0 10px;
+    border-right:1px solid var(--line);
+    color:var(--text-2);
+    font-size:11px;letter-spacing:.06em;
+    white-space:nowrap;
+    font-family:var(--mono);
+  }
+  #brand .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 6px var(--accent);flex:none;}
+  #brand span.name{color:var(--text-1);font-weight:600;}
+
+  #tabs{
+    display:flex;align-items:stretch;
+    flex:1;min-width:0;
+  }
+  .tab-btn{
+    appearance:none;background:transparent;border:none;
+    border-right:1px solid var(--line-soft);
+    color:var(--text-2);
+    font-size:var(--fs-ui);font-weight:600;letter-spacing:.02em;
+    padding:0 16px;cursor:pointer;position:relative;
+    display:flex;align-items:center;
+    transition:color .15s, background .15s;
+  }
+  .tab-btn:active{background:var(--bg-2);}
+  .tab-btn.active{color:var(--text-0);background:var(--bg-1);}
+  .tab-btn.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);}
+  .tab-btn:disabled{color:var(--text-3);cursor:not-allowed;}
+
+  /* Home tab never scrolls — fixed, flex:none */
+  .tab-btn-home{flex:none;}
+
+  /* ---- Scrollable element-tab strip ----
+     Sits between the fixed Home tab and the fixed Exit button.
+     Only this middle strip scrolls horizontally; Home and Exit
+     never move. A thin custom scrollbar mimics the desktop-Chrome
+     "many tabs open" feel. */
+  #tabs-scroll-wrap{
+    flex:1;min-width:0;
+    display:flex;align-items:stretch;
+    overflow-x:auto;overflow-y:hidden;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:thin;
+  }
+  #tabs-scroll-wrap::-webkit-scrollbar{height:4px;}
+  #tabs-scroll-wrap::-webkit-scrollbar-track{background:transparent;}
+  #tabs-scroll-wrap::-webkit-scrollbar-thumb{background:var(--line);border-radius:2px;}
+  #tabs-scroll-wrap::-webkit-scrollbar-thumb:hover{background:var(--text-3);}
+
+  .elem-tab{
+    appearance:none;background:transparent;border:none;
+    border-right:1px solid var(--line-soft);
+    color:var(--text-2);
+    font-size:var(--fs-ui);font-weight:600;letter-spacing:.01em;
+    padding:0 10px 0 14px;cursor:pointer;position:relative;
+    display:flex;align-items:center;gap:7px;
+    align-self:stretch;
+    white-space:nowrap;flex:none;
+    max-width:180px;
+    transition:color .15s, background .15s;
+    -webkit-user-select:none;user-select:none;
+  }
+  .elem-tab .et-label{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:120px;}
+  .elem-tab .et-close{
+    flex:none;
+    width:18px;height:18px;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;color:var(--text-3);
+    transition:background .15s, color .15s;
+  }
+  .elem-tab .et-close:hover, .elem-tab .et-close:active{background:var(--bg-3);color:var(--text-0);}
+  .elem-tab:active{background:var(--bg-2);}
+  .elem-tab.active{color:var(--text-0);background:var(--bg-1);}
+  .elem-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);}
+  .elem-tab.unsaved .et-label::after{content:"•";color:var(--amber);margin-left:5px;font-weight:800;}
+
+  /* ---- Tab context menu (long-press / right-click) ---- */
+  #tab-ctx-backdrop{
+    position:fixed;inset:0;z-index:90;display:none;
+  }
+  #tab-ctx-backdrop.open{display:block;}
+  #tab-ctx-menu{
+    position:fixed;z-index:91;
+    min-width:140px;
+    background:var(--bg-3);
+    border:1px solid var(--line);
+    border-radius:8px;
+    box-shadow:0 8px 24px rgba(0,0,0,.4);
+    padding:4px;
+    display:none;
+    flex-direction:column;
+  }
+  #tab-ctx-menu.open{display:flex;}
+  #tab-ctx-menu button{
+    appearance:none;background:transparent;border:none;
+    text-align:left;
+    color:var(--text-0);
+    font-size:13px;font-family:var(--sans);
+    padding:9px 10px;border-radius:6px;
+    cursor:pointer;
+  }
+  #tab-ctx-menu button:active{background:var(--bg-4);}
+  #tab-ctx-menu button[data-action="delete"]{color:var(--red);}
+
+  #app-exit-btn{
+    appearance:none;
+    border:none;
+    background:var(--red);
+    color:#fff;
+    border-radius:6px;
+    width:30px;height:30px;
+    flex:none;
+    margin:auto 8px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;font-weight:800;line-height:1;
+    box-shadow:0 0 0 1px rgba(0,0,0,.25);
+    transition:background .15s, transform .1s;
+  }
+  #app-exit-btn:active{background:#e14f4f;transform:scale(.94);}
+
+  .icon-btn{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--text-1);
+    border-radius:6px;
+    width:30px;height:30px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:14px;position:relative;
+    transition:background .15s, border-color .15s, color .15s;
+  }
+  .icon-btn:active{background:var(--bg-3);}
+  .icon-btn.is-active{color:var(--accent);border-color:var(--accent-dim);background:var(--bg-3);}
+
+  /* ---- Custom close button (red circle + white X) used to close
+         the full-screen Script view / run output panel, replacing
+         the old hamburger icon ---- */
+  .close-x-btn{
+    appearance:none;
+    border:none;
+    background:var(--red);
+    color:#fff;
+    border-radius:50%;
+    width:30px;height:30px;
+    flex:none;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;font-size:15px;font-weight:800;line-height:1;
+    box-shadow:0 0 0 1px rgba(0,0,0,.25);
+    transition:background .15s, transform .1s;
+  }
+  .close-x-btn:active{background:#e14f4f;transform:scale(.94);}
+
+  .back-to-editor-btn{
+    appearance:none;
+    border:1px solid var(--line);
+    background:var(--bg-2);
+    color:var(--text-0);
+    border-radius:7px;
+    height:30px;
+    flex:none;
+    display:flex;align-items:center;gap:6px;
+    padding:0 10px 0 8px;
+    cursor:pointer;font-size:12.5px;font-weight:600;
+    font-family:var(--sans);
+    white-space:nowrap;
+    transition:background .15s, border-color .15s, transform .1s;
+  }
+  .back-to-editor-btn .bte-arrow{font-size:11px;color:var(--accent);}
+  .back-to-editor-btn:active{background:var(--bg-3);border-color:var(--accent-dim);transform:scale(.98);}
+  @media (max-width:520px){
+    .back-to-editor-btn span:not(.bte-arrow){display:none;}
+    .back-to-editor-btn{padding:0;width:30px;justify-content:center;}
+  }
+
+  .err-badge{
+    position:absolute;
+    top:-6px;right:-6px;
+    min-width:16px;height:16px;
+    padding:0 3px;
+    border-radius:9px;
+    background:var(--red);
+    color:#1a0a0a;
+    font-family:var(--mono);
+    font-size:9.5px;
+    font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 0 0 2px var(--bg-0);
+  }
+  .err-badge.hidden{display:none;}
+
+  /* ============================================================
+     BODY
+     ============================================================ */
+  #body-row{
+    flex:1;display:flex;min-height:0;min-width:0;position:relative;
+  }
+
+  /* ============================================================
+     HOME VIEW — grid of created items
+     ============================================================ */
+  #view-home{
+    flex:1;display:none;
+    flex-direction:column;
+    min-height:0;
+    min-width:0;
+    background:var(--bg-1);
+  }
+  #view-home.active{display:flex;}
+
+  #home-toolbar{
+    flex:none;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    padding:10px 14px;
+    border-bottom:1px solid var(--line);
+    background:var(--bg-0);
+  }
+  #home-toolbar .home-title{
+    font-size:13px;font-weight:700;color:var(--text-0);
+  }
+  #home-toolbar .home-count{
+    font-family:var(--mono);
+    font-size:11px;color:var(--text-3);
+    margin-left:8px;
+  }
+  #home-new-btn{
+    appearance:none;
+    background:var(--accent-glow);
+    border:1px solid var(--accent-dim);
+    color:var(--accent);
+    border-radius:7px;
+    padding:7px 14px;
+    font-size:12.5px;font-weight:700;
+    cursor:pointer;
+    display:flex;align-items:center;gap:6px;
+    transition:background .15s;
+  }
+  #home-new-btn:active{background:rgba(94,230,165,.28);}
+
+  #home-scroll{
+    flex:1;overflow-y:auto;
+    min-width:0;
+    padding:14px;
+  }
+  #home-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(148px, 1fr));
+    gap:12px;
+    width:100%;
+    max-width:1200px;
+    margin:0 auto;
+  }
+  .home-empty{
+    max-width:360px;
+    margin:60px auto;
+    text-align:center;
+    color:var(--text-2);
+    font-size:12.5px;
+    line-height:1.6;
+  }
+  .home-empty .icon{font-size:34px;margin-bottom:10px;}
+
+  .elem-card{
+    position:relative;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:12px 10px 10px;
+    cursor:pointer;
+    display:flex;flex-direction:column;align-items:center;
+    gap:8px;
+    transition:border-color .15s, background .15s;
+  }
+  .elem-card:active{background:var(--bg-3);border-color:var(--accent-dim);}
+  .elem-card .thumb{
+    width:56px;height:56px;
+    border-radius:8px;
+    background:var(--bg-1);
+    border:1px solid var(--line-soft);
+    display:flex;align-items:center;justify-content:center;
+    font-size:26px;
+    overflow:hidden;
+  }
+  .elem-card .thumb img{width:100%;height:100%;object-fit:cover;}
+  .elem-card .name{
+    font-size:12px;font-weight:600;color:var(--text-0);
+    text-align:center;
+    width:100%;
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  }
+  .elem-card .type{
+    font-size:10px;color:var(--text-3);
+    font-family:var(--mono);
+    display:flex;align-items:center;gap:4px;
+  }
+  .elem-card .scripted-dot{
+    width:5px;height:5px;border-radius:50%;
+    background:var(--accent);
+  }
+  .elem-card .card-delete{
+    position:absolute;top:6px;right:6px;
+    width:20px;height:20px;
+    border-radius:5px;
+    border:1px solid var(--line);
+    background:var(--bg-1);
+    color:var(--text-3);
+    font-size:11px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    opacity:0;
+    transition:opacity .15s, color .15s, border-color .15s;
+  }
+  .elem-card:hover .card-delete, .elem-card:active .card-delete{opacity:1;}
+  .card-delete:active{color:var(--red);border-color:var(--red);}
+
+  /* ============================================================
+     CATEGORY PICKER MODAL (+ New)
+     ============================================================ */
+  #modal-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.55);
+    display:none;
+    align-items:center;justify-content:center;
+    z-index:70;
+    padding:20px;
+  }
+  #modal-overlay.open{display:flex;}
+  #cat-picker-modal{
+    width:100%;max-width:420px;
+    max-height:80vh;
+    background:var(--bg-0);
+    border:1px solid var(--line);
+    border-radius:12px;
+    display:flex;flex-direction:column;
+    overflow:hidden;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  #cat-picker-modal .cpm-header{
+    padding:14px 16px 10px;
+    border-bottom:1px solid var(--line);
+  }
+  #cat-picker-modal .cpm-header h2{
+    margin:0 0 2px;font-size:13.5px;font-weight:700;color:var(--text-0);
+  }
+  #cat-picker-modal .cpm-header p{margin:0;font-size:11px;color:var(--text-3);}
+  #cat-picker-list{
+    overflow-y:auto;
+    padding:10px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px;
+  }
+  .cat-pick-btn{
+    display:flex;align-items:center;gap:9px;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:10px;
+    cursor:pointer;
+    text-align:left;
+    color:var(--text-0);
+    transition:background .15s, border-color .15s;
+  }
+  .cat-pick-btn:active{background:var(--bg-3);border-color:var(--accent-dim);}
+  .cat-pick-btn .ic{font-size:18px;flex:none;}
+  .cat-pick-btn .lbl{font-size:12.5px;font-weight:600;}
+  #cat-picker-modal .cpm-footer{
+    padding:10px 16px;
+    border-top:1px solid var(--line);
+    display:flex;justify-content:flex-end;
+  }
+  .btn-secondary{
+    appearance:none;background:var(--bg-2);
+    border:1px solid var(--line);color:var(--text-1);
+    border-radius:7px;padding:7px 14px;
+    font-size:12px;font-weight:600;cursor:pointer;
+  }
+  .btn-secondary:active{background:var(--bg-3);}
+
+  /* ---- Confirm modal ---- */
+  #confirm-overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.6);
+    display:none;
+    align-items:center;justify-content:center;
+    z-index:90;
+    padding:20px;
+  }
+  #confirm-overlay.open{display:flex;}
+  #confirm-modal{
+    width:100%;max-width:340px;
+    background:var(--bg-0);
+    border:1px solid var(--line);
+    border-radius:12px;
+    padding:18px 18px 16px;
+    box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  #confirm-modal-title{
+    font-size:13.5px;font-weight:700;color:var(--text-0);
+    margin-bottom:6px;
+  }
+  #confirm-modal-body{
+    font-size:12px;color:var(--text-2);
+    line-height:1.5;
+    margin-bottom:16px;
+  }
+  #confirm-modal-body b{color:var(--text-1);}
+  #confirm-modal-actions{
+    display:flex;justify-content:flex-end;gap:8px;
+  }
+  #confirm-ok-btn{
+    appearance:none;
+    background:var(--red-glow);
+    border:1px solid var(--red);
+    color:var(--red);
+    border-radius:7px;
+    padding:7px 14px;
+    font-size:12px;font-weight:700;
+    cursor:pointer;
+  }
+  #confirm-ok-btn:active{background:rgba(255,107,107,.28);}
+  #confirm-ok-btn.neutral{
+    background:var(--accent-glow);
+    border:1px solid var(--accent-dim);
+    color:var(--accent);
+  }
+  #confirm-ok-btn.neutral:active{background:rgba(94,230,165,.28);}
+
+  /* ============================================================
+     ELEMENT EDITOR VIEW — Properties (Identity + Properties cards,
+     plus the "Use Script" entry point into the Script view)
+     ============================================================ */
+  #view-editor{
+    flex:1;display:none;
+    min-height:0;
+    min-width:0;
+    max-width:100%;
+  }
+  #view-editor.active{display:flex;}
+
+  /* ============================================================
+     SCRIPT VIEW — third full-screen view, opened via "Use Script"
+     ============================================================ */
+  #view-script{
+    position:fixed;inset:0;
+    z-index:60;
+    display:none;
+    flex-direction:column;
+    background:var(--bg-1);
+  }
+  #view-script.active{display:flex;}
+
+  #script-view-header{
+    flex:none;
+    height:var(--topbar-h);min-height:var(--topbar-h);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 14px;
+    background:var(--bg-0);
+    border-bottom:1px solid var(--line);
+  }
+  #script-view-title{display:flex;flex-direction:column;gap:1px;min-width:0;}
+  #script-view-title .sv-label{font-size:12.5px;font-weight:700;color:var(--text-0);}
+  #script-view-title .sv-sub{
+    font-size:10.5px;color:var(--text-3);font-family:var(--mono);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:60vw;
+  }
+
+  #script-view-body{
+    flex:1;display:flex;min-height:0;min-width:0;
+  }
+  #panel-script{
+    flex:1;display:flex;flex-direction:column;min-height:0;min-width:0;
+    background:var(--bg-1);
+  }
+
+  /* ---- Properties tab content (scrolling column of cards) ---- */
+  #panel-properties{
+    flex:1;display:none;
+    overflow-y:auto;
+    background:var(--bg-1);
+    padding:16px;
+  }
+  #panel-properties.active{display:block;}
+
+  .prop-card{
+    max-width:640px;margin:0 auto 14px;
+    background:var(--bg-2);border:1px solid var(--line);border-radius:10px;
+    padding:14px 16px;
+  }
+  .prop-card h3{
+    margin:0 0 10px;font-size:12px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--text-2);font-weight:700;
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+  }
+  .prop-card h3 .h3-sub{
+    font-size:10px;letter-spacing:.03em;text-transform:none;color:var(--text-3);font-weight:500;
+  }
+
+  #prop-identity{display:flex;gap:14px;align-items:center;margin-bottom:4px;}
+  #prop-upload-box{
+    flex:none;width:96px;height:96px;
+    border-radius:12px;
+    background:var(--bg-1);
+    border:1.5px dashed var(--line);
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;overflow:hidden;position:relative;
+    transition:border-color .15s, background .15s;
+  }
+  #prop-upload-box:active{border-color:var(--accent-dim);background:var(--bg-2);}
+  #prop-upload-box.has-image{border-style:solid;}
+  #prop-upload-box img{width:100%;height:100%;object-fit:cover;}
+  #prop-upload-box .upload-plus{
+    font-size:30px;
+    line-height:1;
+    color:var(--text-3);
+    font-weight:300;
+    transition:color .15s;
+  }
+  #prop-upload-box:active .upload-plus{color:var(--accent);}
+  #prop-upload-box .upload-remove{
+    position:absolute;
+    top:5px;right:5px;
+    width:20px;height:20px;
+    border-radius:6px;
+    background:rgba(13,13,15,.75);
+    border:1px solid var(--line);
+    color:var(--text-1);
+    font-size:11px;
+    display:flex;align-items:center;justify-content:center;
+    cursor:pointer;
+    z-index:2;
+  }
+  #prop-upload-box .upload-remove:active{color:var(--red);border-color:var(--red);}
+
+  /* ---- Model (.gltf / .glb) identity variant — used by NPC/Entity and
+     Emote categories in place of a flat PNG texture. Shows a small live
+     3D preview (Three.js) once a model is loaded, with a canvas that
+     auto-rotates the mesh so the shape reads clearly at a glance. ---- */
+  #prop-upload-box.model-mode{
+    cursor:default;
+  }
+  #prop-model-canvas-wrap{
+    position:absolute;inset:0;
+    display:none;
+  }
+  #prop-model-canvas-wrap.visible{display:block;}
+  #prop-model-canvas-wrap canvas{
+    width:100%;height:100%;display:block;
+  }
+  #prop-model-empty{
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:6px;width:100%;height:100%;
+    cursor:pointer;
+  }
+  #prop-model-empty .upload-plus{font-size:26px;color:var(--text-3);font-weight:300;line-height:1;}
+  #prop-model-empty .model-hint{
+    font-size:8.5px;letter-spacing:.04em;text-transform:uppercase;
+    color:var(--text-3);font-family:var(--mono);
+  }
+  #prop-model-loading{
+    display:none;
+    position:absolute;inset:0;
+    align-items:center;justify-content:center;
+    background:var(--bg-1);
+    font-family:var(--mono);font-size:10px;color:var(--text-2);
+  }
+  #prop-model-loading.visible{display:flex;}
+  #prop-model-error{
+    display:none;
+    position:absolute;inset:0;
+    flex-direction:column;align-items:center;justify-content:center;gap:4px;
+    background:var(--bg-1);
+    padding:6px;text-align:center;
+  }
+  #prop-model-error.visible{display:flex;}
+  #prop-model-error .err-icon{font-size:18px;color:var(--red);}
+  #prop-model-error .err-txt{font-size:8.5px;color:var(--red);font-family:var(--mono);line-height:1.3;}
+
+  #prop-model-file-row{
+    display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap;
+  }
+  #prop-model-upload-btn{
+    appearance:none;background:var(--bg-3);border:1px solid var(--line);
+    color:var(--accent);border-radius:6px;padding:6px 11px;
+    font-size:11.5px;font-weight:700;cursor:pointer;white-space:nowrap;
+    transition:background .15s, border-color .15s;
+  }
+  #prop-model-upload-btn:active{background:var(--accent-glow);border-color:var(--accent-dim);}
+  #prop-model-file-chip{
+    display:flex;align-items:center;gap:6px;
+    background:var(--bg-1);border:1px solid var(--line-soft);border-radius:6px;
+    padding:5px 8px;font-family:var(--mono);font-size:11px;color:var(--text-1);
+    max-width:220px;overflow:hidden;
+  }
+  #prop-model-file-chip .mfc-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  #prop-model-file-chip .mfc-remove{
+    flex:none;background:none;border:none;color:var(--text-3);
+    cursor:pointer;font-size:12px;padding:0 2px;
+  }
+  #prop-model-file-chip .mfc-remove:active{color:var(--red);}
+  #prop-model-file-chip.empty{color:var(--text-3);font-style:italic;}
+
+  #prop-identity-fields{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;}
+  #prop-name-input{
+    background:var(--bg-1);border:1px solid var(--line);
+    color:var(--text-0);border-radius:6px;
+    padding:8px 9px;font-size:13px;font-weight:600;
+    outline:none;width:100%;
+  }
+  #prop-name-input:focus{border-color:var(--accent-dim);}
+  #prop-type-badge{
+    align-self:flex-start;
+    font-family:var(--mono);font-size:10.5px;
+    color:var(--accent);
+    background:var(--accent-glow);
+    border:1px solid var(--accent-dim);
+    padding:2px 8px;border-radius:5px;
+  }
+
+  .prop-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:9px 0;border-top:1px solid var(--line-soft);
+  }
+  .prop-row:first-of-type{border-top:none;}
+  .prop-row label{font-size:12.5px;color:var(--text-1);}
+  .prop-input{
+    background:var(--bg-1);border:1px solid var(--line);color:var(--text-0);
+    border-radius:6px;padding:6px 8px;font-size:12.5px;font-family:var(--mono);
+    width:150px;outline:none;
+  }
+  .prop-input:focus{border-color:var(--accent-dim);}
+  select.prop-input{width:150px;}
+
+  /* Upload-sound button (used instead of a free-text field) */
+  .upload-sound-btn{
+    appearance:none;
+    background:var(--bg-1);
+    border:1px solid var(--line);
+    color:var(--accent);
+    border-radius:6px;
+    padding:6px 12px;
+    font-size:11.5px;font-weight:700;
+    cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s, border-color .15s;
+  }
+  .upload-sound-btn:active{background:var(--accent-glow);border-color:var(--accent-dim);}
+  .sound-field-wrap{
+    display:flex;align-items:center;gap:8px;
+    max-width:220px;min-width:0;
+  }
+  .sound-file-name{
+    font-family:var(--mono);font-size:11px;color:var(--text-2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
+  }
+  .sound-file-name.empty{color:var(--text-3);font-style:italic;}
+  .sound-clear-btn{
+    flex:none;width:20px;height:20px;border-radius:5px;
+    border:1px solid var(--line);background:var(--bg-1);color:var(--text-3);
+    font-size:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  }
+  .sound-clear-btn:active{color:var(--red);border-color:var(--red);}
+
+  .switch{position:relative;width:38px;height:21px;flex:none;}
+  .switch input{opacity:0;width:0;height:0;position:absolute;}
+  .switch .track{
+    position:absolute;inset:0;background:var(--bg-4);border:1px solid var(--line);
+    border-radius:20px;transition:background .15s, border-color .15s;cursor:pointer;
+  }
+  .switch .track::after{
+    content:"";position:absolute;top:2px;left:2px;width:15px;height:15px;
+    border-radius:50%;background:var(--text-2);transition:transform .15s, background .15s;
+  }
+  .switch input:checked + .track{background:var(--accent-glow);border-color:var(--accent-dim);}
+  .switch input:checked + .track::after{transform:translateX(17px);background:var(--accent);}
+
+  #prop-delete-btn{
+    width:100%;
+    appearance:none;
+    background:transparent;
+    border:1px solid var(--line);
+    color:var(--red);
+    border-radius:7px;
+    padding:9px 0;
+    font-size:12px;font-weight:700;
+    cursor:pointer;
+    margin-top:2px;
+    transition:background .15s, border-color .15s;
+  }
+  #prop-delete-btn:active{background:var(--red-glow);border-color:var(--red);}
+
+  /* ---- "Use Script" button — opens the full-screen Script view ---- */
+  .use-script-btn{
+    width:100%;
+    appearance:none;
+    background:var(--accent-glow);
+    border:1px solid var(--accent-dim);
+    color:var(--accent);
+    border-radius:7px;
+    padding:10px 0;
+    font-size:12.5px;font-weight:700;
+    letter-spacing:.02em;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;gap:7px;
+    margin-top:4px;
+    transition:background .15s, border-color .15s;
+  }
+  .use-script-btn:active{background:rgba(94,230,165,.28);}
+  .use-script-btn .us-ic{font-size:14px;}
+  .use-script-btn .us-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--accent);box-shadow:0 0 5px var(--accent);
+    display:none;
+  }
+  .use-script-btn.has-content .us-dot{display:inline-block;}
+
+  /* ---- Per-category Save button (Properties panel) ---- */
+  .prop-save-btn{
+    width:100%;
+    appearance:none;
+    background:var(--accent);
+    border:1px solid var(--accent);
+    color:#0a1a12;
+    border-radius:7px;
+    padding:10px 0;
+    font-size:12.5px;font-weight:800;
+    letter-spacing:.02em;
+    cursor:pointer;
+    margin-top:12px;
+    transition:background .15s, transform .1s;
+  }
+  .prop-save-btn:active{background:#4fd497;transform:scale(.99);}
+  .prop-save-btn.saved{background:var(--bg-4);border-color:var(--line);color:var(--text-1);}
+
+  /* ============================================================
+     "SOON" placeholder card (Craft / Effects / Armor)
+     ============================================================ */
+  .soon-card{
+    max-width:640px;margin:0 auto 14px;
+    background:linear-gradient(160deg, var(--bg-2), var(--bg-3));
+    border:1px solid var(--line);border-radius:12px;
+    padding:26px 20px;
+    display:flex;flex-direction:column;align-items:center;text-align:center;
+    gap:8px;
+  }
+  .soon-card .soon-badge{
+    font-family:var(--mono);font-size:10.5px;font-weight:800;letter-spacing:.12em;
+    color:var(--amber);background:rgba(242,193,78,0.14);
+    border:1px solid rgba(242,193,78,0.4);
+    padding:3px 10px;border-radius:20px;
+    margin-bottom:4px;
+  }
+  .soon-card .soon-icon{font-size:30px;opacity:.85;}
+  .soon-card h4{margin:2px 0 0;font-size:14px;color:var(--text-0);font-weight:700;}
+  .soon-card p{margin:0;max-width:360px;font-size:12px;color:var(--text-3);line-height:1.55;}
+
+  /* ============================================================
+     SCRIPT EDITOR — file tabs, file bar, code surface
+     (lives inside #panel-script within the full-screen Script view)
+     ============================================================ */
+  #file-tabs-bar{
+    display:flex;
+    align-items:stretch;
+    background:var(--bg-0);
+    border-bottom:1px solid var(--line-soft);
+    flex:none;
+  }
+  #file-tabs-scroll{
+    flex:1;min-width:0;
+    display:flex;
+    overflow-x:auto;
+    scrollbar-width:thin;
+  }
+  #file-tabs-scroll::-webkit-scrollbar{height:5px;}
+  .file-tab{
+    flex:none;
+    display:flex;align-items:center;gap:6px;
+    padding:7px 10px;
+    background:transparent;
+    border:none;
+    border-right:1px solid var(--line-soft);
+    color:var(--text-2);
+    font-family:var(--mono);
+    font-size:11.5px;
+    white-space:nowrap;
+    cursor:pointer;
+    position:relative;
+    max-width:150px;
+  }
+  .file-tab .ft-name{overflow:hidden;text-overflow:ellipsis;}
+  .file-tab .ft-err-dot{
+    width:6px;height:6px;border-radius:50%;
+    background:var(--red);
+    box-shadow:0 0 5px var(--red);
+    flex:none;
+    margin-left:2px;
+  }
+  .file-tab.active{color:var(--text-0);background:var(--bg-1);}
+  .file-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);}
+  .file-tab:active{background:var(--bg-2);}
+  #new-file-btn{
+    flex:none;
+    appearance:none;background:var(--bg-2);
+    border:none;border-left:1px solid var(--line);
+    color:var(--accent);
+    font-size:11.5px;font-weight:700;
+    padding:0 12px;cursor:pointer;
+    white-space:nowrap;
+    transition:background .15s;
+  }
+  #new-file-btn:active{background:var(--accent-glow);}
+
+  #delete-file-btn{
+    appearance:none;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    color:var(--text-3);
+    border-radius:6px;
+    width:26px;height:26px;
+    flex:none;
+    font-size:11.5px;
+    cursor:pointer;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .15s, color .15s, border-color .15s;
+  }
+  #delete-file-btn:active{background:var(--red-glow);color:var(--red);border-color:var(--red);}
+  #delete-file-btn:disabled{opacity:.35;cursor:not-allowed;}
+
+  #file-bar{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    padding:7px 10px;
+    background:var(--bg-0);
+    border-bottom:1px solid var(--line-soft);
+    flex-wrap:wrap;
+  }
+  #file-bar .file-bar-label{
+    font-family:var(--mono);
+    font-size:10.5px;
+    color:var(--text-3);
+    letter-spacing:.05em;
+    text-transform:uppercase;
+    flex:none;
+  }
+  #file-name-input{
+    flex:1;min-width:120px;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    color:var(--text-0);
+    border-radius:6px;
+    padding:6px 8px;
+    font-family:var(--mono);
+    font-size:12px;
+    outline:none;
+  }
+  #file-name-input:focus{border-color:var(--accent-dim);}
+  #file-name-input.invalid{border-color:var(--red);color:var(--red);}
+  #file-ext-suffix{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-3);
+    flex:none;
+  }
+  #file-name-hint{
+    width:100%;
+    font-size:10px;
+    color:var(--text-3);
+    font-family:var(--mono);
+  }
+  #file-name-hint.error{color:var(--red);}
+
+  #editor-meta{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:6px 10px;
+    background:var(--bg-0);
+    border-bottom:1px solid var(--line-soft);
+    font-family:var(--mono);font-size:11px;color:var(--text-2);
+    flex-wrap:wrap;gap:4px;
+  }
+  #editor-meta .meta-right{display:flex;gap:10px;color:var(--text-3);align-items:center;}
+  #editor-meta .meta-right .run-inline-btn{
+    appearance:none;border:1px solid var(--accent-dim);background:var(--accent-glow);
+    color:var(--accent);border-radius:5px;padding:3px 9px;font-size:10.5px;font-weight:700;
+    cursor:pointer;font-family:var(--mono);letter-spacing:.03em;
+  }
+  #editor-meta .meta-right .run-inline-btn:active{background:rgba(94,230,165,.28);}
+
+  #code-editor-wrap{
+    flex:1;display:flex;min-height:0;position:relative;background:var(--bg-1);
+  }
+  #line-numbers{
+    flex:none;width:38px;
+    background:var(--bg-0);color:var(--text-3);
+    font-family:var(--mono);font-size:var(--fs-code);
+    line-height:1.55;text-align:right;
+    padding:10px 6px 10px 0;
+    user-select:none;overflow:hidden;
+    border-right:1px solid var(--line-soft);
+    white-space:pre;
+  }
+  #line-numbers .ln-row{
+    display:block;
+    height:calc(var(--fs-code) * 1.55);
+  }
+  #line-numbers .ln-row.ln-error{
+    color:var(--red);
+    font-weight:700;
+  }
+
+  /* Syntax-highlighted overlay editor:
+     #code-highlight (behind, colored, non-interactive) and
+     #code-editor (front, transparent text, real caret/selection)
+     are perfectly stacked and scroll together. */
+  #code-surface{
+    position:relative;
+    flex:1;min-width:0;
+    overflow:hidden;
+  }
+  #code-highlight, #code-editor{
+    position:absolute;
+    inset:0;
+    margin:0;
+    border:none;
+    font-family:var(--mono);
+    font-size:var(--fs-code);
+    line-height:1.55;
+    padding:10px 12px;
+    white-space:pre;
+    tab-size:2;
+    overflow:auto;
+  }
+  #code-highlight{
+    color:var(--text-0);
+    background:var(--bg-1);
+    pointer-events:none;
+    z-index:1;
+  }
+  #code-highlight code{
+    font-family:inherit;
+    display:block;
+  }
+  #code-editor{
+    z-index:2;
+    background:transparent;
+    color:transparent;
+    caret-color:var(--accent);
+    outline:none;
+    resize:none;
+    -webkit-text-fill-color:transparent;
+  }
+  #code-editor::selection{background:var(--accent-glow);-webkit-text-fill-color:transparent;}
+  #code-editor::placeholder{color:var(--text-3);-webkit-text-fill-color:var(--text-3);}
+
+  /* token colors for the highlight layer */
+  .tok-kw{color:var(--purple);}
+  .tok-fn{color:var(--blue);}
+  .tok-str{color:var(--accent);}
+  .tok-num{color:var(--amber);}
+  .tok-cm{color:var(--text-3);font-style:italic;}
+  .tok-punc{color:var(--text-1);}
+  .tok-prop{color:#f0a3c4;}
+  .err-line{
+    display:block;
+    background:var(--red-glow);
+    box-shadow:inset 3px 0 0 var(--red);
+  }
+
+  #code-editor::placeholder{color:var(--text-3);}
+
+  /* ============================================================
+     AUTOCOMPLETE / INTELLISENSE POPUP
+     ============================================================ */
+  #autocomplete-popup{
+    position:absolute;
+    z-index:30;
+    display:none;
+    flex-direction:column;
+    min-width:180px;
+    max-width:280px;
+    max-height:196px;
+    overflow-y:auto;
+    background:var(--bg-3);
+    border:1px solid var(--line);
+    border-radius:8px;
+    box-shadow:0 10px 30px rgba(0,0,0,.5);
+    padding:4px;
+  }
+  #autocomplete-popup.open{display:flex;}
+  .ac-item{
+    display:flex;align-items:center;gap:8px;
+    padding:6px 8px;
+    border-radius:5px;
+    cursor:pointer;
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-1);
+    white-space:nowrap;
+  }
+  .ac-item .ac-kind{
+    flex:none;width:16px;height:16px;border-radius:4px;
+    display:flex;align-items:center;justify-content:center;
+    font-size:9px;font-weight:800;
+    background:var(--bg-1);color:var(--text-3);
+  }
+  .ac-item .ac-kind.kw{color:var(--purple);}
+  .ac-item .ac-kind.fn{color:var(--blue);}
+  .ac-item .ac-kind.ev{color:var(--amber);}
+  .ac-item .ac-label{color:var(--text-0);font-weight:600;overflow:hidden;text-overflow:ellipsis;}
+  .ac-item .ac-label b{color:var(--accent);}
+  .ac-item .ac-hint{margin-left:auto;flex:none;color:var(--text-3);font-size:10px;}
+  .ac-item:hover, .ac-item.active{background:var(--accent-glow);}
+  .ac-item:hover .ac-label, .ac-item.active .ac-label{color:var(--text-0);}
+  #autocomplete-popup .ac-empty{padding:8px;font-size:11px;color:var(--text-3);text-align:center;}
+
+  /* ---- Right column: Docs + Console share the same column ---- */
+  #right-pane{
+    flex:0 0 340px;
+    max-width:42vw;
+    display:flex;flex-direction:column;
+    background:var(--bg-0);
+    min-height:0;
+  }
+  #right-pane-tabs{
+    flex:none;
+    display:flex;
+    border-bottom:1px solid var(--line);
+  }
+  .rp-tab{
+    flex:1;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+    background:transparent;border:none;
+    border-right:1px solid var(--line-soft);
+    color:var(--text-2);
+    font-size:11.5px;font-weight:700;letter-spacing:.03em;
+    padding:9px 6px;cursor:pointer;position:relative;
+  }
+  .rp-tab:last-child{border-right:none;}
+  .rp-tab.active{color:var(--text-0);background:var(--bg-1);}
+  .rp-tab.active::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--accent);}
+  .rp-tab .rp-err-badge{
+    min-width:15px;height:15px;padding:0 3px;
+    border-radius:8px;
+    background:var(--red);
+    color:#1a0a0a;
+    font-family:var(--mono);
+    font-size:9px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .rp-tab .rp-err-badge.hidden{display:none;}
+
+  #right-pane-body{
+    flex:1;min-height:0;position:relative;
+  }
+
+  /* ---- Docs panel content ---- */
+  #docs-content{
+    position:absolute;inset:0;
+    display:none;
+    flex-direction:column;
+    min-height:0;
+  }
+  #docs-content.active{display:flex;}
+
+  #docs-search{
+    margin:8px 12px 4px;
+    display:flex;align-items:center;gap:6px;
+    background:var(--bg-2);
+    border:1px solid var(--line);
+    border-radius:6px;
+    padding:6px 8px;
+    flex:none;
+  }
+  #docs-search input{
+    flex:1;min-width:0;background:transparent;border:none;outline:none;
+    color:var(--text-0);font-family:var(--mono);font-size:12px;
+  }
+  #docs-search input::placeholder{color:var(--text-3);}
+  #docs-search svg{flex:none;color:var(--text-3);}
+
+  #docs-body{flex:1;overflow-y:auto;padding:8px 12px 24px;}
+
+  .docs-section{margin-bottom:18px;border-top:1px solid var(--line-soft);padding-top:12px;}
+  .docs-section:first-child{border-top:none;padding-top:2px;}
+  .docs-section h2{
+    display:flex;align-items:center;gap:7px;
+    margin:0 0 8px;
+    font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;
+    color:var(--accent);font-weight:700;
+  }
+  .docs-section h2 .bar{width:3px;height:12px;border-radius:2px;background:var(--accent);flex:none;}
+
+  .doc-entry{
+    background:var(--bg-2);border:1px solid var(--line);border-radius:8px;
+    padding:9px 10px;margin-bottom:8px;
+  }
+  .doc-entry .sig{font-family:var(--mono);font-size:12.5px;color:var(--blue);font-weight:600;word-break:break-word;}
+  .doc-entry .sig .fn{color:var(--text-0);}
+  .doc-entry .desc{margin:5px 0 7px;font-size:11.5px;color:var(--text-1);line-height:1.45;}
+  .doc-entry .params{margin:0 0 8px;padding:0;list-style:none;font-size:11px;}
+  .doc-entry .params li{display:flex;gap:6px;padding:2px 0;color:var(--text-2);}
+  .doc-entry .params li b{color:var(--purple);font-family:var(--mono);font-weight:600;flex:none;}
+  .doc-entry pre{margin:0;background:var(--bg-0);border:1px solid var(--line-soft);border-radius:6px;padding:8px 9px;overflow-x:auto;}
+  .doc-entry pre code{font-family:var(--mono);font-size:11.5px;color:var(--text-1);white-space:pre;line-height:1.5;}
+  .doc-entry pre code .kw{color:var(--purple);}
+  .doc-entry pre code .fn{color:var(--blue);}
+  .doc-entry pre code .num{color:var(--amber);}
+  .doc-entry pre code .str{color:var(--accent);}
+  .doc-entry pre code .cm{color:var(--text-3);font-style:italic;}
+
+  #blockid-table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:11.5px;}
+  #blockid-table th{
+    text-align:left;color:var(--text-3);font-weight:600;font-size:10px;
+    letter-spacing:.06em;text-transform:uppercase;padding:4px 6px;
+    border-bottom:1px solid var(--line);
+  }
+  #blockid-table td{padding:5px 6px;border-bottom:1px solid var(--line-soft);color:var(--text-1);}
+  #blockid-table td.id-cell{color:var(--amber);font-weight:700;width:28px;}
+  #blockid-table td.swatch-cell{width:20px;}
+  #blockid-table tr:last-child td{border-bottom:none;}
+  #blockid-table tr:hover td{background:var(--bg-2);cursor:pointer;}
+  .swatch{display:inline-block;width:12px;height:12px;border-radius:3px;border:1px solid rgba(255,255,255,.12);}
+
+  /* ---- Console panel content ---- */
+  #console-content{
+    position:absolute;inset:0;
+    display:none;
+    flex-direction:column;
+    min-height:0;
+  }
+  #console-content.active{display:flex;}
+  #console-header{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:8px 12px;
+    font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;
+    color:var(--text-2);
+    border-bottom:1px solid var(--line-soft);
+    flex:none;
+  }
+  #console-header .console-title{display:flex;align-items:center;gap:8px;}
+  #console-header .console-err-count{
+    display:flex;align-items:center;gap:4px;
+    color:var(--red);
+    font-weight:700;
+  }
+  #console-header .console-err-count.hidden{display:none;}
+  #console-header .console-err-count .dot{width:6px;height:6px;border-radius:50%;background:var(--red);box-shadow:0 0 5px var(--red);}
+  #console-header .clear-console{background:none;border:none;color:var(--text-3);font-family:var(--mono);font-size:10.5px;cursor:pointer;}
+  #console-header .clear-console:active{color:var(--text-1);}
+  #console-log{flex:1;overflow-y:auto;padding:8px 12px;font-family:var(--mono);font-size:11.5px;line-height:1.6;}
+  #console-log .line{white-space:pre-wrap;word-break:break-word;margin-bottom:2px;padding:2px 6px;border-radius:4px;}
+  #console-log .line.info{color:var(--text-1);}
+  #console-log .line.ok{color:var(--accent);}
+  #console-log .line.warn{color:var(--amber);}
+  #console-log .line.err{color:var(--red);background:var(--red-glow);}
+  #console-log .line .ts{color:var(--text-3);margin-right:6px;}
+
+  /* ============================================================
+     STATUS BAR
+     ============================================================ */
+  #statusbar{
+    height:var(--statusbar-h);min-height:var(--statusbar-h);
+    background:var(--bg-0);border-top:1px solid var(--line);
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 10px;font-family:var(--mono);font-size:10.5px;color:var(--text-3);
+    flex:none;
+  }
+  #statusbar .status-left, #statusbar .status-right{display:flex;align-items:center;gap:12px;}
+  #statusbar .status-dot{width:6px;height:6px;border-radius:50%;background:var(--accent);box-shadow:0 0 5px var(--accent);}
+  #statusbar .status-dot.err{background:var(--red);box-shadow:0 0 5px var(--red);}
+
+  #toast{
+    position:fixed;left:50%;bottom:calc(var(--statusbar-h) + 14px);
+    transform:translateX(-50%) translateY(8px);
+    background:var(--bg-3);border:1px solid var(--accent-dim);color:var(--accent);
+    padding:8px 14px;border-radius:20px;
+    font-size:11.5px;font-family:var(--mono);font-weight:600;
+    opacity:0;pointer-events:none;
+    transition:opacity .18s ease, transform .18s ease;
+    z-index:80;white-space:nowrap;
+  }
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  #toast.err{border-color:var(--red);color:var(--red);}
+
+  /* ============================================================
+     RESPONSIVE — MOBILE
+     ============================================================ */
+  @media (max-width: 860px){
+    :root{--topbar-h:44px;--fs-ui:12.5px;--fs-code:12.5px;}
+    #brand{display:none;}
+    .tab-btn{padding:0 12px;font-size:12.5px;}
+    .elem-tab{padding:0 8px 0 12px;font-size:12.5px;max-width:150px;}
+    .elem-tab .et-label{max-width:96px;}
+    #right-pane{
+      position:fixed;top:var(--topbar-h);
+      right:0;bottom:0;
+      width:92vw;max-width:380px;
+      transform:translateX(100%);
+      transition:transform .22s cubic-bezier(.4,0,.2,1);
+      z-index:65;border-left:1px solid var(--line);
+      box-shadow:-2px 0 24px rgba(0,0,0,.4);
+    }
+    #right-pane.open{transform:translateX(0);}
+    #line-numbers{width:28px;font-size:11.5px;padding:8px 4px 8px 0;}
+    #line-numbers .ln-row{height:calc(11.5px * 1.55);}
+    #code-highlight, #code-editor{padding:8px;font-size:12.5px;}
+    .icon-btn{width:28px;height:28px;font-size:12.5px;}
+    .prop-input{width:120px;}
+    #home-grid{grid-template-columns:repeat(auto-fill, minmax(120px, 1fr));}
+    #cat-picker-list{grid-template-columns:1fr;}
+    #code-editor-wrap{min-height:260px;}
+  }
+
+  @media (max-width: 420px){
+    .tab-btn{padding:0 10px;font-size:12px;}
+    .elem-tab{padding:0 6px 0 10px;font-size:12px;max-width:120px;}
+    .elem-tab .et-label{max-width:72px;}
+    #right-pane{width:94vw;}
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    #right-pane, #toast{transition:none !important;}
+  }
+</style>
+<!-- Three.js + GLTFLoader (classic global-namespace build, no bundler needed).
+     Used only for the small 3D model preview on NPC / Entity and Emote
+     identity fields, which accept .gltf / .glb files exported from
+     Blockbench instead of a flat PNG texture. -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ============================================================
+       TOP BAR — Home / Properties only (Script tab removed;
+       the script editor now lives inside the Properties panel)
+       ============================================================ -->
+  <div id="topbar">
+    <div id="brand">
+      <span class="dot"></span>
+      <span class="name">LEGENDS</span>
+      <span>· Mod Editor</span>
+    </div>
+
+    <button class="tab-btn tab-btn-home active" data-tab="home" role="tab" aria-selected="true" id="home-tab-btn">Home</button>
+
+    <div id="tabs-scroll-wrap">
+      <div id="tabs" role="tablist"><!-- element tabs populated by JS --></div>
+    </div>
+
+    <button id="app-exit-btn" title="Exit editor" aria-label="Exit editor">✕</button>
+  </div>
+
+  <!-- ---------- ELEMENT TAB CONTEXT MENU (long-press / right-click) ---------- -->
+  <div id="tab-ctx-menu" role="menu">
+    <button type="button" data-action="open" role="menuitem">Aç</button>
+    <button type="button" data-action="close" role="menuitem">Kapat</button>
+    <button type="button" data-action="delete" role="menuitem">Sil</button>
+  </div>
+  <div id="tab-ctx-backdrop"></div>
+
+  <!-- ============================================================
+       BODY
+       ============================================================ -->
+  <div id="body-row">
+
+    <!-- ---------- HOME VIEW ---------- -->
+    <div id="view-home" class="active">
+      <div id="home-toolbar">
+        <div>
+          <span class="home-title">Workspace</span>
+          <span class="home-count" id="home-count">0 items</span>
+        </div>
+        <button id="home-new-btn">
+          <span>+</span> New
+        </button>
+      </div>
+      <div id="home-scroll">
+        <div id="home-grid"><!-- populated by JS --></div>
+      </div>
+    </div>
+
+    <!-- ---------- ELEMENT EDITOR VIEW (Properties) ----------
+         Single scrolling Properties panel containing, in order:
+         1) IDENTITY card
+         2) PROPERTIES card (category-specific fields) + Save button
+         3) "Use Script" button (opens the full-screen Script view)
+         (Craft / Effects / Armor render a "SOON" card instead
+         of the Properties card, and never show Save or Use Script.)
+    -->
+    <div id="view-editor">
+
+      <div id="panel-properties">
+
+        <!-- IDENTITY -->
+        <div class="prop-card">
+          <h3>Identity</h3>
+          <div id="prop-identity">
+            <div id="prop-upload-box" title="Upload texture / image">
+              <span class="upload-plus">+</span>
+            </div>
+            <input type="file" id="prop-upload-input" accept="image/*" style="display:none;">
+            <input type="file" id="prop-model-input" accept=".gltf,.glb" style="display:none;">
+            <div id="prop-identity-fields">
+              <input type="text" id="prop-name-input" placeholder="Element name">
+              <span id="prop-type-badge">Item</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- PROPERTIES (category-specific fields; hidden for SOON categories) -->
+        <div class="prop-card" id="prop-properties-card">
+          <h3>Properties</h3>
+          <div id="prop-dynamic-fields"><!-- populated by JS, per category --></div>
+          <button class="prop-save-btn" id="prop-save-btn">Save</button>
+        </div>
+
+        <!-- SOON placeholder (Craft / Effects / Armor) — no Save button -->
+        <div class="soon-card" id="prop-soon-card" style="display:none;">
+          <span class="soon-badge">SOON</span>
+          <div class="soon-icon" id="soon-icon">🛠️</div>
+          <h4 id="soon-title">This category is coming soon</h4>
+          <p id="soon-desc">We're still building this feature. Check back in a future update.</p>
+        </div>
+
+        <!-- USE SCRIPT — opens the full-screen Script view -->
+        <div class="prop-card" id="prop-script-entry-card">
+          <h3>Script <span class="h3-sub" id="editor-meta-item">No element selected</span></h3>
+          <button class="use-script-btn" id="use-script-btn">
+            <span class="us-ic">{ }</span>
+            <span>Use Script</span>
+            <span class="us-dot"></span>
+          </button>
+        </div>
+
+        <div class="prop-card">
+          <button id="prop-delete-btn">Delete this element</button>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- ---------- SCRIPT VIEW (full-screen, opened via "Use Script") ---------- -->
+    <div id="view-script">
+
+      <div id="script-view-header">
+        <button class="back-to-editor-btn" id="back-to-editor-btn" title="Back to editor" aria-label="Back to editor">
+          <span class="bte-arrow">◀</span><span>Editöre Dön</span>
+        </button>
+        <div id="script-view-title">
+          <span class="sv-label">Script</span>
+          <span class="sv-sub" id="script-view-meta">No element selected</span>
+        </div>
+        <button class="close-x-btn" id="script-close-btn" title="Close" aria-label="Close script editor">✕</button>
+      </div>
+
+      <div id="script-view-body">
+
+        <div id="panel-script">
+
+          <div id="file-tabs-bar">
+            <div id="file-tabs-scroll"><!-- populated by JS --></div>
+            <button id="new-file-btn" title="Add a new script file">+ Script</button>
+          </div>
+
+          <div id="file-bar">
+            <span class="file-bar-label">Rename</span>
+            <input type="text" id="file-name-input" placeholder="script_name" maxlength="48">
+            <span id="file-ext-suffix">.js</span>
+            <button id="delete-file-btn" title="Delete this file">🗑</button>
+            <span id="file-name-hint">Letters, numbers, "_" and "-" only. No spaces or special characters.</span>
+          </div>
+
+          <div id="editor-meta">
+            <span id="editor-meta-chars-wrap">Script editor</span>
+            <div class="meta-right">
+              <span id="char-count">0 chars</span>
+              <span id="line-count">1 line</span>
+              <button class="run-inline-btn" id="run-inline-btn" title="Run script">▶ Run</button>
+            </div>
+          </div>
+
+          <div id="code-editor-wrap">
+            <div id="line-numbers">1</div>
+            <div id="code-surface">
+              <pre id="code-highlight" aria-hidden="true"><code id="code-highlight-inner"></code></pre>
+              <textarea
+                id="code-editor"
+                spellcheck="false"
+                autocapitalize="off"
+                autocomplete="off"
+                autocorrect="off"
+                wrap="off"
+                placeholder="// Write your Legends script here...
+// Start typing (e.g. &quot;fun&quot;) for autocomplete suggestions.
+// Tap ▶ Run to test it.
+"
+              ></textarea>
+              <div id="autocomplete-popup" role="listbox" aria-label="Autocomplete suggestions"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ---------- RIGHT PANE: Docs / Console tabs ---------- -->
+        <div id="right-pane">
+          <div id="right-pane-tabs">
+            <button class="rp-tab active" data-rp="docs" title="Documentation">
+              📓 Docs
+            </button>
+            <button class="rp-tab" data-rp="console" title="Console">
+              ▤ Console
+              <span class="rp-err-badge hidden" id="rp-console-err-badge">0</span>
+            </button>
+          </div>
+
+          <div id="right-pane-body">
+
+            <!-- DOCS -->
+            <div id="docs-content" class="active">
+              <div id="docs-search">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                <input type="text" id="docs-search-input" placeholder="Search functions...">
+              </div>
+
+              <div id="docs-body">
+
+                <section class="docs-section" data-group="world">
+                  <h2><span class="bar"></span>World Manipulation</h2>
+
+                  <div class="doc-entry" data-search="setblock world manipulation place a single block">
+                    <div class="sig"><span class="fn">setBlock</span>(x, y, z, blockId)</div>
+                    <p class="desc">Places a single block of type <code>blockId</code> at the given world coordinates.</p>
+                    <ul class="params">
+                      <li><b>x, y, z</b><span>number — world coordinates</span></li>
+                      <li><b>blockId</b><span>number — see Block IDs Reference</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Place a stone block at (10, 64, 10)</span>
+<span class="fn">setBlock</span>(<span class="num">10</span>, <span class="num">64</span>, <span class="num">10</span>, <span class="num">4</span>); <span class="cm">// 4 = Stone</span></code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="fillregion world manipulation fill area cuboid region">
+                    <div class="sig"><span class="fn">fillRegion</span>(x1, y1, z1, x2, y2, z2, blockId)</div>
+                    <p class="desc">Fills the cuboid region between two corner points with <code>blockId</code>.</p>
+                    <ul class="params">
+                      <li><b>x1,y1,z1</b><span>number — first corner</span></li>
+                      <li><b>x2,y2,z2</b><span>number — opposite corner</span></li>
+                      <li><b>blockId</b><span>number — see Block IDs Reference</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Fill a 5x1x5 platform with planks</span>
+<span class="fn">fillRegion</span>(<span class="num">0</span>, <span class="num">70</span>, <span class="num">0</span>, <span class="num">4</span>, <span class="num">70</span>, <span class="num">4</span>, <span class="num">1</span>); <span class="cm">// 1 = Planks</span></code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="player">
+                  <h2><span class="bar"></span>Player &amp; Entities</h2>
+
+                  <div class="doc-entry" data-search="teleportplayer player entities move warp">
+                    <div class="sig"><span class="fn">teleportPlayer</span>(x, y, z)</div>
+                    <p class="desc">Instantly teleports the local player to the given coordinates.</p>
+                    <ul class="params">
+                      <li><b>x, y, z</b><span>number — destination coordinates</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Teleport player to spawn</span>
+<span class="fn">teleportPlayer</span>(<span class="num">0</span>, <span class="num">80</span>, <span class="num">0</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="spawnentity player entities mob animal summon">
+                    <div class="sig"><span class="fn">spawnEntity</span>(type, x, y, z)</div>
+                    <p class="desc">Spawns an entity of the given <code>type</code> at the specified coordinates.</p>
+                    <ul class="params">
+                      <li><b>type</b><span>string — e.g. "sheep", "cow", "pig"</span></li>
+                      <li><b>x, y, z</b><span>number — spawn coordinates</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Spawn a sheep near the player</span>
+<span class="fn">spawnEntity</span>(<span class="str">"sheep"</span>, <span class="num">5</span>, <span class="num">70</span>, <span class="num">5</span>);</code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="chat">
+                  <h2><span class="bar"></span>Chat &amp; System</h2>
+
+                  <div class="doc-entry" data-search="sendsystemmessage chat system broadcast">
+                    <div class="sig"><span class="fn">sendSystemMessage</span>(msg)</div>
+                    <p class="desc">Broadcasts a system-styled message to the in-game chat.</p>
+                    <ul class="params">
+                      <li><b>msg</b><span>string — message text</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Announce to all players</span>
+<span class="fn">sendSystemMessage</span>(<span class="str">"The gates have opened!"</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="event listener on tick block break place player join chat">
+                    <div class="sig"><span class="kw">on</span>(<span class="fn">eventName</span>, handler)</div>
+                    <p class="desc">Registers an event listener. The handler runs every time the event fires.</p>
+                    <ul class="params">
+                      <li><b>eventName</b><span>string — e.g. "onTick", "onPlayerChat"</span></li>
+                      <li><b>handler</b><span>function — receives event arguments</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Listen for chat messages</span>
+<span class="kw">on</span>(<span class="str">"onPlayerChat"</span>, <span class="kw">function</span>(name, msg) {
+  console.<span class="fn">log</span>(name + <span class="str">": "</span> + msg);
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="registercommand command permission register">
+                    <div class="sig"><span class="fn">registerCommand</span>(name, handler)</div>
+                    <p class="desc">Registers a chat command. The handler runs whenever a player uses it.</p>
+                    <ul class="params">
+                      <li><b>name</b><span>string — e.g. "heal"</span></li>
+                      <li><b>handler</b><span>function — receives command args</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Register /heal</span>
+<span class="fn">registerCommand</span>(<span class="str">"heal"</span>, <span class="kw">function</span>(args) {
+  console.<span class="fn">log</span>(<span class="str">"Healed!"</span>);
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="playsound audio sound play">
+                    <div class="sig"><span class="fn">playSound</span>(soundId, x, y, z)</div>
+                    <p class="desc">Plays an uploaded sound at the given world coordinates.</p>
+                    <ul class="params">
+                      <li><b>soundId</b><span>string — the uploaded sound file name</span></li>
+                      <li><b>x, y, z</b><span>number — world coordinates</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Play a door sound</span>
+<span class="fn">playSound</span>(<span class="str">"door_open.ogg"</span>, <span class="num">0</span>, <span class="num">64</span>, <span class="num">0</span>);</code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="voxel">
+                  <h2><span class="bar"></span>Voxel &amp; World Interactions</h2>
+
+                  <div class="doc-entry" data-search="onblockplaced voxel world interactions event claim structure portal">
+                    <div class="sig"><span class="kw">on</span>(<span class="str">"onBlockPlaced"</span>, <span class="fn">handler</span>(x, y, z, blockId))</div>
+                    <p class="desc">Fires whenever a player places a block. Useful for claim systems, custom structures, or portal mechanics.</p>
+                    <ul class="params">
+                      <li><b>x, y, z</b><span>number — coordinates of the placed block</span></li>
+                      <li><b>blockId</b><span>number — see Block IDs Reference</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Detect a placed portal frame block</span>
+<span class="kw">on</span>(<span class="str">"onBlockPlaced"</span>, <span class="kw">function</span>(x, y, z, blockId) {
+  <span class="kw">if</span> (blockId === <span class="num">89</span>) {
+    console.<span class="fn">log</span>(<span class="str">"Portal frame placed at "</span> + x + <span class="str">","</span> + y + <span class="str">","</span> + z);
+  }
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="setblocksilent voxel world interactions silent no effect no sound">
+                    <div class="sig"><span class="fn">setBlockSilent</span>(x, y, z, blockId)</div>
+                    <p class="desc">Changes a block in the background with no placement particles or sound — useful for scripted world changes that shouldn't draw attention.</p>
+                    <ul class="params">
+                      <li><b>x, y, z</b><span>number — world coordinates</span></li>
+                      <li><b>blockId</b><span>number — see Block IDs Reference</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Silently swap a trapdoor for stone</span>
+<span class="fn">setBlockSilent</span>(<span class="num">12</span>, <span class="num">64</span>, <span class="num">8</span>, <span class="num">4</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="getblocksinradius voxel world interactions nearby scan radius">
+                    <div class="sig"><span class="fn">getBlocksInRadius</span>(x, y, z, radius)</div>
+                    <p class="desc">Returns a list of blocks (coordinates + block ID) found within <code>radius</code> of the given point.</p>
+                    <ul class="params">
+                      <li><b>x, y, z</b><span>number — center coordinates</span></li>
+                      <li><b>radius</b><span>number — search radius, in blocks</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Scan a small area around the player</span>
+<span class="kw">var</span> nearby = <span class="fn">getBlocksInRadius</span>(<span class="num">0</span>, <span class="num">64</span>, <span class="num">0</span>, <span class="num">5</span>);
+console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.length + <span class="str">" blocks"</span>);</code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="uiux">
+                  <h2><span class="bar"></span>UI &amp; UX</h2>
+
+                  <div class="doc-entry" data-search="createcustomhud ui ux hud bar indicator stamina mana thirst">
+                    <div class="sig"><span class="fn">createCustomHUD</span>(config)</div>
+                    <p class="desc">Adds a custom on-screen HUD indicator or bar (e.g. mana, stamina, thirst) driven by your script.</p>
+                    <ul class="params">
+                      <li><b>config</b><span>object — e.g. {"{ id, label, value, max, color }"}</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Add a simple mana bar</span>
+<span class="fn">createCustomHUD</span>({
+  id: <span class="str">"mana_bar"</span>,
+  label: <span class="str">"Mana"</span>,
+  value: <span class="num">80</span>,
+  max: <span class="num">100</span>,
+  color: <span class="str">"#6fb3ff"</span>
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="shownotification ui ux popup toast alert message">
+                    <div class="sig"><span class="fn">showNotification</span>(title, message, icon)</div>
+                    <p class="desc">Displays an in-game notification popup to the local player.</p>
+                    <ul class="params">
+                      <li><b>title</b><span>string — notification title</span></li>
+                      <li><b>message</b><span>string — notification body text</span></li>
+                      <li><b>icon</b><span>string — optional icon id / texture name</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Notify the player of a quest update</span>
+<span class="fn">showNotification</span>(<span class="str">"Quest Updated"</span>, <span class="str">"Return to the village elder."</span>, <span class="str">"quest_icon"</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="opencustomgui ui ux inventory shop trader chest menu">
+                    <div class="sig"><span class="fn">openCustomGUI</span>(guiId)</div>
+                    <p class="desc">Opens a custom interface for the player, such as a special inventory, a trader/shop screen, or a chest-style container.</p>
+                    <ul class="params">
+                      <li><b>guiId</b><span>string — id of the registered custom GUI</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Open a trader screen</span>
+<span class="fn">openCustomGUI</span>(<span class="str">"village_trader"</span>);</code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="entities">
+                  <h2><span class="bar"></span>Entities &amp; NPCs</h2>
+
+                  <div class="doc-entry" data-search="spawnmob entities npcs custom stats spawn monster">
+                    <div class="sig"><span class="fn">spawnMob</span>(mobType, x, y, z, stats)</div>
+                    <p class="desc">Spawns a mob or NPC of the given type at the specified coordinates, with optional custom stats.</p>
+                    <ul class="params">
+                      <li><b>mobType</b><span>string — e.g. "zombie", "npc_villager"</span></li>
+                      <li><b>x, y, z</b><span>number — spawn coordinates</span></li>
+                      <li><b>stats</b><span>object — optional, e.g. {"{ health, damage, speed }"}</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Spawn a tougher zombie guard</span>
+<span class="fn">spawnMob</span>(<span class="str">"zombie"</span>, <span class="num">10</span>, <span class="num">64</span>, <span class="num">10</span>, { health: <span class="num">40</span>, damage: <span class="num">6</span> });</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="onentitydamage entities npcs damage hit combat event">
+                    <div class="sig"><span class="kw">on</span>(<span class="str">"onEntityDamage"</span>, <span class="fn">handler</span>(target, source, damage))</div>
+                    <p class="desc">Fires whenever an entity takes damage, giving you the target, the damage source, and the amount dealt.</p>
+                    <ul class="params">
+                      <li><b>target</b><span>entity — the entity that was damaged</span></li>
+                      <li><b>source</b><span>entity — the entity or cause that dealt damage</span></li>
+                      <li><b>damage</b><span>number — amount of damage dealt</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Log every hit on a boss NPC</span>
+<span class="kw">on</span>(<span class="str">"onEntityDamage"</span>, <span class="kw">function</span>(target, source, damage) {
+  console.<span class="fn">log</span>(target + <span class="str">" took "</span> + damage + <span class="str">" damage"</span>);
+});</code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="audio">
+                  <h2><span class="bar"></span>Audio &amp; Atmosphere</h2>
+
+                  <div class="doc-entry" data-search="setskybox audio atmosphere sky time of day fog">
+                    <div class="sig"><span class="fn">setSkybox</span>(textureId, timeOfDay)</div>
+                    <p class="desc">Sets the sky texture, time-of-day cycle, and/or fog intensity for the current world.</p>
+                    <ul class="params">
+                      <li><b>textureId</b><span>string — id of the uploaded skybox texture</span></li>
+                      <li><b>timeOfDay</b><span>number — 0–24000 tick value, or a fixed time</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Switch to a stormy dusk skybox</span>
+<span class="fn">setSkybox</span>(<span class="str">"storm_sky"</span>, <span class="num">13000</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="playloopingsound audio atmosphere ambient loop positional">
+                    <div class="sig"><span class="fn">playLoopingSound</span>(soundId, x, y, z)</div>
+                    <p class="desc">Plays a looping, positional ambient sound anchored at the given world coordinates.</p>
+                    <ul class="params">
+                      <li><b>soundId</b><span>string — the uploaded sound file name</span></li>
+                      <li><b>x, y, z</b><span>number — world coordinates</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Loop a campfire crackle at a fire pit</span>
+<span class="fn">playLoopingSound</span>(<span class="str">"campfire_loop.ogg"</span>, <span class="num">4</span>, <span class="num">64</span>, <span class="num">4</span>);</code></pre>
+                  </div>
+                </section>
+
+                <section class="docs-section" data-group="blocks">
+                  <h2><span class="bar"></span>Block IDs Reference</h2>
+                  <table id="blockid-table">
+                    <thead><tr><th>Swatch</th><th>ID</th><th>Name</th></tr></thead>
+                    <tbody id="blockid-tbody"><!-- populated by JS --></tbody>
+                  </table>
+                </section>
+
+              </div>
+            </div>
+
+            <!-- CONSOLE -->
+            <div id="console-content">
+              <div id="console-header">
+                <span class="console-title">
+                  CONSOLE OUTPUT
+                  <span class="console-err-count hidden" id="console-err-count"><span class="dot"></span><span id="console-err-count-num">0</span> error(s)</span>
+                </span>
+                <button class="clear-console" id="clear-console-btn">CLEAR</button>
+              </div>
+              <div id="console-log">
+                <div class="line info"><span class="ts">[ready]</span>Console ready. Waiting for run...</div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ============================================================
+       STATUS BAR
+       ============================================================ -->
+  <div id="statusbar">
+    <div class="status-left">
+      <span class="status-dot" id="status-dot"></span>
+      <span id="status-text">Idle</span>
+    </div>
+    <div class="status-right">
+      <span id="status-tab-label">Home</span>
+    </div>
+  </div>
+
+</div>
+
+<!-- ============================================================
+     CATEGORY PICKER MODAL ("+ New")
+     ============================================================ -->
+<div id="modal-overlay">
+  <div id="cat-picker-modal">
+    <div class="cpm-header">
+      <h2>Create new element</h2>
+      <p>Choose a category to start building</p>
+    </div>
+    <div id="cat-picker-list"><!-- populated by JS --></div>
+    <div class="cpm-footer">
+      <button class="btn-secondary" id="cat-picker-cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================
+     CONFIRM MODAL (used instead of window.confirm, which is
+     unreliable inside some mobile/webview contexts)
+     ============================================================ -->
+<div id="confirm-overlay">
+  <div id="confirm-modal" role="alertdialog" aria-label="Confirm">
+    <div id="confirm-modal-title">Are you sure?</div>
+    <div id="confirm-modal-body">This action cannot be undone.</div>
+    <div id="confirm-modal-actions">
+      <button class="btn-secondary" id="confirm-cancel-btn">Cancel</button>
+      <button id="confirm-ok-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- toast -->
+<div id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============================================================
+     0) CATEGORY & FIELD DEFINITIONS
+     ============================================================ */
+
+  // Categories that only show the "SOON" placeholder card instead of
+  // the Properties card + "Use Script" entry point.
+  var SOON_CATEGORIES = { craft:true, effect:true, armor:true };
+
+  var SOON_COPY = {
+    craft:  { icon:'⚒️', title:'Crafting recipes are coming soon',  desc:'Recipe building (result item, amount, and ingredient list) is still in development. Check back in a future update.' },
+    effect: { icon:'🌀', title:'Status effects are coming soon',    desc:'Custom status-effect authoring (duration, amplifier, harmful flag) is still in development. Check back in a future update.' },
+    armor:  { icon:'🛡️', title:'Armor is coming soon',              desc:'Armor piece creation is still in development. Check back in a future update.' }
+  };
+
+  var CATEGORY_DEFS = {
+    item:        { label:'Item',              icon:'🍞', fields:['stackSize','durability','rarity'] },
+    tool:        { label:'Tools & Weapons',   icon:'🗡️', fields:['toolType','durability','attackDamage','miningSpeed'] },
+    block:       { label:'Block',             icon:'🧱', fields:['hardness','blastResistance','lightLevel','solid'] },
+    craft:       { label:'Craft',             icon:'⚒️', fields:[] },
+    door:        { label:'Door',              icon:'🚪', fields:['openSound','closeSound','requiresKey'] },
+    particle:    { label:'Particle',          icon:'✨', fields:['lifetime','color','spawnRate'] },
+    npc:         { label:'NPC / Entity',      icon:'🧟', fields:['health','damage','speed','hostile'], identityType:'model' },
+    keybind:     { label:'Keybind',           icon:'⌨️', fields:['defaultKey','action'] },
+    effect:      { label:'Effect',            icon:'🌀', fields:[] },
+    armor:       { label:'Armor',             icon:'🛡️', fields:[] },
+    emote:       { label:'Emote',             icon:'💃', fields:['animationLength','loop'], identityType:'model' },
+    command:     { label:'Command',           icon:'/',  fields:['syntax','permissionLevel'] }
+  };
+
+  // Dropdown option sets shared by several fields
+  var KEYBIND_KEY_OPTIONS = (function(){
+    var out = [];
+    for(var i=0;i<26;i++) out.push(String.fromCharCode(65+i));       // A-Z
+    for(var n=0;n<=9;n++) out.push(String(n));                        // 0-9
+    for(var f=1;f<=12;f++) out.push('F'+f);                           // F1-F12
+    out.push('Space','Shift','Ctrl','Alt');
+    return out;
+  })();
+
+  var FIELD_DEFS = {
+    // ---- Items & Materials (weapons/armor excluded) ----
+    stackSize:        { label:'Stack Size', type:'select', options:['1','16','64'] },
+    durability:       { label:'Durability', type:'text', placeholder:'Unbreakable' },
+    rarity:           { label:'Rarity', type:'select', options:['Common','Uncommon','Rare','Epic','Legendary'] },
+
+    // ---- Tools & Weapons (new category) ----
+    toolType:         { label:'Tool Type', type:'select', options:['Sword','Pickaxe','Axe','Shovel','Hoe','Bow'] },
+    attackDamage:     { label:'Attack Damage', type:'text', placeholder:'0' },
+    miningSpeed:      { label:'Mining Speed', type:'text', placeholder:'1.0' },
+
+    // ---- Blocks ----
+    hardness:         { label:'Hardness', type:'text', placeholder:'1.5' },
+    blastResistance:  { label:'Blast Resistance', type:'text', placeholder:'6.0' },
+    lightLevel:       { label:'Light Level', type:'text', placeholder:'0' },
+    solid:            { label:'Solid (blocks movement)', type:'checkbox' },
+
+    // ---- Door ----
+    openSound:        { label:'Open Sound', type:'sound' },
+    closeSound:       { label:'Close Sound', type:'sound' },
+    requiresKey:      { label:'Requires Key', type:'checkbox' },
+
+    // ---- Particle ----
+    lifetime:         { label:'Lifetime (ms)', type:'text', placeholder:'1000' },
+    color:            { label:'Color', type:'text', placeholder:'#75a7ff' },
+    spawnRate:        { label:'Spawn Rate', type:'text', placeholder:'10' },
+
+    // ---- NPC / Entity ----
+    health:           { label:'Health', type:'text', placeholder:'20' },
+    damage:           { label:'Damage', type:'text', placeholder:'2' },
+    speed:            { label:'Speed', type:'text', placeholder:'1.0' },
+    hostile:          { label:'Hostile', type:'checkbox' },
+
+    // ---- Keybind ----
+    defaultKey:       { label:'Default Key', type:'select', options:KEYBIND_KEY_OPTIONS, placeholder:'Select a key' },
+    action:           { label:'Action', type:'text', placeholder:'e.g. openInventory' },
+
+    // ---- Emote ----
+    animationLength:  { label:'Animation Length (ms)', type:'text', placeholder:'800' },
+    loop:             { label:'Loop', type:'checkbox' },
+
+    // ---- Command ----
+    syntax:           { label:'Syntax', type:'text', placeholder:'/mycommand <arg>' },
+    permissionLevel:  { label:'Permission Level', type:'select', options:['Everyone','Admin','Owner'] }
+  };
+
+  var CATEGORY_ORDER = ['item','tool','block','craft','door','particle','npc','keybind','effect','armor','emote','command'];
+
+  var BLOCK_IDS = [
+    {id:0,  name:"Air",         color:"transparent"},
+    {id:1,  name:"Planks",      color:"#b98a4b"},
+    {id:2,  name:"Grass",       color:"#5a9c3a"},
+    {id:3,  name:"Dirt",        color:"#7a5230"},
+    {id:4,  name:"Stone",       color:"#8a8a8a"},
+    {id:5,  name:"Log",         color:"#6b4423"},
+    {id:6,  name:"Cobblestone", color:"#6f6f6f"},
+    {id:7,  name:"Glass",       color:"#bfe8f0"},
+    {id:8,  name:"Leaves",      color:"#3f7d32"},
+    {id:9,  name:"Sand",        color:"#e0d08a"},
+    {id:10, name:"Water",       color:"#3a7bd5"},
+    {id:11, name:"Bedrock",     color:"#3a3a3a"},
+    {id:12, name:"Lava",        color:"#e0561f"},
+    {id:13, name:"Obsidian",    color:"#1c1730"},
+    {id:14, name:"Andesite",    color:"#9a9a95"},
+    {id:15, name:"Granite",     color:"#c98e6f"},
+    {id:16, name:"Diorite",     color:"#d9d9d9"},
+    {id:17, name:"Gravel",      color:"#928c86"}
+  ];
+  var BLOCK_NAME_BY_ID = {};
+  BLOCK_IDS.forEach(function(b){ BLOCK_NAME_BY_ID[b.id] = b.name; });
+
+  /* ============================================================
+     0b) AUTOCOMPLETE / INTELLISENSE DATA
+     Keywords + known API functions, each with a short insertion
+     template and a one-line hint shown in the popup.
+     ============================================================ */
+  var AUTOCOMPLETE_ENTRIES = [
+    // -- language keywords --
+    { word:'function',  kind:'kw', hint:'keyword',  insert:'function ' },
+    { word:'var',       kind:'kw', hint:'keyword',  insert:'var ' },
+    { word:'let',       kind:'kw', hint:'keyword',  insert:'let ' },
+    { word:'const',     kind:'kw', hint:'keyword',  insert:'const ' },
+    { word:'return',    kind:'kw', hint:'keyword',  insert:'return ' },
+    { word:'if',        kind:'kw', hint:'keyword',  insert:'if (' },
+    { word:'else',      kind:'kw', hint:'keyword',  insert:'else ' },
+    { word:'for',       kind:'kw', hint:'keyword',  insert:'for (' },
+    { word:'while',     kind:'kw', hint:'keyword',  insert:'while (' },
+    { word:'true',      kind:'kw', hint:'keyword',  insert:'true' },
+    { word:'false',     kind:'kw', hint:'keyword',  insert:'false' },
+    { word:'null',      kind:'kw', hint:'keyword',  insert:'null' },
+    { word:'break',     kind:'kw', hint:'keyword',  insert:'break;' },
+    { word:'continue',  kind:'kw', hint:'keyword',  insert:'continue;' },
+
+    // -- API functions --
+    { word:'setBlock',          kind:'fn', hint:'world',   insert:'setBlock(x, y, z, blockId)' },
+    { word:'fillRegion',        kind:'fn', hint:'world',   insert:'fillRegion(x1, y1, z1, x2, y2, z2, blockId)' },
+    { word:'teleportPlayer',    kind:'fn', hint:'player',  insert:'teleportPlayer(x, y, z)' },
+    { word:'spawnEntity',       kind:'fn', hint:'entity',  insert:'spawnEntity("type", x, y, z)' },
+    { word:'sendSystemMessage', kind:'fn', hint:'chat',    insert:'sendSystemMessage("message")' },
+    { word:'registerCommand',   kind:'fn', hint:'command', insert:'registerCommand("name", function(args) {\n  \n})' },
+    { word:'playSound',         kind:'fn', hint:'audio',   insert:'playSound("sound_id", x, y, z)' },
+    { word:'on',                kind:'fn', hint:'event',   insert:'on("eventName", function() {\n  \n})' },
+    { word:'console.log',       kind:'fn', hint:'debug',   insert:'console.log()' },
+
+    // -- Voxel & World Interactions --
+    { word:'setBlockSilent',    kind:'fn', hint:'voxel',   insert:'setBlockSilent(x, y, z, blockId)' },
+    { word:'getBlocksInRadius', kind:'fn', hint:'voxel',   insert:'getBlocksInRadius(x, y, z, radius)' },
+    { word:'onBlockPlaced',     kind:'ev', hint:'voxel',   insert:'on("onBlockPlaced", function(x, y, z, blockId) {\n  \n})' },
+
+    // -- UI & UX --
+    { word:'createCustomHUD',   kind:'fn', hint:'ui',      insert:'createCustomHUD({ id: "", label: "", value: 0, max: 100, color: "#6fb3ff" })' },
+    { word:'showNotification',  kind:'fn', hint:'ui',      insert:'showNotification("title", "message", "icon")' },
+    { word:'openCustomGUI',     kind:'fn', hint:'ui',      insert:'openCustomGUI("guiId")' },
+
+    // -- Entities & NPCs --
+    { word:'spawnMob',          kind:'fn', hint:'entity',  insert:'spawnMob("mobType", x, y, z, { health: 20 })' },
+    { word:'onEntityDamage',    kind:'ev', hint:'entity',  insert:'on("onEntityDamage", function(target, source, damage) {\n  \n})' },
+
+    // -- Audio & Atmosphere --
+    { word:'setSkybox',         kind:'fn', hint:'audio',   insert:'setSkybox("textureId", timeOfDay)' },
+    { word:'playLoopingSound',  kind:'fn', hint:'audio',   insert:'playLoopingSound("soundId", x, y, z)' }
+  ];
+  var AUTOCOMPLETE_MAX_VISIBLE = 6;
+
+
+  /* ============================================================
+     1) STATE
+     ============================================================ */
+  var items = [];          // {id, category, name, texture, props:{}, files:[...], activeFileId}
+  var selectedItemId = null;
+  var nextIdCounter = 1;
+  var errorCount = 0;
+
+  // ---- Open element tabs (Chrome-style multi-tab strip) ------------
+  // Each entry is an itemId currently open as a tab in the topbar.
+  // Several elements can stay open at once; the strip scrolls
+  // horizontally while the Home tab and the Exit (✕) button stay put.
+  var openTabs = [];        // array of itemId strings, in display order
+
+  // ---- Draft / Persist safety net ----------------------------------
+  // A brand-new element (created via "+ New") is NOT written into
+  // `items` (and therefore never appears on the Home grid) until the
+  // user explicitly taps "Save" at least once. Until then it lives
+  // here as a pending draft only. Leaving the editor (Home tab,
+  // breadcrumb, or closing the script view) without ever saving
+  // discards the pending draft entirely — nothing is persisted on
+  // Home unless an explicit Save action occurred.
+  var pendingNewItem = null;
+
+  function makeId(){ return 'el_' + (nextIdCounter++); }
+  var nextFileIdCounter = 1;
+  function makeFileId(){ return 'file_' + (nextFileIdCounter++); }
+
+  function defaultPropsFor(def){
+    var props = {};
+    def.fields.forEach(function(f){
+      var fd = FIELD_DEFS[f];
+      if(!fd){ props[f] = ''; return; }
+      if(fd.type === 'checkbox') props[f] = false;
+      else if(fd.type === 'select') props[f] = fd.options[0];
+      else if(fd.type === 'sound') props[f] = { name:'', dataUrl:'' };
+      else props[f] = '';
+    });
+    return props;
+  }
+
+  function createItem(category){
+    var def = CATEGORY_DEFS[category] || CATEGORY_DEFS.item;
+    var props = defaultPropsFor(def);
+    var firstFile = { id: makeFileId(), name: 'main', content: '' };
+    return {
+      id: makeId(),
+      category: category,
+      name: 'New ' + def.label,
+      texture: null,
+      props: props,
+      files: [ firstFile ],
+      activeFileId: firstFile.id
+    };
+  }
+
+  function findFile(item, fileId){
+    if(!item) return null;
+    for(var i=0;i<item.files.length;i++){ if(item.files[i].id===fileId) return item.files[i]; }
+    return null;
+  }
+  function getActiveFile(item){
+    if(!item) return null;
+    return findFile(item, item.activeFileId) || item.files[0] || null;
+  }
+
+  function findItem(id){
+    if(pendingNewItem && pendingNewItem.id === id) return pendingNewItem;
+    for(var i=0;i<items.length;i++){ if(items[i].id===id) return items[i]; }
+    return null;
+  }
+
+  function isSoonCategory(category){
+    return !!SOON_CATEGORIES[category];
+  }
+
+  /* ============================================================
+     2) DOM REFS
+     ============================================================ */
+  var $ = function(sel, ctx){ return (ctx||document).querySelector(sel); };
+  var $$ = function(sel, ctx){ return Array.prototype.slice.call((ctx||document).querySelectorAll(sel)); };
+
+  var codeEditor       = $('#code-editor');
+  var lineNumbers       = $('#line-numbers');
+  var charCountEl        = $('#char-count');
+  var lineCountEl          = $('#line-count');
+  var editorMetaItem        = $('#editor-meta-item');
+  var scriptViewMeta          = $('#script-view-meta');
+  var runInlineBtn             = $('#run-inline-btn');
+  var consoleLog               = $('#console-log');
+  var clearConsoleBtn           = $('#clear-console-btn');
+  var toastEl                    = $('#toast');
+  var statusText                   = $('#status-text');
+  var statusDot                     = $('#status-dot');
+  var statusTabLabel                 = $('#status-tab-label');
+  var docsSearchInput                 = $('#docs-search-input');
+  var blockIdTbody                     = $('#blockid-tbody');
+
+  var homeGrid = $('#home-grid');
+  var homeCount = $('#home-count');
+  var homeNewBtn = $('#home-new-btn');
+  var appExitBtn = $('#app-exit-btn');
+  var viewHome = $('#view-home');
+  var viewEditor = $('#view-editor');
+  var viewScript = $('#view-script');
+  var homeTabBtn = $('#home-tab-btn');
+  var tabsStrip = $('#tabs');
+  var tabsScrollWrap = $('#tabs-scroll-wrap');
+  var tabCtxMenu = $('#tab-ctx-menu');
+  var tabCtxBackdrop = $('#tab-ctx-backdrop');
+
+  var panelProperties = $('#panel-properties');
+  var propUploadBox = $('#prop-upload-box');
+  var propUploadInput = $('#prop-upload-input');
+  var propModelInput = $('#prop-model-input');
+  var propNameInput = $('#prop-name-input');
+  var propTypeBadge = $('#prop-type-badge');
+  var propDynamicFields = $('#prop-dynamic-fields');
+  var propDeleteBtn = $('#prop-delete-btn');
+  var propSaveBtn = $('#prop-save-btn');
+  var propPropertiesCard = $('#prop-properties-card');
+  var propSoonCard = $('#prop-soon-card');
+  var propScriptEntryCard = $('#prop-script-entry-card');
+  var useScriptBtn = $('#use-script-btn');
+  var scriptCloseBtn = $('#script-close-btn');
+  var backToEditorBtn = $('#back-to-editor-btn');
+  var soonIcon = $('#soon-icon');
+  var soonTitle = $('#soon-title');
+  var soonDesc = $('#soon-desc');
+
+  var fileNameInput = $('#file-name-input');
+  var fileNameHint = $('#file-name-hint');
+  var fileTabsScroll = $('#file-tabs-scroll');
+  var newFileBtn = $('#new-file-btn');
+  var deleteFileBtn = $('#delete-file-btn');
+
+  var rightPane = $('#right-pane');
+  var rpTabs = $$('.rp-tab');
+  var docsContent = $('#docs-content');
+  var consoleContent = $('#console-content');
+  var rpConsoleErrBadge = $('#rp-console-err-badge');
+  var consoleErrCountWrap = $('#console-err-count');
+  var consoleErrCountNum = $('#console-err-count-num');
+
+  var modalOverlay = $('#modal-overlay');
+  var catPickerList = $('#cat-picker-list');
+  var catPickerCancelBtn = $('#cat-picker-cancel-btn');
+
+  var confirmOverlay = $('#confirm-overlay');
+  var confirmModalTitle = $('#confirm-modal-title');
+  var confirmModalBody = $('#confirm-modal-body');
+  var confirmOkBtn = $('#confirm-ok-btn');
+  var confirmCancelBtn = $('#confirm-cancel-btn');
+
+  var autocompletePopup = $('#autocomplete-popup');
+  var codeSurface = $('#code-surface');
+
+  // NOTE: element tabs are rendered dynamically (see openTabs / renderTabsStrip)
+  // rather than queried statically, since they come and go as items are
+  // opened/closed. The Home tab button is handled separately (homeTabBtn).
+
+  /* ============================================================
+     3) FILE NAME VALIDATION
+     Rule: letters (incl. accented), numbers, "_" and "-" only.
+     No spaces, no emoji, no other special characters.
+     (This rule applies to FILE names only — element/item names
+     in Properties are free text.)
+     ============================================================ */
+  var FILE_NAME_RE = /^[A-Za-z0-9À-ÖØ-öø-ÿ_-]+$/;
+
+  function sanitizeFileNameLive(raw){
+    return raw.replace(/\s+/g, '_').replace(/[^A-Za-z0-9À-ÖØ-öø-ÿ_-]/g, '');
+  }
+
+  function validateFileName(name, item, fileIdBeingEdited){
+    if(!name || !name.trim()) return { ok:false, msg:'File name cannot be empty.' };
+    if(!FILE_NAME_RE.test(name)) return { ok:false, msg:'Only letters, numbers, "_" and "-" are allowed. No spaces or special characters.' };
+    if(item){
+      var dup = item.files.some(function(f){ return f.id !== fileIdBeingEdited && f.name.toLowerCase() === name.toLowerCase(); });
+      if(dup) return { ok:false, msg:'A file with this name already exists in this element.' };
+    }
+    return { ok:true, msg:'Letters, numbers, "_" and "-" only. No spaces or special characters.' };
+  }
+
+  fileNameInput.addEventListener('input', function(){
+    var cleaned = sanitizeFileNameLive(fileNameInput.value);
+    if(cleaned !== fileNameInput.value) fileNameInput.value = cleaned;
+    var item = findItem(selectedItemId);
+    var file = getActiveFile(item);
+    var result = validateFileName(fileNameInput.value, item, file ? file.id : null);
+    fileNameInput.classList.toggle('invalid', !result.ok);
+    fileNameHint.textContent = result.msg;
+    fileNameHint.classList.toggle('error', !result.ok);
+    if(item && file && result.ok){
+      file.name = fileNameInput.value;
+      renderFileTabs(item);
+    }
+  });
+
+  /* ============================================================
+     4) TOP TABS — Home (fixed) + one tab per open element
+     (Script is not a topbar tab. It opens as a separate full-screen
+     view via the "Use Script" button inside an element's tab.)
+     ============================================================ */
+
+  // If a new, never-saved element is being discarded (user closes its
+  // tab or navigates to Home without pressing Save), drop it for good
+  // so it never reaches the workspace / Home grid — and remove its
+  // tab from the strip even if a different tab is currently active.
+  function discardUnsavedPendingItem(){
+    if(!pendingNewItem) return;
+    var draftId = pendingNewItem.id;
+    openTabs = openTabs.filter(function(id){ return id !== draftId; });
+    pendingNewItem = null;
+    if(selectedItemId === draftId) selectedItemId = null;
+  }
+
+  function itemHasUnsavedNewFlag(itemId){
+    return !!(pendingNewItem && pendingNewItem.id === itemId);
+  }
+
+  // Builds/refreshes the scrollable element-tab strip. Called whenever
+  // a tab opens, closes, or an item's name/save-state changes.
+  function renderTabsStrip(){
+    tabsStrip.innerHTML = '';
+    openTabs.forEach(function(itemId){
+      var item = findItem(itemId);
+      if(!item) return;
+      var def = CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item;
+      var btn = document.createElement('button');
+      btn.className = 'elem-tab' + (itemId === selectedItemId ? ' active' : '') + (itemHasUnsavedNewFlag(itemId) ? ' unsaved' : '');
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', itemId === selectedItemId ? 'true' : 'false');
+      btn.dataset.itemId = itemId;
+
+      var label = document.createElement('span');
+      label.className = 'et-label';
+      label.textContent = item.name || def.label;
+      btn.appendChild(label);
+
+      var closeX = document.createElement('span');
+      closeX.className = 'et-close';
+      closeX.textContent = '✕';
+      closeX.title = 'Kapat';
+      closeX.addEventListener('click', function(e){
+        e.stopPropagation();
+        closeElementTab(itemId);
+      });
+      btn.appendChild(closeX);
+
+      var suppressNextClick = false;
+      btn.addEventListener('click', function(e){
+        if(suppressNextClick){ suppressNextClick = false; e.preventDefault(); return; }
+        activateElementTab(itemId);
+      });
+
+      // Right-click (desktop) / long-press (mobile) -> context menu
+      btn.addEventListener('contextmenu', function(e){
+        e.preventDefault();
+        showTabContextMenu(itemId, e.clientX, e.clientY);
+      });
+      attachLongPress(btn, function(x, y){
+        suppressNextClick = true;
+        showTabContextMenu(itemId, x, y);
+      });
+
+      tabsStrip.appendChild(btn);
+    });
+  }
+
+  // Ensures itemId has an open tab (adding one if needed) and makes
+  // it the active tab, showing the Properties/editor view for it.
+  function openElementTab(itemId){
+    var item = findItem(itemId);
+    if(!item) return;
+    if(openTabs.indexOf(itemId) === -1) openTabs.push(itemId);
+    activateElementTab(itemId);
+  }
+
+  // Switches focus to an already-open tab without altering openTabs.
+  function activateElementTab(itemId){
+    var item = findItem(itemId);
+    if(!item) return;
+    selectedItemId = itemId;
+    homeTabBtn.classList.remove('active');
+    homeTabBtn.setAttribute('aria-selected', 'false');
+    viewHome.classList.remove('active');
+    viewEditor.classList.add('active');
+    panelProperties.classList.add('active');
+    statusTabLabel.textContent = item.name || 'Properties';
+    renderTabsStrip();
+    renderEditorFor(item);
+  }
+
+  // Closes a tab. If the element was never saved (pending draft),
+  // it's discarded entirely; otherwise it just stops being open —
+  // its saved data stays intact and can be reopened from Home.
+  function closeElementTab(itemId){
+    openTabs = openTabs.filter(function(id){ return id !== itemId; });
+    if(itemHasUnsavedNewFlag(itemId)){
+      pendingNewItem = null;
+    }
+    if(selectedItemId === itemId){
+      selectedItemId = null;
+      var next = openTabs[openTabs.length - 1];
+      if(next){
+        activateElementTab(next);
+      } else {
+        activateHomeTab();
+      }
+    } else {
+      renderTabsStrip();
+    }
+  }
+
+  function activateHomeTab(){
+    discardUnsavedPendingItem();
+    homeTabBtn.classList.add('active');
+    homeTabBtn.setAttribute('aria-selected', 'true');
+    viewHome.classList.add('active');
+    viewEditor.classList.remove('active');
+    panelProperties.classList.remove('active');
+    statusTabLabel.textContent = 'Home';
+    renderTabsStrip();
+    renderHomeGrid();
+  }
+
+  // Backwards-compatible shim: some code paths still call
+  // activateTab('home' | 'properties'). Route them onto the new
+  // multi-tab model without needing to touch every call site.
+  function activateTab(tabName){
+    if(tabName === 'home'){
+      activateHomeTab();
+    } else if(selectedItemId){
+      activateElementTab(selectedItemId);
+    }
+  }
+
+  homeTabBtn.addEventListener('click', activateHomeTab);
+
+  /* ---- Long-press detection (mobile "right click") ---- */
+  function attachLongPress(el, callback){
+    var timer = null;
+    var startX = 0, startY = 0;
+    var LONG_PRESS_MS = 500;
+    el.addEventListener('touchstart', function(e){
+      if(e.touches.length !== 1) return;
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+      timer = setTimeout(function(){
+        timer = null;
+        if(navigator.vibrate) navigator.vibrate(12);
+        callback(startX, startY);
+      }, LONG_PRESS_MS);
+    }, { passive:true });
+    el.addEventListener('touchmove', function(e){
+      if(!timer) return;
+      var dx = Math.abs(e.touches[0].clientX - startX);
+      var dy = Math.abs(e.touches[0].clientY - startY);
+      if(dx > 10 || dy > 10){ clearTimeout(timer); timer = null; }
+    }, { passive:true });
+    el.addEventListener('touchend', function(){ if(timer){ clearTimeout(timer); timer = null; } });
+    el.addEventListener('touchcancel', function(){ if(timer){ clearTimeout(timer); timer = null; } });
+  }
+
+  /* ---- Tab context menu: Aç / Kapat / Sil ---- */
+  var ctxMenuItemId = null;
+
+  function showTabContextMenu(itemId, x, y){
+    ctxMenuItemId = itemId;
+    tabCtxMenu.classList.add('open');
+    tabCtxBackdrop.classList.add('open');
+    // Position, then clamp inside the viewport.
+    var menuW = 150, menuH = 130;
+    var left = Math.min(x, window.innerWidth - menuW - 8);
+    var top = Math.min(y, window.innerHeight - menuH - 8);
+    tabCtxMenu.style.left = Math.max(8, left) + 'px';
+    tabCtxMenu.style.top = Math.max(8, top) + 'px';
+  }
+  function hideTabContextMenu(){
+    tabCtxMenu.classList.remove('open');
+    tabCtxBackdrop.classList.remove('open');
+    ctxMenuItemId = null;
+  }
+  tabCtxBackdrop.addEventListener('click', hideTabContextMenu);
+  tabCtxBackdrop.addEventListener('contextmenu', function(e){ e.preventDefault(); hideTabContextMenu(); });
+
+  $$('#tab-ctx-menu button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var action = btn.dataset.action;
+      var itemId = ctxMenuItemId;
+      hideTabContextMenu();
+      if(!itemId) return;
+      if(action === 'open'){
+        openElementTab(itemId);
+      } else if(action === 'close'){
+        closeElementTab(itemId);
+      } else if(action === 'delete'){
+        var item = findItem(itemId);
+        var label = (item && item.name) || 'this element';
+        showConfirm('Delete element?', 'Delete <b>' + escapeHtml(label) + '</b>? This cannot be undone.', function(){
+          items = items.filter(function(it){ return it.id !== itemId; });
+          if(pendingNewItem && pendingNewItem.id === itemId) pendingNewItem = null;
+          openTabs = openTabs.filter(function(id){ return id !== itemId; });
+          if(selectedItemId === itemId){
+            selectedItemId = null;
+            var next = openTabs[openTabs.length - 1];
+            if(next) activateElementTab(next); else activateHomeTab();
+          } else {
+            renderTabsStrip();
+          }
+          renderHomeGrid();
+        });
+      }
+    });
+  });
+
+
+
+  /* ============================================================
+     4b) SCRIPT VIEW — third full-screen view
+     Opened via the "Use Script" button inside Properties.
+     Closed via the red ✕ button in its header.
+     ============================================================ */
+  function openScriptView(){
+    var item = findItem(selectedItemId);
+    if(!item || isSoonCategory(item.category)) return;
+    var def = CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item;
+    editorMetaItem.textContent = (item.name || def.label) + ' · ' + def.label;
+    scriptViewMeta.textContent = (item.name || def.label) + ' · ' + def.label;
+    renderFileTabs(item);
+    loadActiveFileIntoEditor(item);
+    resetConsoleForNewItem();
+    viewScript.classList.add('active');
+    statusTabLabel.textContent = 'Script';
+  }
+
+  function closeScriptView(){
+    viewScript.classList.remove('active');
+    stopScript();
+    var item = findItem(selectedItemId);
+    statusTabLabel.textContent = item ? (item.name || 'Properties') : 'Properties';
+    if(item) updateUseScriptDot(item);
+  }
+
+  useScriptBtn.addEventListener('click', openScriptView);
+  scriptCloseBtn.addEventListener('click', closeScriptView);
+  // "Editöre Dön" — same behavior as the ✕ close button: exits the
+  // Run/Script view and returns the user cleanly to the code editor
+  // (Properties view), without discarding anything.
+  backToEditorBtn.addEventListener('click', closeScriptView);
+
+  /* ============================================================
+     5b) CONFIRM MODAL (replacement for window.confirm)
+     ============================================================ */
+  var _confirmCallback = null;
+  function showConfirm(title, bodyHtml, onConfirm, okLabel, tone){
+    confirmModalTitle.textContent = title;
+    confirmModalBody.innerHTML = bodyHtml;
+    confirmOkBtn.textContent = okLabel || 'Delete';
+    confirmOkBtn.classList.toggle('neutral', tone === 'neutral');
+    _confirmCallback = onConfirm;
+    confirmOverlay.classList.add('open');
+  }
+  function hideConfirm(){
+    confirmOverlay.classList.remove('open');
+    _confirmCallback = null;
+  }
+  confirmOkBtn.addEventListener('click', function(){
+    var cb = _confirmCallback;
+    hideConfirm();
+    if(cb) cb();
+  });
+  confirmCancelBtn.addEventListener('click', hideConfirm);
+  confirmOverlay.addEventListener('click', function(e){
+    if(e.target === confirmOverlay) hideConfirm();
+  });
+
+  /* ============================================================
+     5c) APP EXIT — full exit trigger (red ✕ next to Home)
+     ============================================================ */
+  function exitEditor(){
+    discardUnsavedPendingItem();
+    // Host-app hook: if this editor is embedded (e.g. a WebView),
+    // the surrounding app can listen for this event to close the
+    // editor screen entirely.
+    try{
+      window.dispatchEvent(new CustomEvent('legends:exit-editor'));
+      if(window.parent && window.parent !== window){
+        window.parent.postMessage({ type:'legends-mod-editor:exit' }, '*');
+      }
+    }catch(e){}
+    if(window.LegendsHost && typeof window.LegendsHost.exitEditor === 'function'){
+      window.LegendsHost.exitEditor();
+      return;
+    }
+    window.close();
+  }
+
+  appExitBtn.addEventListener('click', function(){
+    showConfirm(
+      'Exit editor?',
+      'This will close the Mod Editor completely. Any unsaved changes to the current element will be lost.',
+      exitEditor,
+      'Exit',
+      'neutral'
+    );
+  });
+
+  /* ============================================================
+     5) HOME GRID
+     ============================================================ */
+  function renderHomeGrid(){
+    homeGrid.innerHTML = '';
+    homeCount.textContent = items.length + (items.length === 1 ? ' item' : ' items');
+
+    if(!items.length){
+      homeGrid.innerHTML =
+        '<div class="home-empty" style="grid-column:1/-1;">' +
+          '<div class="icon">📦</div>' +
+          'No content yet.<br>Tap <b>+ New</b> above to create your first element.' +
+        '</div>';
+      return;
+    }
+
+    items.forEach(function(item){
+      var def = CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item;
+      var card = document.createElement('div');
+      card.className = 'elem-card';
+      var thumbInner = item.texture ? '<img src="'+item.texture+'" alt="">' : def.icon;
+      card.innerHTML =
+        '<button type="button" class="card-delete" title="Delete">✕</button>' +
+        '<div class="thumb">'+thumbInner+'</div>' +
+        '<div class="name"></div>' +
+        '<div class="type"></div>';
+      card.querySelector('.name').textContent = item.name || def.label;
+      var typeEl = card.querySelector('.type');
+      typeEl.textContent = def.label;
+      if(!isSoonCategory(item.category) && item.files.some(function(f){ return f.content && f.content.trim(); })){
+        var dot = document.createElement('span');
+        dot.className = 'scripted-dot';
+        dot.title = 'Has script content';
+        typeEl.appendChild(dot);
+      }
+      card.addEventListener('click', function(e){
+        if(e.target.closest('.card-delete')) return;
+        openEditorFor(item.id);
+      });
+      card.querySelector('.card-delete').addEventListener('click', function(e){
+        e.stopPropagation();
+        var label = item.name || def.label;
+        showConfirm('Delete element?', 'Delete <b>' + escapeHtml(label) + '</b>? This cannot be undone.', function(){
+          items = items.filter(function(it){ return it.id !== item.id; });
+          openTabs = openTabs.filter(function(id){ return id !== item.id; });
+          if(selectedItemId === item.id) selectedItemId = null;
+          renderTabsStrip();
+          renderHomeGrid();
+        });
+      });
+      homeGrid.appendChild(card);
+    });
+  }
+
+  /* ============================================================
+     6) CATEGORY PICKER MODAL ("+ New")
+     ============================================================ */
+  function openCatPicker(){
+    catPickerList.innerHTML = '';
+    CATEGORY_ORDER.forEach(function(catKey){
+      var def = CATEGORY_DEFS[catKey];
+      var btn = document.createElement('button');
+      btn.className = 'cat-pick-btn';
+      btn.innerHTML = '<span class="ic">'+def.icon+'</span><span class="lbl">'+def.label+'</span>';
+      btn.addEventListener('click', function(){
+        var newItem = createItem(catKey);
+        // NOTE: not pushed into `items` yet — it stays a pending draft
+        // and will only be persisted to Home once the user taps Save.
+        pendingNewItem = newItem;
+        closeCatPicker();
+        openEditorFor(newItem.id);
+      });
+      catPickerList.appendChild(btn);
+    });
+    modalOverlay.classList.add('open');
+  }
+  function closeCatPicker(){ modalOverlay.classList.remove('open'); }
+
+  homeNewBtn.addEventListener('click', openCatPicker);
+  catPickerCancelBtn.addEventListener('click', closeCatPicker);
+  modalOverlay.addEventListener('click', function(e){
+    if(e.target === modalOverlay) closeCatPicker();
+  });
+
+
+  /* ============================================================
+     7) ELEMENT EDITOR — open + Properties rendering
+     ============================================================ */
+  // Opens (or focuses) the tab for this item and fills the Properties
+  // panel for it. Called from Home cards and the "+ New" flow.
+  function openEditorFor(itemId){
+    openElementTab(itemId);
+  }
+
+  // Pure render: fills the Properties/editor panel for the given item.
+  // Does not touch tab state — call openElementTab()/activateElementTab()
+  // to actually switch focus; they call this for you.
+  function renderEditorFor(item){
+    if(!item) return;
+    var def = CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item;
+
+    // Identity
+    propNameInput.value = item.name || '';
+    propTypeBadge.textContent = def.label;
+    renderUploadBox(item);
+
+    var soon = isSoonCategory(item.category);
+
+    // Toggle SOON card vs. Properties card + "Use Script" entry point.
+    // SOON categories (Craft / Effects / Armor) never show Save or Use Script.
+    propSoonCard.style.display = soon ? 'flex' : 'none';
+    propPropertiesCard.style.display = soon ? 'none' : 'block';
+    propScriptEntryCard.style.display = soon ? 'none' : 'block';
+
+    if(soon){
+      var copy = SOON_COPY[item.category] || { icon:'🛠️', title:'Coming soon', desc:'This feature is still in development.' };
+      soonIcon.textContent = copy.icon;
+      soonTitle.textContent = copy.title;
+      soonDesc.textContent = copy.desc;
+    } else {
+      renderDynamicFields(item);
+      resetSaveBtn();
+      updateUseScriptDot(item);
+    }
+
+    editorMetaItem.textContent = (item.name || def.label) + ' · ' + def.label;
+    scriptViewMeta.textContent = (item.name || def.label) + ' · ' + def.label;
+  }
+
+
+  // Reflects whether the current element already has non-empty script
+  // content as a small dot on the "Use Script" button.
+  function updateUseScriptDot(item){
+    var hasContent = item.files.some(function(f){ return f.content && f.content.trim(); });
+    useScriptBtn.classList.toggle('has-content', hasContent);
+  }
+
+  // Properties are edited into a draft copy and are only written back to
+  // the real item.props when the user taps this category's "Save" button —
+  // per spec, nothing is persisted until Save is pressed.
+  var draftProps = null;
+
+  function renderDynamicFields(item){
+    propDynamicFields.innerHTML = '';
+    draftProps = JSON.parse(JSON.stringify(item.props));
+    var def = CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item;
+    def.fields.forEach(function(fieldKey){
+      var fd = FIELD_DEFS[fieldKey];
+      if(!fd) return;
+      var row = document.createElement('div');
+      row.className = 'prop-row';
+
+      if(fd.type === 'checkbox'){
+        var label = document.createElement('label');
+        label.textContent = fd.label;
+        var sw = document.createElement('label');
+        sw.className = 'switch';
+        var cb = document.createElement('input');
+        cb.type = 'checkbox';
+        cb.checked = !!draftProps[fieldKey];
+        var track = document.createElement('span');
+        track.className = 'track';
+        sw.appendChild(cb);
+        sw.appendChild(track);
+        cb.addEventListener('change', function(){ draftProps[fieldKey] = cb.checked; markUnsaved(); });
+        row.appendChild(label);
+        row.appendChild(sw);
+
+      } else if(fd.type === 'select'){
+        var label2 = document.createElement('label');
+        label2.textContent = fd.label;
+        var select = document.createElement('select');
+        select.className = 'prop-input';
+        fd.options.forEach(function(opt){
+          var o = document.createElement('option');
+          o.value = opt; o.textContent = opt;
+          if(draftProps[fieldKey] === opt) o.selected = true;
+          select.appendChild(o);
+        });
+        select.addEventListener('change', function(){ draftProps[fieldKey] = select.value; markUnsaved(); });
+        row.appendChild(label2);
+        row.appendChild(select);
+
+      } else if(fd.type === 'sound'){
+        // "+ Upload Sound" button instead of a free-text field.
+        if(!draftProps[fieldKey] || typeof draftProps[fieldKey] !== 'object'){
+          draftProps[fieldKey] = { name:'', dataUrl:'' };
+        }
+        var label4 = document.createElement('label');
+        label4.textContent = fd.label;
+
+        var wrap = document.createElement('div');
+        wrap.className = 'sound-field-wrap';
+
+        var uploadBtn = document.createElement('button');
+        uploadBtn.type = 'button';
+        uploadBtn.className = 'upload-sound-btn';
+        uploadBtn.textContent = '+ Upload Sound';
+
+        var fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'audio/*';
+        fileInput.style.display = 'none';
+
+        var nameEl = document.createElement('span');
+        nameEl.className = 'sound-file-name' + (draftProps[fieldKey].name ? '' : ' empty');
+        nameEl.textContent = draftProps[fieldKey].name || 'No file selected';
+
+        var clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.className = 'sound-clear-btn';
+        clearBtn.title = 'Remove sound';
+        clearBtn.textContent = '✕';
+        clearBtn.style.display = draftProps[fieldKey].name ? 'flex' : 'none';
+
+        uploadBtn.addEventListener('click', function(){ fileInput.click(); });
+        fileInput.addEventListener('change', function(){
+          var f = fileInput.files && fileInput.files[0];
+          if(!f) return;
+          var reader = new FileReader();
+          reader.onload = function(){
+            draftProps[fieldKey] = { name: f.name, dataUrl: reader.result };
+            nameEl.textContent = f.name;
+            nameEl.classList.remove('empty');
+            clearBtn.style.display = 'flex';
+            markUnsaved();
+            showToast('Sound uploaded: ' + f.name + ' (tap Save to keep it)');
+          };
+          reader.readAsDataURL(f);
+          fileInput.value = '';
+        });
+        clearBtn.addEventListener('click', function(){
+          draftProps[fieldKey] = { name:'', dataUrl:'' };
+          nameEl.textContent = 'No file selected';
+          nameEl.classList.add('empty');
+          clearBtn.style.display = 'none';
+          markUnsaved();
+        });
+
+        wrap.appendChild(uploadBtn);
+        wrap.appendChild(fileInput);
+        wrap.appendChild(nameEl);
+        wrap.appendChild(clearBtn);
+        row.appendChild(label4);
+        row.appendChild(wrap);
+
+      } else {
+        var label3 = document.createElement('label');
+        label3.textContent = fd.label;
+        var input = document.createElement('input');
+        input.type = 'text';
+        input.className = 'prop-input';
+        input.placeholder = fd.placeholder || '';
+        input.value = draftProps[fieldKey] || '';
+        input.addEventListener('input', function(){ draftProps[fieldKey] = input.value; markUnsaved(); });
+        row.appendChild(label3);
+        row.appendChild(input);
+      }
+      propDynamicFields.appendChild(row);
+    });
+  }
+
+  function markUnsaved(){
+    propSaveBtn.classList.remove('saved');
+    propSaveBtn.textContent = 'Save';
+  }
+  function resetSaveBtn(){
+    propSaveBtn.classList.remove('saved');
+    propSaveBtn.textContent = 'Save';
+  }
+
+  propSaveBtn.addEventListener('click', function(){
+    var item = findItem(selectedItemId);
+    if(!item || !draftProps) return;
+    item.props = JSON.parse(JSON.stringify(draftProps));
+
+    // First Save on a brand-new element: commit it from the pending
+    // draft into the real workspace so it now appears on Home.
+    if(pendingNewItem && pendingNewItem.id === item.id){
+      items.push(pendingNewItem);
+      pendingNewItem = null;
+    }
+
+    propSaveBtn.classList.add('saved');
+    propSaveBtn.textContent = '✓ Saved';
+    showToast('Properties saved');
+    renderHomeGrid();
+  });
+
+  propNameInput.addEventListener('input', function(){
+    var item = findItem(selectedItemId);
+    if(!item) return;
+    item.name = propNameInput.value;
+    editorMetaItem.textContent = (item.name || '') + ' · ' + (CATEGORY_DEFS[item.category]||{}).label;
+    scriptViewMeta.textContent = (item.name || '') + ' · ' + (CATEGORY_DEFS[item.category]||{}).label;
+    statusTabLabel.textContent = item.name || 'Properties';
+    renderTabsStrip();
+  });
+
+  function renderUploadBox(item){
+    if(!item) return;
+    var def = CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item;
+    var staleRow = $('#prop-model-file-row');
+    if(def.identityType === 'model'){
+      propUploadBox.classList.add('model-mode');
+      renderModelBox(item);
+    } else {
+      propUploadBox.classList.remove('model-mode');
+      disposeModelPreview();
+      if(staleRow) staleRow.remove();
+      renderTextureBox(item);
+    }
+  }
+
+  function renderTextureBox(item){
+    if(item.texture){
+      propUploadBox.classList.add('has-image');
+      propUploadBox.innerHTML =
+        '<img src="'+item.texture+'" alt="">' +
+        '<button type="button" class="upload-remove" id="upload-remove-btn" title="Remove image">✕</button>';
+      var removeBtn = $('#upload-remove-btn');
+      removeBtn.addEventListener('click', function(e){
+        e.stopPropagation();
+        item.texture = null;
+        renderUploadBox(item);
+        renderHomeGrid();
+      });
+    } else {
+      propUploadBox.classList.remove('has-image');
+      propUploadBox.innerHTML = '<span class="upload-plus">+</span>';
+    }
+  }
+
+  /* ============================================================
+     MODEL IDENTITY (NPC/Entity, Emote) — .gltf / .glb upload with
+     a small live Three.js preview instead of a flat PNG texture.
+     ============================================================ */
+  var modelPreview = { renderer:null, scene:null, camera:null, mesh:null, rafId:null, canvas:null };
+
+  function disposeModelPreview(){
+    if(modelPreview.rafId) cancelAnimationFrame(modelPreview.rafId);
+    if(modelPreview.renderer){
+      modelPreview.renderer.dispose();
+    }
+    modelPreview.renderer = null;
+    modelPreview.scene = null;
+    modelPreview.camera = null;
+    modelPreview.mesh = null;
+    modelPreview.rafId = null;
+    modelPreview.canvas = null;
+  }
+
+  function buildModelBoxSkeleton(){
+    propUploadBox.innerHTML =
+      '<div id="prop-model-canvas-wrap"></div>' +
+      '<div id="prop-model-loading">Loading…</div>' +
+      '<div id="prop-model-error"><span class="err-icon">⚠</span><span class="err-txt">Couldn\'t load model</span></div>' +
+      '<div id="prop-model-empty" title="Upload .gltf or .glb model">' +
+        '<span class="upload-plus">+</span>' +
+        '<span class="model-hint">.gltf / .glb</span>' +
+      '</div>';
+  }
+
+  function renderModelBox(item){
+    disposeModelPreview();
+    buildModelBoxSkeleton();
+
+    var canvasWrap = $('#prop-model-canvas-wrap');
+    var loadingEl = $('#prop-model-loading');
+    var errorEl = $('#prop-model-error');
+    var emptyEl = $('#prop-model-empty');
+
+    emptyEl.addEventListener('click', function(){ propModelInput.click(); });
+
+    if(item.model && item.model.dataUrl){
+      emptyEl.style.display = 'none';
+      canvasWrap.classList.add('visible');
+      loadingEl.classList.add('visible');
+      startModelPreview(item.model.dataUrl, canvasWrap, loadingEl, errorEl);
+    } else {
+      canvasWrap.classList.remove('visible');
+    }
+
+    renderModelFileRow(item);
+  }
+
+  function startModelPreview(dataUrl, canvasWrap, loadingEl, errorEl){
+    if(typeof THREE === 'undefined' || typeof THREE.GLTFLoader === 'undefined'){
+      loadingEl.classList.remove('visible');
+      errorEl.classList.add('visible');
+      errorEl.querySelector('.err-txt').textContent = '3D preview unavailable offline';
+      return;
+    }
+
+    var w = propUploadBox.clientWidth || 96;
+    var h = propUploadBox.clientHeight || 96;
+
+    var renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.setSize(w, h);
+    canvasWrap.innerHTML = '';
+    canvasWrap.appendChild(renderer.domElement);
+
+    var scene = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(40, w / h, 0.05, 100);
+    camera.position.set(1.6, 1.3, 1.8);
+    camera.lookAt(0, 0, 0);
+
+    var hemi = new THREE.HemisphereLight(0xffffff, 0x2b2b30, 1.1);
+    scene.add(hemi);
+    var dir = new THREE.DirectionalLight(0xffffff, 0.9);
+    dir.position.set(3, 5, 2);
+    scene.add(dir);
+
+    modelPreview.renderer = renderer;
+    modelPreview.scene = scene;
+    modelPreview.camera = camera;
+    modelPreview.canvas = renderer.domElement;
+
+    var loader = new THREE.GLTFLoader();
+    loader.load(
+      dataUrl,
+      function(gltf){
+        loadingEl.classList.remove('visible');
+        var root = gltf.scene || (gltf.scenes && gltf.scenes[0]);
+        if(!root){
+          errorEl.classList.add('visible');
+          return;
+        }
+        // Normalize scale/position so any model roughly fills the preview frame
+        var box = new THREE.Box3().setFromObject(root);
+        var size = new THREE.Vector3();
+        box.getSize(size);
+        var center = new THREE.Vector3();
+        box.getCenter(center);
+        var maxDim = Math.max(size.x, size.y, size.z) || 1;
+        var scale = 1.2 / maxDim;
+        root.scale.setScalar(scale);
+        root.position.sub(center.multiplyScalar(scale));
+
+        scene.add(root);
+        modelPreview.mesh = root;
+
+        var start = null;
+        function tick(ts){
+          if(!modelPreview.renderer) return; // preview was disposed
+          if(start === null) start = ts;
+          var elapsed = (ts - start) / 1000;
+          if(modelPreview.mesh){ modelPreview.mesh.rotation.y = elapsed * 0.8; }
+          modelPreview.renderer.render(modelPreview.scene, modelPreview.camera);
+          modelPreview.rafId = requestAnimationFrame(tick);
+        }
+        modelPreview.rafId = requestAnimationFrame(tick);
+      },
+      undefined,
+      function(err){
+        loadingEl.classList.remove('visible');
+        errorEl.classList.add('visible');
+      }
+    );
+  }
+
+  function renderModelFileRow(item){
+    var row = $('#prop-model-file-row');
+    if(row) row.remove();
+    row = document.createElement('div');
+    row.id = 'prop-model-file-row';
+
+    var uploadBtn = document.createElement('button');
+    uploadBtn.type = 'button';
+    uploadBtn.id = 'prop-model-upload-btn';
+    uploadBtn.textContent = (item.model && item.model.name) ? '↻ Replace' : '+ Upload Model';
+    uploadBtn.addEventListener('click', function(){ propModelInput.click(); });
+    row.appendChild(uploadBtn);
+
+    var chip = document.createElement('span');
+    if(item.model && item.model.name){
+      chip.id = 'prop-model-file-chip';
+      var nm = document.createElement('span');
+      nm.className = 'mfc-name';
+      nm.textContent = item.model.name;
+      chip.appendChild(nm);
+      var rm = document.createElement('button');
+      rm.type = 'button';
+      rm.className = 'mfc-remove';
+      rm.textContent = '✕';
+      rm.title = 'Remove model';
+      rm.addEventListener('click', function(){
+        item.model = null;
+        renderUploadBox(item);
+        renderHomeGrid();
+      });
+      chip.appendChild(rm);
+    } else {
+      chip.id = 'prop-model-file-chip';
+      chip.classList.add('empty');
+      chip.textContent = 'No model selected';
+    }
+    row.appendChild(chip);
+
+    // Insert AFTER the whole #prop-identity flex row (not after just the
+    // upload box inside it) so it doesn't get pulled into that flex layout
+    // and push the name/badge fields out of place.
+    var identityRow = $('#prop-identity');
+    identityRow.insertAdjacentElement('afterend', row);
+  }
+
+  propModelInput.addEventListener('change', function(){
+    var file = propModelInput.files && propModelInput.files[0];
+    if(!file) return;
+    var name = file.name.toLowerCase();
+    if(!(name.endsWith('.gltf') || name.endsWith('.glb'))){
+      showToast('Please choose a .gltf or .glb file', true);
+      propModelInput.value = '';
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function(){
+      var item = findItem(selectedItemId);
+      if(!item) return;
+      item.model = { name: file.name, dataUrl: reader.result };
+      renderUploadBox(item);
+      renderHomeGrid();
+      showToast('Model uploaded: ' + file.name);
+    };
+    reader.readAsDataURL(file);
+    propModelInput.value = '';
+  });
+
+  propUploadBox.addEventListener('click', function(e){
+    if(e.target.closest('.upload-remove')) return;
+    var item = findItem(selectedItemId);
+    var def = item ? (CATEGORY_DEFS[item.category] || CATEGORY_DEFS.item) : null;
+    if(def && def.identityType === 'model') return; // model box handles its own click targets
+    propUploadInput.click();
+  });
+  propUploadInput.addEventListener('change', function(){
+    var file = propUploadInput.files && propUploadInput.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(){
+      var item = findItem(selectedItemId);
+      if(!item) return;
+      item.texture = reader.result;
+      renderUploadBox(item);
+      renderHomeGrid();
+    };
+    reader.readAsDataURL(file);
+    propUploadInput.value = ''; // allow re-selecting the same file later
+  });
+
+  propDeleteBtn.addEventListener('click', function(){
+    var item = findItem(selectedItemId);
+    if(!item) return;
+    var label = item.name || 'this element';
+    var itemId = item.id;
+    showConfirm('Delete element?', 'Delete <b>' + escapeHtml(label) + '</b>? This cannot be undone.', function(){
+      items = items.filter(function(it){ return it.id !== itemId; });
+      if(pendingNewItem && pendingNewItem.id === itemId) pendingNewItem = null;
+      openTabs = openTabs.filter(function(id){ return id !== itemId; });
+      selectedItemId = null;
+      var next = openTabs[openTabs.length - 1];
+      if(next) activateElementTab(next); else activateHomeTab();
+      renderHomeGrid();
+    });
+  });
+
+  /* ============================================================
+     9) RIGHT PANE — Docs / Console tabs
+     ============================================================ */
+  var rpOpenMobile = false;
+  function applyRightPaneMobile(){
+    if(window.innerWidth <= 860){
+      rightPane.classList.toggle('open', rpOpenMobile);
+    } else {
+      rightPane.classList.remove('open');
+    }
+  }
+  window.addEventListener('resize', applyRightPaneMobile);
+
+  function activateRpTab(name){
+    rpTabs.forEach(function(t){ t.classList.toggle('active', t.dataset.rp === name); });
+    docsContent.classList.toggle('active', name === 'docs');
+    consoleContent.classList.toggle('active', name === 'console');
+    if(window.innerWidth <= 860){ rpOpenMobile = true; applyRightPaneMobile(); }
+  }
+  rpTabs.forEach(function(t){
+    t.addEventListener('click', function(){
+      // on mobile, tapping the already-active tab toggles the panel closed
+      if(window.innerWidth <= 860 && t.classList.contains('active') && rightPane.classList.contains('open')){
+        rpOpenMobile = false; applyRightPaneMobile(); return;
+      }
+      activateRpTab(t.dataset.rp);
+    });
+  });
+  applyRightPaneMobile();
+
+  /* ============================================================
+     10) DOCS — search filter
+     (The old "+ Insert snippet" buttons have been removed: users
+     read the docs and write the code themselves.)
+     ============================================================ */
+  docsSearchInput.addEventListener('input', function(){
+    var q = docsSearchInput.value.trim().toLowerCase();
+    $$('.doc-entry').forEach(function(entry){
+      var haystack = (entry.getAttribute('data-search') || '') + ' ' + entry.textContent.toLowerCase();
+      entry.style.display = (!q || haystack.toLowerCase().indexOf(q) !== -1) ? '' : 'none';
+    });
+    $$('.docs-section[data-group]').forEach(function(section){
+      if(section.querySelector('table')) return;
+      var anyVisible = $$('.doc-entry', section).some(function(e){ return e.style.display !== 'none'; });
+      section.style.display = (!q || anyVisible) ? '' : 'none';
+    });
+  });
+
+  BLOCK_IDS.forEach(function(b){
+    var tr = document.createElement('tr');
+    tr.title = 'Tap to insert ID ' + b.id;
+    tr.innerHTML =
+      '<td class="swatch-cell"><span class="swatch" style="background:' + b.color + '"></span></td>' +
+      '<td class="id-cell">' + b.id + '</td>' +
+      '<td>' + b.name + '</td>';
+    tr.addEventListener('click', function(){
+      insertAtCursor(codeEditor, String(b.id));
+      showToast('Inserted block ID ' + b.id + ' (' + b.name + ')');
+      updateEditorMeta();
+      syncScriptToItem();
+    });
+    blockIdTbody.appendChild(tr);
+  });
+
+
+  /* ============================================================
+     11) CODE EDITOR — line numbers, syntax highlighting, sync scroll
+     ============================================================ */
+  var codeHighlight   = $('#code-highlight');
+  var codeHighlightInner = $('#code-highlight-inner');
+
+  // Simple JS tokenizer -> HTML spans (safe: always escapes text first)
+  var JS_KEYWORDS = ['var','let','const','function','return','if','else','for','while','do',
+    'break','continue','new','typeof','instanceof','in','of','true','false','null','undefined',
+    'this','switch','case','default','try','catch','finally','throw','class','extends','super',
+    'static','yield','async','await','delete','void'];
+  var KNOWN_FN_NAMES = ['setBlock','fillRegion','teleportPlayer','spawnEntity','sendSystemMessage','registerCommand','playSound','on','log','warn','error','info'];
+
+  function escapeHtml(s){
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // Tokenizes a single line of JS-like code into highlighted HTML.
+  function highlightLine(line){
+    var out = '';
+    var i = 0;
+    var n = line.length;
+    while(i < n){
+      var ch = line[i];
+
+      // line comment
+      if(ch === '/' && line[i+1] === '/'){
+        out += '<span class="tok-cm">' + escapeHtml(line.slice(i)) + '</span>';
+        break;
+      }
+      // strings
+      if(ch === '"' || ch === "'" || ch === '`'){
+        var quote = ch;
+        var j = i + 1;
+        while(j < n && line[j] !== quote){
+          if(line[j] === '\\') j++;
+          j++;
+        }
+        j = Math.min(j + 1, n);
+        out += '<span class="tok-str">' + escapeHtml(line.slice(i, j)) + '</span>';
+        i = j;
+        continue;
+      }
+      // numbers
+      if(/[0-9]/.test(ch) && !/[A-Za-z0-9_$]/.test(line[i-1] || '')){
+        var j2 = i;
+        while(j2 < n && /[0-9.]/.test(line[j2])) j2++;
+        out += '<span class="tok-num">' + escapeHtml(line.slice(i, j2)) + '</span>';
+        i = j2;
+        continue;
+      }
+      // identifiers / keywords / function calls
+      if(/[A-Za-z_$]/.test(ch)){
+        var j3 = i;
+        while(j3 < n && /[A-Za-z0-9_$]/.test(line[j3])) j3++;
+        var word = line.slice(i, j3);
+        var isFnCall = line[j3] === '(';
+        if(JS_KEYWORDS.indexOf(word) !== -1){
+          out += '<span class="tok-kw">' + escapeHtml(word) + '</span>';
+        } else if(isFnCall || KNOWN_FN_NAMES.indexOf(word) !== -1){
+          out += '<span class="tok-fn">' + escapeHtml(word) + '</span>';
+        } else {
+          out += escapeHtml(word);
+        }
+        i = j3;
+        continue;
+      }
+      // punctuation
+      if('{}()[];,.:'.indexOf(ch) !== -1){
+        out += '<span class="tok-punc">' + escapeHtml(ch) + '</span>';
+        i++;
+        continue;
+      }
+      out += escapeHtml(ch);
+      i++;
+    }
+    return out || '\u200b'; // keep empty lines from collapsing height
+  }
+
+  var errorLineNumber = null; // 1-based line number to highlight in red, or null
+
+  function renderHighlight(){
+    var lines = codeEditor.value.split('\n');
+    var html = '';
+    for(var i = 0; i < lines.length; i++){
+      var lineNum = i + 1;
+      var cls = (errorLineNumber === lineNum) ? ' class="err-line"' : '';
+      html += '<span' + cls + '>' + highlightLine(lines[i]) + '</span>\n';
+    }
+    codeHighlightInner.innerHTML = html;
+  }
+
+  function updateLineNumbers(){
+    var lines = codeEditor.value.split('\n').length;
+    var out = '';
+    for(var i = 1; i <= lines; i++){
+      var isErr = (errorLineNumber === i);
+      out += '<span class="ln-row' + (isErr ? ' ln-error' : '') + '">' + i + '</span>';
+    }
+    lineNumbers.innerHTML = out;
+  }
+  function updateEditorMeta(){
+    var val = codeEditor.value;
+    var lines = val.split('\n').length;
+    charCountEl.textContent = val.length + ' chars';
+    lineCountEl.textContent = lines + (lines === 1 ? ' line' : ' lines');
+    updateLineNumbers();
+    renderHighlight();
+  }
+  function syncScriptToItem(){
+    var item = findItem(selectedItemId);
+    var file = getActiveFile(item);
+    if(file) file.content = codeEditor.value;
+  }
+
+  function loadActiveFileIntoEditor(item){
+    var file = getActiveFile(item);
+    codeEditor.value = file ? (file.content || '') : '';
+    if(file){
+      fileNameInput.value = file.name;
+      var fnResult = validateFileName(file.name, item, file.id);
+      fileNameHint.textContent = fnResult.msg;
+      fileNameHint.classList.toggle('error', !fnResult.ok);
+      fileNameInput.classList.toggle('invalid', !fnResult.ok);
+    }
+    deleteFileBtn.disabled = !item || item.files.length <= 1;
+    errorLineNumber = null;
+    updateEditorMeta();
+    closeAutocomplete();
+  }
+
+  function renderFileTabs(item){
+    fileTabsScroll.innerHTML = '';
+    if(!item) return;
+    item.files.forEach(function(file){
+      var tab = document.createElement('button');
+      tab.className = 'file-tab' + (file.id === item.activeFileId ? ' active' : '');
+      var hasErr = file.lastRunErrorCount ? file.lastRunErrorCount > 0 : false;
+      tab.innerHTML = '<span class="ft-name"></span><span style="color:var(--text-3);">.js</span>' + (hasErr ? '<span class="ft-err-dot" title="This file has errors"></span>' : '');
+      tab.querySelector('.ft-name').textContent = file.name;
+      tab.title = file.name + '.js';
+      tab.addEventListener('click', function(){
+        syncScriptToItem(); // save whatever's currently in the editor before switching
+        item.activeFileId = file.id;
+        renderFileTabs(item);
+        loadActiveFileIntoEditor(item);
+      });
+      fileTabsScroll.appendChild(tab);
+    });
+  }
+
+  function uniqueDefaultFileName(item){
+    var base = 'script';
+    var n = item.files.length + 1;
+    var candidate = base + n;
+    while(item.files.some(function(f){ return f.name.toLowerCase() === candidate.toLowerCase(); })){
+      n++; candidate = base + n;
+    }
+    return candidate;
+  }
+
+  newFileBtn.addEventListener('click', function(){
+    var item = findItem(selectedItemId);
+    if(!item) return;
+    syncScriptToItem();
+    var newFile = { id: makeFileId(), name: uniqueDefaultFileName(item), content: '' };
+    item.files.push(newFile);
+    item.activeFileId = newFile.id;
+    renderFileTabs(item);
+    loadActiveFileIntoEditor(item);
+    fileNameInput.focus();
+    fileNameInput.select();
+    showToast('New file created');
+  });
+
+  deleteFileBtn.addEventListener('click', function(){
+    var item = findItem(selectedItemId);
+    if(!item){ showToast('No element selected', true); return; }
+    if(item.files.length <= 1){ showToast('An element needs at least one file', true); return; }
+    var file = getActiveFile(item);
+    if(!file) return;
+    showConfirm('Delete file?', 'Delete <b>' + escapeHtml(file.name) + '.js</b>? This cannot be undone.', function(){
+      item.files = item.files.filter(function(f){ return f.id !== file.id; });
+      if(!findFile(item, item.activeFileId)){
+        item.activeFileId = item.files[0].id;
+      }
+      renderFileTabs(item);
+      loadActiveFileIntoEditor(item);
+      showToast('File deleted');
+    });
+  });
+
+  codeEditor.addEventListener('input', function(){
+    if(errorLineNumber !== null){ errorLineNumber = null; } // clear stale error highlight once user edits
+    updateEditorMeta();
+    syncScriptToItem();
+    updateAutocomplete();
+  });
+  function syncEditorScroll(){
+    lineNumbers.scrollTop = codeEditor.scrollTop;
+    codeHighlight.scrollTop = codeEditor.scrollTop;
+    codeHighlight.scrollLeft = codeEditor.scrollLeft;
+    closeAutocomplete();
+  }
+  codeEditor.addEventListener('scroll', syncEditorScroll);
+  codeEditor.addEventListener('click', function(){ closeAutocomplete(); });
+  codeEditor.addEventListener('blur', function(){
+    // small delay so a click on the popup can still register first
+    setTimeout(closeAutocomplete, 120);
+  });
+
+  codeEditor.addEventListener('keydown', function(e){
+    // Autocomplete keyboard navigation takes priority when the popup is open
+    if(autocompletePopup.classList.contains('open')){
+      if(e.key === 'ArrowDown'){ e.preventDefault(); moveAutocompleteSelection(1); return; }
+      if(e.key === 'ArrowUp'){ e.preventDefault(); moveAutocompleteSelection(-1); return; }
+      if(e.key === 'Enter' || e.key === 'Tab'){
+        if(acFiltered.length){
+          e.preventDefault();
+          applyAutocompleteEntry(acFiltered[acSelectedIndex]);
+          return;
+        }
+      }
+      if(e.key === 'Escape'){ closeAutocomplete(); return; }
+    }
+
+    if(e.key === 'Tab'){
+      e.preventDefault();
+      insertAtCursor(codeEditor, '  ');
+      updateEditorMeta();
+      syncScriptToItem();
+    }
+  });
+
+  function insertAtCursor(textarea, text){
+    var start = textarea.selectionStart;
+    var end = textarea.selectionEnd;
+    var val = textarea.value;
+    textarea.value = val.slice(0, start) + text + val.slice(end);
+    var newPos = start + text.length;
+    textarea.selectionStart = textarea.selectionEnd = newPos;
+    textarea.focus();
+  }
+
+  /* ============================================================
+     11b) AUTOCOMPLETE / INTELLISENSE ENGINE
+     Shows a small popup directly under the caret listing keywords
+     and known API functions that start with the word currently
+     being typed (e.g. "fun" -> "function"). Capped to a limited
+     number of visible suggestions so it never fills the screen.
+     ============================================================ */
+  var acFiltered = [];
+  var acSelectedIndex = 0;
+  var acCurrentWordStart = 0;
+  var acCurrentWordEnd = 0;
+
+  function getCurrentWordAtCaret(){
+    var val = codeEditor.value;
+    var caret = codeEditor.selectionStart;
+    if(codeEditor.selectionStart !== codeEditor.selectionEnd) return null; // no active selection
+
+    var start = caret;
+    while(start > 0 && /[A-Za-z0-9_$.]/.test(val[start-1])) start--;
+    var end = caret;
+    while(end < val.length && /[A-Za-z0-9_$]/.test(val[end])) end++;
+
+    var word = val.slice(start, caret);
+    if(!word) return null;
+    return { word: word, start: start, end: end, caret: caret };
+  }
+
+  // Rough pixel-position estimate for a monospace textarea, used to place
+  // the popup directly beneath the caret without a hidden-mirror element.
+  function estimateCaretPixelPosition(){
+    var val = codeEditor.value.slice(0, codeEditor.selectionStart);
+    var lines = val.split('\n');
+    var lineIndex = lines.length - 1;
+    var col = lines[lineIndex].length;
+
+    var charWidth = 7.1;   // approx for 14px JetBrains-Mono-like font
+    var lineHeight = 14 * 1.55;
+
+    var paddingLeft = 12, paddingTop = 10;
+    var x = paddingLeft + col * charWidth - codeEditor.scrollLeft;
+    var y = paddingTop + (lineIndex + 1) * lineHeight - codeEditor.scrollTop;
+    return { x: x, y: y };
+  }
+
+  function updateAutocomplete(){
+    var info = getCurrentWordAtCaret();
+    if(!info || info.word.length < 1){ closeAutocomplete(); return; }
+
+    var q = info.word.toLowerCase();
+    acFiltered = AUTOCOMPLETE_ENTRIES.filter(function(entry){
+      return entry.word.toLowerCase().indexOf(q) === 0 && entry.word.toLowerCase() !== q;
+    }).slice(0, AUTOCOMPLETE_MAX_VISIBLE);
+
+    acCurrentWordStart = info.start;
+    acCurrentWordEnd = info.end;
+
+    if(!acFiltered.length){ closeAutocomplete(); return; }
+    acSelectedIndex = 0;
+    renderAutocomplete(info.word);
+    positionAutocomplete();
+  }
+
+  function renderAutocomplete(typedWord){
+    autocompletePopup.innerHTML = '';
+    acFiltered.forEach(function(entry, idx){
+      var row = document.createElement('div');
+      row.className = 'ac-item' + (idx === acSelectedIndex ? ' active' : '');
+      row.setAttribute('role', 'option');
+
+      var kindEl = document.createElement('span');
+      kindEl.className = 'ac-kind ' + entry.kind;
+      kindEl.textContent = entry.kind === 'kw' ? 'K' : (entry.kind === 'ev' ? 'E' : 'ƒ');
+
+      var labelEl = document.createElement('span');
+      labelEl.className = 'ac-label';
+      var lower = entry.word.toLowerCase();
+      var matchLen = typedWord.length;
+      labelEl.innerHTML = '<b>' + escapeHtml(entry.word.slice(0, matchLen)) + '</b>' + escapeHtml(entry.word.slice(matchLen));
+
+      var hintEl = document.createElement('span');
+      hintEl.className = 'ac-hint';
+      hintEl.textContent = entry.hint;
+
+      row.appendChild(kindEl);
+      row.appendChild(labelEl);
+      row.appendChild(hintEl);
+
+      row.addEventListener('mousedown', function(e){
+        // mousedown (not click) so it fires before the textarea blur handler
+        e.preventDefault();
+        applyAutocompleteEntry(entry);
+      });
+
+      autocompletePopup.appendChild(row);
+    });
+    autocompletePopup.classList.add('open');
+  }
+
+  function moveAutocompleteSelection(delta){
+    if(!acFiltered.length) return;
+    acSelectedIndex = (acSelectedIndex + delta + acFiltered.length) % acFiltered.length;
+    $$('.ac-item', autocompletePopup).forEach(function(el, idx){
+      el.classList.toggle('active', idx === acSelectedIndex);
+    });
+    var activeEl = autocompletePopup.children[acSelectedIndex];
+    if(activeEl) activeEl.scrollIntoView({ block:'nearest' });
+  }
+
+  function applyAutocompleteEntry(entry){
+    var val = codeEditor.value;
+    var before = val.slice(0, acCurrentWordStart);
+    var after = val.slice(acCurrentWordEnd);
+    var insertText = entry.insert;
+    codeEditor.value = before + insertText + after;
+    var newPos = before.length + insertText.length;
+    codeEditor.selectionStart = codeEditor.selectionEnd = newPos;
+    codeEditor.focus();
+    updateEditorMeta();
+    syncScriptToItem();
+    closeAutocomplete();
+  }
+
+  function positionAutocomplete(){
+    var pos = estimateCaretPixelPosition();
+    var surfaceRect = codeSurface.getBoundingClientRect();
+    var maxLeft = codeSurface.clientWidth - autocompletePopup.offsetWidth - 6;
+    var left = Math.max(4, Math.min(pos.x, maxLeft > 0 ? maxLeft : pos.x));
+    var top = pos.y;
+    // flip above the caret if there isn't room below
+    if(top + 200 > codeSurface.clientHeight){
+      top = Math.max(4, pos.y - (14*1.55) - autocompletePopup.offsetHeight - 6);
+    }
+    autocompletePopup.style.left = left + 'px';
+    autocompletePopup.style.top = top + 'px';
+  }
+
+  function closeAutocomplete(){
+    acFiltered = [];
+    acSelectedIndex = 0;
+    autocompletePopup.classList.remove('open');
+    autocompletePopup.innerHTML = '';
+  }
+
+
+  /* ============================================================
+     12) TOAST
+     ============================================================ */
+  var toastTimer = null;
+  function showToast(msg, isErr){
+    toastEl.textContent = msg;
+    toastEl.classList.toggle('err', !!isErr);
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ toastEl.classList.remove('show'); }, 1800);
+  }
+
+  /* ============================================================
+     13) CONSOLE + ERROR COUNTING
+     ============================================================ */
+  function nowStamp(){
+    var d = new Date();
+    function pad(n){ return (n < 10 ? '0' : '') + n; }
+    return pad(d.getHours()) + ':' + pad(d.getMinutes()) + ':' + pad(d.getSeconds());
+  }
+
+  function updateErrorBadges(){
+    rpConsoleErrBadge.textContent = String(errorCount);
+    rpConsoleErrBadge.classList.toggle('hidden', errorCount === 0);
+    consoleErrCountNum.textContent = String(errorCount);
+    consoleErrCountWrap.classList.toggle('hidden', errorCount === 0);
+    statusDot.classList.toggle('err', errorCount > 0);
+  }
+
+  function logLine(kind, text){
+    var line = document.createElement('div');
+    line.className = 'line ' + kind;
+    var ts = document.createElement('span');
+    ts.className = 'ts';
+    ts.textContent = '[' + nowStamp() + ']';
+    line.appendChild(ts);
+    line.appendChild(document.createTextNode(text));
+    consoleLog.appendChild(line);
+    consoleLog.scrollTop = consoleLog.scrollHeight;
+    if(kind === 'err'){
+      errorCount++;
+      updateErrorBadges();
+    }
+  }
+
+  function resetConsoleForNewItem(){
+    consoleLog.innerHTML = '';
+    errorCount = 0;
+    updateErrorBadges();
+    logLine('info', 'Console ready. Waiting for run...');
+  }
+
+  clearConsoleBtn.addEventListener('click', function(){
+    consoleLog.innerHTML = '';
+    errorCount = 0;
+    updateErrorBadges();
+    logLine('info', 'Console cleared.');
+  });
+
+  /* ============================================================
+     14) SANDBOXED SCRIPT RUNNER
+     ============================================================ */
+  var eventHandlers = {};
+  function on(eventName, handler){
+    if(!eventHandlers[eventName]) eventHandlers[eventName] = [];
+    eventHandlers[eventName].push(handler);
+    logLine('info', 'Listener registered for "' + eventName + '"');
+    return function off(){
+      var idx = eventHandlers[eventName].indexOf(handler);
+      if(idx !== -1) eventHandlers[eventName].splice(idx, 1);
+    };
+  }
+
+  function makeSandboxAPI(){
+    return {
+      setBlock: function(x, y, z, blockId){
+        var name = BLOCK_NAME_BY_ID.hasOwnProperty(blockId) ? BLOCK_NAME_BY_ID[blockId] : 'Unknown';
+        logLine('ok', 'setBlock(' + x + ', ' + y + ', ' + z + ', ' + blockId + ') → ' + name);
+      },
+      fillRegion: function(x1, y1, z1, x2, y2, z2, blockId){
+        var name = BLOCK_NAME_BY_ID.hasOwnProperty(blockId) ? BLOCK_NAME_BY_ID[blockId] : 'Unknown';
+        var count = (Math.abs(x2-x1)+1) * (Math.abs(y2-y1)+1) * (Math.abs(z2-z1)+1);
+        logLine('ok', 'fillRegion(' + [x1,y1,z1,x2,y2,z2,blockId].join(', ') + ') → ' + count + ' blocks of ' + name);
+      },
+      teleportPlayer: function(x, y, z){
+        logLine('ok', 'teleportPlayer(' + x + ', ' + y + ', ' + z + ') → player moved');
+      },
+      spawnEntity: function(type, x, y, z){
+        logLine('ok', 'spawnEntity("' + type + '", ' + x + ', ' + y + ', ' + z + ') → entity spawned');
+      },
+      sendSystemMessage: function(msg){
+        logLine('ok', 'sendSystemMessage("' + msg + '")');
+      },
+      registerCommand: function(name, handler){
+        logLine('ok', 'registerCommand("' + name + '") → command registered');
+      },
+      playSound: function(soundId, x, y, z){
+        logLine('ok', 'playSound("' + soundId + '", ' + x + ', ' + y + ', ' + z + ') → sound queued');
+      }
+    };
+  }
+
+  function stopScript(){ eventHandlers = {}; }
+
+  function runScript(){
+    stopScript();
+    errorCount = 0;
+    consoleLog.innerHTML = '';
+    updateErrorBadges();
+
+    var item = findItem(selectedItemId);
+    var file = getActiveFile(item);
+    errorLineNumber = null;
+
+    var fnResult = validateFileName(fileNameInput.value, item, file ? file.id : null);
+    if(!fnResult.ok){
+      logLine('err', 'Cannot run: invalid file name — ' + fnResult.msg);
+      statusText.textContent = 'Error';
+      activateRpTab('console');
+      return;
+    }
+
+    var fileLabel = (file ? file.name : fileNameInput.value) + '.js';
+    var code = codeEditor.value;
+    if(!code || !code.trim()){
+      logLine('warn', 'Nothing to run — the script is empty.');
+      activateRpTab('console');
+      return;
+    }
+
+    var api = makeSandboxAPI();
+    var sandboxConsole = {
+      log:   function(){ logLine('info', Array.prototype.slice.call(arguments).join(' ')); },
+      info:  function(){ logLine('info', Array.prototype.slice.call(arguments).join(' ')); },
+      warn:  function(){ logLine('warn', Array.prototype.slice.call(arguments).join(' ')); },
+      error: function(){ logLine('err',  Array.prototype.slice.call(arguments).join(' ')); }
+    };
+
+    logLine('info', 'Running "' + fileLabel + '"...');
+    statusText.textContent = 'Running';
+    activateRpTab('console');
+
+    // The wrapped source we hand to `new Function`. We prepend one line
+    // ("use strict") before the user's code. `new Function` itself adds
+    // implicit lines around the body when V8 reports stack positions, so we
+    // measure the real offset once (cheap) instead of hard-coding a guess.
+    var wrapperPrefixLines = measureFunctionBodyLineOffset();
+    var wrappedSource = '"use strict";\n' + code;
+
+    try{
+      var fn = new Function(
+        'setBlock', 'fillRegion', 'teleportPlayer', 'spawnEntity', 'sendSystemMessage',
+        'registerCommand', 'playSound',
+        'on', 'console',
+        wrappedSource
+      );
+      fn(
+        api.setBlock, api.fillRegion, api.teleportPlayer, api.spawnEntity, api.sendSystemMessage,
+        api.registerCommand, api.playSound,
+        on, sandboxConsole
+      );
+      logLine('ok', 'Script executed successfully.');
+      statusText.textContent = 'Idle';
+    }catch(e){
+      var userLine = extractUserLineNumber(e, wrapperPrefixLines);
+      var locationLabel = fileLabel + (userLine ? (':' + userLine) : '');
+      var msg = (e && e.message ? e.message : String(e));
+      logLine('err', '[' + locationLabel + '] ' + msg);
+      statusText.textContent = 'Error (' + errorCount + ')';
+      showToast(errorCount + ' error(s) in ' + locationLabel, true);
+      if(userLine){ errorLineNumber = userLine; }
+      if(file){ file.lastRunErrorCount = errorCount; }
+    }
+
+    if(!errorCount && file){ file.lastRunErrorCount = 0; }
+    if(item) renderFileTabs(item);
+    updateLineNumbers();
+    renderHighlight();
+    syncScriptToItem();
+  }
+
+  // Measures how many lines `new Function` adds in front of the body when
+  // reporting stack trace line numbers, by throwing a known error on a known
+  // line and reading back where the engine says it happened. Cached after
+  // first call since it's constant per engine/browser.
+  var _cachedLineOffset = null;
+  function measureFunctionBodyLineOffset(){
+    if(_cachedLineOffset !== null) return _cachedLineOffset;
+    var offset = 1; // sane fallback
+    try{
+      var probe = new Function('"use strict";\nthrowsOnLineTwo();\n');
+      try{ probe(); } catch(e){
+        var stack = e.stack || '';
+        var m = stack.match(/anonymous:(\d+):(\d+)/) || stack.match(/<anonymous>:(\d+):(\d+)/);
+        if(m){
+          var reportedLine = parseInt(m[1], 10);
+          offset = reportedLine - 2; // the probe's throwing call is on source line 2
+        }
+      }
+    }catch(outer){ /* keep fallback */ }
+    _cachedLineOffset = offset;
+    return offset;
+  }
+
+  // Attempts to pull a 1-based line number (relative to the user's own code,
+  // i.e. with the synthetic wrapper lines subtracted out) from a thrown error's
+  // stack trace. Falls back to null if it can't be determined (e.g. Safari).
+  function extractUserLineNumber(err, engineLineOffset){
+    if(!err) return null;
+    var stack = err.stack || '';
+    // V8-style: "at anonymous:LINE:COL" or "at eval (eval at ...:LINE:COL)"
+    var match = stack.match(/anonymous:(\d+):(\d+)/) || stack.match(/<anonymous>:(\d+):(\d+)/);
+    if(match){
+      var rawLine = parseInt(match[1], 10);
+      // Subtract the engine's own reporting offset, then subtract 1 more for
+      // the synthetic '"use strict";\n' line we prepend ourselves, to map
+      // back to a 1-based line number within the user's own script.
+      var userLine = rawLine - engineLineOffset - 1;
+      if(userLine >= 1) return userLine;
+    }
+    if(typeof err.lineNumber === 'number'){ // Firefox
+      var fl = err.lineNumber - engineLineOffset - 1;
+      if(fl >= 1) return fl;
+    }
+    return null;
+  }
+
+  runInlineBtn.addEventListener('click', runScript);
+
+  /* ============================================================
+     15) INIT
+     ============================================================ */
+  renderHomeGrid();
+  renderTabsStrip();
+  updateErrorBadges();
+
+})();
+</script>
+</body>
+</html>

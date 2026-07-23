@@ -2408,7 +2408,41 @@ function renderRanksList() {
         }
 
         function continueExperimental() {
-            alert('Sürüm bulunamadı! / Version not found!');
+            closeExperimentalModal();
+
+            const playerName = document.getElementById('navProfileName').innerText;
+            const overlay = document.getElementById('gameOverlay');
+            const iframe = document.getElementById('gameFrame');
+            const playerRole = (!isGuest && window.currentUserRole && window.currentUserRole !== 'Player')
+                ? window.currentUserRole
+                : null;
+            const playerRoleColor = playerRole ? getRankColor(playerRole) : null;
+
+            overlay.style.display = 'block';
+            iframe.src = 'gameexp.html';
+
+            iframe.onload = () => {
+                try {
+                    const uid = auth.currentUser ? auth.currentUser.uid : null;
+                    const sendInit = (headB64) => {
+                        iframe.contentWindow.postMessage({
+                            type: 'SET_USERNAME',
+                            username: playerName,
+                            role: playerRole,
+                            rankColor: playerRoleColor,
+                            headB64: headB64 || null,
+                            uid: uid || null
+                        }, '*');
+                    };
+                    if (uid) {
+                        database.ref(`users/${uid}/headB64`).once('value').then(s => sendInit(s.val()));
+                    } else {
+                        sendInit(null);
+                    }
+                } catch (e) {
+                    console.error("İsim gönderilemedi, iframe henüz hazır değil.");
+                }
+            };
         }
 
         // 🎖️ Rütbe -> Renk eşleme fonksiyonu (admin panelindeki ile aynı kaynaktan, tek noktadan yönetim)
