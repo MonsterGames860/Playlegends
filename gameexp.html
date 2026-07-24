@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-<title>Legends Experimental v1.7.Lp1 - Perlin World</title>
+<title>Legends Preview v1.7.Lp1 - Perlin World</title>
 <!-- [MODÜLER DİL MİMARİSİ] Aşağıdaki JS bloğu, projedeki ayrı language.js
      dosyasının BİREBİR içeriğidir. Kod hâlâ modüler bir yapı olarak
      (window.LegendsLanguage API'si + window.langData) organize edilmiştir;
@@ -43,10 +43,11 @@
   // ── Tam sözlük verisi (tüm diller, 272 anahtar/dil) ────────────────
   var LANG_DATA = {
   "en": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "SINGLE PLAYER",
     "multiplayer": "MULTIPLAYER",
     "settings": "SETTINGS",
+    "exit": "EXIT",
     "deviceTitle": "SELECT DEVICE",
     "pcBtn": "COMPUTER",
     "mobileBtn": "MOBILE",
@@ -63,7 +64,7 @@
     "resume": "RESUME",
     "quit": "QUIT",
     "pauseTitle": "GAME MENU",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "JUMP",
     "mpTitle": "MULTIPLAYER",
     "mpJoin": "JOIN",
@@ -114,6 +115,7 @@
     "worldSectionLabel": "WORLD",
     "gameModeSectionLabel": "GAME MODE",
     "cheatsLabel": "CHEATS",
+    "modsLabel": "MODS",
     "cheatOff": "OFF",
     "cheatOn": "ON",
     "deathTitle": "You Died!",
@@ -371,10 +373,11 @@
     "languageTabLabel": "Language"
   },
   "tr": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "TEK OYUNCU",
     "multiplayer": "ÇOK OYUNCU",
     "settings": "AYARLAR",
+    "exit": "ÇIKIŞ",
     "deviceTitle": "CİHAZ SEÇİMİ",
     "pcBtn": "BİLGİSAYAR",
     "mobileBtn": "MOBİL",
@@ -391,7 +394,7 @@
     "resume": "DEVAM ET",
     "quit": "ÇIK",
     "pauseTitle": "OYUN MENÜSÜ",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "ZIPLA",
     "mpTitle": "ÇOK OYUNCULU",
     "mpJoin": "KATIL",
@@ -442,6 +445,7 @@
     "worldSectionLabel": "DÜNYA",
     "gameModeSectionLabel": "OYUN MODU",
     "cheatsLabel": "HİLELER",
+    "modsLabel": "MODLAR",
     "cheatOff": "KAPALI",
     "cheatOn": "AÇIK",
     "deathTitle": "Öldün!",
@@ -699,11 +703,11 @@
     "languageTabLabel": "Dil"
   },
   "de": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "EINZELSPIELER",
     "multiplayer": "MEHRSPIELER",
     "settings": "EINSTELLUNGEN",
-    "deviceTitle": "GERÄT WÄHLEN",
+    "exit": "BEENDEN",
     "pcBtn": "COMPUTER",
     "mobileBtn": "MOBIL",
     "worldTitle": "WELT WÄHLEN",
@@ -719,7 +723,7 @@
     "resume": "FORTSETZEN",
     "quit": "BEENDEN",
     "pauseTitle": "SPIELMENÜ",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "SPRINGEN",
     "mpTitle": "MEHRSPIELER",
     "mpJoin": "BEITRETEN",
@@ -770,6 +774,7 @@
     "worldSectionLabel": "WELT",
     "gameModeSectionLabel": "SPIELMODUS",
     "cheatsLabel": "CHEATS",
+    "modsLabel": "MODS",
     "cheatOff": "AUS",
     "cheatOn": "AN",
     "deathTitle": "Du bist gestorben!",
@@ -1027,11 +1032,11 @@
     "languageTabLabel": "Sprache"
   },
   "fr": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "SOLO",
     "multiplayer": "MULTIJOUEUR",
     "settings": "PARAMÈTRES",
-    "deviceTitle": "CHOISIR L'APPAREIL",
+    "exit": "QUITTER",
     "pcBtn": "ORDINATEUR",
     "mobileBtn": "MOBILE",
     "worldTitle": "CHOISIR LE MONDE",
@@ -1047,7 +1052,7 @@
     "resume": "REPRENDRE",
     "quit": "QUITTER",
     "pauseTitle": "MENU DU JEU",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "SAUTER",
     "mpTitle": "MULTIJOUEUR",
     "mpJoin": "REJOINDRE",
@@ -1098,6 +1103,7 @@
     "worldSectionLabel": "MONDE",
     "gameModeSectionLabel": "MODE DE JEU",
     "cheatsLabel": "TRICHES",
+    "modsLabel": "MODS",
     "cheatOff": "DÉSACTIVÉ",
     "cheatOn": "ACTIVÉ",
     "deathTitle": "Vous êtes mort !",
@@ -1355,11 +1361,11 @@
     "languageTabLabel": "Langue"
   },
   "es": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "UN JUGADOR",
     "multiplayer": "MULTIJUGADOR",
     "settings": "AJUSTES",
-    "deviceTitle": "SELECCIONAR DISPOSITIVO",
+    "exit": "SALIR",
     "pcBtn": "ORDENADOR",
     "mobileBtn": "MÓVIL",
     "worldTitle": "SELECCIONAR MUNDO",
@@ -1375,7 +1381,7 @@
     "resume": "REANUDAR",
     "quit": "SALIR",
     "pauseTitle": "MENÚ DEL JUEGO",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "SALTAR",
     "mpTitle": "MULTIJUGADOR",
     "mpJoin": "UNIRSE",
@@ -1426,6 +1432,7 @@
     "worldSectionLabel": "MUNDO",
     "gameModeSectionLabel": "MODO DE JUEGO",
     "cheatsLabel": "TRUCOS",
+    "modsLabel": "MODS",
     "cheatOff": "DESACTIVADO",
     "cheatOn": "ACTIVADO",
     "deathTitle": "¡Has muerto!",
@@ -1683,11 +1690,11 @@
     "languageTabLabel": "Idioma"
   },
   "ru": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "ОДИН ИГРОК",
     "multiplayer": "МУЛЬТИПЛЕЕР",
     "settings": "НАСТРОЙКИ",
-    "deviceTitle": "ВЫБОР УСТРОЙСТВА",
+    "exit": "ВЫХОД",
     "pcBtn": "КОМПЬЮТЕР",
     "mobileBtn": "МОБИЛЬНЫЙ",
     "worldTitle": "ВЫБОР МИРА",
@@ -1703,7 +1710,7 @@
     "resume": "ПРОДОЛЖИТЬ",
     "quit": "ВЫЙТИ",
     "pauseTitle": "МЕНЮ ИГРЫ",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "ПРЫЖОК",
     "mpTitle": "МУЛЬТИПЛЕЕР",
     "mpJoin": "ПРИСОЕДИНИТЬСЯ",
@@ -1754,6 +1761,7 @@
     "worldSectionLabel": "МИР",
     "gameModeSectionLabel": "РЕЖИМ ИГРЫ",
     "cheatsLabel": "ЧИТЫ",
+    "modsLabel": "МОДЫ",
     "cheatOff": "ВЫКЛ",
     "cheatOn": "ВКЛ",
     "deathTitle": "Вы погибли!",
@@ -2011,11 +2019,11 @@
     "languageTabLabel": "Язык"
   },
   "pt": {
-    "title": "LEGENDS EXPERIMENTAL",
+    "title": "LEGENDS PREVIEW",
     "singleplayer": "UM JOGADOR",
     "multiplayer": "MULTIJOGADOR",
     "settings": "CONFIGURAÇÕES",
-    "deviceTitle": "SELECIONAR DISPOSITIVO",
+    "exit": "SAIR",
     "pcBtn": "COMPUTADOR",
     "mobileBtn": "CELULAR",
     "worldTitle": "SELECIONAR MUNDO",
@@ -2031,7 +2039,7 @@
     "resume": "CONTINUAR",
     "quit": "SAIR",
     "pauseTitle": "MENU DO JOGO",
-    "gameTitle": "Legends Experimental v1.7.Lp1",
+    "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "PULAR",
     "mpTitle": "MULTIJOGADOR",
     "mpJoin": "ENTRAR",
@@ -2082,6 +2090,7 @@
     "worldSectionLabel": "MUNDO",
     "gameModeSectionLabel": "MODO DE JOGO",
     "cheatsLabel": "TRAPAÇAS",
+    "modsLabel": "MODS",
     "cheatOff": "DESATIVADO",
     "cheatOn": "ATIVADO",
     "deathTitle": "Você morreu!",
@@ -2381,7 +2390,33 @@
     get: get,
     getDict: buildLangProxy,
     readStoredLang: readStoredLang,
-    storeLang: storeLang
+    storeLang: storeLang,
+    // [HARİCİ language.js DESTEĞİ] Bir web sunucusu üzerinden çalışırken
+    // (content:// / file:// DIŞINDA) gerçek language.js dosyası başarıyla
+    // yüklenirse, bu fonksiyon onun verisini burada gömülü olan fallback
+    // sözlüğün üstüne yazar (anahtar bazında merge — eksik anahtarlar
+    // gömülü sürümden gelmeye devam eder, hiçbir metin asla boş kalmaz).
+    // content:// / file:// gibi harici script'lerin engellendiği ortamlarda
+    // bu fonksiyon hiç çağrılmaz ve gömülü veri olduğu gibi kullanılmaya
+    // devam eder — arayüz hiçbir koşulda boş görünmez.
+    mergeExternalLangData: function(externalData){
+      if(!externalData || typeof externalData !== 'object') return;
+      SUPPORTED.forEach(function(l){
+        if(!externalData[l]) return;
+        if(!LANG_DATA[l]) LANG_DATA[l] = {};
+        for(var k in externalData[l]){
+          if(Object.prototype.hasOwnProperty.call(externalData[l], k)){
+            LANG_DATA[l][k] = externalData[l][k];
+          }
+        }
+      });
+      // Proxy'leri (langData) taze birleşmiş veriyle yeniden inşa et.
+      SUPPORTED.forEach(function(l){ proxiedLangData[l] = buildLangProxy(l); });
+      // Aktif dil zaten seçiliyse arayüzü hemen tazele.
+      if(typeof global.setLanguage === 'function' && global.currentLang){
+        global.setLanguage(global.currentLang);
+      }
+    }
   };
 
   global.LegendsLanguage = LegendsLanguage;
@@ -2394,6 +2429,34 @@
 
 })(typeof window !== "undefined" ? window : this);
 
+</script>
+<!-- [HARİCİ language.js DENEMESİ] Bu dosya bir web sunucusu üzerinden
+     açıldıysa (http/https), aşağıdaki script gerçek language.js dosyasını
+     yükleyip yukarıdaki gömülü sözlüğün üzerine yazar — böylece iki dosya
+     arasında metin tekrar etmeden tek bir kaynaktan güncellenebilir.
+     content:// veya file:// üzerinden doğrudan açıldıysa (indirilenler
+     klasörü vb.) tarayıcı bu isteği güvenlik kısıtı yüzünden engeller;
+     onerror bunu sessizce yutar ve yukarıdaki gömülü veri (fallback)
+     olduğu gibi kullanılmaya devam eder — arayüz asla boş kalmaz. -->
+<script>
+(function(){
+  try{
+    if(location.protocol === 'http:' || location.protocol === 'https:'){
+      var s = document.createElement('script');
+      s.src = 'language.js';
+      s.async = false; // sıralamayı garanti et: LANG_DATA zaten hazır, bu sadece üstüne yazacak
+      s.onload = function(){
+        try{
+          if(window.__legendsExternalLangData && window.LegendsLanguage && window.LegendsLanguage.mergeExternalLangData){
+            window.LegendsLanguage.mergeExternalLangData(window.__legendsExternalLangData);
+          }
+        }catch(e){}
+      };
+      s.onerror = function(){ /* content:// / file:// veya 404 — sessizce yut, gömülü veri kalır */ };
+      document.head.appendChild(s);
+    }
+  }catch(e){ /* herhangi bir hata sessizce yutulur — gömülü veri her zaman devrede */ }
+})();
 </script>
 <style>
 @import url('https://fonts.cdnfonts.com/css/minecraftia');
@@ -2409,7 +2472,7 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .menu-screen::-webkit-scrollbar-track{background:transparent;}
 .menu-screen::-webkit-scrollbar-thumb{background:rgba(117,167,255,0.3);border-radius:2px;}
 .menu-screen.active{display:flex;}
-.game-logo{font-size:clamp(20px,7vw,34px);font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:1px;margin-bottom:4px;white-space:nowrap;text-align:center;}
+.game-logo{font-size:clamp(18px,6vw,28px);font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:1px;margin-bottom:4px;white-space:nowrap;text-align:center;max-width:100%;}
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
 .mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
 .mbtn:hover{filter:brightness(1.2);}
@@ -2418,6 +2481,7 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .mbtn.back{background:linear-gradient(180deg,#3a3a3a,#222);font-size:12px;padding:9px;margin-top:14px;width:55%;}
 .mbtn.primary{background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border-top-color:#4a8acf;border-left-color:#4a8acf;border-bottom-color:#0a1a4f;border-right-color:#0a1a4f;}
 .mbtn.quit-btn{background:linear-gradient(180deg,#9f2a2a,#7a1a1a);border-top-color:#cf4a4a;border-left-color:#cf4a4a;border-bottom-color:#4f0a0a;border-right-color:#4f0a0a;}
+#btn-settings,#btn-exit-game{box-sizing:border-box;height:44px;font-size:12px!important;line-height:1;}
 .world-cards,.device-cards,.mp-cards{display:flex;gap:12px;width:100%;margin-bottom:4px;}
 .world-card,.device-card,.mp-card{flex:1;padding:14px 10px;background:linear-gradient(180deg,#2a3a4a,#1a2a3a);border:3px solid #3a4a5a;border-radius:6px;cursor:pointer;transition:border-color .15s,transform .1s;text-align:center;}
 .world-card:hover,.device-card:hover,.mp-card:hover{border-color:#75a7ff;transform:translateY(-2px);}
@@ -2970,15 +3034,18 @@ body.low-health::after {
 .mm-category-row{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
 .mm-category-btn{padding:6px 12px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.15);border-radius:14px;color:rgba(255,255,255,.6);font-size:10px;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.5px;}
 .mm-category-btn.active{background:rgba(117,167,255,.18);border-color:#75a7ff;color:#75a7ff;}
-.mm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;min-height:220px;}
-.mm-mod-card{background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;}
-.mm-mod-thumb{width:100%;height:64px;border-radius:5px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:10px;}
-.mm-mod-name{font-size:11px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.mm-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;align-content:start;}
+.mm-mod-card{background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:0;}
+.mm-mod-card-top{display:flex;align-items:center;gap:10px;}
+.mm-mod-thumb{width:64px;height:64px;flex-shrink:0;border-radius:6px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:20px;overflow:hidden;}
+.mm-mod-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px;}
+.mm-mod-name{font-size:11.5px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .mm-mod-author{font-size:9px;color:rgba(255,255,255,.4);}
-.mm-mod-download-btn{margin-top:2px;padding:6px 0;background:linear-gradient(180deg,#2a5a9f,#1a3a7f);border:none;border-bottom:2px solid #0a1a4f;border-right:2px solid #0a1a4f;border-top:2px solid #4a8acf;border-left:2px solid #4a8acf;color:#fff;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;}
+.mm-mod-tap-hint{font-size:8px;color:rgba(117,167,255,.5);flex-shrink:0;text-align:right;}
 
 /* ── Badges (New / Remix / Update / Official) ── */
-.mm-badge-row{display:flex;gap:4px;flex-wrap:wrap;position:absolute;top:6px;left:6px;z-index:2;}
+.mm-card-top-row{display:flex;align-items:flex-start;justify-content:space-between;gap:6px;margin-bottom:6px;}
+.mm-badge-row{display:flex;gap:4px;flex-wrap:wrap;}
 .mm-mod-card{position:relative;}
 .mm-badge{font-size:8px;font-weight:bold;letter-spacing:.5px;padding:3px 6px;border-radius:10px;text-transform:uppercase;box-shadow:0 1px 3px rgba(0,0,0,.4);}
 .mm-badge-new{background:#2a8a4a;color:#fff;}
@@ -2986,6 +3053,30 @@ body.low-health::after {
 .mm-badge-update{background:#c4901a;color:#fff;}
 .mm-badge-official{background:linear-gradient(135deg,#4a8acf,#75a7ff);color:#fff;border:1px solid rgba(255,255,255,.4);}
 .mm-mod-author-row{display:flex;align-items:center;justify-content:space-between;gap:4px;}
+
+/* ── Star rating (Mod Manager cards) ── */
+.mm-star-btn{display:flex;align-items:center;gap:3px;flex-shrink:0;padding:5px 8px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.12);border-radius:12px;cursor:pointer;user-select:none;-webkit-user-select:none;transition:filter .1s;}
+.mm-star-btn:active{filter:brightness(1.3);}
+.mm-star-btn .mm-star-icon{font-size:12px;line-height:1;color:rgba(255,255,255,.35);}
+.mm-star-btn.starred .mm-star-icon{color:#ffc94a;}
+.mm-star-btn .mm-star-count{font-size:10px;font-weight:bold;color:rgba(255,255,255,.6);}
+.mm-star-btn.starred .mm-star-count{color:#ffc94a;}
+
+/* ── Star rating (inline mod rows — World Creation / Server Settings) ── */
+.inline-mod-star{display:flex;align-items:center;gap:2px;flex-shrink:0;padding:4px 7px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.1);border-radius:10px;cursor:pointer;user-select:none;-webkit-user-select:none;}
+.inline-mod-star .inline-mod-star-icon{font-size:10px;line-height:1;color:rgba(255,255,255,.3);}
+.inline-mod-star.starred .inline-mod-star-icon{color:#ffc94a;}
+.inline-mod-star .inline-mod-star-count{font-size:9px;font-weight:bold;color:rgba(255,255,255,.55);}
+.inline-mod-star.starred .inline-mod-star-count{color:#ffc94a;}
+
+/* ── Mod card details accordion (tap card to expand description/version) ── */
+.mm-mod-card{cursor:pointer;}
+.mm-mod-details{max-height:0;overflow:hidden;transition:max-height .22s ease,margin-top .22s ease;margin-top:0;}
+.mm-mod-card.expanded .mm-mod-details{max-height:260px;margin-top:8px;}
+.mm-mod-details-inner{border-top:1px solid rgba(117,167,255,.15);padding-top:6px;display:flex;flex-direction:column;gap:5px;}
+.mm-mod-detail-label{font-size:8px;font-weight:bold;letter-spacing:.6px;text-transform:uppercase;color:rgba(117,167,255,.7);}
+.mm-mod-detail-text{font-size:9.5px;line-height:1.45;color:rgba(255,255,255,.75);white-space:pre-wrap;}
+.mm-mod-detail-version{font-size:9px;color:rgba(255,255,255,.45);}
 
 /* ── My Mods status pill (Draft / Published) ── */
 .mm-status-pill{display:inline-block;padding:1px 7px;border-radius:8px;font-size:8.5px;font-weight:bold;letter-spacing:.5px;text-transform:uppercase;margin-left:5px;}
@@ -3032,6 +3123,8 @@ body.low-health::after {
 .mm-mymod-actions{display:flex;gap:6px;flex-shrink:0;}
 .mm-add-btn{padding:6px 10px;background:linear-gradient(180deg,#3a6a2f,#1f4a1a);border:none;border-bottom:2px solid #0f2a0a;border-right:2px solid #0f2a0a;border-top:2px solid #5f9a4a;border-left:2px solid #5f9a4a;color:#fff;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;}
 .mm-update-btn{padding:6px 10px;background:linear-gradient(180deg,#8a6a1a,#5a4400);border:none;border-bottom:2px solid #2a1e00;border-right:2px solid #2a1e00;border-top:2px solid #c49a3a;border-left:2px solid #c49a3a;color:#fff;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;}
+.mm-settings-btn{padding:6px 10px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.85);font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;white-space:nowrap;}
+.mm-settings-btn:hover{background:rgba(117,167,255,.18);border-color:rgba(117,167,255,.4);color:#fff;}
 
 .mm-footer-note{padding:10px 20px 16px;font-size:9.5px;color:rgba(255,255,255,.35);text-align:center;line-height:1.5;border-top:1px solid rgba(255,255,255,.08);}
 
@@ -3074,6 +3167,41 @@ body.low-health::after {
 .ss-btn-off{background:linear-gradient(180deg,#8a6a1a,#5a4400);border-bottom:3px solid #2a1e00;border-right:3px solid #2a1e00;border-top:3px solid #c49a3a;border-left:3px solid #c49a3a;}
 .ss-btn-delete{background:linear-gradient(180deg,#8a2a2a,#5a1414);border-bottom:3px solid #2a0a0a;border-right:3px solid #2a0a0a;border-top:3px solid #c44a4a;border-left:3px solid #c44a4a;}
 .ss-btn:hover{filter:brightness(1.12);}
+
+/* ── Mod Settings Modal (My Mods → ⚙️ Ayarlar) ── */
+#mod-settings-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:none;justify-content:center;align-items:center;z-index:2200;}
+#mod-settings-modal.active{display:flex;}
+#mod-settings-box{background:linear-gradient(180deg,#1c2a42,#0e1826);border:2px solid rgba(117,167,255,.3);border-radius:12px;width:92%;max-width:440px;max-height:90vh;display:flex;flex-direction:column;box-shadow:0 0 60px rgba(30,80,200,.2),0 12px 48px rgba(0,0,0,.7);overflow:hidden;}
+.msm-version-warning{display:none;font-size:9.5px;line-height:1.4;color:#ffcf6b;background:rgba(255,180,60,.1);border:1px solid rgba(255,180,60,.3);border-radius:5px;padding:7px 9px;margin:-6px 0 14px;}
+.msm-version-warning.visible{display:block;}
+.msm-cover-preview{width:100%;height:110px;border-radius:6px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;margin-bottom:8px;overflow:hidden;}
+.msm-cover-preview img{width:100%;height:100%;object-fit:cover;}
+#msm-cover-placeholder{font-size:10px;color:rgba(255,255,255,.3);}
+.msm-cover-actions{display:flex;gap:8px;margin-top:8px;}
+.msm-cover-upload-btn,.msm-cover-clear-btn{flex:1;padding:8px 0;border:none;border-radius:3px;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:.4px;}
+.msm-cover-upload-btn{background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border-bottom:2px solid #0a1030;border-right:2px solid #0a1030;border-top:2px solid #4a6aba;border-left:2px solid #4a6aba;color:#fff;}
+.msm-cover-clear-btn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:rgba(255,255,255,.7);}
+.msm-cover-upload-btn:hover,.msm-cover-clear-btn:hover{filter:brightness(1.15);}
+.msm-textarea{min-height:70px;resize:vertical;font-family:'Minecraft',monospace;line-height:1.4;}
+/* ── SAYFA İÇİ MOD YÖNETİMİ (World Creation + Server Settings ortak) ──
+   Create/My Mods sekmeleri OLMADAN, sadece kur/kaldır amaçlı sade liste. */
+.inline-mods-section{width:100%;margin:6px 0 10px;}
+.inline-mods-search{width:100%;box-sizing:border-box;padding:8px 10px;margin-bottom:6px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.12);border-radius:5px;color:#fff;font-size:11px;font-family:'Minecraft',monospace;outline:none;}
+.inline-mods-search::placeholder{color:rgba(255,255,255,.3);}
+.inline-mods-search:focus{border-color:rgba(117,167,255,.5);}
+.inline-mods-list{max-height:368px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;border:1px solid rgba(255,255,255,.08);border-radius:5px;background:rgba(0,0,0,.25);}
+.inline-mod-row{display:flex;align-items:center;gap:10px;padding:8px 10px;border-bottom:1px solid rgba(255,255,255,.06);}
+.inline-mod-row:last-child{border-bottom:none;}
+.inline-mod-thumb{width:30px;height:30px;border-radius:4px;background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;overflow:hidden;}
+.inline-mod-thumb img{width:100%;height:100%;object-fit:cover;}
+.inline-mod-info{flex:1;min-width:0;}
+.inline-mod-name{font-size:11px;color:#fff;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.inline-mod-meta{font-size:9px;color:rgba(255,255,255,.4);margin-top:2px;}
+.inline-mod-toggle{width:38px;height:20px;border-radius:12px;background:rgba(255,255,255,.15);position:relative;flex-shrink:0;cursor:pointer;}
+.inline-mod-toggle.on{background:rgba(117,167,255,.4);}
+.inline-mod-toggle .inline-mod-toggle-dot{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .12s;}
+.inline-mod-toggle.on .inline-mod-toggle-dot{left:20px;background:#75a7ff;}
+.inline-mods-empty{font-size:10px;color:rgba(255,255,255,.35);text-align:center;padding:16px 8px;}
 /* =====================================================================
    [VISUAL MOD EDITOR - MCreator TARZI HOME/WORKSPACE] v3 Aşama 3.2
    Home: eklenen tüm ögeler (Item/Block/Craft/NPC vb.) grid'de görünür.
@@ -3082,8 +3210,10 @@ body.low-health::after {
    Script Studio artık ayrı bir tam-ekran modal DEĞİL — ögenin editörü
    içinde bir sekme (tab). "USE SCRIPT" genel menüde/Add Content'te yok.
    ===================================================================== */
-#mod-editor-modal{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0d1320;display:none;flex-direction:column;z-index:2500;}
+#mod-editor-modal{position:fixed;top:0;left:0;width:100vw;height:100vh;background:#0d1320;display:none;flex-direction:column;z-index:2500;touch-action:none;overscroll-behavior:contain;}
 #mod-editor-modal.active{display:flex;}
+/* FOCUS LOCK: mod editörü açıkken arka plan sayfa (gameexp) ile etkileşimi engelle */
+body.me-locked{overflow:hidden!important;touch-action:none!important;}
 
 .me-topbar{display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:linear-gradient(180deg,#1c2a42,#141d30);border-bottom:2px solid rgba(117,167,255,.15);flex-shrink:0;flex-wrap:wrap;row-gap:8px;max-width:100%;box-sizing:border-box;gap:10px;}
 .me-topbar-left,.me-topbar-right{display:flex;align-items:center;gap:8px;flex-wrap:wrap;row-gap:6px;min-width:0;}
@@ -3375,7 +3505,31 @@ body.low-health::after {
   .ss-docs-header{padding:14px;}
   .ss-docs-body{padding:14px;}
   .ss-docs-code{font-size:10px;}
+/* ═══ CUSTOM NPC MOD — settings modal styling ═══ */
+#custom-npc-modal-overlay{
+  position:fixed;inset:0;background:rgba(6,8,12,.65);z-index:9500;
+  display:none;align-items:center;justify-content:center;padding:20px;
 }
+#custom-npc-modal-overlay.active{display:flex;}
+#custom-npc-modal{
+  background:#1c2027;border:1px solid rgba(117,167,255,.35);border-radius:12px;
+  width:100%;max-width:340px;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.55);
+  font-family:inherit;
+}
+#custom-npc-modal h3{margin:0 0 6px;font-size:16px;color:#fff;}
+#custom-npc-modal p{margin:0 0 14px;font-size:12.5px;color:#a8b0bd;line-height:1.5;}
+#custom-npc-modal-input{
+  width:100%;box-sizing:border-box;background:#12151b;border:1px solid rgba(117,167,255,.3);
+  border-radius:7px;color:#fff;font-size:13px;padding:10px 11px;margin-bottom:8px;
+}
+#custom-npc-modal-input::placeholder{color:#6b7280;}
+#custom-npc-modal-hint{min-height:16px;font-size:11.5px;color:#f4a742;margin-bottom:10px;}
+.custom-npc-modal-btns{display:flex;gap:8px;justify-content:flex-end;}
+.custom-npc-modal-btns button{
+  border-radius:7px;border:1px solid rgba(117,167,255,.3);background:#262b34;color:#e5e7eb;
+  font-size:13px;font-weight:600;padding:9px 16px;cursor:pointer;
+}
+#custom-npc-modal-apply{background:#4a8acf;border-color:transparent;color:#fff;}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/three@0.128.0/build/three.min.js';document.head.appendChild(s);"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s);"></script>
@@ -3427,11 +3581,100 @@ body.low-health::after {
   }, 1000);
 })();
 </script>
+<!-- ═══════════════════════════════════════════════════════════════════════
+     [LOCALSTORAGE KALICILIK TANI KATMANI]
+     Bu dosya bir web sunucusu yerine doğrudan content:// (Android İndirilenler
+     klasöründen) veya file:// üzerinden açıldığında, bazı tarayıcılar
+     localStorage'ı "opak/geçici" bir origin'e bağlar: yazma işlemi hata
+     vermeden BAŞARILI görünür, ama sayfa kapatılıp yeniden açıldığında
+     (yeni bir sekme/oturum) o veri hiç yoktur — çünkü her açılış farklı bir
+     depoya erişmiş olabilir. Oyunun kendi try/catch'leri sadece "yazma anında
+     atılan hataları" yakalar; bu senaryoda hata atılmadığı için sessizce
+     geçilir ve kullanıcı "dünyam kaydedilmedi" sürprizini ancak SONRADAN,
+     tekrar açtığında fark eder.
+     Bu blok, sayfa yüklenir yüklenmez basit bir yaz+oku+damga testiyle bunu
+     tespit eder: bir önceki ziyaretten kalan bir damga var mı? Yoksa (ilk
+     açılış olabilir, sorun olmayabilir) yeni bir damga yazar ve normal
+     devam eder. Varsa ve şu anki yazdığımız değeri hemen geri okuyamıyorsak
+     (ya da location.protocol content:/file: kaynaklıysa ekstra dikkatli),
+     kullanıcıya en üstte kapatılabilir bir uyarı şeridi gösterir — oyun
+     yine de oynanabilir kalır, sadece dürüst bir bilgilendirme yapılır.
+     ═══════════════════════════════════════════════════════════════════════ -->
+<script>
+(function(){
+  "use strict";
+  var PROBE_KEY = 'legends_storage_probe_v1';
+  var canPersist = true;
+  var reason = '';
+  try{
+    var testVal = 'probe_' + Date.now();
+    localStorage.setItem(PROBE_KEY + '_test', testVal);
+    var readBack = localStorage.getItem(PROBE_KEY + '_test');
+    if(readBack !== testVal){
+      canPersist = false;
+      reason = 'readback-mismatch';
+    }
+  }catch(e){
+    canPersist = false;
+    reason = 'exception:' + (e && e.name ? e.name : 'unknown');
+  }
+
+  // content:// ve file:// protokollerinde yazma/okuma o AN başarılı görünse
+  // bile localStorage'ın gerçekten kalıcı olduğunu (bir sonraki açılışta hâlâ
+  // orada olacağını) garanti edemeyiz — bu yüzden bu iki protokolde ekstra
+  // bir "önceki ziyaret damgası" kontrolü yapıyoruz.
+  var isRiskyProtocol = (location.protocol === 'content:' || location.protocol === 'file:');
+  var hadPriorVisit = false;
+  if(canPersist){
+    try{
+      hadPriorVisit = !!localStorage.getItem(PROBE_KEY + '_visited');
+      localStorage.setItem(PROBE_KEY + '_visited', '1');
+    }catch(e){ /* zaten yukarıda yakalanmış olur normalde */ }
+  }
+
+  window._legendsStorageDiag = {
+    canPersistThisWrite: canPersist,
+    reason: reason,
+    isRiskyProtocol: isRiskyProtocol,
+    protocol: location.protocol
+  };
+
+  if(isRiskyProtocol){
+    // Bu protokollerde "yazma başarılı" tek başına yeterli güven vermiyor —
+    // kullanıcıyı DOM hazır olur olmaz bilgilendirmek için bir bayrak
+    // bırakıyoruz; asıl banner'ı body yüklendiğinde ekleyeceğiz (aşağıda).
+    window._legendsShowStorageWarning = true;
+  } else if(!canPersist){
+    window._legendsShowStorageWarning = true;
+  }
+})();
+</script>
 </head>
+<script>
+// Storage uyarı şeridi — DOM hazır olur olmaz (menü ekranından önce) en üstte
+// gösterilir. Sadece bilgilendirir, oyunu durdurmaz; kullanıcı isterse kapatır.
+document.addEventListener('DOMContentLoaded', function(){
+  if(!window._legendsShowStorageWarning) return;
+  var bar = document.createElement('div');
+  bar.id = 'legends-storage-warning-bar';
+  var isTR = (navigator.language || '').toLowerCase().indexOf('tr') === 0;
+  var msg = isTR
+    ? '⚠️ Bu sayfa "İndirilenler" klasöründen (content://) veya doğrudan bir dosyadan açılmış görünüyor. Bu şekilde tarayıcı, kayıtlarınızı (dünyalar, modlar) kalıcı olarak SAKLAYAMAYABİLİR — sayfayı kapatıp tekrar açtığınızda kayıplar yaşayabilirsiniz. Kalıcı kayıt için oyunu bir web sunucusu üzerinden (http/https) veya "Ana ekrana ekle" ile açmanız önerilir.'
+    : '⚠️ This page appears to be opened from the Downloads folder (content://) or directly from a file. In this mode the browser may NOT reliably persist your saves (worlds, mods) — you may lose progress when you close and reopen the page. For reliable saving, open the game via a web server (http/https) or "Add to Home Screen".';
+  bar.textContent = msg;
+  bar.style.cssText = 'position:fixed;top:0;left:0;right:0;z-index:99999;background:#7a1a1a;color:#fff;font-family:monospace;font-size:11px;line-height:1.5;padding:10px 40px 10px 12px;box-shadow:0 2px 8px rgba(0,0,0,.5);';
+  var closeBtn = document.createElement('button');
+  closeBtn.textContent = '✕';
+  closeBtn.style.cssText = 'position:absolute;top:6px;right:8px;background:transparent;border:none;color:#fff;font-size:16px;cursor:pointer;padding:4px 8px;';
+  closeBtn.addEventListener('click', function(){ bar.remove(); });
+  bar.appendChild(closeBtn);
+  document.body.insertBefore(bar, document.body.firstChild);
+});
+</script>
 <body>
 <!-- ═══ LOADING SCREEN ═══ -->
 <div id="loading-screen">
-  <div id="loading-title">LEGENDS EXPERIMENTAL</div>
+  <div id="loading-title">LEGENDS PREVIEW</div>
   <div id="loading-subtitle">DÜNYA YÜKLENİYOR... / LOADING WORLD...</div>
   <div id="loading-bar-wrap"><div id="loading-bar-fill"></div></div>
   <div id="loading-pct">0%</div>
@@ -3440,7 +3683,7 @@ body.low-health::after {
 
 <!-- ═══ TAB OYUNCU LİSTESİ ═══ -->
 <div id="tab-overlay">
-  <div id="tab-header"><span id="tab-header-name">LEGENDS EXPERIMENTAL</span><span id="tab-header-count">0</span></div>
+  <div id="tab-header"><span id="tab-header-name">LEGENDS PREVIEW</span><span id="tab-header-count">0</span></div>
   <div id="tab-grid"></div>
 </div>
 
@@ -3455,25 +3698,28 @@ body.low-health::after {
   <!-- [MODÜLER DİL MİMARİSİ] Köşedeki TR/EN hızlı geçiş butonu kaldırıldı.
        Dil artık Ayarlar → Dil sekmesinden, 7 dil arasından seçiliyor. -->
   <div class="menu-screen active" id="screen-main">
-    <div class="game-logo" id="txt-title">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo" id="txt-title">LEGENDS PREVIEW</div>
     <div class="game-version">v1.7.Lp1 - Perlin World</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-skin-menu"></button>
-    <button class="mbtn" id="btn-settings"></button>
+    <div style="display:flex;gap:8px;align-items:center;justify-content:center;width:100%;margin:5px 0;">
+      <button class="mbtn" id="btn-settings" style="flex:1;padding:9px 20px;font-size:12px;margin:0;"></button>
+      <button class="mbtn quit-btn" id="btn-exit-game" style="flex:1;padding:9px 20px;font-size:12px;margin:0;"></button>
+    </div>
     <!-- [MOD YÖNETİCİSİ - GÖRSEL İSKELET] Sadece ana menüde görünen Mods butonu -->
     <button class="mbtn-corner" id="btn-mods-corner">MODS</button>
   </div>
 
   <div class="menu-screen" id="screen-reports">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title">REPORTS</div>
     <div class="mm-reports-panel" id="mm-reports-panel"></div>
     <button class="mbtn" id="btn-reports-back">Back</button>
   </div>
 
   <div class="menu-screen" id="screen-pc-settings">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-pc-settings-title">PC AYARLARI</div>
     <!-- [AYARLAR MENÜSÜ YENİLEMESİ] Emojisiz, sade 2 sekme: Kontroller / Dil -->
     <div class="settings-tabs" id="pc-settings-tabs">
@@ -3530,7 +3776,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-pc-settings"></button>
   </div>
   <div class="menu-screen" id="screen-mobile-settings">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-mobile-settings-title">MOBİL AYARLAR</div>
     <!-- [AYARLAR MENÜSÜ YENİLEMESİ] Emojisiz, sade 2 sekme: Kontroller / Dil -->
     <div class="settings-tabs" id="mobile-settings-tabs">
@@ -3576,7 +3822,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-mobile-settings"></button>
   </div>
   <div class="menu-screen" id="screen-world">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-world-title">DÜNYA SEÇİMİ</div>
     <div class="sub-title" id="txt-sp-worldname-label">WORLD NAME</div>
     <input class="menu-input name-input" id="sp-worldname-input" type="text" maxlength="32" autocomplete="off" spellcheck="false" placeholder="New World" style="margin-bottom:8px;">
@@ -3598,10 +3844,15 @@ body.low-health::after {
       <div class="mini-card sel" id="sp-cheat-off"><div class="mc2-icon">🔒</div><div class="mc2-title" id="txt-sp-cheat-off">KAPALI</div></div>
       <div class="mini-card" id="sp-cheat-on"><div class="mc2-icon">🔓</div><div class="mc2-title" id="txt-sp-cheat-on">AÇIK</div></div>
     </div>
+    <div class="sub-title" id="txt-sp-mods-label">MODS</div>
+    <div class="inline-mods-section">
+      <input type="text" class="inline-mods-search" id="sp-inline-mods-search" placeholder="Search mods...">
+      <div class="inline-mods-list" id="sp-inline-mods-list"></div>
+    </div>
     <button class="mbtn back" id="btn-back-world"></button>
   </div>
   <div class="menu-screen" id="screen-multiplayer">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-mp-title">MULTIPLAYER</div>
     <div class="mp-cards" style="flex-direction:column;">
       <div class="mp-card" id="btn-mp-join"><div class="mc-icon">🔗</div><div class="mc-title" id="txt-mp-join">JOIN</div></div>
@@ -3613,7 +3864,7 @@ body.low-health::after {
 
   <!-- ─── SERVER LIST SCREEN ─── -->
   <div class="menu-screen" id="screen-serverlist">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-sl-title">SERVER LIST</div>
     <!-- Sekmeler -->
     <div id="sl-tab-bar" style="display:flex;width:100%;border-radius:5px 5px 0 0;overflow:hidden;border:2px solid rgba(117,167,255,.25);border-bottom:none;margin-bottom:0;">
@@ -3657,7 +3908,7 @@ body.low-health::after {
 
   <!-- ─── BROWSE SCREEN ─── -->
   <div class="menu-screen" id="screen-browse">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-browse-title">BROWSE SERVERS</div>
     <div class="browse-toolbar">
       <input id="browse-search" type="text" placeholder="Search server name..." autocomplete="off" spellcheck="false">
@@ -3672,7 +3923,7 @@ body.low-health::after {
 
   <!-- ─── LOAD WORLD SCREEN ─── -->
   <div class="menu-screen" id="screen-load">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-load-title">LOAD WORLD</div>
     <div class="sub-title" id="txt-load-hint">SELECT A SAVED WORLD TO HOST</div>
     <div class="load-list" id="load-list">
@@ -3694,7 +3945,7 @@ body.low-health::after {
   </div>
 
   <div class="menu-screen" id="screen-join">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-join-title">ODAYA KATIL</div>
     <input class="menu-input" id="join-code-input" maxlength="4" autocomplete="off" spellcheck="false">
     <button class="mbtn primary" id="btn-do-join"></button>
@@ -3702,7 +3953,7 @@ body.low-health::after {
     <button class="mbtn back" id="btn-back-join"></button>
   </div>
   <div class="menu-screen" id="screen-host">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-host-title">ODA KUR</div>
     <div class="sub-title" id="txt-host-world-label">DÜNYA</div>
     <div class="mini-cards">
@@ -3729,7 +3980,7 @@ body.low-health::after {
   </div>
   <!-- ─── SKİN EKRANI ─── -->
   <div class="menu-screen" id="screen-skin">
-    <div class="game-logo">LEGENDS EXPERIMENTAL</div>
+    <div class="game-logo">LEGENDS PREVIEW</div>
     <div class="screen-title" id="txt-skin-title">SKİN AYARLARI</div>
     <div style="display:flex;gap:16px;width:100%;align-items:flex-start;justify-content:center;flex-wrap:wrap;margin-bottom:10px;">
       <!-- Önizleme -->
@@ -3794,7 +4045,11 @@ body.low-health::after {
         </div>
         <div class="mm-category-row" id="mm-public-category-row">
           <button class="mm-category-btn active" data-mm-category="All">All</button>
+          <button class="mm-category-btn" data-mm-category="Popular">Popular</button>
           <button class="mm-category-btn" data-mm-category="Official">Official</button>
+          <button class="mm-category-btn" data-mm-category="New">New</button>
+          <button class="mm-category-btn" data-mm-category="Remix">Remix</button>
+          <button class="mm-category-btn" data-mm-category="Update">Update</button>
           <button class="mm-category-btn" data-mm-category="Horror">Horror</button>
           <button class="mm-category-btn" data-mm-category="Texture Pack">Texture Pack</button>
           <button class="mm-category-btn" data-mm-category="Gameplay">Gameplay</button>
@@ -3829,13 +4084,6 @@ body.low-health::after {
               <button type="button" class="mm-category-select-btn" data-category="Adventure">Adventure</button>
               <button type="button" class="mm-category-select-btn" data-category="Minigame">Minigame</button>
               <button type="button" class="mm-category-select-btn" data-category="Utility">Utility</button>
-            </div>
-          </div>
-          <div>
-            <div class="mm-field-label">Thumbnail Image</div>
-            <div class="mm-upload-box">
-              <div class="mm-upload-icon">🖼️</div>
-              <div>Click or drag an image to upload</div>
             </div>
           </div>
           <div class="mm-create-warning" id="mm-create-warning" style="display:none;"></div>
@@ -3877,6 +4125,76 @@ body.low-health::after {
 
     <div class="mm-footer-note">
       Mod downloading &amp; activation is available inside World Creation / Server Settings.
+    </div>
+
+  </div>
+</div>
+
+<!-- =========================================================================
+     [MOD SETTINGS MODAL - GÖRSEL İSKELET] "My Mods" panelindeki ⚙️ Ayarlar
+     butonuyla açılır. Name kilitli/readonly; Version sadece isUpdated===true
+     iken açık (aksi halde kilitli + uyarı metni); Cover Image (URL/Base64)
+     BURADA girilir — Modding Wizard'da resim alanı YOKTUR; Description &
+     Details serbestçe düzenlenebilir.
+     ========================================================================= -->
+<div id="mod-settings-modal">
+  <div id="mod-settings-box">
+
+    <div class="ss-header">
+      <div class="ss-title">MOD SETTINGS</div>
+      <div class="ss-subtitle" id="msm-subtitle">—</div>
+      <button class="ss-close-btn" id="msm-close-btn">✕</button>
+    </div>
+
+    <div class="ss-body">
+      <!-- Name — always locked, never editable -->
+      <div class="ss-section ss-locked-row">
+        <div class="ss-label">Mod Name</div>
+        <input type="text" class="ss-input locked" id="msm-input-name" readonly disabled>
+        <span class="ss-lock-icon">🔒</span>
+      </div>
+
+      <!-- Version — locked unless mod.isUpdated (an update has actually happened) -->
+      <div class="ss-section ss-locked-row" id="msm-version-row">
+        <div class="ss-label">Version</div>
+        <input type="text" class="ss-input locked" id="msm-input-version" readonly disabled>
+        <span class="ss-lock-icon" id="msm-version-lock-icon">🔒</span>
+      </div>
+      <div class="msm-version-warning" id="msm-version-warning">
+        ⚠️ You must update the mod before changing its version.
+      </div>
+
+      <!-- Cover image — URL or Base64, only editable place for the mod's image -->
+      <div class="ss-section">
+        <div class="ss-label">Cover Image</div>
+        <div class="msm-cover-preview" id="msm-cover-preview">
+          <span id="msm-cover-placeholder">No cover image</span>
+        </div>
+        <input type="text" class="ss-input" id="msm-input-cover-url" placeholder="Image URL or Base64 data...">
+        <div class="msm-cover-actions">
+          <button type="button" class="msm-cover-upload-btn" id="msm-cover-upload-btn">📁 Choose File (Base64)</button>
+          <button type="button" class="msm-cover-clear-btn" id="msm-cover-clear-btn">Clear</button>
+        </div>
+      </div>
+
+      <!-- Description — freely editable -->
+      <div class="ss-section">
+        <div class="ss-label">Description</div>
+        <textarea class="ss-input msm-textarea" id="msm-input-description" placeholder="Describe your mod..."></textarea>
+      </div>
+
+      <!-- Details — freely editable -->
+      <div class="ss-section">
+        <div class="ss-label">Details</div>
+        <textarea class="ss-input msm-textarea" id="msm-input-details" placeholder="Changelog, credits, requirements..." style="min-height:100px;"></textarea>
+      </div>
+    </div>
+
+    <div class="ss-footer">
+      <div class="ss-btn-row">
+        <button class="ss-btn ss-btn-save" id="msm-save-btn">SAVE CHANGES</button>
+        <button class="ss-btn ss-btn-mods" id="msm-cancel-btn">CANCEL</button>
+      </div>
     </div>
 
   </div>
@@ -3928,10 +4246,16 @@ body.low-health::after {
           <div class="ss-toggle-pill on"><div class="ss-toggle-dot"></div></div>
         </div>
       </div>
+      <div class="ss-section">
+        <div class="ss-label">Mods</div>
+        <div class="inline-mods-section">
+          <input type="text" class="inline-mods-search" id="ss-inline-mods-search" placeholder="Search mods...">
+          <div class="inline-mods-list" id="ss-inline-mods-list"></div>
+        </div>
+      </div>
     </div>
 
     <div class="ss-footer">
-      <button class="ss-btn ss-btn-mods" id="btn-manage-mods">MANAGE MODS</button>
       <div class="ss-btn-row">
         <button class="ss-btn ss-btn-save">SAVE CHANGES</button>
         <button class="ss-btn ss-btn-off">TURN OFF</button>
@@ -4148,6 +4472,24 @@ console.error("Error message")</div>
 <div id="game-title"></div>
 <div id="crosshair">+</div>
 <div id="mode-indicator"></div>
+
+<!-- ═══ CUSTOM NPC MOD — settings modal ═══
+     Opened by handleCustomNpcInteract() when an Admin in Creative Mode
+     taps/clicks a Custom NPC. Lets them type a player name and copy
+     that player's Skin, Name Tag, and Rank onto the NPC. -->
+<div id="custom-npc-modal-overlay">
+  <div id="custom-npc-modal">
+    <h3>Custom NPC Settings</h3>
+    <p>Enter a player name to copy Skin, Name Tag, and Rank.</p>
+    <input type="text" id="custom-npc-modal-input" placeholder="Enter Player Name...">
+    <div id="custom-npc-modal-hint"></div>
+    <div class="custom-npc-modal-btns">
+      <button id="custom-npc-modal-close">Close</button>
+      <button id="custom-npc-modal-apply">Apply</button>
+    </div>
+  </div>
+</div>
+
 <div id="water-vignette"></div>
 <div id="lava-vignette"></div>
 <div id="block-inside-vignette"></div>
@@ -4913,7 +5255,7 @@ function checkRate(key,maxPerSec,windowMs=1000){
 if(typeof langData === 'undefined'){
   console.error('[Legends] Dil modulu yuklenemedi. Acil durum Ingilizce metinleri kullaniliyor.');
   window.langData = { en: {
-    title:'LEGENDS EXPERIMENTAL',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
+    title:'LEGENDS PREVIEW',singleplayer:'SINGLE PLAYER',multiplayer:'MULTIPLAYER',settings:'SETTINGS',
     deviceTitle:'SELECT DEVICE',pcBtn:'COMPUTER',mobileBtn:'MOBILE',
     worldTitle:'SELECT WORLD',wInfTitle:'NORMAL WORLD',wInfDesc:'Perlin noise terrain',
     wSmTitle:'SMALL WORLD',wSmDesc:'Light and fast',wFlatTitle:'FLAT WORLD',wFlatDesc:'Fully flat terrain',
@@ -5026,7 +5368,7 @@ function setLanguage(l){
     var hcWarnTxt = document.getElementById('sp-hardcore-warning-text');
     if(hcWarnTxt && d.hcWarningText) hcWarnTxt.textContent = d.hcWarningText;
   })();
-  s('txt-title',d.title);s('btn-singleplayer',d.singleplayer);s('btn-multiplayer',d.multiplayer);s('btn-settings',d.settings);
+  s('txt-title',d.title);s('btn-singleplayer',d.singleplayer);s('btn-multiplayer',d.multiplayer);s('btn-settings',d.settings);s('btn-exit-game',d.exit);
   s('txt-settings-title',d.settingsTitle);s('btn-back-settings',d.back);
   s('txt-settings-pc-btn',d.settingsPcBtn);s('txt-settings-mobile-btn',d.settingsMobileBtn);
   s('txt-pc-settings-title',d.pcSettingsTitle);s('txt-mobile-settings-title',d.mobileSettingsTitle);
@@ -5057,7 +5399,7 @@ function setLanguage(l){
   s('txt-wmc-inf',d.wmcInf);s('txt-wmc-flat',d.wmcFlat);s('txt-wmc-sm',d.wmcSm);s('txt-sp-surv',d.spSurv);s('txt-sp-crea',d.spCrea);s('txt-sp-adv',d.spAdv);
   s('txt-rd-label',d.rdLabel);s('txt-rd-pc-label',d.rdPcLabel);s('txt-rd-m-label',d.rdMLabel);
   s('txt-crosshair-mode-label',d.crosshairModeLabel);s('txt-crosshair-mode-sublabel',d.crosshairModeSublabel);
-  s('txt-sp-cheats-label',d.cheatsLabel);s('txt-sp-cheat-off',d.cheatOff);s('txt-sp-cheat-on',d.cheatOn);
+  s('txt-sp-cheats-label',d.cheatsLabel);s('txt-sp-cheat-off',d.cheatOff);s('txt-sp-cheat-on',d.cheatOn);s('txt-sp-mods-label',d.modsLabel);
   s('death-title',d.deathTitle);s('btn-respawn',d.respawnBtn);
   document.getElementById('join-code-input').placeholder=d.joinCodePh;
   document.getElementById('btn-do-join').textContent=d.joinBtn;
@@ -5110,7 +5452,29 @@ function setLanguage(l){
     if(label) label.textContent = hcLabel;
     if(badge) badge.textContent = window._spHardcore ? hcOn : hcOff;
   })();
+
+  // Başlık taşmasını (kırpılmayı) her ekran genişliğinde kesin olarak
+  // önle: metin kutuya sığmıyorsa font-size'ı sığana kadar küçült.
+  fitTitleText();
 }
+
+function fitTitleText(){
+  var el = document.getElementById('txt-title');
+  if(!el) return;
+  var container = el.parentElement;
+  if(!container) return;
+  // Baseline'a dön, sonra taşana kadar adım adım küçült.
+  el.style.fontSize = '';
+  var maxWidth = container.clientWidth - 36; // menu-screen yatay padding payı
+  var computed = parseFloat(getComputedStyle(el).fontSize);
+  var guard = 0;
+  while(el.scrollWidth > maxWidth && computed > 11 && guard < 40){
+    computed -= 1;
+    el.style.fontSize = computed + 'px';
+    guard++;
+  }
+}
+window.addEventListener('resize', fitTitleText);
 // [AYARLAR MENÜSÜ YENİLEMESİ + MODÜLER DİL MİMARİSİ]
 // Ayarlar → Dil sekmesindeki 7 dil butonu (.lang-tab-opt) tek bir
 // event-delegation listener'la yönetiliyor; eski #lang-tr/#lang-en
@@ -5183,6 +5547,100 @@ function applyRdFromSettings(v){
 if(rdPcSlider) rdPcSlider.addEventListener('input',()=>applyRdFromSettings(+rdPcSlider.value));
 if(rdMSlider) rdMSlider.addEventListener('input',()=>applyRdFromSettings(+rdMSlider.value));
  
+// ═══ CUSTOM NPC MOD — interaction + settings modal logic ═══
+// Called whenever a player taps/clicks a Custom NPC (from doLeftClick
+// and the mobile short-tap handler). Never deals damage — either opens
+// the settings modal (Admin + Creative Mode) or shows a denial message.
+function handleCustomNpcInteract(npc){
+  if(!isCustomNpcAdmin()){
+    addChat(null,'⛔ '+customNpcDenialMessage(),true,'warn');
+    return;
+  }
+  customNpcModalTarget=npc;
+  const input=document.getElementById('custom-npc-modal-input');
+  const hint=document.getElementById('custom-npc-modal-hint');
+  if(input) input.value='';
+  if(hint) hint.textContent='';
+  const overlay=document.getElementById('custom-npc-modal-overlay');
+  if(overlay) overlay.classList.add('active');
+  if(deviceMode==='pc'&&document.pointerLockElement===document.body) document.exitPointerLock();
+}
+
+// Looks up a player by name and returns { name, rank, rankColor,
+// skinCanvas } or null. Checks the local player first (works in SP
+// with no connection needed), then remote MP players if connected —
+// remote skins only exist once an MP connection has actually sent
+// them (remPlayers[].skinB64), matching how skins really reach this
+// client elsewhere in the game.
+function findCustomNpcTargetPlayer(name){
+  const norm=String(name||'').trim().toLowerCase();
+  if(!norm) return null;
+  if(norm===String(myUsername||'').trim().toLowerCase()){
+    return {name:myUsername,rank:playerRank,rankColor:playerRankColor,skinCanvas:activeSkinCanvas};
+  }
+  for(const id of Object.keys(remPlayers)){
+    const rp=remPlayers[id];
+    if(rp.name&&rp.name.trim().toLowerCase()===norm){
+      return {name:rp.name,rank:rp.rank,rankColor:rp.rankColor,skinCanvas:null,skinB64:rp.skinB64||null};
+    }
+  }
+  return null;
+}
+
+function applyCustomNpcSettings(){
+  const npc=customNpcModalTarget;
+  if(!npc) return;
+  const input=document.getElementById('custom-npc-modal-input');
+  const hint=document.getElementById('custom-npc-modal-hint');
+  const name=(input&&input.value||'').trim();
+  if(!name){ if(hint) hint.textContent=(currentLang==='en'?'Please enter a player name.':'Lütfen bir oyuncu adı girin.'); return; }
+  const target=findCustomNpcTargetPlayer(name);
+  if(!target){ if(hint) hint.textContent=(currentLang==='en'?'Player "'+name+'" not found.':'"'+name+'" adlı oyuncu bulunamadı.'); return; }
+
+  // Name/rank tag: swaps in a real mkSprite label, same as a real
+  // player's floating nametag (so it actually renders above the NPC,
+  // unlike the earlier version which only stored the value).
+  applyCustomNpcNameTag(npc,target.name,target.rank||null,target.rankColor||'#ffffff');
+
+  // Skin: applied per-body-part through buildSkinMats so every face
+  // (head/body/arms/legs, base + overlay layers) samples the correct
+  // region of the 64x64 skin atlas — a single stretched material
+  // across the whole mesh (the earlier approach) is what produced
+  // the garbled look.
+  try{
+    if(target.skinCanvas){
+      applyCustomNpcSkinCanvas(npc,target.skinCanvas);
+    } else if(target.skinB64){
+      const img=new Image();
+      img.onload=function(){
+        const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+        cv.getContext('2d').drawImage(img,0,0,64,64);
+        applyCustomNpcSkinCanvas(npc,cv);
+      };
+      img.src=target.skinB64;
+    }
+  }catch(e){ /* texture application is best-effort; name/rank tag still applies */ }
+
+  addChat(null,(currentLang==='en'?'NPC updated to match '+target.name+'.':'NPC, '+target.name+' ile eşleşecek şekilde güncellendi.'),true,'srv');
+  const overlay=document.getElementById('custom-npc-modal-overlay');
+  if(overlay) overlay.classList.remove('active');
+  customNpcModalTarget=null;
+}
+
+(function wireCustomNpcModal(){
+  const applyBtn=document.getElementById('custom-npc-modal-apply');
+  const closeBtn=document.getElementById('custom-npc-modal-close');
+  const overlay=document.getElementById('custom-npc-modal-overlay');
+  if(applyBtn) applyBtn.addEventListener('click',applyCustomNpcSettings);
+  if(closeBtn) closeBtn.addEventListener('click',()=>{
+    if(overlay) overlay.classList.remove('active');
+    customNpcModalTarget=null;
+  });
+  if(overlay) overlay.addEventListener('click',(ev)=>{
+    if(ev.target===overlay){ overlay.classList.remove('active'); customNpcModalTarget=null; }
+  });
+})();
+
 function openPauseMenu(){if(!deviceMode||isChatOpen||invOpen) return;isPaused=true;document.getElementById('pause-overlay').classList.add('active');if(deviceMode==='pc'&&document.pointerLockElement===document.body) document.exitPointerLock();
   // Lav sesini duraklat
   if(_sndLava&&!_sndLava.paused){_sndLava.pause();_lavaAmbientActive=false;}
@@ -5227,6 +5685,16 @@ function selMini(g,id){g.forEach(el=>document.getElementById(el).classList.toggl
 let settingsFromPause=false;
 document.getElementById('btn-singleplayer').addEventListener('click',()=>{selectedDevice=autoDevice();showScreen('screen-world');});
 document.getElementById('btn-settings').addEventListener('click',()=>showScreen(autoDevice()==='mobile'?'screen-mobile-settings':'screen-pc-settings'));
+// EXIT: oyun oturumunu sonlandır, parent (index.html) ana menüye dönsün
+document.getElementById('btn-exit-game').addEventListener('click',()=>{
+  try{
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({ type:'EXIT_GAME' }, '*');
+    }else{
+      window.close();
+    }
+  }catch(e){}
+});
 function _backFromSettings(){
   if(settingsFromPause){settingsFromPause=false;document.getElementById('menu-overlay').style.display='none';
   document.getElementById('menu-overlay').style.pointerEvents='none';
@@ -8423,6 +8891,168 @@ function _mkAnimalFaceTexture(type){
   tex.magFilter=THREE.NearestFilter;tex.minFilter=THREE.NearestFilter;
   return tex;
 }
+// ═══════════════════════════════════════════════════════════════════
+// CUSTOM NPC MOD — by RealMonster
+// Lets an Admin in Creative Mode spawn a plain (untextured) NPC with
+// /summon npc, then tap/click it to open a settings panel that copies
+// a player's Skin, Name Tag, and Rank onto it. This block is additive:
+// it introduces its own `customNpcs` registry, mesh builder, and
+// interaction path, and only taps into the existing engine at a few
+// well-defined points (processCmd, findEntityInCrosshair, doLeftClick,
+// the mobile short-tap handler, and the main update loop).
+// ═══════════════════════════════════════════════════════════════════
+let customNpcs=[];
+let customNpcIdCounter=0;
+let customNpcModalTarget=null; // npc currently open in the settings modal
+
+// True when the local player is allowed to summon/edit Custom NPCs.
+// SP has no server-issued "admin rank" concept at all (playerRank is
+// only ever set from the website's role for MP; myOp is only ever
+// set via MP host/op flows) — every other admin-gated SP command in
+// this game (e.g. /summon <animal>, /fill) uses cheatsEnabled as the
+// SP equivalent of "admin", so this mirrors that instead of silently
+// locking the feature out of Singleplayer entirely. In MP, the real
+// rank/op check still applies.
+function isCustomNpcAdmin(){
+  if(gameMode!=='creative') return false;
+  if(!isMP){
+    return !!cheatsEnabled;
+  }
+  const rank=(typeof playerRank==='string'?playerRank:'').trim().toLowerCase();
+  const isAdminRankHere=['owner / developer','owner/developer','admin / developer','admin/developer','admin','owner'].indexOf(rank)>-1 || !!myOp;
+  return isAdminRankHere;
+}
+// Denial message matches whichever gate actually applies (SP: Cheats
+// + Creative; MP: Admin/Op rank + Creative) instead of always saying
+// "Admin", which would be misleading in Singleplayer.
+function customNpcDenialMessage(){
+  if(!isMP){
+    return currentLang==='en'
+      ? 'Custom NPCs require Cheats: ON and Creative Mode.'
+      : 'Custom NPC için Hileler: AÇIK ve Creative Mod gerekli.';
+  }
+  return currentLang==='en'
+    ? 'You must be an Admin in Creative Mode to use this.'
+    : 'Bunu kullanmak için Admin ve Creative Modda olmalısınız.';
+}
+
+// Plain gray/white 64x64 skin canvas — used as the NPC's starting
+// "skin" so a freshly spawned Custom NPC looks deliberately blank
+// (no face/clothing detail) until an admin applies a real player's
+// skin via the settings modal. Built once and reused for every spawn.
+let _customNpcBlankSkinCanvas=null;
+function getCustomNpcBlankSkinCanvas(){
+  if(_customNpcBlankSkinCanvas) return _customNpcBlankSkinCanvas;
+  const cv=document.createElement('canvas');cv.width=64;cv.height=64;
+  const ctx=cv.getContext('2d');
+  ctx.fillStyle='#bdbdbd';ctx.fillRect(0,0,64,64);
+  // Slightly lighter head-front region so the model doesn't look like
+  // a single flat-shaded block from every angle.
+  ctx.fillStyle='#e6e6e6';ctx.fillRect(8,8,8,8);
+  _customNpcBlankSkinCanvas=cv;
+  return cv;
+}
+
+// The Custom NPC Mod reuses the game's real player model builder
+// (mkPlayer) instead of a bespoke mesh — this guarantees the NPC has
+// the exact same body proportions, UV-mapped skin regions, and
+// floating name/rank tag rendering as an actual player, matching the
+// "looks like a normal player" requirement instead of a rough
+// approximation of one.
+function spawnCustomNpc(x,y,z){
+  const savedSkin=activeSkinCanvas;
+  activeSkinCanvas=getCustomNpcBlankSkinCanvas(); // mkPlayer reads this global
+  const mesh=mkPlayer('NPC',null,null);
+  activeSkinCanvas=savedSkin; // restore immediately — never touch the real player's skin
+  mesh.position.set(x,y,z);
+  // mkPlayer already added its own "NPC" name sprite (via mkSprite)
+  // with no marker on it. Strip it here so applyCustomNpcNameTag has
+  // exactly one sprite to find/replace later instead of stacking a
+  // second one on top — it's the last child added by mkPlayer, a
+  // THREE.Sprite, so it's identified structurally rather than by tag.
+  const initialSprite=mesh.children.find(c=>c.isSprite);
+  if(initialSprite){ mesh.remove(initialSprite); if(initialSprite.material&&initialSprite.material.map) initialSprite.material.map.dispose(); }
+  const npc={
+    id:++customNpcIdCounter,
+    x,y,z,
+    mesh,
+    skinCanvas:getCustomNpcBlankSkinCanvas(),
+    nameTag:null,
+    rank:null,
+    rankColor:null
+  };
+  customNpcs.push(npc);
+  applyCustomNpcNameTag(npc,'NPC',null,null);
+  return npc;
+}
+function removeCustomNpc(npc){
+  scene.remove(npc.mesh);
+  const idx=allPlayerModels.indexOf(npc.mesh);
+  if(idx>-1) allPlayerModels.splice(idx,1);
+  const i=customNpcs.indexOf(npc);
+  if(i>-1) customNpcs.splice(i,1);
+}
+// Re-applies a skin canvas across every body part + overlay layer of
+// an NPC's mkPlayer-built mesh, using the same buildSkinMats UV
+// regions real players use — this is what fixes the "looks garbled"
+// texture-stretching bug a naive single-material swap caused.
+function applyCustomNpcSkinCanvas(npc,skinCv){
+  npc.skinCanvas=skinCv;
+  const parts=npc.mesh.userData.skinParts;
+  if(!parts) return;
+  parts.head.material=buildSkinMats(skinCv,'head');
+  parts.headOv.material=buildSkinMats(skinCv,'head',true);
+  parts.body.material=buildSkinMats(skinCv,'body');
+  parts.bodyOv.material=buildSkinMats(skinCv,'body',true);
+  parts.armR.material=buildSkinMats(skinCv,'armR');
+  parts.armROv.material=buildSkinMats(skinCv,'armR',true);
+  parts.armL.material=buildSkinMats(skinCv,'armL');
+  parts.armLOv.material=buildSkinMats(skinCv,'armL',true);
+  parts.legR.material=buildSkinMats(skinCv,'legR');
+  parts.legROv.material=buildSkinMats(skinCv,'legR',true);
+  parts.legL.material=buildSkinMats(skinCv,'legL');
+  parts.legLOv.material=buildSkinMats(skinCv,'legL',true);
+}
+// Rebuilds the floating name/rank tag sprite above the NPC — mkPlayer
+// only builds this once at creation time (real players get a new one
+// per join), so changing the tag later means swapping the sprite.
+function applyCustomNpcNameTag(npc,name,rank,rankColor){
+  npc.nameTag=name;npc.rank=rank||null;npc.rankColor=rankColor||null;
+  const old=npc.mesh.children.find(c=>c.userData&&c.userData.isNameSprite);
+  if(old){ npc.mesh.remove(old); if(old.material&&old.material.map) old.material.map.dispose(); }
+  const ns=mkSprite(name,rank,rankColor);
+  ns.position.y=2.20;
+  ns.userData.isNameSprite=true;
+  npc.mesh.add(ns);
+}
+// Turns the NPC's whole body to face the given world point (Y is
+// ignored so it doesn't tilt up/down, matching how player/animal
+// models turn).
+function customNpcLookAt(npc,tx,tz){
+  const dx=tx-npc.x,dz=tz-npc.z;
+  if(Math.abs(dx)<0.0001&&Math.abs(dz)<0.0001) return;
+  // mkPlayer's model faces -Z at rotation.y=0 (see buildSkinMats'
+  // "-Z ön" / "-Z front" comments), so facing world point (tx,tz)
+  // requires the +PI-rotated atan2, not the bare atan2(dx,dz) that
+  // would be correct for a +Z-facing model.
+  npc.mesh.rotation.y=Math.atan2(-dx,-dz);
+}
+function updateCustomNpcs(){
+  if(!customNpcs.length) return;
+  // Face the nearest player (local camera in SP, or nearest remote
+  // player in MP if one is closer) — mirrors the "look at nearest
+  // player" requirement without needing a full attention/AI system.
+  customNpcs.forEach(npc=>{
+    let bestX=camera.position.x,bestZ=camera.position.z;
+    let bestD=(camera.position.x-npc.x)**2+(camera.position.z-npc.z)**2;
+    Object.values(remPlayers).forEach(rp=>{
+      const d=(rp.g.position.x-npc.x)**2+(rp.g.position.z-npc.z)**2;
+      if(d<bestD){bestD=d;bestX=rp.g.position.x;bestZ=rp.g.position.z;}
+    });
+    customNpcLookAt(npc,bestX,bestZ);
+  });
+}
+
 function mkAnimalMesh(type){
   const g=new THREE.Group();
   const sz=A_SIZE[type];
@@ -8988,6 +9618,13 @@ function findEntityInCrosshair(maxDist=5,screenX=null,screenY=null){
     dir=new THREE.Vector3(0,0,-1).applyQuaternion(camera.quaternion);orig=camera.position.clone();
   }
   let best=null,bestD=maxDist;
+  for(const npc of customNpcs){
+    const np=new THREE.Vector3(npc.x,npc.y+0.9,npc.z);
+    const toC=np.clone().sub(orig);
+    const proj=toC.dot(dir);if(proj<0.15||proj>bestD) continue;
+    const closest=orig.clone().addScaledVector(dir,proj);
+    if(closest.distanceTo(np)<0.65){bestD=proj;best={type:'customNpc',npc};}
+  }
   for(const a of animals){
     if(a.hp<=0) continue;
     // [FIX] Hitbox artık türe göre boyutlandırılıyor (eskiden sabit 0.8 toleranslı
@@ -9453,6 +10090,17 @@ function processCmd(raw){
     return;
   }
   if(cmd==='summon'){
+    // ---- Custom NPC Mod: /summon npc ----
+    // Spawns a plain, stationary NPC that only Admins in Creative Mode
+    // may summon/edit — separate gate from the animal /summon below,
+    // which uses the existing cheats/op check instead.
+    if((parts[1]||'').toLowerCase()==='npc'){
+      if(!isCustomNpcAdmin()){addChat(null,'⛔ '+customNpcDenialMessage(),true,'warn');return;}
+      const nx=camera.position.x,ny=camera.position.y-PLAYER_HEIGHT,nz=camera.position.z;
+      const npc=spawnCustomNpc(nx,ny,nz);
+      addChat(null,(currentLang==='en'?'Custom NPC spawned (id '+npc.id+').':'Custom NPC oluşturuldu (id '+npc.id+').'),true,'srv');
+      return;
+    }
     if(!cheatsEnabled&&!myOp){addChat(null,d.srvNoCheat,true,'warn');return;}
     if(isMP&&!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
     // Sözdizimi: /summon <entity> [x y z]  — koordinat verilmezse oyuncunun konumuna spawn olur.
@@ -11510,6 +12158,10 @@ function doLeftClick(x,y,isc){
   if(DeathManager.isDead) return;
   triggerSwing();
   const entity=findEntityInCrosshair(5);
+  if(entity&&entity.type==='customNpc'){
+    handleCustomNpcInteract(entity.npc);
+    return;
+  }
   if(entity){
     if(entity.type==='animal') attackAnimal(entity.animal,5);
     else if(entity.type==='player'&&gameMode==='survival'){
@@ -12071,7 +12723,9 @@ function setupMobile(){
           if(DeathManager.isDead){delete aT[id];if(id===lkId) lkId=null;continue;}
           // Kısa dokunuş: dokunulan yöne raycast ile blok koy veya canlıya saldır
           const entity=findEntityInCrosshair(5,aT[id].cx,aT[id].cy);
-          if(entity&&gameMode==='survival'){
+          if(entity&&entity.type==='customNpc'){
+            handleCustomNpcInteract(entity.npc);
+          } else if(entity&&gameMode==='survival'){
             if(entity.type==='animal') attackAnimal(entity.animal,5);
             else if(entity.type==='player'&&isMP){
               const dmg=2+Math.floor(Math.random()*2);
@@ -12139,7 +12793,7 @@ function animate(){
   // chat açıkken bile düşme, sürüklenme (knockback), hasar vs. devam eder. Sadece
   // hareket GİRDİSİ (mv.f/b/l/r, joystick) chat açıkken aşağıda ayrıca sıfırlanıyor.
   if(!isPaused&&!DeathManager.isDead&&!(typeof LoadingScreen!=='undefined'&&LoadingScreen.isActive())){
-    updateAnimals(dt);updateFoods(dt);updateHealthSystem(dt);
+    updateAnimals(dt);updateFoods(dt);updateHealthSystem(dt);updateCustomNpcs();
     if(typeof tickGlobalWorldBorder==='function') tickGlobalWorldBorder(dt);
     if(typeof tickGravityBlocks==='function') tickGravityBlocks(dt);
     updateWater(dt);
@@ -13399,7 +14053,7 @@ function renderTabList() {
   // Sunucu adı: host isem kendi belirlediğim isim (mpServerName), değilsem
   // welcome mesajıyla host'tan gelen isim (_tabServerName). İkisi de yoksa
   // (tek oyunculu/SP) oyuncu adına göre fallback.
-  let _serverDisplayName = 'LEGENDS EXPERIMENTAL';
+  let _serverDisplayName = 'LEGENDS PREVIEW';
   if (isMP) {
     if (amHost) _serverDisplayName = mpServerName || (myName + "'s Server");
     else _serverDisplayName = _tabServerName || (myName + "'s Server");
@@ -14357,7 +15011,7 @@ preloadTabIcons();
 
     const chunkCount=Object.keys(chunks).length;
     const leftLines=[
-      'Legends Experimental v1.7.Lp1',
+      'Legends Preview v1.7.Lp1',
       '',
       'FPS: '+_f3FpsVal,
       '',
@@ -15689,7 +16343,31 @@ preloadTabIcons();
 // ─── ORTAK YARDIMCILER ──────────────────────────────────────────────────────
 var SP_WORLDS_KEY = 'legendsSpWorlds';
 function loadSpWorlds(){ try{ return JSON.parse(localStorage.getItem(SP_WORLDS_KEY)||'[]'); }catch(e){ return []; } }
-function saveSpWorlds(arr){ try{ localStorage.setItem(SP_WORLDS_KEY,JSON.stringify(arr)); }catch(e){} }
+function saveSpWorlds(arr){
+  try{
+    localStorage.setItem(SP_WORLDS_KEY,JSON.stringify(arr));
+    return true;
+  }catch(e){
+    // [FIX] Bu hata eskiden tamamen sessizce yutuluyordu — localStorage kotası
+    // dolduğunda (genelde mod thumbnail'lerindeki büyük base64 görseller
+    // yüzünden) yeni oluşturulan bir dünya sessizce KAYDEDİLMİYORDU: oyun
+    // normal başlıyor, oynanıyor, ama "Ana Menüye Dön" sonrası dünya listede
+    // hiç görünmüyordu ve kullanıcıya hiçbir hata gösterilmiyordu. Artık
+    // hata konsola yazılıyor ve kullanıcıya görünür bir uyarı veriliyor.
+    console.error('[SP Worlds] Kayıt başarısız — localStorage kotası dolmuş olabilir.', e);
+    try{
+      if(typeof addChat === 'function'){
+        addChat(null, T(
+          '⚠️ Dünya kaydedilemedi! Depolama alanı dolu olabilir — büyük mod görsellerini silmeyi deneyin.',
+          '⚠️ World could not be saved! Storage may be full — try deleting large mod images.'
+        ), true, 'warn');
+      } else {
+        window.alert('World could not be saved — storage may be full. Try deleting some mods (especially ones with large images).');
+      }
+    }catch(e2){}
+    return false;
+  }
+}
 function genSpId(){ return 'sp_'+Date.now()+'_'+Math.floor(Math.random()*10000); }
 
 // ════════════════════════════════════════════════════════════════════════════
@@ -16170,7 +16848,7 @@ window._spHardcore  = false;
   spWsEl.className = 'menu-screen';
   spWsEl.id = 'screen-sp-worlds';
   spWsEl.innerHTML = [
-    '<div class="game-logo">LEGENDS EXPERIMENTAL</div>',
+    '<div class="game-logo">LEGENDS PREVIEW</div>',
     '<div class="screen-title">DÜNYALARIM</div>',
     '<button class="mbtn primary" id="btn-new-sp-world" style="margin-bottom:8px;padding:10px;">',
     '  ➕ YENİ DÜNYA OLUŞTUR',
@@ -16247,6 +16925,13 @@ window._spHardcore  = false;
     // Dünya adı girişini de temizle
     var wnInput=document.getElementById('sp-worldname-input');
     if(wnInput) wnInput.value='';
+    // Mods listesi: btn-singleplayer'ın orijinal (bubble-phase) listener'ı
+    // burada stopImmediatePropagation ile engellendiği için mod seçimini
+    // sıfırlama ve listeyi render etme işini burada tekrar yapıyoruz —
+    // aksi halde "MODS" bölümü World Creation ekranına bu yoldan
+    // girildiğinde hep boş kalır.
+    if(typeof window._inlineModsSelection !== 'undefined' && window._inlineModsSelection) window._inlineModsSelection.sp = new Set();
+    if(typeof renderInlineMods === 'function') renderInlineMods('sp');
     showScreen('screen-world');
   });
 
@@ -16398,6 +17083,13 @@ window._spHardcore  = false;
     window.startGame = function(device,world,mp,gm,cheats){
       _origSGS.apply(this, arguments);
       if(mp) return; // Sadece SP
+      // [MOD AKTİVASYONU] Hangi dünyaya giriliyorsa (yeni veya var olan),
+      // o dünyanın enabledModIds listesindeki modları çalıştır. Önceki
+      // dünyadan kalan mod scriptleri (varsa) önce durdurulur — modlar
+      // dünyaya özeldir, bir dünyada kurulu mod diğerinde çalışmamalı.
+      if(window.LegendsScriptStudio && typeof window.LegendsScriptStudio.stopAllMods==='function'){
+        window.LegendsScriptStudio.stopAllMods();
+      }
       if(window._spLoadedWorldId){
         // [FIX] Var olan bir dünya açıldı. Eskiden burada _spLoadedWorldId sıfırlanıp
         // return ediliyordu — ama _spActiveWorldId hiç set edilmediği için,
@@ -16417,6 +17109,7 @@ window._spHardcore  = false;
           saveSpWorlds(_wsMru);
         }
         window._spLoadedWorldId = null;
+        activateModsForWorldId(window._spActiveWorldId);
         return;
       }
       if(!window._spNewWorldMode) return; // Menü dışı başlatma
@@ -16436,15 +17129,24 @@ window._spHardcore  = false;
         cheats:!!(cheats||spCheatsEnabled),
         hardcore:!!(window._spHardcore),
         seed:(typeof worldSeed!=='undefined'?worldSeed:0),
+        enabledModIds:getSelectedInlineModIds('sp'),
         createdAt:new Date().toISOString()
       });
-      saveSpWorlds(ws4);
+      var saveOk = saveSpWorlds(ws4);
+      if(!saveOk){
+        // saveSpWorlds() zaten bir uyarı gösterdi (chat/alert), burada ek
+        // olarak _spActiveWorldId'yi YİNE DE set ediyoruz ki oturum boyunca
+        // en azından tam-durum kaydı (pozisyon/blok) tekrar denenebilsin —
+        // ama dünya listede kalıcı olarak görünmeyecek, kullanıcı depolamayı
+        // boşaltıp elle tekrar kaydetmeli (Edit → Save).
+      }
       // Bir sonraki dünya oluşturma ekranı için isim alanını temizle
       if(_nameInput) _nameInput.value='';
       // [FIX] Yeni oluşturulan dünyanın id'sini aktif dünya olarak işaretle —
       // bu olmadan getActiveSpWorldId() null dönüyor ve yeni dünyada yapılan
       // hiçbir blok/pozisyon/can değişikliği hiç kaydedilmiyordu.
       window._spActiveWorldId = id;
+      activateModsForWorldId(id);
     };
   })();
 })();
@@ -16471,7 +17173,15 @@ function T(tr, en){ return (typeof currentLang !== 'undefined' && currentLang ==
 // SP dünya listesi aynı localStorage anahtarını kullanır (YAMA 4 ile uyumlu)
 var SP_WORLDS_KEY_V18 = 'legendsSpWorlds';
 function loadSpWorldsV18(){ try{ return JSON.parse(localStorage.getItem(SP_WORLDS_KEY_V18)||'[]'); }catch(e){ return []; } }
-function saveSpWorldsV18(arr){ try{ localStorage.setItem(SP_WORLDS_KEY_V18, JSON.stringify(arr)); }catch(e){} }
+function saveSpWorldsV18(arr){
+  try{
+    localStorage.setItem(SP_WORLDS_KEY_V18, JSON.stringify(arr));
+    return true;
+  }catch(e){
+    console.error('[SP Worlds V18] Kayıt başarısız — localStorage kotası dolmuş olabilir.', e);
+    return false;
+  }
+}
 function findSpWorldIndex(id){
   var ws = loadSpWorldsV18();
   return ws.findIndex(function(w){ return w.id === id; });
@@ -17535,8 +18245,26 @@ animate();
 // =====================================================================
 (function(){
   "use strict";
-  function openModal(id){ var el=document.getElementById(id); if(el) el.classList.add('active'); }
-  function closeModal(id){ var el=document.getElementById(id); if(el) el.classList.remove('active'); }
+  function openModal(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.classList.add('active');
+    if(id==='mod-editor-modal'){
+      document.body.classList.add('me-locked');
+      document.querySelectorAll('#menu-overlay, #tab-overlay, canvas, #btn-mobile-tab').forEach(function(bg){
+        if('inert' in bg){ bg.inert = true; } else { bg.setAttribute('tabindex','-1'); }
+      });
+    }
+  }
+  function closeModal(id){
+    var el=document.getElementById(id); if(!el) return;
+    el.classList.remove('active');
+    if(id==='mod-editor-modal'){
+      document.body.classList.remove('me-locked');
+      document.querySelectorAll('#menu-overlay, #tab-overlay, canvas, #btn-mobile-tab').forEach(function(bg){
+        if('inert' in bg){ bg.inert = false; } else { bg.removeAttribute('tabindex'); }
+      });
+    }
+  }
 
   // ═══════════════════════════════════════════════════════════════════
   // 1) MOD & USER SCHEMA + PERSISTENCE LAYER
@@ -17693,6 +18421,40 @@ animate();
       .sort(function(a,b){ return (b.publishedAt||0) - (a.publishedAt||0); });
   }
 
+  // ── Star rating: one star per user per mod, toggleable (tap again to
+  //    un-star). Stored as { username: true } on the mod record itself
+  //    so it rides along in the same DB_KEY save/load as everything
+  //    else — no separate storage key to keep in sync.
+  function getStarCount(mod){
+    if(!mod || !mod.stars) return 0;
+    return Object.keys(mod.stars).length;
+  }
+  function hasUserStarred(mod, username){
+    if(!mod || !mod.stars) return false;
+    return !!mod.stars[username || currentUsername()];
+  }
+  function toggleStar(modId){
+    var mod = getMod(modId);
+    if(!mod) return false;
+    var username = currentUsername();
+    if(!mod.stars) mod.stars = {};
+    var nowStarred;
+    if(mod.stars[username]){
+      delete mod.stars[username];
+      nowStarred = false;
+    } else {
+      mod.stars[username] = true;
+      nowStarred = true;
+    }
+    saveDB(db);
+    return nowStarred;
+  }
+  window.LegendsModRatings = {
+    getStarCount: getStarCount,
+    hasUserStarred: hasUserStarred,
+    toggleStar: toggleStar
+  };
+
   // Persist the full items array coming back from the iframe editor.
   // Called on every postMessage state report — guarantees scripts,
   // textures and props are never lost, even if the user never
@@ -17807,8 +18569,205 @@ animate();
     setOfficial: setOfficial,
     deleteMod: deleteMod,
     checkBadges: checkBadges,
-    isAdmin: currentUserIsAdmin
+    isAdmin: currentUserIsAdmin,
+    getStarCount: getStarCount,
+    hasUserStarred: hasUserStarred,
+    toggleStar: toggleStar
   };
+
+  // ═══════════════════════════════════════════════════════════════════
+  // 2-B) SAYFA İÇİ MOD YÖNETİMİ — World Creation (screen-world) ve
+  //    Server Settings ekranlarında Create/My Mods sekmeleri OLMADAN,
+  //    sadece "kur / kaldır" amaçlı sade bir aç-kapa listesi.
+  //
+  //    Görünen liste = kullanıcının KENDİ modları (taslak dahil — henüz
+  //    Publish edilmemişse SADECE kendisine görünür, tıpkı My Mods'ta
+  //    olduğu gibi) + başkalarının YAYINLADIĞI modlar. Kendi yayınladığı
+  //    bir mod iki kez görünmesin diye id bazında tekilleştirilir.
+  //
+  //    Seçim kalıcılığı:
+  //      - World Creation (context 'sp'): henüz kaydedilmemiş yeni bir
+  //        dünya için geçiciden bir Set'te tutulur; dünya gerçekten
+  //        oluşturulduğunda (patchStartGameSave) o dünyanın kaydına
+  //        enabledModIds olarak yazılır.
+  //      - Server Settings (context 'ss'): zaten var olan bir dünyanın
+  //        kaydını doğrudan okuyup yazar — değişiklik anında kalıcı olur.
+  // ═══════════════════════════════════════════════════════════════════
+  var inlineModsSelection = { sp: new Set() }; // 'ss' context kendi worldData'sını doğrudan kullanır, ayrı Set gerekmez
+  window._inlineModsSelection = inlineModsSelection;
+
+  function getAllModsForInlineList(){
+    var mine = (typeof getMyMods === 'function') ? getMyMods() : [];
+    var published = (typeof getPublishedMods === 'function') ? getPublishedMods() : [];
+    var seen = {};
+    var result = [];
+    mine.forEach(function(m){ if(!seen[m.id]){ seen[m.id]=true; result.push(m); } });
+    published.forEach(function(m){ if(!seen[m.id]){ seen[m.id]=true; result.push(m); } });
+    return result.sort(function(a,b){ return (b.updatedAt||0) - (a.updatedAt||0); });
+  }
+
+  // Server Settings hangi dünyayı düzenliyor? Şu an açık olan SP dünyasını
+  // kullanıyoruz (server-settings-modal bugünkü akışta SP dünya düzenleme
+  // amacıyla açılıyor — bkz. btn-open-server-settings).
+  function getSsTargetWorldId(){
+    return (typeof getActiveSpWorldId === 'function') ? getActiveSpWorldId() : (window._spActiveWorldId || window._spLoadedWorldId || null);
+  }
+  function getSsTargetWorldRecord(){
+    var wid = getSsTargetWorldId();
+    if(!wid || typeof loadSpWorlds !== 'function') return null;
+    var ws = loadSpWorlds();
+    return ws.find(function(w){ return w.id === wid; }) || null;
+  }
+
+  function isModEnabledForContext(context, modId){
+    if(context === 'ss'){
+      var rec = getSsTargetWorldRecord();
+      return !!(rec && Array.isArray(rec.enabledModIds) && rec.enabledModIds.indexOf(modId) > -1);
+    }
+    return inlineModsSelection.sp.has(modId);
+  }
+
+  function toggleModForContext(context, modId){
+    if(context === 'ss'){
+      var wid = getSsTargetWorldId();
+      if(!wid || typeof loadSpWorlds !== 'function' || typeof saveSpWorlds !== 'function') return;
+      var ws = loadSpWorlds();
+      var idx = ws.findIndex(function(w){ return w.id === wid; });
+      if(idx < 0) return;
+      if(!Array.isArray(ws[idx].enabledModIds)) ws[idx].enabledModIds = [];
+      var pos = ws[idx].enabledModIds.indexOf(modId);
+      var nowEnabled;
+      if(pos > -1){ ws[idx].enabledModIds.splice(pos,1); nowEnabled = false; }
+      else { ws[idx].enabledModIds.push(modId); nowEnabled = true; }
+      saveSpWorlds(ws);
+      // Server Settings zaten oynanmakta olan bir dünyayı düzenliyorsa
+      // (Pause menüsünden açıldıysa) değişikliği ANINDA uygula — sayfayı
+      // terk edip geri dönmeyi beklemeye gerek yok.
+      if(window._spActiveWorldId === wid && window.LegendsScriptStudio){
+        var modRec = getMod(modId);
+        if(modRec){
+          if(nowEnabled) window.LegendsScriptStudio.runMod(modRec);
+          else window.LegendsScriptStudio.stopMod(modId);
+        }
+      }
+      return;
+    }
+    if(inlineModsSelection.sp.has(modId)) inlineModsSelection.sp.delete(modId);
+    else inlineModsSelection.sp.add(modId);
+  }
+
+  function getSelectedInlineModIds(context){
+    if(context === 'ss'){
+      var rec = getSsTargetWorldRecord();
+      return (rec && Array.isArray(rec.enabledModIds)) ? rec.enabledModIds.slice() : [];
+    }
+    return Array.from(inlineModsSelection.sp);
+  }
+
+  // Per-context search text for the inline "MODS" list (World Creation
+  // and Server Settings each keep their own, so opening one doesn't
+  // reset a term typed in the other).
+  var inlineModsSearchTerm = { sp:'', ss:'' };
+
+  function renderInlineMods(context){
+    var listEl = document.getElementById(context === 'ss' ? 'ss-inline-mods-list' : 'sp-inline-mods-list');
+    if(!listEl) return;
+    var allMods = getAllModsForInlineList();
+    var term = (inlineModsSearchTerm[context]||'').trim().toLowerCase();
+    var mods = !term ? allMods : allMods.filter(function(m){
+      return (m.name||'').toLowerCase().indexOf(term) > -1 ||
+             (m.author||'').toLowerCase().indexOf(term) > -1 ||
+             (m.description||'').toLowerCase().indexOf(term) > -1;
+    });
+    listEl.innerHTML = '';
+    if(!allMods.length){
+      listEl.innerHTML = '<div class="inline-mods-empty">'+
+        (currentLang==='tr' ? 'Henüz hiç mod yok. Mods menüsünden bir mod oluşturun.' : 'No mods yet. Create one from the Mods menu.') +
+        '</div>';
+      return;
+    }
+    if(!mods.length){
+      listEl.innerHTML = '<div class="inline-mods-empty">'+
+        (currentLang==='tr' ? 'Aramayla eşleşen mod yok.' : 'No mods match your search.') +
+        '</div>';
+      return;
+    }
+    mods.forEach(function(mod){
+      var row = document.createElement('div');
+      row.className = 'inline-mod-row';
+      var thumbInner = mod.thumbnail ? '<img src="'+mod.thumbnail+'" alt="">' : '🧩';
+      var isDraft = mod.status !== 'published';
+      var metaText = isDraft
+        ? (currentLang==='tr' ? 'Taslak (sadece siz)' : 'Draft (only you)')
+        : ('by ' + mod.author);
+      var enabled = isModEnabledForContext(context, mod.id);
+      var starCount = getStarCount(mod);
+      var isStarred = hasUserStarred(mod);
+      row.innerHTML =
+        '<div class="inline-mod-thumb">'+thumbInner+'</div>'+
+        '<div class="inline-mod-info">'+
+          '<div class="inline-mod-name"></div>'+
+          '<div class="inline-mod-meta"></div>'+
+        '</div>'+
+        '<div class="inline-mod-star'+(isStarred?' starred':'')+'" data-mod-id="'+mod.id+'"><span class="inline-mod-star-icon">★</span><span class="inline-mod-star-count">'+starCount+'</span></div>'+
+        '<div class="inline-mod-toggle'+(enabled?' on':'')+'" data-mod-id="'+mod.id+'"><div class="inline-mod-toggle-dot"></div></div>';
+      row.querySelector('.inline-mod-name').textContent = mod.name;
+      row.querySelector('.inline-mod-meta').textContent = metaText;
+      var toggleEl = row.querySelector('.inline-mod-toggle');
+      toggleEl.addEventListener('click', function(){
+        toggleModForContext(context, mod.id);
+        toggleEl.classList.toggle('on');
+      });
+      var starEl = row.querySelector('.inline-mod-star');
+      starEl.addEventListener('click', function(e){
+        e.stopPropagation();
+        var nowStarred = toggleStar(mod.id);
+        starEl.classList.toggle('starred', nowStarred);
+        starEl.querySelector('.inline-mod-star-count').textContent = getStarCount(mod);
+      });
+      listEl.appendChild(row);
+    });
+  }
+  window.renderInlineMods = renderInlineMods;
+
+  // Wire the two search inputs (World Creation + Server Settings) —
+  // filters as you type, no separate search button needed since the
+  // list is already local data with no network round-trip.
+  ['sp','ss'].forEach(function(context){
+    var input = document.getElementById(context + '-inline-mods-search');
+    if(!input) return;
+    input.addEventListener('input', function(){
+      inlineModsSearchTerm[context] = input.value;
+      renderInlineMods(context);
+    });
+  });
+
+  // Yeni bir dünya girildiğinde (yeni oluşturulan veya var olan), o
+  // dünyanın kaydındaki enabledModIds listesindeki modları çalıştırır.
+  function activateModsForWorldId(worldId){
+    if(!worldId || typeof loadSpWorlds !== 'function') return;
+    var ws = loadSpWorlds();
+    var rec = ws.find(function(w){ return w.id === worldId; });
+    if(!rec || !Array.isArray(rec.enabledModIds) || !rec.enabledModIds.length) return;
+    rec.enabledModIds.forEach(function(modId){
+      var mod = getMod(modId);
+      if(mod && window.LegendsScriptStudio && typeof window.LegendsScriptStudio.runMod === 'function'){
+        window.LegendsScriptStudio.runMod(mod);
+      }
+    });
+  }
+  window.activateModsForWorldId = activateModsForWorldId;
+
+  // World Creation ekranı her açıldığında (Single Player butonuna
+  // basıldığında), yeni dünya için geçici seçim listesini sıfırla ve
+  // listeyi güncel mod verisiyle tazele.
+  var spBtnForMods = document.getElementById('btn-singleplayer');
+  if(spBtnForMods){
+    spBtnForMods.addEventListener('click', function(){
+      inlineModsSelection.sp = new Set();
+      renderInlineMods('sp');
+    });
+  }
 
   // ═══════════════════════════════════════════════════════════════════
   // 3) MODAL PLUMBING (Mods corner button, tab switching, close buttons)
@@ -17820,15 +18779,7 @@ animate();
   if(modsCloseBtn) modsCloseBtn.addEventListener('click', function(){ closeModal('mods-modal'); });
 
   var editBtn = document.getElementById('btn-open-server-settings');
-  if(editBtn) editBtn.addEventListener('click', function(){ openModal('server-settings-modal'); });
-
-  var manageModsBtn = document.getElementById('btn-manage-mods');
-  if(manageModsBtn) manageModsBtn.addEventListener('click', function(){
-    closeModal('server-settings-modal');
-    openModal('mods-modal');
-    renderPublicMods();
-    renderMyMods();
-  });
+  if(editBtn) editBtn.addEventListener('click', function(){ openModal('server-settings-modal'); renderInlineMods('ss'); });
 
   var ssCloseBtn = document.getElementById('ss-close-btn');
   if(ssCloseBtn) ssCloseBtn.addEventListener('click', function(){ closeModal('server-settings-modal'); });
@@ -17866,12 +18817,30 @@ animate();
   function renderPublicMods(){
     if(!publicGrid) return;
     var mods = getPublishedMods().filter(function(m){
-      var categoryOk = (publicActiveCategory === 'All') ||
-        (publicActiveCategory === 'Official' ? m.isOfficial : m.category === publicActiveCategory);
+      var categoryOk;
+      if(publicActiveCategory === 'All' || publicActiveCategory === 'Popular'){
+        // "Popular" isn't a real category field — it's the same mod
+        // pool as "All", just re-sorted by star count below.
+        categoryOk = true;
+      } else if(publicActiveCategory === 'Official'){
+        categoryOk = !!m.isOfficial;
+      } else if(publicActiveCategory === 'New' || publicActiveCategory === 'Remix' || publicActiveCategory === 'Update'){
+        // These three aren't stored fields on the mod — they're the
+        // same time-/relation-based badges rendered on the card, so
+        // filtering by them reuses checkBadges instead of a separate
+        // (and inevitably-drifting) parallel check.
+        var badgeKey = publicActiveCategory.toLowerCase();
+        categoryOk = checkBadges(m).some(function(b){ return b.key === badgeKey; });
+      } else {
+        categoryOk = m.category === publicActiveCategory;
+      }
       var term = publicSearchTerm.trim().toLowerCase();
       var searchOk = !term || (m.name||'').toLowerCase().indexOf(term) > -1 || (m.description||'').toLowerCase().indexOf(term) > -1;
       return categoryOk && searchOk;
     });
+    if(publicActiveCategory === 'Popular'){
+      mods = mods.slice().sort(function(a,b){ return getStarCount(b) - getStarCount(a); });
+    }
     publicGrid.innerHTML = '';
     if(!mods.length){
       publicGrid.innerHTML =
@@ -17885,21 +18854,76 @@ animate();
       var card = document.createElement('div');
       card.className = 'mm-mod-card';
       card.setAttribute('data-mod-id', mod.id);
-      var thumbInner = mod.thumbnail ? '<img src="'+mod.thumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:5px;" alt="">' : '🧩';
+      var thumbInner = mod.thumbnail ? '<img src="'+mod.thumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="">' : '🧩';
+      var hasDescription = !!(mod.description && mod.description.trim());
+      var hasDetailedInfo = !!(mod.detailedInfo && mod.detailedInfo.trim());
+      var versionText = mod.version ? ('v' + mod.version) : '';
+      var isAdminHere = currentUserIsAdmin();
+      // Admins/Owners always get an expandable panel (to reach the
+      // Official toggle) even on a mod with no description/version yet.
+      var hasDetails = hasDescription || hasDetailedInfo || !!versionText || isAdminHere;
+      var starCount = getStarCount(mod);
+      var isStarred = hasUserStarred(mod);
+      var badgeRowHtml = renderBadgeRow(mod);
+      var starBtnHtml = '<div class="mm-star-btn'+(isStarred?' starred':'')+'" data-mod-id="'+mod.id+'"><span class="mm-star-icon">★</span><span class="mm-star-count">'+starCount+'</span></div>';
       card.innerHTML =
-        renderBadgeRow(mod) +
-        '<div class="mm-mod-thumb">'+thumbInner+'</div>'+
-        '<div class="mm-mod-name"></div>'+
-        '<div class="mm-mod-author-row">'+
-          '<span class="mm-mod-author"></span>'+
+        '<div class="mm-card-top-row">'+ (badgeRowHtml || '<div></div>') + starBtnHtml + '</div>'+
+        '<div class="mm-mod-card-top">'+
+          '<div class="mm-mod-thumb">'+thumbInner+'</div>'+
+          '<div class="mm-mod-card-info">'+
+            '<div class="mm-mod-name"></div>'+
+            '<span class="mm-mod-author"></span>'+
+          '</div>'+
+          (hasDetails ? '<div class="mm-mod-tap-hint">'+(currentLang==='tr'?'▾ Detaylar':'▾ Details')+'</div>' : '')+
         '</div>'+
-        '<button type="button" class="mm-mod-download-btn">USE MOD</button>';
+        (hasDetails ?
+          '<div class="mm-mod-details">'+
+            '<div class="mm-mod-details-inner">'+
+              (hasDescription ? '<div><div class="mm-mod-detail-label">Description</div><div class="mm-mod-detail-text mm-mod-desc-text"></div></div>' : '')+
+              (hasDetailedInfo ? '<div><div class="mm-mod-detail-label">Detailed Info</div><div class="mm-mod-detail-text mm-mod-detailedinfo-text"></div></div>' : '')+
+              (versionText ? '<div class="mm-mod-detail-version"></div>' : '')+
+              (isAdminHere ? adminPanelHtml(mod) : '')+
+            '</div>'+
+          '</div>' : '');
       card.querySelector('.mm-mod-name').textContent = mod.name;
       card.querySelector('.mm-mod-author').textContent = 'by ' + mod.author;
-      card.querySelector('.mm-mod-download-btn').addEventListener('click', function(e){
-        e.stopPropagation();
-        activateModForLocalPlay(mod.id);
-      });
+      if(hasDescription) card.querySelector('.mm-mod-desc-text').textContent = mod.description;
+      if(hasDetailedInfo) card.querySelector('.mm-mod-detailedinfo-text').textContent = mod.detailedInfo;
+      if(versionText) card.querySelector('.mm-mod-detail-version').textContent = versionText;
+      if(hasDetails){
+        // Tapping the card body toggles the description/detailed-info/
+        // version panel open or closed. Activation now happens only
+        // from World Creation / Server Settings (per the footer note),
+        // so there's no separate USE MOD action here anymore.
+        card.addEventListener('click', function(e){
+          // Don't toggle the accordion when the click was on the admin
+          // Official button itself — that has its own handler below
+          // and shouldn't also collapse the panel it just changed.
+          if(e.target.closest('.mm-admin-official-btn')) return;
+          card.classList.toggle('expanded');
+        });
+      }
+      if(isAdminHere){
+        var officialBtn = card.querySelector('.mm-admin-official-btn');
+        if(officialBtn){
+          officialBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            setOfficial(mod.id, !mod.isOfficial);
+            renderPublicMods();
+            renderMyMods();
+          });
+        }
+      }
+      var starBtn = card.querySelector('.mm-star-btn');
+      if(starBtn){
+        starBtn.addEventListener('click', function(e){
+          e.stopPropagation();
+          var nowStarred = toggleStar(mod.id);
+          starBtn.classList.toggle('starred', nowStarred);
+          starBtn.querySelector('.mm-star-count').textContent = getStarCount(mod);
+          if(publicActiveCategory === 'Popular') renderPublicMods();
+        });
+      }
       publicGrid.appendChild(card);
     });
   }
@@ -17965,28 +18989,10 @@ animate();
   var descInput = document.getElementById('mm-input-description');
   var versionInput = document.getElementById('mm-input-version');
   var infoInput = document.getElementById('mm-input-detailedinfo');
-  var thumbUploadBox = document.querySelector('#mm-create-step1 .mm-upload-box');
+  // NOTE: the Modding Wizard intentionally has NO image/thumbnail upload
+  // field (see rule 1 in the spec). Cover image is set/changed exclusively
+  // from the Mod Settings modal (openModSettingsFor) after the mod exists.
   var pendingThumbnail = null;
-
-  if(thumbUploadBox){
-    var thumbFileInput = document.createElement('input');
-    thumbFileInput.type = 'file';
-    thumbFileInput.accept = 'image/*';
-    thumbFileInput.style.display = 'none';
-    thumbUploadBox.appendChild(thumbFileInput);
-    thumbUploadBox.addEventListener('click', function(){ thumbFileInput.click(); });
-    thumbFileInput.addEventListener('change', function(){
-      var file = thumbFileInput.files && thumbFileInput.files[0];
-      if(!file) return;
-      var reader = new FileReader();
-      reader.onload = function(){
-        pendingThumbnail = reader.result;
-        thumbUploadBox.innerHTML = '<img src="'+pendingThumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="">';
-        thumbUploadBox.appendChild(thumbFileInput);
-      };
-      reader.readAsDataURL(file);
-    });
-  }
 
   function showCreateWarning(msg){
     if(!warningEl) return;
@@ -18004,24 +19010,6 @@ animate();
     if(versionInput) versionInput.value = '1.0.0';
     if(infoInput) infoInput.value = '';
     pendingThumbnail = null;
-    if(thumbUploadBox){
-      thumbUploadBox.innerHTML = '<div class="mm-upload-icon">🖼️</div><div>Click or drag an image to upload</div>';
-      var f = document.createElement('input');
-      f.type='file'; f.accept='image/*'; f.style.display='none';
-      thumbUploadBox.appendChild(f);
-      f.addEventListener('change', function(){
-        var file = f.files && f.files[0];
-        if(!file) return;
-        var reader = new FileReader();
-        reader.onload = function(){
-          pendingThumbnail = reader.result;
-          thumbUploadBox.innerHTML = '<img src="'+pendingThumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="">';
-          thumbUploadBox.appendChild(f);
-        };
-        reader.readAsDataURL(file);
-      });
-      thumbUploadBox.onclick = function(){ f.click(); };
-    }
     if(categoryGrid){
       categoryGrid.querySelectorAll('.mm-category-select-btn').forEach(function(b,i){ b.classList.toggle('active', i===0); });
       selectedCategory = categoryGrid.querySelector('.mm-category-select-btn') ? categoryGrid.querySelector('.mm-category-select-btn').getAttribute('data-category') : 'Horror';
@@ -18098,7 +19086,7 @@ animate();
       card.className = 'mm-mymod-card';
       card.style.flexDirection = 'column';
       card.style.alignItems = 'stretch';
-      var thumbInner = mod.thumbnail ? '<img src="'+mod.thumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:5px;" alt="">' : '';
+      var thumbInner = mod.thumbnail ? '<img src="'+mod.thumbnail+'" style="width:100%;height:100%;object-fit:cover;border-radius:6px;" alt="">' : '';
       card.innerHTML =
         '<div style="display:flex;align-items:center;gap:10px;">'+
           '<div class="mm-mymod-thumb">'+thumbInner+'</div>'+
@@ -18113,6 +19101,7 @@ animate();
           '<div class="mm-mymod-actions">'+
             '<button type="button" class="mm-add-btn" style="'+(hasContent?'display:none;':'')+'">ADD +</button>'+
             '<button type="button" class="mm-update-btn" style="'+(hasContent?'':'display:none;')+'">EDIT</button>'+
+            '<button type="button" class="mm-settings-btn">⚙️ Settings</button>'+
           '</div>'+
         '</div>'+
         '<div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;">'+
@@ -18130,6 +19119,9 @@ animate();
       var updateBtn = card.querySelector('.mm-update-btn');
       if(addBtn) addBtn.addEventListener('click', function(){ openModEditorFor(mod.id); });
       if(updateBtn) updateBtn.addEventListener('click', function(){ openModEditorFor(mod.id); });
+
+      var settingsBtn = card.querySelector('.mm-settings-btn');
+      if(settingsBtn) settingsBtn.addEventListener('click', function(){ openModSettingsFor(mod.id); });
 
       var publishBtn = card.querySelector('.mm-publish-inline-btn');
       if(publishBtn){
@@ -18177,6 +19169,143 @@ animate();
       '</button>'+
     '</div>';
   }
+
+  // ═══════════════════════════════════════════════════════════════════
+  // 6.5) MOD SETTINGS MODAL — opened via the ⚙️ Settings button on each
+  //    My Mods card. Name is always read-only. Version is locked unless
+  //    the mod has actually gone through an update pass (we treat
+  //    mod.lastUpdatedPublishAt truthy as the isUpdated flag: it's set
+  //    inside publishMod() the moment a mod that was already published
+  //    gets republished, i.e. "a mod update happened"). Cover image is
+  //    edited here exclusively — this is intentional: the create wizard
+  //    has no image field per spec, so this modal is the only place a
+  //    thumbnail/cover can be set or changed.
+  // ═══════════════════════════════════════════════════════════════════
+  var modSettingsModalEl = document.getElementById('mod-settings-modal');
+  var msmSubtitle = document.getElementById('msm-subtitle');
+  var msmNameInput = document.getElementById('msm-input-name');
+  var msmVersionInput = document.getElementById('msm-input-version');
+  var msmVersionLockIcon = document.getElementById('msm-version-lock-icon');
+  var msmVersionWarning = document.getElementById('msm-version-warning');
+  var msmCoverPreview = document.getElementById('msm-cover-preview');
+  var msmCoverUrlInput = document.getElementById('msm-input-cover-url');
+  var msmCoverUploadBtn = document.getElementById('msm-cover-upload-btn');
+  var msmCoverClearBtn = document.getElementById('msm-cover-clear-btn');
+  var msmDescInput = document.getElementById('msm-input-description');
+  var msmDetailsInput = document.getElementById('msm-input-details');
+  var msmSaveBtn = document.getElementById('msm-save-btn');
+  var msmCancelBtn = document.getElementById('msm-close-btn');
+  var msmCancelBtn2 = document.getElementById('msm-cancel-btn');
+  var currentSettingsModId = null;
+  var msmPendingCover = null;
+
+  function modIsUpdated(mod){
+    // A mod counts as "updated" once it has gone through at least one
+    // real update pass after its first publish — mirrors the history
+    // entries pushed by publishMod() (type:'update').
+    return !!(mod.lastUpdatedPublishAt || (mod.history||[]).some(function(h){ return h.type === 'update'; }));
+  }
+
+  function renderMsmCoverPreview(src){
+    if(!msmCoverPreview) return;
+    if(src){
+      msmCoverPreview.innerHTML = '<img src="'+src+'" alt="">';
+    } else {
+      msmCoverPreview.innerHTML = '<span id="msm-cover-placeholder">No cover image</span>';
+    }
+  }
+
+  function openModSettingsFor(modId){
+    var mod = getMod(modId);
+    if(!mod || !modSettingsModalEl) return;
+    currentSettingsModId = modId;
+
+    if(msmSubtitle) msmSubtitle.textContent = mod.category ? mod.category.toUpperCase() : '—';
+    if(msmNameInput) msmNameInput.value = mod.name || '';
+
+    var updated = modIsUpdated(mod);
+    if(msmVersionInput){
+      msmVersionInput.value = mod.version || '1.0.0';
+      msmVersionInput.readOnly = !updated;
+      msmVersionInput.disabled = !updated;
+      msmVersionInput.classList.toggle('locked', !updated);
+    }
+    if(msmVersionLockIcon) msmVersionLockIcon.style.display = updated ? 'none' : '';
+    if(msmVersionWarning) msmVersionWarning.classList.toggle('visible', !updated);
+
+    msmPendingCover = mod.thumbnail || null;
+    renderMsmCoverPreview(msmPendingCover);
+    if(msmCoverUrlInput) msmCoverUrlInput.value = (msmPendingCover && !msmPendingCover.startsWith('data:')) ? msmPendingCover : '';
+
+    if(msmDescInput) msmDescInput.value = mod.description || '';
+    if(msmDetailsInput) msmDetailsInput.value = mod.detailedInfo || '';
+
+    openModal('mod-settings-modal');
+  }
+
+  function closeModSettings(){
+    closeModal('mod-settings-modal');
+    currentSettingsModId = null;
+    msmPendingCover = null;
+  }
+
+  if(msmCoverUrlInput){
+    msmCoverUrlInput.addEventListener('input', function(){
+      msmPendingCover = msmCoverUrlInput.value.trim() || null;
+      renderMsmCoverPreview(msmPendingCover);
+    });
+  }
+  if(msmCoverUploadBtn){
+    var msmFileInput = document.createElement('input');
+    msmFileInput.type = 'file';
+    msmFileInput.accept = 'image/*';
+    msmFileInput.style.display = 'none';
+    msmCoverUploadBtn.parentNode.appendChild(msmFileInput);
+    msmCoverUploadBtn.addEventListener('click', function(){ msmFileInput.click(); });
+    msmFileInput.addEventListener('change', function(){
+      var file = msmFileInput.files && msmFileInput.files[0];
+      if(!file) return;
+      var reader = new FileReader();
+      reader.onload = function(){
+        msmPendingCover = reader.result;
+        renderMsmCoverPreview(msmPendingCover);
+        if(msmCoverUrlInput) msmCoverUrlInput.value = '';
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+  if(msmCoverClearBtn){
+    msmCoverClearBtn.addEventListener('click', function(){
+      msmPendingCover = null;
+      renderMsmCoverPreview(null);
+      if(msmCoverUrlInput) msmCoverUrlInput.value = '';
+    });
+  }
+
+  if(msmSaveBtn){
+    msmSaveBtn.addEventListener('click', function(){
+      if(!currentSettingsModId) return;
+      var mod = getMod(currentSettingsModId);
+      if(!mod) return;
+      var updated = modIsUpdated(mod);
+      var fields = {
+        description: msmDescInput ? msmDescInput.value.trim() : mod.description,
+        detailedInfo: msmDetailsInput ? msmDetailsInput.value.trim() : mod.detailedInfo,
+        thumbnail: msmPendingCover
+      };
+      // Name is never changed here. Version only changes if unlocked.
+      if(updated && msmVersionInput){
+        var v = msmVersionInput.value.trim();
+        if(v) fields.version = v;
+      }
+      updateModMeta(currentSettingsModId, fields);
+      renderMyMods();
+      renderPublicMods();
+      closeModSettings();
+    });
+  }
+  if(msmCancelBtn) msmCancelBtn.addEventListener('click', closeModSettings);
+  if(msmCancelBtn2) msmCancelBtn2.addEventListener('click', closeModSettings);
 
   // ═══════════════════════════════════════════════════════════════════
   // 7) IFRAME MOD EDITOR HOST — Add+/Edit opens legends-mod-editor.html
@@ -18284,6 +19413,148 @@ animate();
   if(docsBtn) docsBtn.addEventListener('click', function(){ openModal('ss-docs-modal'); });
   var docsCloseBtn = document.getElementById('ss-docs-close-btn');
   if(docsCloseBtn) docsCloseBtn.addEventListener('click', function(){ closeModal('ss-docs-modal'); });
+
+  // ═══════════════════════════════════════════════════════════════════
+  // BOOTSTRAP: "Custom NPC Mod" by RealMonster — ships pre-published so
+  // it's visible in the Mods tab / My Mods without the user having to
+  // build it through the editor UI first. Runs once (guarded by a
+  // marker id) then no-ops on every later load. The actual gameplay
+  // logic (/summon npc, the settings modal, skin/tag/rank copy) is
+  // wired directly into the engine elsewhere in this file — this
+  // record's `files[0].content` is the mod's script for reference/
+  // editing in the Mod Editor, matching the shape every other mod's
+  // items array uses.
+  // ═══════════════════════════════════════════════════════════════════
+  (function bootstrapCustomNpcMod(){
+    var BOOT_ID = 'mod_custom_npc_v1';
+    if(db.mods[BOOT_ID]) return; // already installed on a previous load
+
+    var scriptSource = [
+      '/* ============================================================',
+      '   Custom NPC Mod',
+      '   Author: RealMonster',
+      '   Description: Allows admins in creative mode to spawn and',
+      '   customize NPCs with player skins and rank tags using the',
+      '   /summon npc command.',
+      '   ============================================================ */',
+      '',
+      '// Tracks the entityId of the NPC currently open in the settings',
+      '// modal, so the onCustomGuiButton handler knows which NPC to apply',
+      '// changes to when "Apply" is pressed.',
+      'var activeNpcId = null;',
+      '',
+      '// ------------------------------------------------------------',
+      '// /summon npc',
+      '// Spawns a stationary, untextured NPC at the player\'s position',
+      '// that turns to face the nearest player.',
+      '// ------------------------------------------------------------',
+      'registerCommand("summon", function (args) {',
+      '  if (!args || args[0] !== "npc") return;',
+      '',
+      '  var npcId = spawnEntity("npc", 0, 64, 0);',
+      '  setEntityFrozen(npcId, true);',
+      '  sendSystemMessage("Custom NPC spawned (" + npcId + ").");',
+      '',
+      '  on("onTick", function () {',
+      '    var nearby = getNearbyPlayers(0, 64, 0);',
+      '    if (nearby.length > 0) {',
+      '      lookAt(npcId, nearby[0].x, nearby[0].y, nearby[0].z);',
+      '    }',
+      '  });',
+      '});',
+      '',
+      '// ------------------------------------------------------------',
+      '// Interaction: tapping/clicking a Custom NPC opens the settings',
+      '// modal instead of dealing damage.',
+      '// ------------------------------------------------------------',
+      'on("onEntityInteract", function (entity, player) {',
+      '  if (!entity || entity.type !== "npc") return;',
+      '',
+      '  if (!isAdmin() || !isCreativeMode()) {',
+      '    sendSystemMessage("You must be an Admin in Creative Mode to edit this NPC.");',
+      '    return;',
+      '  }',
+      '',
+      '  activeNpcId = entity.id;',
+      '  openCustomGUI({',
+      '    title: "Custom NPC Settings",',
+      '    subtitle: "Enter a player name to copy Skin, Name Tag, and Rank.",',
+      '    inputPlaceholder: "Enter Player Name...",',
+      '    buttons: [',
+      '      { id: "apply", label: "Apply" },',
+      '      { id: "close", label: "Close" }',
+      '    ]',
+      '  });',
+      '});',
+      '',
+      '// ------------------------------------------------------------',
+      '// Modal response: Apply copies the target player\'s skin, name',
+      '// tag, and rank onto the active NPC. Close just dismisses it.',
+      '// ------------------------------------------------------------',
+      'on("onCustomGuiButton", function (buttonId, inputValue) {',
+      '  if (buttonId !== "apply" || !activeNpcId) return;',
+      '',
+      '  var name = (inputValue || "").trim();',
+      '  if (!name) {',
+      '    sendSystemMessage("Please enter a player name.");',
+      '    return;',
+      '  }',
+      '',
+      '  var target = getPlayerByName(name);',
+      '  if (!target) {',
+      '    sendSystemMessage("Player \\"" + name + "\\" not found.");',
+      '    return;',
+      '  }',
+      '',
+      '  setEntitySkin(activeNpcId, target.skin);',
+      '  setEntityNameTag(activeNpcId, target.name);',
+      '  setEntityRankTag(activeNpcId, target.rank);',
+      '',
+      '  sendSystemMessage("NPC updated to match " + target.name + ".");',
+      '});',
+      ''
+    ].join('\n');
+
+    var fileId = 'file_boot_main';
+    var itemId = 'item_boot_npc';
+    var now = Date.now();
+
+    db.mods[BOOT_ID] = {
+      id: BOOT_ID,
+      name: 'Custom NPC Mod',
+      description: 'Allows admins in creative mode to spawn and customize NPCs with player skins and rank tags using the /summon npc command.',
+      category: 'Gameplay',
+      version: '1.0.0',
+      detailedInfo: 'Use /summon npc while in Creative Mode as an Admin to spawn a plain NPC near you. Tap or click the NPC to open its settings — enter a player name and press Apply to copy that player\'s Skin, Name Tag, and Rank onto the NPC. The NPC always turns to face the nearest player.',
+      thumbnail: 'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCAHkAlgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwDtqKKK/Uz4wKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooqK6uIbWBpp5Aka9SaG7AS0VzEvjfSEkKhZnx3AGDTf+E50n/nlcfkKx+sUv5jT2U+x1NFct/wnOk/88rj8hR/wnWk/88rj8hR9ZpfzB7KfY6miuV/4TrSf+eVx+Qpf+E50n/nlcfkKPrNL+YPZT7HU0Vy3/CdaT/zyuPyFH/Cc6T/zyuPyFH1ml/MHsp9jqaK5b/hOdJ/55XH5Cj/hOdJ/55XH5Cj6zS/mD2U+x1NFct/wnOk/88rj8hR/wnOk/wDPK4/IUfWaX8weyn2Oporlv+E5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kfQ5e3Kgmzl/+EI0j/pr/wB9Gj/hCNI/6a/99GuooryTuOX/AOEI0j/pr/30aP8AhCNI/wCmv/fRrqKKAOX/AOEI0j/pr/30aP8AhCNI/wCmv/fRrqKKAOX/AOEI0j/pr/30aP8AhCNI/wCmv/fRrqKKAOX/AOEI0j/pr/30aP8AhCNI/wCmv/fRrqKK0pfxI+pE/hZzH/CEaR/01/76o/4QjSP+mv8A30a6iiv0hYelb4T5P2s+5y//AAhGkf8ATX/vo0v/AAhGkf8ATX/vqunop/V6X8oe1n3OX/4QjSP+mv8A31S/8IRpH/TX/vqunoo+r0v5Q9rPuZWj6Bp2ltvt4sv/AHm5NatFFaRioqyIbbd2FFFFUIKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooADSUppK+Ez3/fJfI+ky3+AgooorxzvCiiigAooooAKKKKACiiitKP8AEj6kVPhYtFFFfp62Pj2FFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFAAaSlNJXwme/75L5H0mW/wEFFFFeOd4UUUUAFFFFABRRRQAUUUVpR/iR9SKnwsWiiiv09bHx7CiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigANJSmkr4TPf98l8j6TLf4CCiiivHO8KKKKACiiigAooooAKKKK0o/xI+pFT4WLRRRX6etj49hRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAUUUUAFFFFABRRRQAU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',
+      author: 'RealMonster',
+      status: 'published',
+      items: [
+        {
+          id: itemId,
+          category: 'npc',
+          name: 'Custom NPC',
+          texture: null,
+          props: {},
+          files: [ { id: fileId, name: 'main', content: scriptSource } ],
+          activeFileId: fileId
+        }
+      ],
+      createdAt: now,
+      updatedAt: now,
+      publishedAt: now,
+      isOfficial: true,
+      officialBy: 'RealMonster',
+      remixOf: null,
+      history: [ { at: now, type: 'publish' } ]
+    };
+
+    ensureUser('RealMonster');
+    if(db.users.RealMonster.modIds.indexOf(BOOT_ID) === -1){
+      db.users.RealMonster.modIds.push(BOOT_ID);
+    }
+    saveDB(db);
+  })();
 
   // Initial paint
   renderMyMods();

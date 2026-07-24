@@ -1245,6 +1245,68 @@
   #console-log .line .ts{color:var(--text-3);margin-right:6px;}
 
   /* ============================================================
+     SIMULATE PANEL — lets a script author exercise registerCommand
+     handlers and onEntityInteract listeners without a live game
+     connection, plus flip the fake local player's admin/creative
+     state. Lives directly under the console output.
+     ============================================================ */
+  #sim-panel{border-top:1px solid var(--line-soft);padding:8px 12px;flex:none;display:flex;flex-direction:column;gap:6px;background:var(--bg-1);}
+  #sim-panel .sim-title{font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-3);font-weight:700;}
+  #sim-panel .sim-row{display:flex;gap:6px;align-items:center;}
+  #sim-panel input[type="text"]{
+    flex:1;background:var(--bg-0);border:1px solid var(--line-soft);border-radius:6px;
+    color:var(--text-0);font-family:var(--mono);font-size:11.5px;padding:6px 8px;min-width:0;
+  }
+  #sim-panel input[type="text"]::placeholder{color:var(--text-3);}
+  #sim-panel button{
+    background:var(--bg-2);border:1px solid var(--line-soft);border-radius:6px;color:var(--text-1);
+    font-family:var(--mono);font-size:11px;padding:6px 10px;cursor:pointer;white-space:nowrap;
+  }
+  #sim-panel button:active{background:var(--bg-3,var(--bg-2));}
+  #sim-panel button.sim-primary{background:var(--accent);color:#06210f;border-color:transparent;font-weight:700;}
+  #sim-panel .sim-toggle{
+    display:flex;align-items:center;gap:5px;font-size:11px;color:var(--text-2);
+    background:var(--bg-0);border:1px solid var(--line-soft);border-radius:6px;padding:5px 9px;cursor:pointer;user-select:none;
+  }
+  #sim-panel .sim-toggle input{margin:0;}
+  #sim-panel .sim-toggle.on{color:var(--accent);border-color:var(--accent);}
+  #sim-panel .sim-hint{font-size:10px;color:var(--text-3);}
+  #sim-panel select{
+    background:var(--bg-0);border:1px solid var(--line-soft);border-radius:6px;color:var(--text-1);
+    font-family:var(--mono);font-size:11px;padding:5px 6px;
+  }
+
+  /* ============================================================
+     CUSTOM GUI MODAL — the runtime surface for openCustomGUI().
+     Rendered dynamically by the sandbox; kept generic (title +
+     subtitle + one text input + buttons) so any mod script that
+     calls openCustomGUI(config) gets a real on-screen dialog
+     instead of a console-only stub.
+     ============================================================ */
+  #sandbox-gui-overlay{
+    position:fixed;inset:0;background:rgba(6,8,12,.6);z-index:9999;
+    display:none;align-items:center;justify-content:center;padding:20px;
+  }
+  #sandbox-gui-overlay.active{display:flex;}
+  #sandbox-gui-modal{
+    background:var(--bg-1);border:1px solid var(--line-soft);border-radius:12px;
+    width:100%;max-width:340px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  #sandbox-gui-modal h3{margin:0 0 6px;font-size:15px;color:var(--text-0);}
+  #sandbox-gui-modal p{margin:0 0 14px;font-size:12px;color:var(--text-2);line-height:1.5;}
+  #sandbox-gui-modal input[type="text"]{
+    width:100%;box-sizing:border-box;background:var(--bg-0);border:1px solid var(--line-soft);
+    border-radius:7px;color:var(--text-0);font-size:13px;padding:9px 10px;margin-bottom:14px;
+  }
+  #sandbox-gui-modal input[type="text"]::placeholder{color:var(--text-3);}
+  #sandbox-gui-modal .sandbox-gui-btns{display:flex;gap:8px;justify-content:flex-end;}
+  #sandbox-gui-modal button{
+    border-radius:7px;border:1px solid var(--line-soft);background:var(--bg-2);color:var(--text-1);
+    font-size:12.5px;font-weight:600;padding:8px 14px;cursor:pointer;
+  }
+  #sandbox-gui-modal button.sandbox-gui-primary{background:var(--accent);color:#06210f;border-color:transparent;}
+
+  /* ============================================================
      STATUS BAR
      ============================================================ */
   #statusbar{
@@ -1557,15 +1619,65 @@
 <span class="fn">teleportPlayer</span>(<span class="num">0</span>, <span class="num">80</span>, <span class="num">0</span>);</code></pre>
                   </div>
 
-                  <div class="doc-entry" data-search="spawnentity player entities mob animal summon">
+                  <div class="doc-entry" data-search="spawnentity player entities mob animal summon entityid returns">
                     <div class="sig"><span class="fn">spawnEntity</span>(type, x, y, z)</div>
-                    <p class="desc">Spawns an entity of the given <code>type</code> at the specified coordinates.</p>
+                    <p class="desc">Spawns an entity of the given <code>type</code> at the specified coordinates and returns its new entity id, which you can pass to <code>lookAt</code>, <code>setEntitySkin</code>, <code>setEntityNameTag</code>, <code>setEntityRankTag</code>, and <code>setEntityFrozen</code>.</p>
                     <ul class="params">
-                      <li><b>type</b><span>string — e.g. "sheep", "cow", "pig"</span></li>
+                      <li><b>type</b><span>string — e.g. "sheep", "cow", "pig", "npc"</span></li>
                       <li><b>x, y, z</b><span>number — spawn coordinates</span></li>
+                      <li><b>returns</b><span>string — the new entity's id</span></li>
                     </ul>
                     <pre><code><span class="cm">// Spawn a sheep near the player</span>
-<span class="fn">spawnEntity</span>(<span class="str">"sheep"</span>, <span class="num">5</span>, <span class="num">70</span>, <span class="num">5</span>);</code></pre>
+<span class="kw">var</span> id = <span class="fn">spawnEntity</span>(<span class="str">"sheep"</span>, <span class="num">5</span>, <span class="num">70</span>, <span class="num">5</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="getplayerbyname player entities lookup find username skin rank">
+                    <div class="sig"><span class="fn">getPlayerByName</span>(name)</div>
+                    <p class="desc">Looks up a player currently in the world by exact username (case-insensitive) and returns their data, or <code>null</code> if no player by that name is present.</p>
+                    <ul class="params">
+                      <li><b>name</b><span>string — the username to look up</span></li>
+                      <li><b>returns</b><span>object|null — <code>{ name, x, y, z, rank, skin }</code></span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Copy a player's rank onto a variable</span>
+<span class="kw">var</span> target = <span class="fn">getPlayerByName</span>(<span class="str">"Steela"</span>);
+<span class="kw">if</span>(target){ console.<span class="fn">log</span>(target.rank); }</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="getnearbyplayers player entities radius distance closest nearest">
+                    <div class="sig"><span class="fn">getNearbyPlayers</span>(x, y, z, radius)</div>
+                    <p class="desc">Returns the list of players within <code>radius</code> blocks of the given coordinates. Omit <code>radius</code> to get every player in the world. Combine with sorting by distance to find the nearest player, e.g. for an NPC that should face whoever is closest.</p>
+                    <ul class="params">
+                      <li><b>x, y, z</b><span>number — center coordinates</span></li>
+                      <li><b>radius</b><span>number — optional search radius in blocks</span></li>
+                      <li><b>returns</b><span>array — list of player objects</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Find players within 10 blocks</span>
+<span class="kw">var</span> nearby = <span class="fn">getNearbyPlayers</span>(<span class="num">0</span>, <span class="num">64</span>, <span class="num">0</span>, <span class="num">10</span>);
+console.<span class="fn">log</span>(nearby.length + <span class="str">" player(s) nearby"</span>);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="isadmin player entities permission rank check owner">
+                    <div class="sig"><span class="fn">isAdmin</span>()</div>
+                    <p class="desc">Returns <code>true</code> if the local player's current rank is Admin, Owner, or an equivalent staff rank. Use this to gate admin-only mod behavior, such as who is allowed to customize a spawned NPC.</p>
+                    <ul class="params">
+                      <li><b>returns</b><span>boolean</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Only let admins run a command</span>
+<span class="fn">registerCommand</span>(<span class="str">"wipe"</span>, <span class="kw">function</span>(args) {
+  <span class="kw">if</span> (!<span class="fn">isAdmin</span>()) { <span class="fn">sendSystemMessage</span>(<span class="str">"Admins only."</span>); <span class="kw">return</span>; }
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="iscreativemode player entities gamemode creative survival check">
+                    <div class="sig"><span class="fn">isCreativeMode</span>()</div>
+                    <p class="desc">Returns <code>true</code> if the local player is currently in Creative Mode.</p>
+                    <ul class="params">
+                      <li><b>returns</b><span>boolean</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Require both admin rank and creative mode</span>
+<span class="kw">if</span> (<span class="fn">isAdmin</span>() &amp;&amp; <span class="fn">isCreativeMode</span>()) {
+  console.<span class="fn">log</span>(<span class="str">"Allowed to edit NPCs"</span>);
+}</code></pre>
                   </div>
                 </section>
 
@@ -1693,14 +1805,41 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
 <span class="fn">showNotification</span>(<span class="str">"Quest Updated"</span>, <span class="str">"Return to the village elder."</span>, <span class="str">"quest_icon"</span>);</code></pre>
                   </div>
 
-                  <div class="doc-entry" data-search="opencustomgui ui ux inventory shop trader chest menu">
-                    <div class="sig"><span class="fn">openCustomGUI</span>(guiId)</div>
-                    <p class="desc">Opens a custom interface for the player, such as a special inventory, a trader/shop screen, or a chest-style container.</p>
+                  <div class="doc-entry" data-search="opencustomgui ui ux inventory shop trader chest menu modal dialog popup settings input">
+                    <div class="sig"><span class="fn">openCustomGUI</span>(config)</div>
+                    <p class="desc">Opens a real on-screen modal for the local player — a title, an optional subtitle, an optional single text input, and one or more buttons. Use this for settings panels, trader screens, or any dialog that needs to collect a short text value from the player. Button presses are delivered through the <code>onCustomGuiButton</code> event below.</p>
                     <ul class="params">
-                      <li><b>guiId</b><span>string — id of the registered custom GUI</span></li>
+                      <li><b>config</b><span>object — <code>{ title, subtitle, inputPlaceholder, buttons: [{ id, label }] }</code></span></li>
+                      <li><b>config.title</b><span>string — modal heading</span></li>
+                      <li><b>config.subtitle</b><span>string — optional helper text under the title</span></li>
+                      <li><b>config.inputPlaceholder</b><span>string — optional; if set, a text input is shown with this placeholder</span></li>
+                      <li><b>config.buttons</b><span>array — optional; defaults to a single "Close" button</span></li>
                     </ul>
-                    <pre><code><span class="cm">// Open a trader screen</span>
-<span class="fn">openCustomGUI</span>(<span class="str">"village_trader"</span>);</code></pre>
+                    <pre><code><span class="cm">// Open a settings modal with a text field</span>
+<span class="fn">openCustomGUI</span>({
+  title: <span class="str">"Custom NPC Settings"</span>,
+  subtitle: <span class="str">"Enter a player name to copy Skin, Name Tag, and Rank."</span>,
+  inputPlaceholder: <span class="str">"Enter Player Name..."</span>,
+  buttons: [
+    { id: <span class="str">"apply"</span>, label: <span class="str">"Apply"</span> },
+    { id: <span class="str">"close"</span>, label: <span class="str">"Close"</span> }
+  ]
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="oncustomguibutton ui ux modal dialog apply close button pressed input value">
+                    <div class="sig"><span class="kw">on</span>(<span class="str">"onCustomGuiButton"</span>, <span class="fn">handler</span>(buttonId, inputValue))</div>
+                    <p class="desc">Fires when the player presses a button on a modal opened with <code>openCustomGUI</code>. If the modal had a text input, its current value is passed as <code>inputValue</code>; otherwise <code>inputValue</code> is <code>undefined</code>.</p>
+                    <ul class="params">
+                      <li><b>buttonId</b><span>string — the <code>id</code> of the button that was pressed</span></li>
+                      <li><b>inputValue</b><span>string|undefined — text typed into the modal's input, if any</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// React to Apply / Close on a settings modal</span>
+<span class="kw">on</span>(<span class="str">"onCustomGuiButton"</span>, <span class="kw">function</span>(buttonId, inputValue) {
+  <span class="kw">if</span> (buttonId === <span class="str">"apply"</span>) {
+    console.<span class="fn">log</span>(<span class="str">"Applying for: "</span> + inputValue);
+  }
+});</code></pre>
                   </div>
                 </section>
 
@@ -1731,6 +1870,79 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
 <span class="kw">on</span>(<span class="str">"onEntityDamage"</span>, <span class="kw">function</span>(target, source, damage) {
   console.<span class="fn">log</span>(target + <span class="str">" took "</span> + damage + <span class="str">" damage"</span>);
 });</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="onentityinteract entities npcs click tap touch interact event">
+                    <div class="sig"><span class="kw">on</span>(<span class="str">"onEntityInteract"</span>, <span class="fn">handler</span>(entity, player))</div>
+                    <p class="desc">Fires when a player taps or clicks an entity, <em>instead of</em> the default attack/damage behavior. Use this to open menus, dialogue, or settings UI on interact rather than dealing damage — for example, opening a settings modal when an admin clicks a custom NPC.</p>
+                    <ul class="params">
+                      <li><b>entity</b><span>object — the entity that was interacted with, as returned by <code>spawnEntity</code>/<code>spawnMob</code></span></li>
+                      <li><b>player</b><span>object — the player who performed the interaction</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Open a menu instead of dealing damage</span>
+<span class="kw">on</span>(<span class="str">"onEntityInteract"</span>, <span class="kw">function</span>(entity, player) {
+  <span class="kw">if</span> (<span class="fn">isAdmin</span>() &amp;&amp; <span class="fn">isCreativeMode</span>()) {
+    <span class="fn">openCustomGUI</span>({ title: <span class="str">"NPC Settings"</span> });
+  }
+});</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="lookat entities npcs face turn head rotation target">
+                    <div class="sig"><span class="fn">lookAt</span>(entityId, x, y, z)</div>
+                    <p class="desc">Turns an entity to face the given coordinates. Call this repeatedly (e.g. on <code>onTick</code>, or right after spawning) to keep an NPC facing a moving target such as the nearest player.</p>
+                    <ul class="params">
+                      <li><b>entityId</b><span>string — the id returned by <code>spawnEntity</code>/<code>spawnMob</code></span></li>
+                      <li><b>x, y, z</b><span>number — the point the entity should face</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Make a spawned NPC face the nearest player</span>
+<span class="kw">var</span> npcId = <span class="fn">spawnEntity</span>(<span class="str">"npc"</span>, <span class="num">0</span>, <span class="num">64</span>, <span class="num">0</span>);
+<span class="kw">var</span> nearby = <span class="fn">getNearbyPlayers</span>(<span class="num">0</span>, <span class="num">64</span>, <span class="num">0</span>);
+<span class="kw">if</span> (nearby[<span class="num">0</span>]) <span class="fn">lookAt</span>(npcId, nearby[<span class="num">0</span>].x, nearby[<span class="num">0</span>].y, nearby[<span class="num">0</span>].z);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="setentityskin entities npcs texture appearance player skin clone copy">
+                    <div class="sig"><span class="fn">setEntitySkin</span>(entityId, skinId)</div>
+                    <p class="desc">Applies a skin/texture to an entity. Pass a player's own <code>skin</code> field (from <code>getPlayerByName</code>) to make an NPC visually match that player.</p>
+                    <ul class="params">
+                      <li><b>entityId</b><span>string — the id returned by <code>spawnEntity</code>/<code>spawnMob</code></span></li>
+                      <li><b>skinId</b><span>string — skin identifier, e.g. a player's <code>skin</code> field</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Copy a player's skin onto an NPC</span>
+<span class="kw">var</span> target = <span class="fn">getPlayerByName</span>(<span class="str">"Steela"</span>);
+<span class="kw">if</span> (target) <span class="fn">setEntitySkin</span>(npcId, target.skin);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="setentitynametag entities npcs name label above head">
+                    <div class="sig"><span class="fn">setEntityNameTag</span>(entityId, nameTag)</div>
+                    <p class="desc">Sets the floating name tag shown above an entity.</p>
+                    <ul class="params">
+                      <li><b>entityId</b><span>string — the id returned by <code>spawnEntity</code>/<code>spawnMob</code></span></li>
+                      <li><b>nameTag</b><span>string — text to display above the entity</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Copy a player's name onto an NPC</span>
+<span class="fn">setEntityNameTag</span>(npcId, target.name);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="setentityranktag entities npcs rank badge title copy">
+                    <div class="sig"><span class="fn">setEntityRankTag</span>(entityId, rank)</div>
+                    <p class="desc">Sets the rank/title tag associated with an entity, shown alongside its name tag.</p>
+                    <ul class="params">
+                      <li><b>entityId</b><span>string — the id returned by <code>spawnEntity</code>/<code>spawnMob</code></span></li>
+                      <li><b>rank</b><span>string — rank/title text, e.g. a player's <code>rank</code> field</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Copy a player's rank onto an NPC</span>
+<span class="fn">setEntityRankTag</span>(npcId, target.rank);</code></pre>
+                  </div>
+
+                  <div class="doc-entry" data-search="setentityfrozen entities npcs stationary immobile still movement lock">
+                    <div class="sig"><span class="fn">setEntityFrozen</span>(entityId, frozen)</div>
+                    <p class="desc">Locks or unlocks an entity's movement. A frozen entity stays in place (still able to turn via <code>lookAt</code>) instead of wandering.</p>
+                    <ul class="params">
+                      <li><b>entityId</b><span>string — the id returned by <code>spawnEntity</code>/<code>spawnMob</code></span></li>
+                      <li><b>frozen</b><span>boolean — <code>true</code> to stop movement, <code>false</code> to allow it</span></li>
+                    </ul>
+                    <pre><code><span class="cm">// Keep a spawned NPC stationary</span>
+<span class="fn">setEntityFrozen</span>(npcId, <span class="kw">true</span>);</code></pre>
                   </div>
                 </section>
 
@@ -1783,6 +1995,27 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
               <div id="console-log">
                 <div class="line info"><span class="ts">[ready]</span>Console ready. Waiting for run...</div>
               </div>
+
+              <!-- SIMULATE PANEL: exercises registerCommand() and
+                   onEntityInteract listeners, and flips the fake local
+                   player's admin/creative flags, all without a live
+                   game connection. -->
+              <div id="sim-panel">
+                <div class="sim-title">Simulate</div>
+                <div class="sim-row">
+                  <input type="text" id="sim-command-input" placeholder="/summon npc">
+                  <button id="sim-command-btn" class="sim-primary" title="Send this as a chat command">Send</button>
+                </div>
+                <div class="sim-row">
+                  <select id="sim-npc-select" title="Choose which spawned NPC to interact with"></select>
+                  <button id="sim-interact-btn" title="Simulate tapping/clicking this NPC">Interact with NPC</button>
+                </div>
+                <div class="sim-row">
+                  <label class="sim-toggle" id="sim-admin-toggle"><input type="checkbox" id="sim-admin-check">Admin rank</label>
+                  <label class="sim-toggle" id="sim-creative-toggle"><input type="checkbox" id="sim-creative-check">Creative mode</label>
+                  <span class="sim-hint">local player flags</span>
+                </div>
+              </div>
             </div>
 
           </div>
@@ -1791,6 +2024,18 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
       </div>
     </div>
 
+  </div>
+
+  <!-- CUSTOM GUI MODAL — runtime surface for openCustomGUI(). Hidden by
+       default; the sandbox JS toggles the "active" class and fills in
+       content when a running mod script calls openCustomGUI(config). -->
+  <div id="sandbox-gui-overlay">
+    <div id="sandbox-gui-modal">
+      <h3 id="sandbox-gui-title">Title</h3>
+      <p id="sandbox-gui-subtitle">Subtitle</p>
+      <input type="text" id="sandbox-gui-input" placeholder="">
+      <div class="sandbox-gui-btns" id="sandbox-gui-btns"></div>
+    </div>
   </div>
 
   <!-- ============================================================
@@ -1997,11 +2242,24 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
     // -- UI & UX --
     { word:'createCustomHUD',   kind:'fn', hint:'ui',      insert:'createCustomHUD({ id: "", label: "", value: 0, max: 100, color: "#6fb3ff" })' },
     { word:'showNotification',  kind:'fn', hint:'ui',      insert:'showNotification("title", "message", "icon")' },
-    { word:'openCustomGUI',     kind:'fn', hint:'ui',      insert:'openCustomGUI("guiId")' },
+    { word:'openCustomGUI',     kind:'fn', hint:'ui',      insert:'openCustomGUI({\n  title: "",\n  subtitle: "",\n  inputPlaceholder: "",\n  buttons: [{ id: "apply", label: "Apply" }, { id: "close", label: "Close" }]\n})' },
+    { word:'onCustomGuiButton', kind:'ev', hint:'ui',      insert:'on("onCustomGuiButton", function(buttonId, inputValue) {\n  \n})' },
 
     // -- Entities & NPCs --
     { word:'spawnMob',          kind:'fn', hint:'entity',  insert:'spawnMob("mobType", x, y, z, { health: 20 })' },
     { word:'onEntityDamage',    kind:'ev', hint:'entity',  insert:'on("onEntityDamage", function(target, source, damage) {\n  \n})' },
+    { word:'lookAt',            kind:'fn', hint:'entity',  insert:'lookAt(entityId, x, y, z)' },
+    { word:'setEntitySkin',     kind:'fn', hint:'entity',  insert:'setEntitySkin(entityId, "skinId")' },
+    { word:'setEntityNameTag',  kind:'fn', hint:'entity',  insert:'setEntityNameTag(entityId, "name")' },
+    { word:'setEntityRankTag',  kind:'fn', hint:'entity',  insert:'setEntityRankTag(entityId, "rank")' },
+    { word:'setEntityFrozen',   kind:'fn', hint:'entity',  insert:'setEntityFrozen(entityId, true)' },
+    { word:'onEntityInteract',  kind:'ev', hint:'entity',  insert:'on("onEntityInteract", function(entity, player) {\n  \n})' },
+
+    // -- Player & Permissions --
+    { word:'getPlayerByName',   kind:'fn', hint:'player',  insert:'getPlayerByName("playerName")' },
+    { word:'getNearbyPlayers',  kind:'fn', hint:'player',  insert:'getNearbyPlayers(x, y, z, radius)' },
+    { word:'isAdmin',           kind:'fn', hint:'player',  insert:'isAdmin()' },
+    { word:'isCreativeMode',    kind:'fn', hint:'player',  insert:'isCreativeMode()' },
 
     // -- Audio & Atmosphere --
     { word:'setSkybox',         kind:'fn', hint:'audio',   insert:'setSkybox("textureId", timeOfDay)' },
@@ -2107,6 +2365,19 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
   var statusTabLabel                 = $('#status-tab-label');
   var docsSearchInput                 = $('#docs-search-input');
   var blockIdTbody                     = $('#blockid-tbody');
+  var simCommandInput                   = $('#sim-command-input');
+  var simCommandBtn                      = $('#sim-command-btn');
+  var simNpcSelect                        = $('#sim-npc-select');
+  var simInteractBtn                       = $('#sim-interact-btn');
+  var simAdminCheck                         = $('#sim-admin-check');
+  var simAdminToggle                         = $('#sim-admin-toggle');
+  var simCreativeCheck                        = $('#sim-creative-check');
+  var simCreativeToggle                        = $('#sim-creative-toggle');
+  var sandboxGuiOverlay                         = $('#sandbox-gui-overlay');
+  var sandboxGuiTitle                            = $('#sandbox-gui-title');
+  var sandboxGuiSubtitle                          = $('#sandbox-gui-subtitle');
+  var sandboxGuiInput                              = $('#sandbox-gui-input');
+  var sandboxGuiBtns                                = $('#sandbox-gui-btns');
 
   var homeGrid = $('#home-grid');
   var homeCount = $('#home-count');
@@ -2412,6 +2683,7 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
         var label = (item && item.name) || 'this element';
         showConfirm('Delete element?', 'Delete <b>' + escapeHtml(label) + '</b>? This cannot be undone.', function(){
           items = items.filter(function(it){ return it.id !== itemId; });
+          scheduleStateReport();
           if(pendingNewItem && pendingNewItem.id === itemId) pendingNewItem = null;
           openTabs = openTabs.filter(function(id){ return id !== itemId; });
           if(selectedItemId === itemId){
@@ -2563,6 +2835,7 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
         var label = item.name || def.label;
         showConfirm('Delete element?', 'Delete <b>' + escapeHtml(label) + '</b>? This cannot be undone.', function(){
           items = items.filter(function(it){ return it.id !== item.id; });
+          scheduleStateReport();
           openTabs = openTabs.filter(function(id){ return id !== item.id; });
           if(selectedItemId === item.id) selectedItemId = null;
           renderTabsStrip();
@@ -3077,6 +3350,7 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
     var itemId = item.id;
     showConfirm('Delete element?', 'Delete <b>' + escapeHtml(label) + '</b>? This cannot be undone.', function(){
       items = items.filter(function(it){ return it.id !== itemId; });
+      scheduleStateReport();
       if(pendingNewItem && pendingNewItem.id === itemId) pendingNewItem = null;
       openTabs = openTabs.filter(function(id){ return id !== itemId; });
       selectedItemId = null;
@@ -3611,6 +3885,57 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
       if(idx !== -1) eventHandlers[eventName].splice(idx, 1);
     };
   }
+  function fireEvent(eventName){
+    var args = Array.prototype.slice.call(arguments, 1);
+    var handlers = eventHandlers[eventName] || [];
+    handlers.slice().forEach(function(h){
+      try{ h.apply(null, args); }
+      catch(e){ logLine('err', 'Error in "' + eventName + '" handler: ' + (e && e.message ? e.message : String(e))); }
+    });
+  }
+
+  /* ---- Fake live-game state -------------------------------------
+     The sandbox has no real multiplayer connection, so this block
+     is a small in-memory stand-in for it: a fake local player, a
+     tiny fake player roster (for getPlayerByName/getNearbyPlayers),
+     and a registry of entities spawned during this Run. The
+     "Simulate" panel under the console reads/writes this same
+     state, so registerCommand() handlers and onEntityInteract
+     listeners can actually be exercised end-to-end. */
+  var sandboxWorld = {
+    localPlayer: { name: 'You', x: 0, y: 64, z: 0, rank: 'Owner', skin: 'default_blue', gameMode: 'creative' },
+    players: [
+      { name: 'Steela',  x: 3,  y: 64, z: -2, rank: 'Member', skin: 'skin_steela' },
+      { name: 'Korrin',  x: -4, y: 64, z: 5,  rank: 'VIP',    skin: 'skin_korrin' },
+      { name: 'Admiral_Vex', x: 6, y: 64, z: 6, rank: 'Admin', skin: 'skin_vex' }
+    ],
+    entities: {},          // entityId -> entity record
+    commands: {},          // name -> handler
+    nextEntityId: 1
+  };
+
+  function sandboxMakeEntityId(){ return 'entity_' + (sandboxWorld.nextEntityId++); }
+
+  function refreshSimNpcSelect(){
+    if(!simNpcSelect) return;
+    var ids = Object.keys(sandboxWorld.entities);
+    simNpcSelect.innerHTML = '';
+    if(!ids.length){
+      var opt = document.createElement('option');
+      opt.value = ''; opt.textContent = '(no NPCs spawned yet)';
+      simNpcSelect.appendChild(opt);
+      simNpcSelect.disabled = true;
+      return;
+    }
+    simNpcSelect.disabled = false;
+    ids.forEach(function(id){
+      var e = sandboxWorld.entities[id];
+      var opt = document.createElement('option');
+      opt.value = id;
+      opt.textContent = id + '  (' + e.type + (e.nameTag ? ', "' + e.nameTag + '"' : '') + ')';
+      simNpcSelect.appendChild(opt);
+    });
+  }
 
   function makeSandboxAPI(){
     return {
@@ -3624,24 +3949,206 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
         logLine('ok', 'fillRegion(' + [x1,y1,z1,x2,y2,z2,blockId].join(', ') + ') → ' + count + ' blocks of ' + name);
       },
       teleportPlayer: function(x, y, z){
+        sandboxWorld.localPlayer.x = x; sandboxWorld.localPlayer.y = y; sandboxWorld.localPlayer.z = z;
         logLine('ok', 'teleportPlayer(' + x + ', ' + y + ', ' + z + ') → player moved');
       },
       spawnEntity: function(type, x, y, z){
-        logLine('ok', 'spawnEntity("' + type + '", ' + x + ', ' + y + ', ' + z + ') → entity spawned');
+        var id = sandboxMakeEntityId();
+        sandboxWorld.entities[id] = { id: id, type: type, x: x, y: y, z: z, skin: null, nameTag: null, rank: null, frozen: false };
+        logLine('ok', 'spawnEntity("' + type + '", ' + x + ', ' + y + ', ' + z + ') → entity spawned as ' + id);
+        refreshSimNpcSelect();
+        return id;
       },
       sendSystemMessage: function(msg){
         logLine('ok', 'sendSystemMessage("' + msg + '")');
       },
       registerCommand: function(name, handler){
-        logLine('ok', 'registerCommand("' + name + '") → command registered');
+        var clean = String(name || '').replace(/^\//, '');
+        sandboxWorld.commands[clean] = handler;
+        logLine('ok', 'registerCommand("' + clean + '") → command registered. Use the Simulate panel below to trigger it.');
       },
       playSound: function(soundId, x, y, z){
         logLine('ok', 'playSound("' + soundId + '", ' + x + ', ' + y + ', ' + z + ') → sound queued');
+      },
+
+      // ---- Entities & NPCs -----------------------------------------
+      spawnMob: function(mobType, x, y, z, stats){
+        var id = sandboxMakeEntityId();
+        sandboxWorld.entities[id] = { id: id, type: mobType, x: x, y: y, z: z, skin: null, nameTag: null, rank: null, frozen: false, stats: stats || {} };
+        logLine('ok', 'spawnMob("' + mobType + '", ' + x + ', ' + y + ', ' + z + ') → entity spawned as ' + id +
+          (stats ? ' with stats ' + JSON.stringify(stats) : ''));
+        refreshSimNpcSelect();
+        return id;
+      },
+      lookAt: function(entityId, x, y, z){
+        var e = sandboxWorld.entities[entityId];
+        if(!e){ logLine('warn', 'lookAt("' + entityId + '", ...) → no such entity'); return; }
+        e.facing = { x: x, y: y, z: z };
+        logLine('ok', 'lookAt("' + entityId + '", ' + x + ', ' + y + ', ' + z + ') → entity turned to face target');
+      },
+      setEntitySkin: function(entityId, skinId){
+        var e = sandboxWorld.entities[entityId];
+        if(!e){ logLine('warn', 'setEntitySkin("' + entityId + '", ...) → no such entity'); return; }
+        e.skin = skinId;
+        logLine('ok', 'setEntitySkin("' + entityId + '", "' + skinId + '") → skin applied');
+      },
+      setEntityNameTag: function(entityId, nameTag){
+        var e = sandboxWorld.entities[entityId];
+        if(!e){ logLine('warn', 'setEntityNameTag("' + entityId + '", ...) → no such entity'); return; }
+        e.nameTag = nameTag;
+        logLine('ok', 'setEntityNameTag("' + entityId + '", "' + nameTag + '") → name tag set');
+        refreshSimNpcSelect();
+      },
+      setEntityRankTag: function(entityId, rank){
+        var e = sandboxWorld.entities[entityId];
+        if(!e){ logLine('warn', 'setEntityRankTag("' + entityId + '", ...) → no such entity'); return; }
+        e.rank = rank;
+        logLine('ok', 'setEntityRankTag("' + entityId + '", "' + rank + '") → rank tag set');
+      },
+      setEntityFrozen: function(entityId, frozen){
+        var e = sandboxWorld.entities[entityId];
+        if(!e){ logLine('warn', 'setEntityFrozen("' + entityId + '", ...) → no such entity'); return; }
+        e.frozen = !!frozen;
+        logLine('ok', 'setEntityFrozen("' + entityId + '", ' + (!!frozen) + ')');
+      },
+
+      // ---- Players ----------------------------------------------------
+      getPlayerByName: function(name){
+        var norm = String(name || '').trim().toLowerCase();
+        if(norm === sandboxWorld.localPlayer.name.toLowerCase()){
+          logLine('ok', 'getPlayerByName("' + name + '") → matched local player');
+          return sandboxWorld.localPlayer;
+        }
+        var found = sandboxWorld.players.filter(function(p){ return p.name.toLowerCase() === norm; })[0] || null;
+        logLine(found ? 'ok' : 'warn', 'getPlayerByName("' + name + '") → ' + (found ? JSON.stringify(found) : 'not found'));
+        return found;
+      },
+      getNearbyPlayers: function(x, y, z, radius){
+        var r = (typeof radius === 'number') ? radius : 9999;
+        var out = sandboxWorld.players.filter(function(p){
+          var dx=p.x-x, dy=p.y-y, dz=p.z-z;
+          return (dx*dx+dy*dy+dz*dz) <= r*r;
+        });
+        logLine('ok', 'getNearbyPlayers(' + x + ', ' + y + ', ' + z + (typeof radius==='number' ? ', ' + radius : '') + ') → ' + out.length + ' player(s)');
+        return out;
+      },
+      isAdmin: function(){
+        var result = ['admin','owner','owner / developer','admin / developer'].indexOf(String(sandboxWorld.localPlayer.rank||'').toLowerCase()) > -1;
+        logLine('ok', 'isAdmin() → ' + result);
+        return result;
+      },
+      isCreativeMode: function(){
+        var result = String(sandboxWorld.localPlayer.gameMode||'').toLowerCase() === 'creative';
+        logLine('ok', 'isCreativeMode() → ' + result);
+        return result;
+      },
+
+      // ---- UI & UX -----------------------------------------------
+      showNotification: function(title, message, icon){
+        logLine('ok', 'showNotification("' + title + '", "' + message + '"' + (icon ? ', "' + icon + '"' : '') + ')');
+      },
+      openCustomGUI: function(config){
+        openSandboxGuiModal(config);
+        logLine('ok', 'openCustomGUI(' + (typeof config === 'string' ? '"' + config + '"' : JSON.stringify(config)) + ') → modal opened');
       }
     };
   }
 
-  function stopScript(){ eventHandlers = {}; }
+  function stopScript(){ eventHandlers = {}; sandboxWorld.entities = {}; sandboxWorld.commands = {}; refreshSimNpcSelect(); }
+
+  /* ---- openCustomGUI() renderer -----------------------------------
+     Renders whatever the running script passed to openCustomGUI()
+     into the real #sandbox-gui-overlay modal, so a mod's settings
+     UI (title/subtitle/input/buttons) actually appears on screen
+     instead of only being logged. Accepts either a plain string
+     (used as the guiId/title) or a config object shaped like:
+     { title, subtitle, inputPlaceholder, buttons:[{id,label}] }
+     Button clicks fire an "onCustomGuiButton" sandbox event with
+     (buttonId, inputValue) so the script can react to Apply/Close. */
+  function openSandboxGuiModal(config){
+    var cfg = (typeof config === 'string') ? { title: config, subtitle: '', buttons: [{id:'close', label:'Close'}] } : (config || {});
+    sandboxGuiTitle.textContent = cfg.title || 'Custom GUI';
+    sandboxGuiSubtitle.textContent = cfg.subtitle || '';
+    sandboxGuiSubtitle.style.display = cfg.subtitle ? '' : 'none';
+    if(cfg.inputPlaceholder){
+      sandboxGuiInput.style.display = '';
+      sandboxGuiInput.placeholder = cfg.inputPlaceholder;
+      sandboxGuiInput.value = '';
+    } else {
+      sandboxGuiInput.style.display = 'none';
+    }
+    sandboxGuiBtns.innerHTML = '';
+    var buttons = (cfg.buttons && cfg.buttons.length) ? cfg.buttons : [{id:'close', label:'Close'}];
+    buttons.forEach(function(b, i){
+      var btn = document.createElement('button');
+      btn.textContent = b.label || b.id;
+      if(i === buttons.length - 1) btn.className = 'sandbox-gui-primary';
+      btn.addEventListener('click', function(){
+        var val = sandboxGuiInput.style.display !== 'none' ? sandboxGuiInput.value : undefined;
+        sandboxGuiOverlay.classList.remove('active');
+        logLine('info', 'Custom GUI button "' + b.id + '" pressed' + (val !== undefined ? ' (input: "' + val + '")' : ''));
+        fireEvent('onCustomGuiButton', b.id, val);
+      });
+      sandboxGuiBtns.appendChild(btn);
+    });
+    sandboxGuiOverlay.classList.add('active');
+  }
+  sandboxGuiOverlay.addEventListener('click', function(ev){
+    if(ev.target === sandboxGuiOverlay) sandboxGuiOverlay.classList.remove('active');
+  });
+
+  /* ---- Simulate panel wiring ---------------------------------------
+     "Send" parses the typed line into a command name + args and, if
+     a matching registerCommand() handler is currently registered,
+     calls it — mirroring how a real chat command dispatch would
+     work. "Interact with NPC" fires onEntityInteract for whichever
+     spawned entity is selected. The two rank/mode checkboxes just
+     flip the fake local player's fields that isAdmin()/isCreativeMode()
+     read from. */
+  function parseCommandLine(line){
+    var trimmed = String(line || '').trim().replace(/^\//, '');
+    if(!trimmed) return null;
+    var parts = trimmed.split(/\s+/);
+    return { name: parts[0], args: parts.slice(1) };
+  }
+  if(simCommandBtn){
+    simCommandBtn.addEventListener('click', function(){
+      var parsed = parseCommandLine(simCommandInput.value);
+      if(!parsed){ logLine('warn', 'Simulate: type a command first, e.g. /summon npc'); return; }
+      var handler = sandboxWorld.commands[parsed.name];
+      if(!handler){
+        logLine('warn', 'Simulate: no registerCommand("' + parsed.name + '") handler is registered. Run the script first.');
+        return;
+      }
+      logLine('info', 'Simulate: dispatching "/' + parsed.name + ' ' + parsed.args.join(' ') + '"');
+      try{ handler(parsed.args); }
+      catch(e){ logLine('err', 'Error in command handler: ' + (e && e.message ? e.message : String(e))); }
+    });
+  }
+  if(simInteractBtn){
+    simInteractBtn.addEventListener('click', function(){
+      var id = simNpcSelect.value;
+      var entity = sandboxWorld.entities[id];
+      if(!entity){ logLine('warn', 'Simulate: no NPC selected — spawn one first (e.g. run /summon npc above).'); return; }
+      logLine('info', 'Simulate: local player interacted with ' + id);
+      fireEvent('onEntityInteract', entity, sandboxWorld.localPlayer);
+    });
+  }
+  if(simAdminCheck){
+    simAdminCheck.addEventListener('change', function(){
+      sandboxWorld.localPlayer.rank = simAdminCheck.checked ? 'Admin' : 'Member';
+      simAdminToggle.classList.toggle('on', simAdminCheck.checked);
+      logLine('info', 'Simulate: local player rank set to "' + sandboxWorld.localPlayer.rank + '"');
+    });
+  }
+  if(simCreativeCheck){
+    simCreativeCheck.addEventListener('change', function(){
+      sandboxWorld.localPlayer.gameMode = simCreativeCheck.checked ? 'creative' : 'survival';
+      simCreativeToggle.classList.toggle('on', simCreativeCheck.checked);
+      logLine('info', 'Simulate: local player game mode set to "' + sandboxWorld.localPlayer.gameMode + '"');
+    });
+  }
+  refreshSimNpcSelect();
 
   function runScript(){
     stopScript();
@@ -3692,12 +4199,18 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
       var fn = new Function(
         'setBlock', 'fillRegion', 'teleportPlayer', 'spawnEntity', 'sendSystemMessage',
         'registerCommand', 'playSound',
+        'spawnMob', 'lookAt', 'setEntitySkin', 'setEntityNameTag', 'setEntityRankTag', 'setEntityFrozen',
+        'getPlayerByName', 'getNearbyPlayers', 'isAdmin', 'isCreativeMode',
+        'showNotification', 'openCustomGUI',
         'on', 'console',
         wrappedSource
       );
       fn(
         api.setBlock, api.fillRegion, api.teleportPlayer, api.spawnEntity, api.sendSystemMessage,
         api.registerCommand, api.playSound,
+        api.spawnMob, api.lookAt, api.setEntitySkin, api.setEntityNameTag, api.setEntityRankTag, api.setEntityFrozen,
+        api.getPlayerByName, api.getNearbyPlayers, api.isAdmin, api.isCreativeMode,
+        api.showNotification, api.openCustomGUI,
         on, sandboxConsole
       );
       logLine('ok', 'Script executed successfully.');
@@ -3769,11 +4282,67 @@ console.<span class="fn">log</span>(<span class="str">"Found "</span> + nearby.l
   runInlineBtn.addEventListener('click', runScript);
 
   /* ============================================================
+     15) HOST BRIDGE — reports the live `items` workspace array to
+     the parent (gameexp.html) so Publish validation reads real data
+     instead of always seeing an empty/undefined mod.items.
+     ============================================================ */
+  var stateReportTimer = null;
+  function reportStateToHost(){
+    try{
+      if(!(window.parent && window.parent !== window)) return;
+      window.parent.postMessage({
+        source: 'legends-mod-editor',
+        type: 'legends-mod-editor:state',
+        items: items
+      }, '*');
+    }catch(e){}
+  }
+  function scheduleStateReport(){
+    if(stateReportTimer) clearTimeout(stateReportTimer);
+    stateReportTimer = setTimeout(reportStateToHost, 200);
+  }
+
+  // Report right after every property Save (covers both a brand-new
+  // element's first commit into `items` and in-place edits to an
+  // already-committed item). The three "Delete element" flows above
+  // each call scheduleStateReport() directly after reassigning `items`,
+  // since `items = items.filter(...)` swaps the array reference and
+  // can't be intercepted by wrapping array methods.
+  propSaveBtn.addEventListener('click', scheduleStateReport);
+
+  window.addEventListener('message', function(ev){
+    var data = ev.data;
+    if(!data || typeof data !== 'object') return;
+    if(data.type === 'legends-mod-editor:init'){
+      if(Array.isArray(data.items) && data.items.length){
+        items = data.items.slice();
+        renderHomeGrid();
+        renderTabsStrip();
+      }
+      // Immediately confirm current state back so the host's mod.items
+      // is correct even if the user publishes without touching anything.
+      reportStateToHost();
+      return;
+    }
+    if(data.type === 'legends-mod-editor:requestState'){
+      reportStateToHost();
+      return;
+    }
+  });
+
+  /* ============================================================
      15) INIT
      ============================================================ */
   renderHomeGrid();
   renderTabsStrip();
   updateErrorBadges();
+
+  // Tell the host we're ready to receive the init payload (existing items).
+  try{
+    if(window.parent && window.parent !== window){
+      window.parent.postMessage({ source: 'legends-mod-editor', type: 'legends-mod-editor:ready' }, '*');
+    }
+  }catch(e){}
 
 })();
 </script>

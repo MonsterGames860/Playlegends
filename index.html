@@ -244,13 +244,16 @@
         }
 
         .game-container { width: 100%; height: 100%; position: relative; }
-        .close-game-btn {
-            position: absolute; top: 15px; left: 15px;
-            background-color: rgba(255, 0, 0, 0.7); color: white;
-            border: none; padding: 8px 15px; font-weight: bold;
-            cursor: pointer; border-radius: 5px; z-index: 10000;
-        }
         .game-frame { width: 100%; height: 100%; border: none; }
+
+        /* FOCUS LOCK: oyun/mod editörü açıkken arka planı tamamen kilitle */
+        body.overlay-lock {
+            overflow: hidden !important;
+            touch-action: none !important;
+            position: fixed;
+            width: 100%; height: 100%;
+        }
+        .game-overlay[style*="block"] { touch-action: none; }
 
         /* Ana İçerik */
         .container { max-width: 1100px; margin: 0 auto; padding: 40px 20px; }
@@ -970,7 +973,6 @@
 
     <div class="game-overlay" id="gameOverlay">
         <div class="game-container">
-            <button class="close-game-btn" onclick="closeGame()" id="btn-close-game">X Close Game</button>
             <iframe class="game-frame" id="gameFrame" src=""></iframe>
         </div>
     </div>
@@ -2420,6 +2422,7 @@ function renderRanksList() {
 
             overlay.style.display = 'block';
             iframe.src = 'gameexp.html';
+            lockBackgroundForOverlay();
 
             iframe.onload = () => {
                 try {
@@ -2502,6 +2505,7 @@ function renderRanksList() {
 
             overlay.style.display = 'block';
             iframe.src = 'game.html';
+            lockBackgroundForOverlay();
 
             iframe.onload = () => {
                 try {
@@ -2817,8 +2821,50 @@ function renderRanksList() {
 
         function closeGame() {
             document.getElementById('gameOverlay').style.display = 'none';
-            document.getElementById('gameFrame').src = ''; 
+            document.getElementById('gameFrame').src = '';
+            unlockBackground();
         }
+
+        // ── FOCUS LOCK: oyun/mod editörü açıkken arka plan (index.html) ile
+        //    her türlü etkileşimi (scroll, tıklama, Tab-focus) engelle ──
+        function lockBackgroundForOverlay() {
+            document.body.classList.add('overlay-lock');
+            document.querySelectorAll('body > *').forEach(el => {
+                if (el.id === 'gameOverlay') return;
+                if ('inert' in el) {
+                    el.inert = true;
+                } else {
+                    el.setAttribute('data-prev-tabindex', el.getAttribute('tabindex') || '');
+                    el.setAttribute('tabindex', '-1');
+                    el.setAttribute('aria-hidden', 'true');
+                }
+            });
+        }
+
+        function unlockBackground() {
+            document.body.classList.remove('overlay-lock');
+            document.querySelectorAll('body > *').forEach(el => {
+                if (el.id === 'gameOverlay') return;
+                if ('inert' in el) {
+                    el.inert = false;
+                } else {
+                    const prev = el.getAttribute('data-prev-tabindex');
+                    if (prev) { el.setAttribute('tabindex', prev); } else { el.removeAttribute('tabindex'); }
+                    el.removeAttribute('data-prev-tabindex');
+                    el.removeAttribute('aria-hidden');
+                }
+            });
+        }
+
+        // ── Oyun içi (game.html / gameexp.html) "Exit" butonundan gelen
+        //    çıkış sinyalini dinle ve ana menüye dön ──
+        window.addEventListener('message', (event) => {
+            const data = event.data;
+            if (data && data.type === 'EXIT_GAME') {
+                closeGame();
+            }
+        });
+
         setLanguage('en');
     </script>
 </body>
