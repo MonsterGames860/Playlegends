@@ -2819,6 +2819,56 @@ function renderRanksList() {
             });
         }
 
+        // ============================================================
+        // 🔗 MODÜL 1 - BÖLÜM A: COMMUNITY HUB SSO TOKEN HANDOFF
+        // ============================================================
+        // AMAÇ: Kullanıcı Community Hub'a geçmek istediğinde (bu
+        // fonksiyon dışarıdan, örn. bir menü/buton onclick'i ile
+        // çağrılır), eğer gerçek (guest olmayan) bir oturum varsa
+        // kısa ömürlü bir Firebase ID Token üretip yeni sekmede
+        // Community Hub'ı bu token ile açar. Guest kullanıcılar veya
+        // oturumu olmayanlar için işlem tamamen engellenir.
+        // ============================================================
+
+        // Community Hub'ın gerçek adresi. Hub'ı nereye deploy ederseniz
+        // (Vercel/Firebase Hosting/başka), o URL'i buraya yazın.
+        const COMMUNITY_STUDIO_URL = "https://community.SIZIN-DOMAININIZ.com";
+
+        async function openCommunityStudio() {
+            // 1) Guest kontrolü — guest ise token asla üretilmez.
+            if (isGuest || !auth || !auth.currentUser) {
+                const msg = (typeof lang !== 'undefined' && lang === 'tr')
+                    ? "Community Hub'a erişmek için gerçek bir hesapla giriş yapmalısınız. Misafir hesaplar erişemez."
+                    : "You must be logged in with a real account to access Community Hub. Guest accounts cannot access it.";
+                alert(msg);
+                return;
+            }
+
+            try {
+                // 2) Kısa ömürlü ID Token al (force-refresh: en güncel
+                //    custom claims/rol bilgisiyle gelsin diye).
+                const idToken = await auth.currentUser.getIdToken(/* forceRefresh */ true);
+
+                // 3) Token'ı URL fragment (#) ile taşıyoruz, query string (?) ile
+                //    DEĞİL. Fragment'lar sunucu loglarına/Referer header'ına
+                //    gitmez, sadece tarayıcı JS'i okuyabilir.
+                const targetUrl = `${COMMUNITY_STUDIO_URL}/#authToken=${encodeURIComponent(idToken)}`;
+
+                // 4) Yeni sekmede aç. noopener: yeni sekmenin window.opener
+                //    üzerinden bu sayfaya erişip zararlı bir şey yapmasını engeller.
+                window.open(targetUrl, "_blank", "noopener,noreferrer");
+
+            } catch (err) {
+                console.error("Community Hub token üretilemedi:", err);
+                const msg = (typeof lang !== 'undefined' && lang === 'tr')
+                    ? "Community Hub'a bağlanırken bir hata oluştu. Lütfen tekrar deneyin."
+                    : "An error occurred while connecting to Community Hub. Please try again.";
+                alert(msg);
+            }
+        }
+        // Bu fonksiyonu istediğiniz bir yerden çağırabilirsiniz, örnek:
+        // <button onclick="openCommunityStudio()">🎨 Community Hub</button>
+
         function closeGame() {
             document.getElementById('gameOverlay').style.display = 'none';
             document.getElementById('gameFrame').src = '';
