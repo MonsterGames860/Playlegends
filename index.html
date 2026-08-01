@@ -837,6 +837,13 @@
                 <hr style="border-color: #0b0c10; margin: 20px 0;">
                 <p id="text-have-account" style="font-size:0.9rem;">Already have an account? <span class="auth-link" onclick="switchAuth('login')">Login</span></p>
             </div>
+
+            <div id="googleUsernameForm" style="display: none;">
+                <h2 id="auth-google-username-title">Choose Your Username</h2>
+                <p id="text-google-username-desc" style="font-size:0.85rem; color:#c5c6c7; margin-bottom:14px;">You're almost done! Pick a username to finish creating your account.</p>
+                <input type="text" id="googleRegUser" placeholder="Username" required>
+                <button class="btn btn-primary" style="width: 100%;" onclick="handleGoogleUsernameSubmit()" id="btn-google-username-submit">Continue</button>
+            </div>
         </div>
     </div>
 
@@ -1114,6 +1121,9 @@
                 btnLoginSubmit: "Login",
                 orDivider: "or",
                 btnGoogleLogin: "Sign in with Google",
+                authGoogleUsernameTitle: "Choose Your Username",
+                textGoogleUsernameDesc: "You're almost done! Pick a username to finish creating your account.",
+                btnGoogleUsernameSubmit: "Continue",
                 btnRegSubmit: "Register",
                 btnGuestSubmit: "Play as Guest",
                 textNoAccount: "Don't have an account? <span class='auth-link' onclick='switchAuth(\"register\")'>Register</span>",
@@ -1166,6 +1176,9 @@
                 btnLoginSubmit: "Giriş Yap",
                 orDivider: "veya",
                 btnGoogleLogin: "Google ile Giriş Yap",
+                authGoogleUsernameTitle: "Kullanıcı Adı Seç",
+                textGoogleUsernameDesc: "Neredeyse bitti! Hesabını tamamlamak için bir kullanıcı adı seç.",
+                btnGoogleUsernameSubmit: "Devam Et",
                 btnRegSubmit: "Kaydol",
                 btnGuestSubmit: "Misafir Girişi",
                 textNoAccount: "Hesabın yok mu? <span class='auth-link' onclick='switchAuth(\"register\")'>Kaydol</span>",
@@ -1222,6 +1235,9 @@ document.documentElement.lang = lang;
             document.getElementById('m-logout').innerText = translations[lang].mLogout;
             if(document.getElementById('text-or-divider')) document.getElementById('text-or-divider').innerText = translations[lang].orDivider;
             if(document.getElementById('text-google-login')) document.getElementById('text-google-login').innerText = translations[lang].btnGoogleLogin;
+            if(document.getElementById('auth-google-username-title')) document.getElementById('auth-google-username-title').innerText = translations[lang].authGoogleUsernameTitle;
+            if(document.getElementById('text-google-username-desc')) document.getElementById('text-google-username-desc').innerText = translations[lang].textGoogleUsernameDesc;
+            if(document.getElementById('btn-google-username-submit')) document.getElementById('btn-google-username-submit').innerText = translations[lang].btnGoogleUsernameSubmit;
           // setLanguage fonksiyonunun en altına eklenecekler:
 if(document.getElementById('m-friends')) document.getElementById('m-friends').innerText = translations[lang].menuFriends;
 if(document.getElementById('friendsModalTitle')) document.getElementById('friendsModalTitle').innerText = translations[lang].friendsTitle;
@@ -1611,6 +1627,7 @@ function removeFriend(friendUid) {
         function switchAuth(mode) {
             document.getElementById('loginForm').style.display = mode === 'register' ? 'none' : 'block';
             document.getElementById('registerForm').style.display = mode === 'register' ? 'block' : 'none';
+            document.getElementById('googleUsernameForm').style.display = 'none';
             if(mode === 'register') generateCaptcha();
         }
 
@@ -1756,6 +1773,12 @@ function removeFriend(friendUid) {
         // giriş sağlar. Aynı Firebase Authentication kullanıcı havuzunu
         // paylaşır — yani bir hesap sadece Google ile açılmışsa (şifresi
         // hiç olmayan hesaplar) bu buton olmadan o hesaba giriş yapılamaz.
+        //
+        // ÖNEMLİ: Firebase'de bu Google hesabı için kayıt yoksa, kullanıcı
+        // otomatik olarak içeri alınmıyor. Önce veritabanında bir kayıt
+        // olup olmadığı kontrol ediliyor; yoksa kullanıcı adı seçmesi için
+        // ayrı bir ekrana ("Kullanıcı Adı Seç") yönlendiriliyor ve hesap
+        // ancak kullanıcı adını onayladıktan sonra oluşturuluyor.
         function handleGoogleLogin() {
             const lang = document.documentElement.lang || 'en';
             const googleBtn = document.getElementById('btn-google-login');
@@ -1765,9 +1788,25 @@ function removeFriend(friendUid) {
             googleBtn.disabled = true;
 
             auth.signInWithPopup(provider).then((cred) => {
-                checkAdminAndDatabase(cred.user);
-                document.getElementById('navProfileName').innerText = cred.user.displayName || "Player";
-                document.getElementById('accountOverlay').style.display = 'none';
+                const user = cred.user;
+                return database.ref('users/' + user.uid).once('value').then((snap) => {
+                    if (snap.exists()) {
+                        // Zaten kayıtlı kullanıcı → doğrudan giriş.
+                        checkAdminAndDatabase(user);
+                        document.getElementById('accountOverlay').style.display = 'none';
+                    } else {
+                        // Firebase'de kaydı olmayan yeni bir Google hesabı →
+                        // hesabı hemen oluşturmuyoruz. Kullanıcı adı seçmesi
+                        // için ayrı ekrana geçiyoruz; hesap ancak
+                        // handleGoogleUsernameSubmit() içinde oluşturulacak.
+                        window.__pendingGoogleUser = user;
+                        document.getElementById('loginForm').style.display = 'none';
+                        document.getElementById('registerForm').style.display = 'none';
+                        document.getElementById('googleUsernameForm').style.display = 'block';
+                        const suggested = (user.displayName || "").replace(/\s+/g, "").slice(0, 20);
+                        document.getElementById('googleRegUser').value = suggested;
+                    }
+                });
             }).catch((error) => {
                 console.error("Google Giriş Hatası:", error.code, error.message);
                 if (error.code === "auth/popup-closed-by-user") {
@@ -1781,6 +1820,43 @@ function removeFriend(friendUid) {
                 }
             }).finally(() => {
                 googleBtn.disabled = false;
+            });
+        }
+
+        function handleGoogleUsernameSubmit() {
+            const lang = document.documentElement.lang || 'en';
+            const user = window.__pendingGoogleUser;
+            if (!user) return;
+
+            const chosenName = document.getElementById('googleRegUser').value.trim();
+            if (!chosenName) return;
+
+            const lowerCaseForbidden = forbiddenNames.map(name => name.toLowerCase());
+            if (lowerCaseForbidden.includes(chosenName.toLowerCase())) {
+                alert(lang === 'tr' ? "Bu kullanıcı adı koruma altındadır veya yasaklıdır! Başka bir isim deneyin." : "This username is protected or forbidden! Try another name.");
+                return;
+            }
+
+            const submitBtn = document.getElementById('btn-google-username-submit');
+            submitBtn.disabled = true;
+
+            user.updateProfile({ displayName: chosenName }).then(() => {
+                return database.ref('users/' + user.uid).set({
+                    username: chosenName,
+                    email: user.email,
+                    role: 'Player',
+                    createdAt: firebase.database.ServerValue.TIMESTAMP
+                });
+            }).then(() => {
+                window.__pendingGoogleUser = null;
+                checkAdminAndDatabase(user);
+                document.getElementById('googleUsernameForm').style.display = 'none';
+                document.getElementById('accountOverlay').style.display = 'none';
+            }).catch((err) => {
+                console.error("Google kullanıcı adı kayıt hatası:", err);
+                alert(err.message);
+            }).finally(() => {
+                submitBtn.disabled = false;
             });
         }
 
