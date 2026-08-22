@@ -9757,6 +9757,34 @@ function banPlayerHost(name,fromName=null){
 function processCmd(raw){
   const parts=raw.trim().split(/\s+/),cmd=parts[0].toLowerCase();
   const d=langData[currentLang];
+  if(cmd==='weather'){
+    // /weather clear|rain|storm|blood — Manage Server > Weather ile aynı
+    // state'i (serverWeather) değiştirir ve tüm oyunculara senkronlar.
+    // 'blood' SADECE bu komuttan ve Staff Panel'den seçilebilir (test amaçlı,
+    // Manage Server panelindeki dropdown'a kasıtlı olarak eklenmedi).
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const arg=(parts[1]||'').toLowerCase();
+    const VALID_WEATHER=['clear','rain','storm','blood'];
+    if(!VALID_WEATHER.includes(arg)){
+      addChat(null,'Usage: /weather clear|rain|storm|blood',true);
+      return;
+    }
+    if(!isMP){
+      serverWeather=arg;
+      addChat(null,'⚙ Weather set to '+arg+'.',true,'srv');
+      return;
+    }
+    if(amHost){
+      serverWeather=arg;
+      sendToAll({type:'server_weather',value:serverWeather});
+      const srv='⚙ Weather set to '+serverWeather+'.';
+      addChat(null,srv,true,'srv');
+      addServerLog('server',srv);
+    } else {
+      guestConn.send({type:'cmd',cmd:'weather',arg,from:myName});
+    }
+    return;
+  }
   if(cmd==='mode'||cmd==='gamemode'){
     if(!cheatsEnabled&&!myOp){addChat(null,d.srvNoCheat,true,'warn');return;}
     if(isMP&&!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
@@ -10096,6 +10124,11 @@ function updateManageServerBtn(){
 
 function openManageServer(){
   document.getElementById('manage-server-overlay').classList.add('active');
+  // [FIX] Panel açıkken pointer lock hâlâ aktif kalıyordu, bu yüzden fare
+  // hareketi mousemove listener'ını tetiklemeye devam edip kamera açısını
+  // menüdeymiş gibi değiştirebiliyordu. Diğer panellerle (pause, staff panel
+  // vb.) tutarlı olacak şekilde açılışta pointer lock'tan çıkıyoruz.
+  if(document.pointerLockElement===document.body) document.exitPointerLock();
   renderMSPlayers();
   renderMSAdmins();
   renderMSServerTab();
@@ -10651,6 +10684,20 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             else if(cmd==='mute') mutePlayerHost(sanitizeName(target),from,data.durationMs||null);
             else if(cmd==='unmute') unmutePlayerHost(sanitizeName(target));
             else if(cmd==='warn') warnPlayerHost(sanitizeName(target),data.reason||'',from);
+            else if(cmd==='weather'){
+              // Op yetkili bir guest, /weather komutuyla host dünyasının
+              // hava durumunu değiştirdi — host burada da amHost akışıyla
+              // (Manage Server ile) AYNI şekilde uygular ve herkese yayar.
+              const VALID_WEATHER=['clear','rain','storm','blood'];
+              const wArg=(data.arg||'').toLowerCase();
+              if(VALID_WEATHER.includes(wArg)){
+                serverWeather=wArg;
+                sendToAll({type:'server_weather',value:serverWeather});
+                const srv='⚙ Weather set to '+serverWeather+'.';
+                addChat(null,srv,true,'srv');
+                addServerLog('server',srv);
+              }
+            }
             else if(cmd==='kill'){
               // kill komutu host tarafında işlenir
               const d=langData[currentLang];
@@ -21789,45 +21836,69 @@ const DayNightCycle = {
     this.time += dt;
     if(this.time >= this.totalLength) this.time -= this.totalLength;
 
-    var t = this.time / this.totalLength; // 0..1 tam döngü ilerlemesi
-    var angle = t * Math.PI * 2 - Math.PI/2; // güneş açısı (radyan)
+    // [FIX] Eskiden açı, dayLength/nightLength'in FARKLI uzunlukta olduğunu
+    // hesaba katmayan tek bir "t = time/totalLength" oranından ve sabit bir
+    // "-PI/2" ofsetinden hesaplanıyordu. Bu yüzden oturum time=0 (yani
+    // isNight()===false, mantıksal olarak "gündüz") ile başladığında bile
+    // sunHeight=sin(-PI/2)=-1 çıkıyordu — yani Nightmare moduna girer girmez
+    // gökyüzü/ışıklandırma GÖRSEL olarak tam gece pozisyonundan başlıyordu,
+    // ve gündüz/gece süreleri eşit olmadığı için görsel geçiş isNight() ile
+    // senkron bile değildi.
+    // Yeni yöntem: günü ve geceyi AYRI birer 0..PI yarım-daire olarak, kendi
+    // gerçek sürelerine (dayLength/nightLength) göre eşliyoruz:
+    //   time=0                  -> gündoğumu   (sunHeight=0, yükseliyor)
+    //   time=dayLength/2        -> öğlen        (sunHeight=1)
+    //   time=dayLength          -> günbatımı    (sunHeight=0, isNight() burada başlıyor — senkron)
+    //   time=dayLength+night/2  -> gece yarısı  (moonHeight=1)
+    //   time=totalLength        -> tekrar gündoğumu
+    var angle;
+    if(!this.isNight()){
+      var dayT = this.time / this.dayLength; // 0..1, gündüz içindeki ilerleme
+      angle = dayT * Math.PI; // 0 -> PI (yarım daire: doğudan batıya)
+    } else {
+      var nightT = (this.time - this.dayLength) / this.nightLength; // 0..1
+      angle = nightT * Math.PI; // güneş için bu aralık ufkun ALTINDA sayılacak
+    }
     var radius = 60;
-    var sunY = Math.sin(angle) * radius;
-    var sunX = Math.cos(angle) * radius;
+    // Güneş: sadece gündüz yarım-dairesinde yukarıda; gece boyunca ufkun altında sabit tutulur.
+    var sunAngle = this.isNight() ? -0.05 : angle; // gece: neredeyse tam ufkun altı (negatif sin)
+    var sunY = this.isNight() ? -radius*0.15 : Math.sin(sunAngle) * radius;
+    var sunX = Math.cos(this.isNight() ? Math.PI*0.5 : sunAngle) * radius;
+    // Ay: sadece gece yarım-dairesinde yukarıda; gündüz boyunca ufkun altında sabit tutulur.
+    var moonAngle = this.isNight() ? angle : -0.05;
+    var moonY = this.isNight() ? Math.sin(moonAngle) * radius : -radius*0.15;
+    var moonX = Math.cos(this.isNight() ? moonAngle : Math.PI*0.5) * radius;
 
     if(this.sunLight){
       this.sunLight.position.set(camera.position.x + sunX, Math.max(sunY, -20), camera.position.z + 20);
       this.sunLight.target.position.copy(camera.position);
       this.sunLight.target.updateMatrixWorld();
-      var sunUp = Math.max(0, Math.sin(angle));
+      var sunUp = this.isNight() ? 0 : Math.max(0, Math.sin(sunAngle));
       this.sunLight.intensity = sunUp * 0.95;
     }
     if(this.sunSprite){
       this.sunSprite.position.set(camera.position.x + sunX, camera.position.y + sunY, camera.position.z + 20);
     }
     if(this.moonLight){
-      var moonAngle = angle + Math.PI;
-      var moonY = Math.sin(moonAngle) * radius;
-      var moonX = Math.cos(moonAngle) * radius;
       this.moonLight.position.set(camera.position.x + moonX, Math.max(moonY, -20), camera.position.z + 20);
       this.moonLight.target.position.copy(camera.position);
       this.moonLight.target.updateMatrixWorld();
-      var moonUp = Math.max(0, Math.sin(moonAngle));
+      var moonUp = this.isNight() ? Math.max(0, Math.sin(moonAngle)) : 0;
       this.moonLight.intensity = moonUp * 0.35;
     }
     if(this.moonSprite){
-      var moonAngle2 = angle + Math.PI;
-      var moonY2 = Math.sin(moonAngle2) * radius;
-      var moonX2 = Math.cos(moonAngle2) * radius;
-      this.moonSprite.position.set(camera.position.x + moonX2, camera.position.y + moonY2, camera.position.z + 20);
+      this.moonSprite.position.set(camera.position.x + moonX, camera.position.y + moonY, camera.position.z + 20);
     }
 
-    // Gökyüzü rengi: gündüz mavi <-> gece koyu lacivert, yumuşak interpolasyon
+    // Gökyüzü rengi: gündüz mavi <-> gece koyu lacivert, yumuşak interpolasyon.
+    // sunHeight artık isNight()/dayT-nightT ile birebir senkron: gündüzün ilk
+    // ve son diliminde alacakaranlık tonu, gecenin ortasında tam karanlık.
     var dayColor = new THREE.Color(0x75a7ff);
     var duskColor = new THREE.Color(0xff9a5c);
     var nightColor = new THREE.Color(0x050818);
     var skyCol = new THREE.Color();
-    var sunHeight = Math.sin(angle); // -1..1
+    var sunHeight = this.isNight() ? -Math.sin(angle) : Math.sin(angle); // gündüz: 0..1..0, gece: 0..-1..0
+
     if(sunHeight > 0.15){
       skyCol.copy(dayColor);
     } else if(sunHeight > -0.15){
@@ -21871,10 +21942,12 @@ const WeatherFX = {
   VOLUME: 40,   // kamera etrafında parçacıkların yayıldığı yatay yarı-genişlik
   HEIGHT: 30,   // parçacıkların düştüğü dikey aralık (kameranın üstünden başlar)
 
-  _ensurePoints(count){
-    if(this.points && this.count === count) return;
+  _ensurePoints(count, color){
+    var col = color || 0xaecbe8;
+    if(this.points && this.count === count && this._curColor === col) return;
     if(this.points){ scene.remove(this.points); this.geometry.dispose(); this.points.material.dispose(); }
     this.count = count;
+    this._curColor = col;
     const positions = new Float32Array(count*3);
     this.velocities = new Float32Array(count);
     for(let i=0;i<count;i++){
@@ -21886,7 +21959,7 @@ const WeatherFX = {
     this.geometry = new THREE.BufferGeometry();
     this.geometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
     const mat = new THREE.PointsMaterial({
-      color: 0xaecbe8, size: 0.14, transparent: true, opacity: 0.55,
+      color: col, size: 0.14, transparent: true, opacity: 0.55,
       depthWrite:false, fog:false
     });
     this.points = new THREE.Points(this.geometry, mat);
@@ -21904,6 +21977,7 @@ const WeatherFX = {
       this.geometry = null;
       this.velocities = null;
       this.count = 0;
+      this._curColor = null;
     }
   },
 
@@ -21911,12 +21985,32 @@ const WeatherFX = {
     this.currentMode = mode;
     if(mode === 'clear'){
       this._teardown();
+      // [FIX] scene.background/fog, storm|rain modundayken update() içinde her
+      // frame griye doğru lerp ediliyordu. DayNightCycle.update() sadece
+      // nightmareMode'da çağrıldığı için normal modda hiçbir şey bu kararmayı
+      // geri almıyordu — Clear'a geçilince gökyüzü koyu/gri kalmaya devam
+      // ediyordu. Burada normal (gündüz) gökyüzü rengine ve temel sis
+      // yoğunluğuna açıkça geri dönüyoruz.
+      if(scene.background && scene.background.isColor){
+        scene.background.set(0x75a7ff);
+        if(scene.fog) scene.fog.color.copy(scene.background);
+      }
+      if(scene.fog && scene.fog.isFogExp2 && typeof window.baseFogDensity === 'number'){
+        scene.fog.density = window.baseFogDensity;
+      }
       return;
     }
-    const count = mode === 'storm' ? 2200 : 900;
-    this._ensurePoints(count);
-    this.points.material.opacity = mode === 'storm' ? 0.75 : 0.5;
-    this.points.material.size = mode === 'storm' ? 0.16 : 0.12;
+    // [FIX] Rain ile Storm'da (ve yeni Blood modunda) düşen yağmur miktarı
+    // (parçacık sayısı, boyut, opaklık) artık AYNI — kullanıcı isteğine göre
+    // moda özel tek fark artık RENK (blood = kırmızı) ve Storm'daki yıldırım
+    // (bkz. LightningFX) + hafif ekstra gökyüzü kararması.
+    // Blood: sadece test/gösteri amaçlı bir mod — Rain ile birebir aynı
+    // davranışta, tek farkı parçacık ve gökyüzü kararma renginin kırmızı olması.
+    const count = 1400;
+    const color = (mode === 'blood') ? 0xb31217 : 0xaecbe8;
+    this._ensurePoints(count, color);
+    this.points.material.opacity = 0.6;
+    this.points.material.size = 0.13;
   },
 
   update(dt){
@@ -21942,11 +22036,11 @@ const WeatherFX = {
     this.points.position.set(0,0,0);
 
     // Gökyüzü/sis kararması: DayNightCycle'ın bu frame yazdığı rengin üzerine,
-    // hava durumuna göre griye doğru bir miktar lerp uygula.
+    // hava durumuna göre griye (Blood'da koyu kırmızıya) doğru bir miktar lerp uygula.
     if(scene.background && scene.background.isColor){
       const stormFactor = mode === 'storm' ? 0.55 : 0.28;
-      const greyCol = new THREE.Color(0x5a6470);
-      scene.background.lerp(greyCol, stormFactor);
+      const tintCol = (mode === 'blood') ? new THREE.Color(0x3a0a0c) : new THREE.Color(0x5a6470);
+      scene.background.lerp(tintCol, stormFactor);
       if(scene.fog) scene.fog.color.copy(scene.background);
     }
     if(scene.fog && scene.fog.isFogExp2){
@@ -21957,9 +22051,187 @@ const WeatherFX = {
       const mult = mode === 'storm' ? 2.2 : 1.5;
       scene.fog.density = base * mult;
     }
+
+    // Storm modunda ara sıra rastgele bir yıldırım tetikle.
+    if(mode === 'storm' && window.LightningFX) window.LightningFX.update(dt);
   }
 };
 window.WeatherFX = WeatherFX;
+
+// ═══════════════════════════════════════════════════════════════════════
+// YILDIRIM EFEKTİ (LightningFX) — sadece Storm modunda çalışır. Rastgele
+// aralıklarla, kameranın etrafında rastgele bir konuma "düşen" bir yıldırım
+// çizer: kısa süreli bir beyaz flaş (scene üzerine additive bir ışık/overlay)
+// + zigzag bir çizgi mesh'i + senkronize (küçük gecikmeli) gök gürültüsü
+// sesi. Yıldırımın bir OYUNCUYA isabet etme ihtimali kasıtlı olarak çok
+// düşük tutulmuştur (bkz. PLAYER_HIT_CHANCE) — kullanıcı isteğine göre bu
+// nadir bir olay olmalı, sürekli tehlike değil.
+const LightningFX = {
+  _timer: 0,
+  _nextStrike: 4 + Math.random()*6, // ilk yıldırıma kadar 4-10sn
+  _flashLight: null,
+  _flashTimer: 0,
+  _boltGroup: null,
+  _audioCtx: null,
+
+  RANGE: 55,            // yıldırımın kamera etrafında düşebileceği yatay yarıçap
+  PLAYER_HIT_CHANCE: 0.03, // bir yıldırımın oyuncuyu (kendi kamerasını) hedef alma ihtimali — %3, bilerek çok düşük
+  PLAYER_HIT_RADIUS: 2.2,  // "isabet" sayılması için oyuncuya olan maks. mesafe
+
+  _ensureFlashLight(){
+    if(this._flashLight) return;
+    this._flashLight = new THREE.PointLight(0xdfe8ff, 0, 400, 1.5);
+    this._flashLight.position.set(0,60,0);
+    scene.add(this._flashLight);
+  },
+
+  // Verilen x,z kolonunda en üstteki dolu (solid) bloğun Y'sini bulur.
+  // Bulamazsa null döner (o kolonda hiç blok yok / henüz üretilmemiş chunk).
+  _findGroundY(x, z){
+    const bx = Math.floor(x), bz = Math.floor(z);
+    const topGuess = Math.floor((camera ? camera.position.y : 20)) + 40;
+    for(let y = Math.min(128, topGuess); y >= -32; y--){
+      try{
+        const bd = getBlockAt(bx, y, bz);
+        if(bd && bd !== AIR_BLOCK && typeof isSolidBlock==='function' && isSolidBlock(bd)) return y + 1;
+      }catch(e){ return null; }
+    }
+    return null;
+  },
+
+  _playThunder(){
+    // Basit, dosyasız sentezlenmiş gök gürültüsü: kısa alçak frekanslı
+    // gürültü patlaması (Web Audio API), harici ses dosyasına ihtiyaç duymaz.
+    try{
+      if(!this._audioCtx){
+        const Ctx = window.AudioContext || window.webkitAudioContext;
+        if(!Ctx) return;
+        this._audioCtx = new Ctx();
+      }
+      const ctx = this._audioCtx;
+      if(ctx.state==='suspended') ctx.resume().catch(()=>{});
+      const dur = 1.1;
+      const bufferSize = Math.floor(ctx.sampleRate*dur);
+      const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<bufferSize;i++){
+        const decay = Math.pow(1 - i/bufferSize, 2.2);
+        data[i] = (Math.random()*2-1) * decay;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buffer;
+      const lp = ctx.createBiquadFilter();
+      lp.type = 'lowpass';
+      lp.frequency.value = 380;
+      const gain = ctx.createGain();
+      gain.gain.value = 0.55;
+      src.connect(lp); lp.connect(gain); gain.connect(ctx.destination);
+      src.start();
+    }catch(e){ /* sessizce yut — ses olmadan da yıldırım görsel olarak çalışmalı */ }
+  },
+
+  _buildBolt(x1,y1,z1,x2,y2,z2){
+    if(this._boltGroup){ scene.remove(this._boltGroup); }
+    const pts = [];
+    const segs = 8;
+    for(let i=0;i<=segs;i++){
+      const t = i/segs;
+      const jitter = (i>0 && i<segs) ? (Math.random()*2-1)*1.6 : 0;
+      pts.push(new THREE.Vector3(
+        x1 + (x2-x1)*t + jitter,
+        y1 + (y2-y1)*t,
+        z1 + (z2-z1)*t + jitter
+      ));
+    }
+    const geo = new THREE.BufferGeometry().setFromPoints(pts);
+    const mat = new THREE.LineBasicMaterial({ color:0xeaf2ff, transparent:true, opacity:1, fog:false });
+    const line = new THREE.Line(geo, mat);
+    line.renderOrder = 10;
+    line.frustumCulled = false;
+    this._boltGroup = line;
+    scene.add(line);
+    // Çizgi mesh'i kısa bir an (~180ms) görünür kalsın, gerçek bir yıldırım
+    // çakması gibi ani gelip gitsin — bir sonraki strike'a kadar beklemeden.
+    const self = this;
+    const thisBolt = line;
+    setTimeout(function(){
+      if(self._boltGroup === thisBolt){
+        scene.remove(thisBolt);
+        thisBolt.geometry.dispose();
+        thisBolt.material.dispose();
+        self._boltGroup = null;
+      }
+    }, 180);
+  },
+
+  strikeNear(x, z, isPlayerTarget){
+    const groundY = this._findGroundY(x, z);
+    if(groundY === null) return; // bu kolonda blok yok — sessizce vazgeç
+    const skyY = groundY + 45 + Math.random()*15;
+    this._buildBolt(x, skyY, z, x, groundY, z);
+
+    this._ensureFlashLight();
+    this._flashLight.position.set(x, groundY+20, z);
+    this._flashLight.intensity = 9 + Math.random()*3;
+    this._flashTimer = 0.12;
+
+    // Gökyüzünü çok kısa süreliğine beyaza yaklaştıran bir flaş.
+    if(scene.background && scene.background.isColor){
+      this._flashSkyBackup = scene.background.clone();
+      scene.background.lerp(new THREE.Color(0xffffff), 0.85);
+    }
+
+    this._playThunder();
+
+    if(isPlayerTarget && typeof HealthManager!=='undefined' && HealthManager.takeDamage){
+      // Oyuncuya isabet: hafif ama fark edilir bir hasar. Nadir olduğu için
+      // (bkz. PLAYER_HIT_CHANCE) sert bir ceza olması gerekmiyor.
+      HealthManager.takeDamage(4, 'lightning');
+    }
+  },
+
+  update(dt){
+    this._timer += dt;
+
+    // Aktif flaşı zamanla söndür.
+    if(this._flashTimer > 0){
+      this._flashTimer -= dt;
+      if(this._flashLight) this._flashLight.intensity = Math.max(0, this._flashLight.intensity - dt*40);
+      if(this._flashTimer <= 0 && this._flashSkyBackup && scene.background && scene.background.isColor){
+        scene.background.copy(this._flashSkyBackup);
+        this._flashSkyBackup = null;
+      }
+    }
+    if(this._timer >= this._nextStrike){
+      this._timer = 0;
+      this._nextStrike = 5 + Math.random()*9; // sıradaki yıldırıma 5-14sn
+
+      const cx = camera ? camera.position.x : 0;
+      const cz = camera ? camera.position.z : 0;
+
+      // Çok düşük ihtimalle doğrudan oyuncunun (bu client'ın kamerasının)
+      // yakınını hedef al; aksi halde kamera etrafında tamamen rastgele
+      // bir noktaya düş (oyuncuya isabet etme ihtimali kasıtlı olarak az).
+      const hitsPlayer = Math.random() < this.PLAYER_HIT_CHANCE;
+      let tx, tz;
+      if(hitsPlayer){
+        const ang = Math.random()*Math.PI*2;
+        const r = Math.random()*this.PLAYER_HIT_RADIUS;
+        tx = cx + Math.cos(ang)*r;
+        tz = cz + Math.sin(ang)*r;
+      } else {
+        const ang = Math.random()*Math.PI*2;
+        // Oyuncuya çok yakın olmayan bir halka içinde rastgele nokta seç
+        // (isabet ihtimalini daha da azaltmak için minimum bir mesafe bırak).
+        const r = this.PLAYER_HIT_RADIUS + 6 + Math.random()*(this.RANGE - this.PLAYER_HIT_RADIUS - 6);
+        tx = cx + Math.cos(ang)*r;
+        tz = cz + Math.sin(ang)*r;
+      }
+      this.strikeNear(tx, tz, hitsPlayer);
+    }
+  }
+};
+window.LightningFX = LightningFX;
 
 
 
@@ -22673,8 +22945,14 @@ const MobManager = {
       if(distToPlayer > this.despawnDist){ this.removeMob(m); continue; }
 
       // ── Yanma mekaniği: zombi & iskelet, şafakta güneş görüyorsa yanar ──
+      // [FIX] Rain/Storm/Blood modunda gökten su (veya kan) yağdığı için
+      // güneş ışığı doğrudan mob'a ulaşmıyor sayılır — yağmurlu havalarda
+      // zombi/iskelet artık gündüz/şafakta bile yanmıyor (gerçek Minecraft
+      // davranışına uygun: yağmur güneş yanmasını söndürür/engeller).
       if((m.type === 'zombie' || m.type === 'skeleton')){
-        var atDawnOrDay = DayNightCycle.isDawn() || !DayNightCycle.isNight();
+        var isWetWeather = (typeof serverWeather !== 'undefined') &&
+          (serverWeather === 'rain' || serverWeather === 'storm' || serverWeather === 'blood');
+        var atDawnOrDay = !isWetWeather && (DayNightCycle.isDawn() || !DayNightCycle.isNight());
         var exposed = atDawnOrDay && _mobSeesSky(m.x, m.y+1.6, m.z);
         if(exposed && !m.burning){
           m.burning = true; m.burnTimer = 0;
@@ -23514,6 +23792,7 @@ window.ArrowManager = ArrowManager;
             <option value="clear">☀ Clear</option>
             <option value="rain">🌧 Rain</option>
             <option value="storm">⛈ Storm</option>
+            <option value="blood">🩸 Blood (Test)</option>
           </select>
         </div>
       </div>
