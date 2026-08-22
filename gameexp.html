@@ -300,7 +300,9 @@
     "msTabServer": "⚙ SERVER",
     "msBtnManage": "🛡 MANAGE SERVER",
     "msLblAdmins": "ADMINS",
+    "msLblMuted": "MUTED",
     "msLblBanned": "BANNED",
+    "msLblLogs": "ACTIVITY LOG",
     "msLblAccess": "Access",
     "msLblPvp": "PvP",
     "msLblCheats": "Cheats",
@@ -630,7 +632,9 @@
     "msTabServer": "⚙ SUNUCU",
     "msBtnManage": "🛡 SUNUCUYU YÖNET",
     "msLblAdmins": "ADMİNLER",
+    "msLblMuted": "SUSTURULANLAR",
     "msLblBanned": "BANLILAR",
+    "msLblLogs": "AKTİVİTE GÜNLÜĞÜ",
     "msLblAccess": "Erişim",
     "msLblPvp": "PvP",
     "msLblCheats": "Hileler",
@@ -959,7 +963,9 @@
     "msTabServer": "⚙ SERVER",
     "msBtnManage": "🛡 SERVER VERWALTEN",
     "msLblAdmins": "ADMINS",
+    "msLblMuted": "STUMMGESCHALTET",
     "msLblBanned": "GEBANNT",
+    "msLblLogs": "AKTIVITÄTSPROTOKOLL",
     "msLblAccess": "Zugriff",
     "msLblPvp": "PvP",
     "msLblCheats": "Cheats",
@@ -1288,7 +1294,9 @@
     "msTabServer": "⚙ SERVEUR",
     "msBtnManage": "🛡 GÉRER LE SERVEUR",
     "msLblAdmins": "ADMINS",
+    "msLblMuted": "MIS EN SOURDINE",
     "msLblBanned": "BANNIS",
+    "msLblLogs": "JOURNAL D'ACTIVITÉ",
     "msLblAccess": "Accès",
     "msLblPvp": "PvP",
     "msLblCheats": "Triches",
@@ -1617,7 +1625,9 @@
     "msTabServer": "⚙ SERVIDOR",
     "msBtnManage": "🛡 GESTIONAR SERVIDOR",
     "msLblAdmins": "ADMINS",
+    "msLblMuted": "SILENCIADOS",
     "msLblBanned": "BANEADOS",
+    "msLblLogs": "REGISTRO DE ACTIVIDAD",
     "msLblAccess": "Acceso",
     "msLblPvp": "PvP",
     "msLblCheats": "Trucos",
@@ -1946,7 +1956,9 @@
     "msTabServer": "⚙ СЕРВЕР",
     "msBtnManage": "🛡 УПРАВЛЕНИЕ СЕРВЕРОМ",
     "msLblAdmins": "АДМИНЫ",
+    "msLblMuted": "ЗАГЛУШЕННЫЕ",
     "msLblBanned": "ЗАБАНЕННЫЕ",
+    "msLblLogs": "ЖУРНАЛ АКТИВНОСТИ",
     "msLblAccess": "Доступ",
     "msLblPvp": "PvP",
     "msLblCheats": "Читы",
@@ -2275,7 +2287,9 @@
     "msTabServer": "⚙ SERVIDOR",
     "msBtnManage": "🛡 GERENCIAR SERVIDOR",
     "msLblAdmins": "ADMINS",
+    "msLblMuted": "SILENCIADOS",
     "msLblBanned": "BANIDOS",
+    "msLblLogs": "REGISTRO DE ATIVIDADE",
     "msLblAccess": "Acesso",
     "msLblPvp": "PvP",
     "msLblCheats": "Trapaças",
@@ -2662,6 +2676,26 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .ms-toggle-btn{padding:5px 12px;border:none;border-radius:3px;font-size:10px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;}
 .ms-toggle-btn.on{background:linear-gradient(180deg,#2a7a2a,#1a5a1a);color:#7fff7f;}
 .ms-toggle-btn.off{background:linear-gradient(180deg,#4a1a1a,#3a0a0a);color:#ff8888;}
+.ms-btn.mute{background:linear-gradient(180deg,#5a5a00,#3a3a00);color:#ffe066;}
+.ms-btn.unmute{background:linear-gradient(180deg,#2a5a5a,#1a3a3a);color:#66e0e0;}
+.ms-btn.warn{background:linear-gradient(180deg,#7a4a00,#5a3200);color:#ffb84d;}
+.ms-btn.small{padding:4px 6px;font-size:8px;}
+.ms-muted-row{display:flex;align-items:center;padding:6px 8px;background:rgba(255,224,102,.06);border-radius:5px;margin-bottom:3px;gap:6px;}
+.ms-setting-row select.cs-select,.ms-setting-row input[type=number]{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);color:#fff;border-radius:3px;}
+.ms-setting-row input[type=number]{width:70px;font-size:11px;padding:4px 6px;}
+.ms-log-list{display:flex;flex-direction:column-reverse;gap:2px;}
+.ms-log-row{font-size:9.5px;padding:5px 7px;background:rgba(255,255,255,.03);border-left:2px solid rgba(117,167,255,.4);border-radius:2px;line-height:1.4;color:rgba(255,255,255,.75);}
+.ms-log-row .ms-log-time{color:rgba(255,255,255,.35);margin-right:5px;}
+.ms-log-row.tkick{border-left-color:#ffaa44;}
+.ms-log-row.tban{border-left-color:#ff6666;}
+.ms-log-row.tmute{border-left-color:#ffe066;}
+.ms-log-row.top{border-left-color:#75a7ff;}
+.ms-log-row.tjoin{border-left-color:#7fff7f;}
+.ms-log-clear-btn{width:100%;margin-top:8px;padding:8px;font-size:10px;}
+.ms-search-row{margin-bottom:8px;}
+.ms-search-row input{width:100%;box-sizing:border-box;padding:6px 8px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-family:'Minecraft',monospace;}
+.ms-broadcast-row{display:flex;gap:6px;margin-top:8px;}
+.ms-broadcast-row input{flex:1;padding:7px 8px;font-size:11px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-family:'Minecraft',monospace;}
 #ms-close-btn{width:100%;padding:9px;margin-top:10px;background:linear-gradient(180deg,#3a3a3a,#222);border:none;border-bottom:3px solid #1a1a1a;border-top:3px solid #5a5a5a;color:#fff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #ms-close-btn:hover{filter:brightness(1.2);}
 /* ── /help GUI MENÜSÜ ── mobil ve PC'de uygun boyutlarda, kategorili, aranabilir ── */
@@ -4454,6 +4488,9 @@ console.error("Error message")</div>
 
     <!-- TAB: PLAYERS -->
     <div class="ms-tab-content active" id="ms-content-players">
+      <div class="ms-search-row">
+        <input type="text" id="ms-player-search" placeholder="Search player..." autocomplete="off">
+      </div>
       <div id="ms-player-list"></div>
     </div>
 
@@ -4482,6 +4519,43 @@ console.error("Error message")</div>
       <div class="ms-setting-row">
         <span class="ms-setting-label" id="ms-lbl-cheats">Cheats</span>
         <button class="ms-toggle-btn" id="ms-cheats-toggle"></button>
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-difficulty">Difficulty</span>
+        <select id="ms-difficulty-select" class="cs-select" style="width:140px;font-size:10px;padding:4px 6px;">
+          <option value="peaceful" id="ms-opt-peaceful">😌 Peaceful</option>
+          <option value="easy" id="ms-opt-easy">🙂 Easy</option>
+          <option value="normal" id="ms-opt-normal">😐 Normal</option>
+          <option value="hard" id="ms-opt-hard">💀 Hard</option>
+        </select>
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-daynight">Lock Time</span>
+        <select id="ms-daynight-select" class="cs-select" style="width:140px;font-size:10px;padding:4px 6px;">
+          <option value="none" id="ms-opt-timenone">🔄 Cycle</option>
+          <option value="day" id="ms-opt-timeday">☀ Always Day</option>
+          <option value="night" id="ms-opt-timenight">🌙 Always Night</option>
+        </select>
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-weather">Weather</span>
+        <select id="ms-weather-select" class="cs-select" style="width:140px;font-size:10px;padding:4px 6px;">
+          <option value="clear" id="ms-opt-wclear">☀ Clear</option>
+          <option value="rain" id="ms-opt-wrain">🌧 Rain</option>
+          <option value="storm" id="ms-opt-wstorm">⛈ Storm</option>
+        </select>
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-maxplayers">Max Players</span>
+        <input type="number" id="ms-maxplayers-input" min="1" max="64" value="20">
+      </div>
+      <div class="ms-setting-row">
+        <span class="ms-setting-label" id="ms-lbl-whitelist">Whitelist Only</span>
+        <button class="ms-toggle-btn off" id="ms-whitelist-toggle"></button>
+      </div>
+      <div class="ms-broadcast-row">
+        <input type="text" id="ms-whitelist-input" placeholder="Add player to whitelist..." autocomplete="off">
+        <button class="ms-btn promote" id="ms-whitelist-add-btn">➕</button>
       </div>
       <div style="margin-top:12px;">
         <button class="mbtn quit-btn" id="ms-shutdown-btn" style="width:100%;font-size:12px;padding:10px;"></button>
@@ -4881,7 +4955,15 @@ function applyPlayerData(data) {
 // Ban/Admin listelerini kayıtlı dünyaya yaz (Bulut)
 async function saveServerBansAndAdmins(){
   if(!_currentWorldSaveKey||!amHost) return;
-  const partial = { bannedPlayers: Array.from(bannedPlayers), admins: Array.from(opPlayers) };
+  const partial = {
+    bannedPlayers: Array.from(bannedPlayers),
+    admins: Array.from(opPlayers),
+    mutedPlayers: Array.from(mutedPlayers.entries()).map(([name,expiresAt])=>({name,expiresAt})),
+    warnHistory: Array.from(warnHistory.entries()).map(([name,entries])=>({name,entries})),
+    whitelistPlayers: Array.from(whitelistPlayers),
+    whitelistEnabled: whitelistEnabled,
+    maxPlayers: serverMaxPlayers
+  };
   if(CloudStore.isCloudActive()){
     await CloudStore.updateWorld(_currentWorldSaveKey, partial);
     return;
@@ -4892,6 +4974,11 @@ async function saveServerBansAndAdmins(){
     const data=JSON.parse(raw);
     data.bannedPlayers=partial.bannedPlayers;
     data.admins=partial.admins;
+    data.mutedPlayers=partial.mutedPlayers;
+    data.warnHistory=partial.warnHistory;
+    data.whitelistPlayers=partial.whitelistPlayers;
+    data.whitelistEnabled=partial.whitelistEnabled;
+    data.maxPlayers=partial.maxPlayers;
     localStorage.setItem(_currentWorldSaveKey,JSON.stringify(data));
   }catch(e){}
 }
@@ -4900,6 +4987,23 @@ function loadServerBansAndAdmins(worldData){
   if(!worldData) return;
   if(Array.isArray(worldData.bannedPlayers)) worldData.bannedPlayers.forEach(n=>bannedPlayers.add(n));
   if(Array.isArray(worldData.admins)) worldData.admins.forEach(n=>opPlayers.add(n));
+  // mutedPlayers: eski kayıt formatı düz string dizisiydi (kalıcı mute
+  // anlamına gelir); yeni format {name, expiresAt} objeleri dizisi.
+  // İkisi de desteklenir, geriye dönük uyumluluk için.
+  if(Array.isArray(worldData.mutedPlayers)){
+    worldData.mutedPlayers.forEach(entry=>{
+      if(typeof entry==='string') mutedPlayers.set(entry,null);
+      else if(entry && typeof entry.name==='string') mutedPlayers.set(entry.name, entry.expiresAt ?? null);
+    });
+  }
+  if(Array.isArray(worldData.warnHistory)){
+    worldData.warnHistory.forEach(entry=>{
+      if(entry && typeof entry.name==='string' && Array.isArray(entry.entries)) warnHistory.set(entry.name, entry.entries);
+    });
+  }
+  if(Array.isArray(worldData.whitelistPlayers)) worldData.whitelistPlayers.forEach(n=>whitelistPlayers.add(n));
+  if(typeof worldData.whitelistEnabled==='boolean') whitelistEnabled=worldData.whitelistEnabled;
+  if(typeof worldData.maxPlayers==='number') serverMaxPlayers=worldData.maxPlayers;
   loadWorldSpawn(worldData);
 }
 
@@ -5317,8 +5421,13 @@ function setLanguage(l){
   _mss('ms-lbl-cheats',ms.msLblCheats);
   const msAccess=document.getElementById('ms-access-select');
   if(msAccess){msAccess.options[0].text=ms.msOptPublic;msAccess.options[1].text=ms.msOptRegistered;msAccess.options[2].text=ms.msOptPrivate;}
+  const searchEl=document.getElementById('ms-player-search');if(searchEl) searchEl.placeholder=(l==='tr'?'Oyuncu ara...':'Search player...');
   _mss('ms-shutdown-btn',ms.msBtnShutdown);
   _mss('ms-close-btn',ms.msBtnClose);
+  // Staff Panel dil desteği (LOGS sekmesi)
+  _mss('sp-tab-logs-label',(l==='tr'?'📜 GÜNLÜK':'📜 LOGS'));
+  _mss('sp-lbl-logs',ms.msLblLogs||'ACTIVITY LOG');
+  _mss('sp-log-clear-btn','🗑 '+(l==='tr'?'GÜNLÜĞÜ TEMİZLE':'CLEAR LOG'));
   _mss('btn-manage-server',ms.msBtnManage);
   // PvP / Cheats toggle butonları mevcut duruma göre güncellenecek (renderManageServer'da)
 
@@ -8764,10 +8873,30 @@ function updateAnimals(dt){
   for(let i=animals.length-1;i>=0;i--){
     const a=animals[i];
     if(a.hp<=0){
+      // [FIX] Hayvan ölümünde artık MobManager'daki canavarlarla AYNI görsel
+      // davranış uygulanıyor: mesh Y ekseninde küçülerek yok olur (eskiden hiç
+      // animasyon yoktu, hayvan aniden kayboluyordu).
       if(a.deadTimer<0){a.deadTimer=0.8;}
       a.deadTimer-=dt;
+      if(a.mesh) a.mesh.scale.y = Math.max(0.05, a.deadTimer/0.8);
       if(a.deadTimer<=0){spawnFood(a.x,a.y,a.z,A_FOOD[a.type]);removeAnimal(a);}
       continue;
+    }
+    // ── [FIX] Knockback: vurulan hayvan artık mob'lardaki gibi oyuncudan
+    // uzağa doğru itiliyor (eskiden attackAnimal sadece hp azaltıyordu,
+    // hiçbir fiziksel tepki yoktu). Sönümlenerek azalır.
+    if(a.knockX || a.knockZ){
+      const knx=a.x+a.knockX*dt, knz=a.z+a.knockZ*dt;
+      if(_canStandAtSafe(knx,a.z,a.y)) a.x=knx;
+      if(_canStandAtSafe(a.x,knz,a.y)) a.z=knz;
+      const _kdecay=Math.max(0,1-dt*8);
+      a.knockX*=_kdecay; a.knockZ*=_kdecay;
+      if(Math.abs(a.knockX)<0.02) a.knockX=0;
+      if(Math.abs(a.knockZ)<0.02) a.knockZ=0;
+    }
+    if(a.hitFlashTimer>0){
+      a.hitFlashTimer-=dt;
+      if(a.hitFlashTimer<=0){ a.hitFlashTimer=0; _clearAnimalHitFlash(a); }
     }
     const dx=a.x-camera.position.x,dz=a.z-camera.position.z;
     if(dx*dx+dz*dz>64*64){removeAnimal(a);continue;}
@@ -9236,11 +9365,58 @@ function updateHealthSystem(dt){
   if(hungerTimer>=45){hungerTimer=0;if(hunger>0){hunger=Math.max(0,hunger-1);updateBars();}}
   if(hunger===0){healthTimer+=dt;if(healthTimer>=4){healthTimer=0;HealthManager.takeDamage(1,'unknown');}}
 }
+// ── Hayvan knockback fiziği için zemin/engel kontrolü (mob'lardaki
+// _mobCanStandAt ile aynı mantık, updateAnimals'ın kendi iç fonksiyonu
+// tanımlanmadan ÖNCE de çağrılabilmesi için global olarak tanımlandı) ──
+function _canStandAtSafe(gx,gz,gy){
+  return !blockMap[pk(Math.floor(gx),Math.floor(gy),Math.floor(gz))] &&
+         !blockMap[pk(Math.floor(gx),Math.floor(gy)+1,Math.floor(gz))];
+}
 function attackAnimal(a,dmg=5){
   if(!a||a.hp<=0) return;
   a.hp-=dmg;
+  // [FIX] Hayvanlarda (koyun/inek/domuz) mob'lardan (zombie/creeper/vb.) farklı
+  // olarak hiç knockback/hasar-flaşı yoktu, ölünce de sadece 0.8sn bekleyip
+  // sessizce kayboluyorlardı (ölçekleme animasyonu yoktu). Kullanıcı isteğine
+  // göre hayvanlar da MobManager'daki canavarlarla AYNI davranışı gösteriyor:
+  // vurulunca kırmızı flaş + oyuncudan uzağa knockback, ölünce Y ekseninde
+  // küçülerek yok olma animasyonu (bkz. updateAnimals içindeki ölüm bloğu).
+  var dx = a.x - camera.position.x, dz = a.z - camera.position.z;
+  var dlen = Math.sqrt(dx*dx+dz*dz) || 1;
+  var kp = 4.5;
+  a.knockX = (dx/dlen) * kp;
+  a.knockZ = (dz/dlen) * kp;
+  a.hitFlashTimer = 0.25;
+  _applyAnimalHitFlash(a);
   if(isMP&&amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'ahp',id:a.id,hp:a.hp});});
   if(isMP&&!amHost&&guestConn?.open) guestConn.send({type:'aatk',id:a.id,dmg});
+}
+
+// ── Hayvan hasar flaşı (MobManager._applyHitFlash ile aynı yaklaşım) ──────
+function _applyAnimalHitFlash(a){
+  if(!a.mesh) return;
+  if(!a._origColors){
+    a._origColors = [];
+    a.mesh.traverse(function(o){
+      if(o.isMesh && o.material){
+        var mats = Array.isArray(o.material) ? o.material : [o.material];
+        mats.forEach(function(mat){
+          if(!mat.color) return;
+          a._origColors.push({ mat:mat, c: mat.color.getHex() });
+        });
+      }
+    });
+  }
+  a._origColors.forEach(function(e){
+    var orig = new THREE.Color(e.c);
+    var red = new THREE.Color(0xff2020);
+    e.mat.color.copy(orig).lerp(red, 0.65);
+  });
+}
+function _clearAnimalHitFlash(a){
+  if(!a._origColors) return;
+  a._origColors.forEach(function(e){ e.mat.color.setHex(e.c); });
+  a._origColors = null;
 }
  
 // ─── Entity Raycasting ───
@@ -9280,6 +9456,37 @@ function findEntityInCrosshair(maxDist=5,screenX=null,screenY=null){
 let isMP=false,amHost=false,myName='';
 let myPeer=null,hostConns={},guestConn=null,remPlayers={},bcTimer=null;
 let opPlayers=new Set(),myOp=false,bannedPlayers=new Set();
+// mutedPlayers: Map<isim, expiresAt> — expiresAt bir epoch-ms zaman damgası,
+// süresi dolunca otomatik kalkması gerektiğini belirtir; kalıcı mute'larda
+// (süre seçilmediyse) expiresAt = null olur.
+let mutedPlayers=new Map(),whitelistPlayers=new Set(),whitelistEnabled=false,serverMaxPlayers=20;
+// warnHistory: Map<isim, [{reason, by, ts}, ...]> — kalıcı warn geçmişi.
+// Dünya verisiyle birlikte kaydedilir, host değişse/oturum kapansa bile kalır.
+let warnHistory=new Map();
+// Süresi dolan mute'ları periyodik olarak temizler ve ilgili oyuncuya haber verir.
+function purgeExpiredMutes(){
+  if(!amHost) return;
+  const now=Date.now();
+  let changed=false;
+  mutedPlayers.forEach((expiresAt,name)=>{
+    if(expiresAt!==null && expiresAt<=now){
+      mutedPlayers.delete(name);
+      changed=true;
+      const srv='🔊 '+name+"'s mute has expired.";
+      addChat(null,srv,true,'srv');
+      Object.values(hostConns).forEach(({conn:c})=>{if(c.open){c.send({type:'muted',target:name,val:false});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});}});
+      addServerLog('mute',name+"'s mute expired.");
+    }
+  });
+  if(changed) saveServerBansAndAdmins();
+}
+setInterval(purgeExpiredMutes,15000);
+let serverLog=[]; // {ts, type, text}
+function addServerLog(type,text){
+  serverLog.push({ts:Date.now(),type,text});
+  if(serverLog.length>200) serverLog.shift();
+  try{ if(typeof window._staffRenderLogs==='function' && document.getElementById('sp-section-logs')?.classList.contains('active')) window._staffRenderLogs(); }catch(e){}
+}
 const connTokens=new Map();
 function genCode(){return Array.from({length:4},()=>'ABCDEFGHIJKLMNOPQRSTUVWXYZ'[~~(Math.random()*26)]).join('');}
 function autoDevice(){return('ontouchstart' in window||navigator.maxTouchPoints>0)?'mobile':'pc';}
@@ -9453,6 +9660,7 @@ function grantOpHost(name){
   addChat(null,d.srvPrefix+name+d.srvOpGranted,true,'srv');
   Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'op',target:name,val:true});});
   saveServerBansAndAdmins();
+  addServerLog('op',`${name} was promoted to admin.`);
 }
 function revokeOpHost(name){
   const d=langData[currentLang];
@@ -9460,6 +9668,54 @@ function revokeOpHost(name){
   addChat(null,d.srvPrefix+name+d.srvOpRevoked,true,'srv');
   Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'op',target:name,val:false});});
   saveServerBansAndAdmins();
+  addServerLog('op',`${name} was demoted from admin.`);
+}
+// durationMs: null/undefined = kalıcı mute. Sayı verilirse o kadar ms sonra
+// otomatik kalkar (bkz. purgeExpiredMutes).
+function mutePlayerHost(name,fromName=null,durationMs=null){
+  const d=langData[currentLang];
+  if(fromName!==null&&opPlayers.has(name)){addChat(null,d.srvNoCantKickOp||'Cannot mute an admin.',true,'warn');return;}
+  const expiresAt=durationMs?(Date.now()+durationMs):null;
+  mutedPlayers.set(name,expiresAt);
+  const durText=expiresAt?formatDuration(durationMs):'permanently';
+  const srv=(d.srvPrefix||'')+name+' was muted ('+durText+').';
+  addChat(null,srv,true,'srv');
+  Object.values(hostConns).forEach(({conn:c,name:pn})=>{if(c.open){c.send({type:'muted',target:name,val:true});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});}});
+  saveServerBansAndAdmins();
+  addServerLog('mute',`${name} was muted (${durText}).`);
+}
+function unmutePlayerHost(name){
+  const d=langData[currentLang];
+  mutedPlayers.delete(name);
+  const srv=(d.srvPrefix||'')+name+' was unmuted.';
+  addChat(null,srv,true,'srv');
+  Object.values(hostConns).forEach(({conn:c})=>{if(c.open){c.send({type:'muted',target:name,val:false});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});}});
+  saveServerBansAndAdmins();
+  addServerLog('mute',`${name} was unmuted.`);
+}
+// Süreyi okunabilir metne çevirir (mute log/mesajları için).
+function formatDuration(ms){
+  const min=Math.round(ms/60000);
+  if(min<60) return min+'m';
+  const hrs=Math.round(min/60);
+  if(hrs<24) return hrs+'h';
+  return Math.round(hrs/24)+'d';
+}
+// warn: kalıcı geçmişe (warnHistory) yazılır, dünya verisiyle kaydedilir.
+function warnPlayerHost(name,reason,fromName=null){
+  const d=langData[currentLang];
+  const entry=Object.entries(hostConns).find(([,p])=>p.name===name);
+  const warnerName=fromName||myName;
+  const msg=`⚠ ${warnerName} warned ${name}${reason?(': '+reason):''}`;
+  if(entry){
+    const [,p]=entry;
+    if(p.conn.open) p.conn.send({type:'chat',name:null,msg:'⚠ You have been warned'+(reason?(': '+reason):''),sys:true,cls:'warn'});
+  }
+  if(!warnHistory.has(name)) warnHistory.set(name,[]);
+  warnHistory.get(name).push({reason:reason||'',by:warnerName,ts:Date.now()});
+  saveServerBansAndAdmins();
+  addChat(null,msg,true,'warn');
+  addServerLog('warn',msg);
 }
 function kickPlayerHost(name,fromName=null){
   const d=langData[currentLang];
@@ -9475,6 +9731,7 @@ function kickPlayerHost(name,fromName=null){
   const srv=d.srvPrefix+name+d.srvKicked;
   addChat(null,srv,true,'srv');
   Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});});
+  addServerLog('kick',srv+(fromName?` (by ${fromName})`:''));
 }
 function banPlayerHost(name,fromName=null){
   const d=langData[currentLang];
@@ -9492,6 +9749,7 @@ function banPlayerHost(name,fromName=null){
   addChat(null,srv,true,'srv');
   Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:'pleave',id:pid,name});c.send({type:'chat',name:null,msg:srv,sys:true,cls:'srv'});});
   saveServerBansAndAdmins();
+  addServerLog('ban',srv+(fromName?` (by ${fromName})`:''));
 }
  
 function processCmd(raw){
@@ -9547,7 +9805,52 @@ function processCmd(raw){
   if(cmd==='unban'){
     if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
     if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
-    const target=parts.slice(1).join(' ');bannedPlayers.delete(target);addChat(null,d.srvPrefix+target+d.srvUnbanned,true,'srv');saveServerBansAndAdmins();return;
+    const target=parts.slice(1).join(' ');bannedPlayers.delete(target);addChat(null,d.srvPrefix+target+d.srvUnbanned,true,'srv');saveServerBansAndAdmins();
+    addServerLog('ban',target+' was unbanned.');
+    return;
+  }
+  if(cmd==='mute'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const target=parts[1];if(!target){addChat(null,'Usage: /mute <player> [minutes]',true);return;}
+    const minsArg=parts[2];
+    const durationMs=(minsArg && !isNaN(parseFloat(minsArg)))?parseFloat(minsArg)*60000:null;
+    if(amHost) mutePlayerHost(target,null,durationMs); else guestConn.send({type:'cmd',cmd:'mute',target,durationMs,from:myName});return;
+  }
+  if(cmd==='unmute'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const target=parts.slice(1).join(' ');if(!target){addChat(null,'Usage: /unmute <player>',true);return;}
+    if(amHost) unmutePlayerHost(target); else guestConn.send({type:'cmd',cmd:'unmute',target,from:myName});return;
+  }
+  if(cmd==='warn'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost&&!myOp){addChat(null,d.srvNoPerms,true,'warn');return;}
+    const target=parts[1];if(!target){addChat(null,'Usage: /warn <player> [reason]',true);return;}
+    const reason=parts.slice(2).join(' ');
+    if(amHost) warnPlayerHost(target,reason); else guestConn.send({type:'cmd',cmd:'warn',target,reason,from:myName});return;
+  }
+  // NOT: /say ve /broadcast komutları kaldırıldı — aynı işi herkese açık
+  // /shout komutu görüyor, host-only ayrı bir duyuru komutuna gerek yok.
+  if(cmd==='whitelist'){
+    if(!isMP){addChat(null,d.srvMpOnlyCmd,true,'srv');return;}
+    if(!amHost){addChat(null,d.srvHostOnly,true,'warn');return;}
+    const sub=(parts[1]||'').toLowerCase();
+    const target=parts.slice(2).join(' ');
+    if(sub==='add'&&target){
+      whitelistPlayers.add(target);saveServerBansAndAdmins();
+      addChat(null,'✅ '+target+' added to whitelist.',true,'srv');
+      addServerLog('server',target+' added to whitelist.');
+    } else if(sub==='remove'&&target){
+      whitelistPlayers.delete(target);saveServerBansAndAdmins();
+      addChat(null,'❌ '+target+' removed from whitelist.',true,'srv');
+      addServerLog('server',target+' removed from whitelist.');
+    } else if(sub==='list'){
+      addChat(null,'Whitelist: '+(whitelistPlayers.size?Array.from(whitelistPlayers).join(', '):'(empty)'),true,'srv');
+    } else {
+      addChat(null,'Usage: /whitelist add|remove|list <player>',true);
+    }
+    return;
   }
   // /cheats komutu KALDIRILDI (kullanıcı isteği) — hile izni artık sadece dünya
   // oluşturma ekranındaki "Cheats On/Off" seçeneğiyle (host tarafından, oyun
@@ -9777,6 +10080,10 @@ function cleanupMP(){
 // ─── Sunucu PvP ve sunucu erişim ayarları ───
 let serverPvpEnabled=true;
 let serverAccess='public';
+let serverDifficulty='normal';
+let serverTimeLock='none'; // 'none'|'day'|'night'
+let serverWeather='clear'; // 'clear'|'rain'|'storm'
+let myMuted=false;
 
 // ─── MANAGE SERVER ───
 function updateManageServerBtn(){
@@ -9836,11 +10143,15 @@ function renderMSPlayers(){
     list.innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.4);text-align:center;padding:10px;">${d.msNoPlayers}</div>`;
     return;
   }
+  const searchEl=document.getElementById('ms-player-search');
+  const searchTerm=(searchEl?searchEl.value:'').trim().toLowerCase();
   allPlayers.forEach(pl=>{
     if(pl.id==='__host__'||pl.name===myName) return; // kendini gösterme
+    if(searchTerm && !pl.name.toLowerCase().includes(searchTerm)) return; // arama filtresi
     const isAdmin=pl.isOp||(opPlayers.has(pl.name));
     const row=document.createElement('div');
     row.className='ms-player-row';
+    row.style.flexWrap='wrap';
     const rankColor=pl.rankColor||resolveRankColor(pl.rank,null);
     const rankTag=pl.rank?`<span class="ms-player-rank" style="color:${rankColor};border:1px solid ${rankColor}40;">[${pl.rank.toUpperCase()}]</span>`:'';
     row.innerHTML=`<span class="ms-player-name">${rankTag}${sanitizeText(pl.name)}</span>`;
@@ -9874,6 +10185,13 @@ function renderMSPlayers(){
   }
 }
 
+// Arama kutusu: yazarken listeyi filtrele
+document.addEventListener('input',(e)=>{
+  if(e.target && e.target.id==='ms-player-search') renderMSPlayers();
+});
+// NOT: Broadcast (server duyurusu) Manage Server'dan kaldırıldı.
+// Aynı işi zaten herkese açık /shout komutu görüyor.
+
 function renderMSAdmins(){
   const d=langData[currentLang];
   const adminList=document.getElementById('ms-admin-list');
@@ -9900,6 +10218,7 @@ function renderMSAdmins(){
     adminList.style.display='none';
     document.getElementById('ms-lbl-admins').style.display='none';
   }
+  // NOT: Susturulanlar (Muted) listesi artık Staff Panel'de gösteriliyor.
   // Banlılar
   if(bannedPlayers.size===0){
     bannedList.innerHTML=`<div style="font-size:11px;color:rgba(255,255,255,.4);padding:6px 8px;">${d.msNoBanned}</div>`;
@@ -9938,6 +10257,24 @@ function renderMSServerTab(){
   // Access select
   const accessSel=document.getElementById('ms-access-select');
   if(accessSel) accessSel.value=serverAccess;
+  // Difficulty
+  const diffSel=document.getElementById('ms-difficulty-select');
+  if(diffSel) diffSel.value=serverDifficulty;
+  // Day/Night lock
+  const timeSel=document.getElementById('ms-daynight-select');
+  if(timeSel) timeSel.value=serverTimeLock;
+  // Weather
+  const weatherSel=document.getElementById('ms-weather-select');
+  if(weatherSel) weatherSel.value=serverWeather;
+  // Max players
+  const maxInp=document.getElementById('ms-maxplayers-input');
+  if(maxInp) maxInp.value=serverMaxPlayers;
+  // Whitelist toggle
+  const wlBtn=document.getElementById('ms-whitelist-toggle');
+  if(wlBtn){
+    wlBtn.textContent=whitelistEnabled?'ON':'OFF';
+    wlBtn.className='ms-toggle-btn '+(whitelistEnabled?'on':'off');
+  }
 }
 
 // PvP toggle
@@ -9962,6 +10299,65 @@ document.getElementById('ms-access-select').addEventListener('change',e=>{
     lobbySocket.emit('lobby:update',{code,access:serverAccess});
   }
 });
+// Difficulty change
+document.getElementById('ms-difficulty-select').addEventListener('change',e=>{
+  if(!amHost) return;
+  serverDifficulty=e.target.value;
+  sendToAll({type:'server_difficulty',value:serverDifficulty});
+  const srv='⚙ Difficulty set to '+serverDifficulty+'.';
+  addChat(null,srv,true,'srv');
+  addServerLog('server',srv);
+});
+// Day/Night lock change
+document.getElementById('ms-daynight-select').addEventListener('change',e=>{
+  if(!amHost) return;
+  serverTimeLock=e.target.value;
+  sendToAll({type:'server_timelock',value:serverTimeLock});
+  const srv='⚙ Time lock set to '+serverTimeLock+'.';
+  addChat(null,srv,true,'srv');
+  addServerLog('server',srv);
+});
+// Weather change
+document.getElementById('ms-weather-select').addEventListener('change',e=>{
+  if(!amHost) return;
+  serverWeather=e.target.value;
+  sendToAll({type:'server_weather',value:serverWeather});
+  const srv='⚙ Weather set to '+serverWeather+'.';
+  addChat(null,srv,true,'srv');
+  addServerLog('server',srv);
+});
+// Max players change
+document.getElementById('ms-maxplayers-input').addEventListener('change',e=>{
+  if(!amHost) return;
+  let v=parseInt(e.target.value)||20;
+  v=Math.max(1,Math.min(64,v));
+  serverMaxPlayers=v;
+  e.target.value=v;
+  if(lobbySocket&&lobbySocket.connected){
+    const code=document.getElementById('host-code-display').textContent;
+    lobbySocket.emit('lobby:update',{code,maxPlayers:serverMaxPlayers});
+  }
+  addServerLog('server','⚙ Max players set to '+v+'.');
+});
+// Whitelist toggle
+document.getElementById('ms-whitelist-toggle').addEventListener('click',()=>{
+  if(!amHost) return;
+  whitelistEnabled=!whitelistEnabled;
+  saveServerBansAndAdmins();
+  addServerLog('server','⚙ Whitelist '+(whitelistEnabled?'enabled':'disabled')+'.');
+  renderMSServerTab();
+});
+// Whitelist add button
+document.getElementById('ms-whitelist-add-btn').addEventListener('click',()=>{
+  if(!amHost) return;
+  const inp=document.getElementById('ms-whitelist-input');
+  if(inp && inp.value.trim()){ processCmd('whitelist add '+inp.value.trim()); inp.value=''; }
+});
+document.getElementById('ms-whitelist-input').addEventListener('keydown',e=>{
+  if(e.key==='Enter' && e.target.value.trim()){ processCmd('whitelist add '+e.target.value.trim()); e.target.value=''; }
+});
+// NOT: Activity Log artık Staff Panel'de (LOGS sekmesi) gösteriliyor.
+// renderMSLogs() tanımı da o panelin script bloğuna taşındı.
 // Shutdown
 document.getElementById('ms-shutdown-btn').addEventListener('click',()=>{
   if(!amHost) return;
@@ -10162,6 +10558,7 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             const safeRank=(data.rank&&typeof data.rank==='string')?data.rank.substring(0,32):null;
             const safeRankColor=resolveRankColor(safeRank,data.rankColor);
             if(bannedPlayers.has(safeName)){conn.send({type:'banned',msg:'Bu sunucudan banlandınız.'});setTimeout(()=>{try{conn.close();}catch(e){}},200);return;}
+            if(whitelistEnabled&&!whitelistPlayers.has(safeName)&&!opPlayers.has(safeName)){conn.send({type:'kicked',by:'Server (Whitelist)'});setTimeout(()=>{try{conn.close();}catch(e){}},200);return;}
             if(hostConns[pid]){return;}
             // FIX: Maksimum oyuncu limitini kontrol et
             const _maxP=getMaxPlayersByRank(playerRank);
@@ -10172,7 +10569,8 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             _updateLobbyPlayerCount();
             const pl=[{id:'host',name:myName,x:camera.position.x,y:camera.position.y,z:camera.position.z,ry:camera.rotation.y,rank:playerRank,rankColor:playerRankColor}];
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid) pl.push({id,name:p.name,x:p.x,y:p.y,z:p.z,ry:p.ry,rank:p.rank,rankColor:p.rankColor});});
-            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName),pvp:serverPvpEnabled,access:serverAccess,worldSpawn:worldSpawnPoint||null,maxPlayers:_maxP,serverName:mpServerName||(myName+"'s Server")});
+            conn.send({type:'welcome',world:worldType,seed:worldSeed,players:pl,gameMode,cheats:cheatsEnabled,isOp:opPlayers.has(safeName),pvp:serverPvpEnabled,access:serverAccess,worldSpawn:worldSpawnPoint||null,maxPlayers:_maxP,serverName:mpServerName||(myName+"'s Server"),difficulty:serverDifficulty,timeLock:serverTimeLock,weather:serverWeather,muted:mutedPlayers.has(safeName)});
+            addServerLog('join',safeName+' joined the server.');
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'pjoin',id:pid,name:safeName,rank:safeRank,rankColor:safeRankColor});});
             addRP(pid,safeName,8,2.1,8,0,'survival',safeRank,safeRankColor);addChat(null,safeName+langData[currentLang].sysJoin,true);
             sendMySkinToNewPlayer(conn);
@@ -10190,6 +10588,10 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
           }
           else if(data.type==='chat'){
             if(!connTokens.has(pid)) return;
+            const chatNm=connTokens.get(pid)||'?';
+            if(mutedPlayers.has(chatNm)){
+              conn.send({type:'chat',name:null,msg:'🔇 You are muted and cannot chat.',sys:true,cls:'warn'});return;
+            }
             if(!checkRate('chat_'+pid,3)){
               conn.send({type:'chat',name:null,msg:langData[currentLang].rateLimitMsg,sys:true,cls:'warn'});return;
             }
@@ -10244,6 +10646,9 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             if(cmd==='op') grantOpHost(sanitizeName(target));
             else if(cmd==='kick') kickPlayerHost(sanitizeName(target),from);
             else if(cmd==='ban') banPlayerHost(sanitizeName(target),from);
+            else if(cmd==='mute') mutePlayerHost(sanitizeName(target),from,data.durationMs||null);
+            else if(cmd==='unmute') unmutePlayerHost(sanitizeName(target));
+            else if(cmd==='warn') warnPlayerHost(sanitizeName(target),data.reason||'',from);
             else if(cmd==='kill'){
               // kill komutu host tarafında işlenir
               const d=langData[currentLang];
@@ -10378,6 +10783,10 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         myOp=data.isOp||false;
         if(data.pvp!==undefined) serverPvpEnabled=!!data.pvp;
         if(data.access) serverAccess=data.access;
+        if(data.difficulty) serverDifficulty=data.difficulty;
+        if(data.timeLock) serverTimeLock=data.timeLock;
+        if(data.weather) serverWeather=data.weather;
+        myMuted=!!data.muted;
         if(data.worldSpawn) worldSpawnPoint=data.worldSpawn; else worldSpawnPoint=null;
         // TAB'de gösterilecek sunucu adı/kapasite bilgisi (host'un rankına göre)
         if(data.maxPlayers) _tabServerMaxPlayers=data.maxPlayers;
@@ -10439,6 +10848,16 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
       else if(data.type==='kicked'){showKickScreen(sanitizeName(data.by)||'Sunucu');}
       else if(data.type==='banned'){showBanScreen(sanitizeName(data.by)||'Sunucu');}
       else if(data.type==='server_pvp'){serverPvpEnabled=!!data.enabled;}
+      else if(data.type==='server_difficulty'){serverDifficulty=data.value||'normal';}
+      else if(data.type==='server_timelock'){serverTimeLock=data.value||'none';}
+      else if(data.type==='server_weather'){serverWeather=data.value||'clear';}
+      else if(data.type==='muted'){
+        if(data.target===myName){
+          myMuted=!!data.val;
+          if(myMuted) addChat(null,'🔇 You have been muted.',true,'warn');
+          else addChat(null,'🔊 You have been unmuted.',true,'srv');
+        }
+      }
       else if(data.type==='worldspawn'){worldSpawnPoint={x:data.x,y:data.y,z:data.z};}
       else if(data.type==='pvp_attack') {
         if(data.target === myPeer.id) {
@@ -12023,7 +12442,14 @@ function closeChat(send){
     const msg=inp.value.trim().substring(0,200);
     if(!checkRate('mychat',3)){addChat(null,langData[currentLang].rateLimitMsg,true,'warn');inp.value='';isChatOpen=false;document.getElementById('chat-input-row').style.display='none';document.getElementById('chat-log').classList.remove('scrollable');if(deviceMode==='pc'&&!isPaused) document.body.requestPointerLock();if(typeof updateCrosshairVisibility==='function') updateCrosshairVisibility();return;}
     if(msg.startsWith('/')){processCmd(msg.slice(1));}
-    else if(isMP){addChat(myName,msg,false,'',playerRank,playerRankColor);if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'chat',name:myName,msg,rank:playerRank,rankColor:playerRankColor});});else if(guestConn?.open) guestConn.send({type:'chat',msg});}
+    else if(isMP){
+      if(!amHost&&myMuted){addChat(null,'🔇 You are muted and cannot chat.',true,'warn');}
+      else{
+        addChat(myName,msg,false,'',playerRank,playerRankColor);
+        if(amHost) Object.values(hostConns).forEach(({conn})=>{if(conn.open) conn.send({type:'chat',name:myName,msg,rank:playerRank,rankColor:playerRankColor});});
+        else if(guestConn?.open) guestConn.send({type:'chat',msg});
+      }
+    }
     else{addChat(myUsername,msg,false,'',playerRank,playerRankColor);}
   }
   inp.value='';
@@ -21797,7 +22223,16 @@ function buildCreeperMesh(){
 }
 
 function buildSpiderMesh(){
-  // Alçak ve geniş gövde + 8 bacak (çapraz voksel çizgiler)
+  // [FIX] Eski geometri hatalıydı: gövde/bacak pivotları grup kökünün (Y=0,
+  // yani "ayak tabanı" referans noktası) ÜSTÜNDE konumlanmıştı ama hiçbir
+  // yerde bu fark (groundOff) telafi edilmiyordu — bu yüzden örümcek zeminin
+  // biraz altında/üstünde asılı kalıyor, "havada yürüyormuş" gibi
+  // görünüyordu. Ayrıca bacak kutuları (0.72 uzunluk) pivot noktasından
+  // ekstra offsetle (side*0.36) kaydırılmıştı, bu da bacakların gövdeye hiç
+  // değmeyip dışarıda sivri çubuklar gibi durmasına yol açıyordu (özellikle
+  // arkadan bakınca "garip" görünen kısım buydu). Model, diğer canavarlarla
+  // (zombie/skeleton/creeper) AYNI kurala göre — grup kökü Y=0 = AYAK TABANI
+  // — sıfırdan, doğru oranlarla yeniden kuruldu.
   var g = new THREE.Group();
   var skinMat = new THREE.MeshStandardMaterial({ color: 0x2e2620, roughness: 0.85 });
   var eyeMat = new THREE.MeshStandardMaterial({ color: 0xff2020, emissive: 0xcc1010, emissiveIntensity: 0.9 });
@@ -21814,32 +22249,45 @@ function buildSpiderMesh(){
   faceTex.magFilter = THREE.NearestFilter; faceTex.minFilter = THREE.NearestFilter;
   var faceMat = new THREE.MeshStandardMaterial({ map: faceTex, roughness: 0.85 });
 
-  var bodyMats = [skinMat,skinMat,skinMat,skinMat,skinMat,faceMat];
-  var body = new THREE.Mesh(new THREE.BoxGeometry(0.9,0.55,1.3), bodyMats);
-  body.position.set(0, 0.42, 0);
+  // Bacak yüksekliği zemin boşluğu belirler: bacaklar Y=0'dan (yer) gövdeye
+  // doğru yükselir, gövde bacakların TEPESİNE oturur (Minecraft örümceğinde
+  // olduğu gibi alçak, geniş bir duruş).
+  var LEG_Y = 0.28;      // bacakların gövdeye bağlandığı yükseklik (zeminden)
+  var BODY_CY = 0.34;    // gövde (abdomen) merkez yüksekliği
+  var HEAD_CY = 0.30;    // kafa/göğüs merkez yüksekliği
+
+  var body = new THREE.Mesh(new THREE.BoxGeometry(0.7,0.5,0.9), [skinMat,skinMat,skinMat,skinMat,skinMat,skinMat]);
+  body.position.set(0, BODY_CY, -0.25);
   g.add(body);
 
   var headPivot = new THREE.Group();
-  headPivot.position.set(0, 0.42, 0.75);
+  headPivot.position.set(0, HEAD_CY, 0.45);
   var headMats2 = [skinMat,skinMat,skinMat,skinMat,faceMat,skinMat];
-  var head = new THREE.Mesh(new THREE.BoxGeometry(0.6,0.5,0.5), headMats2);
+  var head = new THREE.Mesh(new THREE.BoxGeometry(0.5,0.45,0.45), headMats2);
   headPivot.add(head);
-  var eyeGeo = new THREE.BoxGeometry(0.07,0.07,0.03);
-  [[-0.16,0.08,0.26],[0.16,0.08,0.26],[-0.22,0.02,0.26],[0.22,0.02,0.26]].forEach(function(p){
+  var eyeGeo = new THREE.BoxGeometry(0.06,0.06,0.03);
+  [[-0.14,0.06,0.235],[0.14,0.06,0.235],[-0.19,0.0,0.235],[0.19,0.0,0.235]].forEach(function(p){
     var eye = new THREE.Mesh(eyeGeo, eyeMat); eye.position.set(p[0],p[1],p[2]); headPivot.add(eye);
   });
   g.add(headPivot);
 
-  var legGeo = new THREE.BoxGeometry(0.72,0.09,0.09);
+  // 8 bacak: her biri gövdenin yan tarafından, LEG_Y yüksekliğinden dışa ve
+  // hafifçe aşağı-yana açılı şekilde çıkar (gerçek örümcek duruşuna yakın).
+  var legGeo = new THREE.BoxGeometry(0.6,0.09,0.09);
   var legs = [];
-  var legRowZ = [0.42, 0.15, -0.15, -0.42];
+  var legRowZ = [0.28, 0.08, -0.14, -0.36]; // önden arkaya 4 çift bacak konumu
   for(var side = -1; side <= 1; side += 2){
     for(var r = 0; r < 4; r++){
       var legPivot = new THREE.Group();
-      legPivot.position.set(side*0.44, 0.5, legRowZ[r]);
+      // Pivot gövdenin kenarında, bacak yüksekliğinde
+      legPivot.position.set(side*0.30, LEG_Y, legRowZ[r]);
       var leg = new THREE.Mesh(legGeo, skinMat);
-      leg.position.set(side*0.36, -0.05, 0);
+      // Bacak, pivot noktasından dışa doğru uzanır (kendi yarı-uzunluğu kadar offset)
+      leg.position.set(side*0.30, 0, 0);
       legPivot.add(leg);
+      // Hafif aşağı açı: bacaklar gövdeden dışa ve biraz aşağı uzanır
+      legPivot.rotation.z = side * -0.28;
+      legPivot.userData.baseRotZ = legPivot.rotation.z;
       g.add(legPivot);
       legs.push(legPivot);
     }
@@ -21848,7 +22296,6 @@ function buildSpiderMesh(){
   g.userData.headPivot = headPivot;
   g.userData.legs = legs;
   g.userData.skinMat = skinMat;
-  g.userData.groundOff = 0.42;
   scene.add(g);
   return g;
 }
@@ -22020,6 +22467,23 @@ const MobManager = {
       // ── Örümcek gündüz/gece davranışı ──
       if(m.type === 'spider' && !m.provoked){
         m.hostile = DayNightCycle.isNight();
+      }
+
+      // ── [FIX] Spectator modu: oyuncu "hayalet" gibi davranmalı — hiçbir
+      // canavar onu göremez/kovalamaz/saldırmaz, ve modeli oyuncuya görünmez
+      // olmalı (bkz. selfModel opacity yaması). Eskiden mob AI'ları gameMode'u
+      // hiç kontrol etmiyordu; bu yüzden spectator'dayken bile zombi/skeleton/
+      // spider oyuncuyu görüp kovalıyordu (hasar alınmıyordu ama görünürlük ve
+      // takip devam ediyordu — kullanıcı raporu). Spectator'dayken mob'un mesh'i
+      // gizlenir ve AI'sı (hareket/saldırı) tamamen atlanır; normal moda
+      // dönünce her şey kaldığı yerden devam eder.
+      var _playerIsSpectator = (typeof gameMode !== 'undefined' && gameMode === 'spectator');
+      if(m.mesh && m.mesh.visible !== !_playerIsSpectator){
+        m.mesh.visible = !_playerIsSpectator;
+      }
+      if(_playerIsSpectator){
+        if(m.mesh) m.mesh.position.set(m.x, m.y, m.z);
+        continue; // AI/knockback/hitflash tamamen atlanır — spectator "yok" sayılır
       }
 
       // ── Tür bazlı AI ──
@@ -22197,10 +22661,15 @@ function _mobAnimateWalk(m){
     var crossSign = [1,-1,-1,1];
     ud.legs.forEach(function(leg,li){ leg.rotation.x = Math.sin(ph*crossSign[li])*0.3; });
   } else if(m.type === 'spider' && ud.legs){
+    // [FIX] Bacak pivotlarının sabit bir taban açısı (userData.baseRotZ) var —
+    // animasyon eskiden rotation.z'ye doğrudan atama yapıyordu, bu da statik
+    // duruş açısını her karede sıfırlayıp bacakların gövdeye yapışık/garip
+    // durmasına yol açıyordu. Artık taban açı korunuyor, animasyon üzerine ekleniyor.
     ud.legs.forEach(function(leg,li){
       var phase = ph + li*0.8;
-      leg.rotation.y = Math.sin(phase)*0.25;
-      leg.rotation.z = Math.cos(phase)*0.12 * (li<4?1:-1);
+      var baseZ = (typeof leg.userData.baseRotZ === 'number') ? leg.userData.baseRotZ : 0;
+      leg.rotation.y = Math.sin(phase)*0.22;
+      leg.rotation.z = baseZ + Math.cos(phase)*0.10 * (li<4?1:-1);
     });
   }
 }
@@ -22273,6 +22742,14 @@ const CreeperAI = {
       var dmg = Math.max(2, 10 - dist*2);
       MobManager.meleeAttackPlayer(Math.round(dmg), 'creeper');
     }
+    // ── [FIX] Etrafa gerçek hasar: eskiden sadece görsel enkaz parçacığı
+    // (spawnBlockDebris) oynatılıyordu, blokların KENDİSİ hiç kırılmıyordu —
+    // yani patlama "kullanıcı raporundaki gibi" görsel bir efektten öteye
+    // gitmiyordu. Artık patlama yarıçapı içindeki (küresel) kırılabilir
+    // blokları da siliyoruz — bedrock/unbreakable/sıvı bloklara dokunulmuz,
+    // Minecraft'taki gibi merkeze yakın bloklar %100, kenara yakınlar ise
+    // rastgele bir ihtimalle kırılır (daha doğal/pürüzlü krater görünümü).
+    safeExplodeBlocks(m.x, m.y, m.z, this.explodeRadius);
     try{
       if(typeof spawnBlockDebris === 'function'){
         spawnBlockDebris(Math.round(m.x), Math.round(m.y), Math.round(m.z), 0x3fa34d);
@@ -22282,6 +22759,35 @@ const CreeperAI = {
   }
 };
 window.CreeperAI = CreeperAI;
+
+// ── Patlama sonrası blok kırma (creeper) ────────────────────────────────
+// Küresel bir alan tarar; bedrock/unbreakable/sıvı bloklara dokunmaz.
+// Kırılan blok sayısı fazla olabileceğinden chunk mesh güncellemesi tek
+// seferde, döngü sonunda yapılır (performans için).
+function safeExplodeBlocks(cx, cy, cz, radius){
+  try{
+    var r = Math.ceil(radius);
+    var cxi = Math.round(cx), cyi = Math.round(cy), czi = Math.round(cz);
+    var touchedChunks = {};
+    for(var dx = -r; dx <= r; dx++){
+      for(var dy = -r; dy <= r; dy++){
+        for(var dz = -r; dz <= r; dz++){
+          var d = Math.sqrt(dx*dx+dy*dy+dz*dz);
+          if(d > radius) continue;
+          var bx = cxi+dx, by = cyi+dy, bz = czi+dz;
+          var key = pk(bx,by,bz);
+          var bd = blockMap[key];
+          if(!bd) continue;
+          if(bd.unbreakable || bd.id==='bedrock' || bd.isWater || (typeof isAnyLava==='function' && isAnyLava(bd))) continue;
+          // Merkeze yakın bloklar kesin kırılır, kenara doğru olasılık düşer
+          var chance = 1 - (d/radius)*0.55;
+          if(Math.random() > chance) continue;
+          if(typeof clearBlockAt === 'function') clearBlockAt(bx,by,bz);
+        }
+      }
+    }
+  }catch(e){ console.warn('[Explosion] block break failed:', e); }
+}
 
 // ─────────────────────────────────────────────────────────────────────────
 // SPIDER AI — alçak/geniş, oyuncuyu kovalar, duvarlardan tırmanabilir
@@ -22614,6 +23120,33 @@ window.ArrowManager = ArrowManager;
 .sp-mini-btn.warn{background:rgba(200,150,40,.18);border-color:rgba(220,170,60,.4);color:#ffe0a0;}
 .sp-empty-msg{font-size:10px;color:rgba(255,255,255,.35);text-align:center;padding:14px 0;}
 .sp-speed-value{font-size:11px;color:#e6d6ff;min-width:32px;text-align:right;}
+.sp-mini-btn.muted-active{background:rgba(255,224,102,.18);border-color:rgba(255,224,102,.45);color:#ffe066;}
+.sp-mute-menu{position:relative;display:inline-block;}
+.sp-mute-dropdown{
+  position:absolute;top:100%;right:0;margin-top:3px;background:#241a38;
+  border:1px solid rgba(180,140,255,.4);border-radius:6px;padding:4px;
+  display:none;flex-direction:column;gap:2px;z-index:10;min-width:90px;
+  box-shadow:0 6px 20px rgba(0,0,0,.5);
+}
+.sp-mute-dropdown.open{display:flex;}
+.sp-mute-dropdown button{
+  background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);color:#e6d6ff;
+  font-family:inherit;font-size:9px;padding:5px 6px;border-radius:4px;cursor:pointer;text-align:left;
+}
+.sp-mute-dropdown button:hover{background:rgba(180,140,255,.2);}
+.sp-warn-history{margin-top:6px;padding:6px 8px;background:rgba(0,0,0,.2);border-radius:5px;display:none;}
+.sp-warn-history.open{display:block;}
+.sp-warn-entry{font-size:9px;color:rgba(255,224,160,.85);padding:3px 0;border-bottom:1px solid rgba(255,255,255,.06);}
+.sp-warn-entry:last-child{border-bottom:none;}
+.sp-warn-entry .sp-warn-meta{color:rgba(255,255,255,.4);font-size:8px;}
+.sp-log-list{display:flex;flex-direction:column-reverse;gap:2px;}
+.sp-log-row{font-size:9.5px;padding:5px 7px;background:rgba(255,255,255,.03);border-left:2px solid rgba(117,167,255,.4);border-radius:2px;line-height:1.4;color:rgba(255,255,255,.75);}
+.sp-log-row .sp-log-time{color:rgba(255,255,255,.35);margin-right:5px;}
+.sp-log-row.tkick{border-left-color:#ffaa44;}
+.sp-log-row.tban{border-left-color:#ff6666;}
+.sp-log-row.tmute{border-left-color:#ffe066;}
+.sp-log-row.top{border-left-color:#75a7ff;}
+.sp-log-clear-btn{width:100%;margin-top:8px;padding:8px;font-size:10px;}
 </style>
 
 <!-- Her zaman ekranda duran, sürüklenebilir yuvarlak buton -->
@@ -22631,6 +23164,7 @@ window.ArrowManager = ArrowManager;
     <div class="sp-tabs">
       <button class="sp-tab active" data-sp-tab="self">SELF</button>
       <button class="sp-tab" data-sp-tab="players">PLAYERS</button>
+      <button class="sp-tab" data-sp-tab="logs" id="sp-tab-logs-label">📜 LOGS</button>
     </div>
     <div class="sp-body">
       <div class="sp-section active" id="sp-section-self">
@@ -22691,6 +23225,12 @@ window.ArrowManager = ArrowManager;
         </div>
         <div class="sp-label" style="margin-top:10px;">Players</div>
         <div class="sp-player-list" id="sp-player-list"></div>
+      </div>
+
+      <div class="sp-section" id="sp-section-logs">
+        <div class="sp-label" id="sp-lbl-logs">ACTIVITY LOG</div>
+        <div class="sp-log-list" id="sp-log-list"></div>
+        <button class="sp-btn sp-btn-danger sp-log-clear-btn" id="sp-log-clear-btn">🗑 CLEAR LOG</button>
       </div>
     </div>
   </div>
@@ -22795,8 +23335,37 @@ window.ArrowManager = ArrowManager;
       document.querySelectorAll('.sp-section').forEach(function(s){ s.classList.remove('active'); });
       document.getElementById('sp-section-'+tab).classList.add('active');
       if(tab==='players') renderPlayerList();
+      if(tab==='logs') renderStaffLogs();
     });
   });
+
+  // ── LOGS: aynı serverLog dizisini okur (host tarafında tutulur) ────────
+  function renderStaffLogs(){
+    var listEl = document.getElementById('sp-log-list');
+    if(!listEl) return;
+    var log = safe(function(){ return g('serverLog'); }, null);
+    if(!log || !log.length){
+      listEl.innerHTML = '<div class="sp-empty-msg">No activity yet.</div>';
+      return;
+    }
+    var typeClass = {kick:'tkick',ban:'tban',mute:'tmute',op:'top',warn:'tkick',server:'top'};
+    listEl.innerHTML = log.map(function(entry){
+      var t = new Date(entry.ts);
+      var hh = String(t.getHours()).padStart(2,'0'), mm = String(t.getMinutes()).padStart(2,'0');
+      var cls = typeClass[entry.type] || '';
+      var txt = safe(function(){ return g('sanitizeText')(entry.text); }, entry.text);
+      return '<div class="sp-log-row '+cls+'"><span class="sp-log-time">'+hh+':'+mm+'</span>'+txt+'</div>';
+    }).join('');
+  }
+  var logClearBtn = document.getElementById('sp-log-clear-btn');
+  if(logClearBtn){
+    logClearBtn.addEventListener('click', function(){
+      safeCall(function(){ s('serverLog', []); });
+      renderStaffLogs();
+    });
+  }
+  // addServerLog() (ana script) canlı güncelleme yapabilsin diye expose ediyoruz.
+  window._staffRenderLogs = renderStaffLogs;
 
   // ── Sürüklenebilir FAB (Roblox exploit menüsü tarzı) ────────────────────
   (function makeDraggable(){
@@ -23084,12 +23653,22 @@ window.ArrowManager = ArrowManager;
       playerListEl.innerHTML = '<div class="sp-empty-msg">No other players on the server.</div>';
       return;
     }
+    var MUTE_DURATIONS = [
+      {label:'5m', mins:5}, {label:'15m', mins:15}, {label:'1h', mins:60},
+      {label:'1d', mins:1440}, {label:'Permanent', mins:null}
+    ];
+
     players.forEach(function(p){
+      var mutedMap = safe(function(){ return g('mutedPlayers'); }, null);
+      var isMuted = !!(mutedMap && mutedMap.has && mutedMap.has(p.name));
+      var warnMap = safe(function(){ return g('warnHistory'); }, null);
+      var warnEntries = (warnMap && warnMap.get && warnMap.get(p.name)) || [];
+
       var row = document.createElement('div');
       row.className = 'sp-player-row';
       var nameSpan = document.createElement('span');
       nameSpan.className = 'sp-player-name';
-      nameSpan.textContent = p.name;
+      nameSpan.textContent = p.name + (isMuted ? ' 🔇' : '') + (warnEntries.length ? ' ⚠'+warnEntries.length : '');
       row.appendChild(nameSpan);
       var actions = document.createElement('div');
       actions.className = 'sp-player-actions';
@@ -23110,10 +23689,97 @@ window.ArrowManager = ArrowManager;
       actions.appendChild(mkBtn('KILL','warn','kill'));
       actions.appendChild(mkBtn('KICK','warn','kick'));
       actions.appendChild(mkBtn('BAN','danger','ban'));
+
+      // ── WARN: sebep sorup kalıcı geçmişe yazan komut ─────────────────
+      var warnBtn = document.createElement('button');
+      warnBtn.className = 'sp-mini-btn warn';
+      warnBtn.textContent = '⚠ WARN';
+      warnBtn.addEventListener('click', function(){
+        var reason = window.prompt('Warn reason for '+p.name+' (optional):', '') || '';
+        safeCall(function(){
+          var pc = g('processCmd');
+          if(typeof pc === 'function') pc('warn '+p.name+(reason?(' '+reason):''));
+        });
+        setTimeout(renderPlayerList, 300);
+      });
+      actions.appendChild(warnBtn);
+
+      // ── MUTE: süre seçimli dropdown (5m/15m/1h/1d/kalıcı) ────────────
+      if(isMuted){
+        var unmuteBtn = document.createElement('button');
+        unmuteBtn.className = 'sp-mini-btn muted-active';
+        unmuteBtn.textContent = '🔊 UNMUTE';
+        unmuteBtn.addEventListener('click', function(){
+          safeCall(function(){
+            var pc = g('processCmd');
+            if(typeof pc === 'function') pc('unmute '+p.name);
+          });
+          setTimeout(renderPlayerList, 300);
+        });
+        actions.appendChild(unmuteBtn);
+      } else {
+        var muteWrap = document.createElement('div');
+        muteWrap.className = 'sp-mute-menu';
+        var muteBtn = document.createElement('button');
+        muteBtn.className = 'sp-mini-btn';
+        muteBtn.textContent = '🔇 MUTE';
+        var dropdown = document.createElement('div');
+        dropdown.className = 'sp-mute-dropdown';
+        MUTE_DURATIONS.forEach(function(dur){
+          var optBtn = document.createElement('button');
+          optBtn.textContent = dur.label;
+          optBtn.addEventListener('click', function(e){
+            e.stopPropagation();
+            safeCall(function(){
+              var pc = g('processCmd');
+              if(typeof pc === 'function') pc('mute '+p.name+(dur.mins!==null?(' '+dur.mins):''));
+            });
+            dropdown.classList.remove('open');
+            setTimeout(renderPlayerList, 300);
+          });
+          dropdown.appendChild(optBtn);
+        });
+        muteBtn.addEventListener('click', function(e){
+          e.stopPropagation();
+          // Diğer açık menüleri kapat
+          document.querySelectorAll('.sp-mute-dropdown.open').forEach(function(dd){
+            if(dd !== dropdown) dd.classList.remove('open');
+          });
+          dropdown.classList.toggle('open');
+        });
+        muteWrap.appendChild(muteBtn);
+        muteWrap.appendChild(dropdown);
+        actions.appendChild(muteWrap);
+      }
+
       row.appendChild(actions);
+
+      // ── Warn geçmişi: varsa küçük bir "history" satırı gösterilir ────
+      if(warnEntries.length){
+        var histToggle = document.createElement('button');
+        histToggle.className = 'sp-mini-btn';
+        histToggle.style.marginTop = '4px';
+        histToggle.textContent = 'HISTORY ('+warnEntries.length+')';
+        var histBox = document.createElement('div');
+        histBox.className = 'sp-warn-history';
+        histBox.innerHTML = warnEntries.slice().reverse().map(function(w){
+          var t = new Date(w.ts);
+          var dateStr = t.toLocaleDateString()+' '+String(t.getHours()).padStart(2,'0')+':'+String(t.getMinutes()).padStart(2,'0');
+          var reasonTxt = w.reason ? w.reason : '(no reason given)';
+          return '<div class="sp-warn-entry">'+reasonTxt+'<div class="sp-warn-meta">by '+w.by+' — '+dateStr+'</div></div>';
+        }).join('');
+        histToggle.addEventListener('click', function(){ histBox.classList.toggle('open'); });
+        row.appendChild(histToggle);
+        row.appendChild(histBox);
+      }
+
       playerListEl.appendChild(row);
     });
   }
+  // Dropdown dışına tıklanınca kapansın (tek seferlik global listener)
+  document.addEventListener('click', function(){
+    document.querySelectorAll('.sp-mute-dropdown.open').forEach(function(dd){ dd.classList.remove('open'); });
+  });
 
   // ── Görünürlük: sadece Helper+ rütbeli kişide FAB görünür ───────────────
   // playerRank site tarafından oyun yüklendikten SONRA postMessage ile
