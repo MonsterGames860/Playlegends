@@ -22618,6 +22618,7 @@ window.ArrowManager = ArrowManager;
 
 <!-- Sol üst: paneli açan küçük buton (sadece Helper+ iken, tek oyunculu/çok oyunculu her dünyada görünür) -->
 <button id="staff-panel-btn">🛡 ADMIN PANEL</button>
+<div id="staff-debug-line" style="position:fixed;top:2px;left:2px;z-index:5000;background:rgba(0,0,0,.75);color:#0f0;font-size:9px;font-family:monospace;padding:3px 6px;border-radius:4px;pointer-events:none;white-space:pre;"></div>
 
 <div id="staff-panel-overlay">
   <div id="staff-panel">
@@ -22762,6 +22763,10 @@ window.ArrowManager = ArrowManager;
     // aksi halde de staff kişiye küçük bir gösterge olarak göster.
     badge.style.display = show ? 'flex' : 'none';
     updateBadgeText();
+    var dbgEl = document.getElementById('staff-debug-line');
+    if(dbgEl){
+      dbgEl.textContent = 'rank='+JSON.stringify(playerRank)+' staff='+isStaffPlus()+' world='+inWorld+' host='+(typeof amHost!=='undefined'?amHost:'?')+' show='+show;
+    }
     if(window._staffDebugLogged !== show+String(playerRank)+String(inWorld)){
       window._staffDebugLogged = show+String(playerRank)+String(inWorld);
       console.log('[StaffPanel debug] playerRank=', JSON.stringify(playerRank),
