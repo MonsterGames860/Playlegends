@@ -5512,6 +5512,7 @@ function applyRenderDist(v){
   // visibleRange: oyuncunun net görebilmesi gereken minimum mesafe (chunk cinsinden * CS).
   const visibleRange = Math.max(v * 16, 32); // en az 32 birim (küçük renderDist'lerde bile)
   scene.fog.density = 1 / (visibleRange * 1.35); // %35 pay: sis, sınırın hemen öncesinde yumuşakça başlar
+  window.baseFogDensity = scene.fog.density; // WeatherFX bu "temiz hava" değerini baseline olarak kullanır
   // Far plane: render distance'a göre ayarla (chunk'ın en uzak köşesini de kapsayacak şekilde payla)
   camera.far=v*16+32;camera.updateProjectionMatrix();
 }
@@ -6508,6 +6509,7 @@ scene.background=new THREE.Color(0x75a7ff);
 // hesaplanıyor: sis, chunk'ların gerçekten unload edildiği sınıra (renderDist*CS) yakın
 // bir yerde başlasın istiyoruz, daha erken değil.
 scene.fog=new THREE.FogExp2(0x75a7ff,0.010);
+window.baseFogDensity = 0.010; // WeatherFX baseline; applyRenderDist() bunu günceller
 // FPS: Kamera uzak kesim düzlemini render distance ile sınırla
 const camera=new THREE.PerspectiveCamera(70,window.innerWidth/window.innerHeight,0.1,80);
 const renderer=new THREE.WebGLRenderer({antialias:false,powerPreference:'high-performance'});
@@ -10711,6 +10713,77 @@ document.getElementById('btn-do-host').addEventListener('click',()=>{
             addChat(null,dmsg,true);
             Object.entries(hostConns).forEach(([id,p])=>{if(id!==pid&&p.conn.open) p.conn.send({type:'chat',name:null,msg:dmsg,sys:true});});
           }
+          // ── STAFF PANEL: Teleport / Freeze / Heal-Feed / Inventory / Server-wide ──
+          // Bu mesajlar Staff Panel'den (Helper+) gelir. Host, gönderenin
+          // rütbesini kendi tarafında da doğrular (isStaffPlusRank), çünkü
+          // guest tarafındaki kontrol atlatılabilir; host asıl otorite.
+          else if(data.type==='staff_action'){
+            if(!connTokens.has(pid)) return;
+            const fromName=connTokens.get(pid);
+            if(!isStaffPlusRank(hostConns[pid]&&hostConns[pid].rank)){ return; }
+            const act=data.action, target=data.target?sanitizeName(data.target):null;
+            if(act==='tp_to'){
+              // İsteyen kişiyi target'ın konumuna ışınla
+              if(target===myName){
+                conn.send({type:'staff_tp',x:camera.position.x,y:camera.position.y,z:camera.position.z});
+              } else {
+                const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+                if(tEntry) conn.send({type:'staff_tp',x:tEntry[1].x,y:tEntry[1].y,z:tEntry[1].z});
+              }
+            } else if(act==='tp_here'){
+              // Target'ı isteyenin konumuna ışınla
+              if(target===myName){
+                // host kendini ışınlayamaz kendine; no-op
+              } else {
+                const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+                const callerPos=hostConns[pid]?{x:hostConns[pid].x,y:hostConns[pid].y,z:hostConns[pid].z}:null;
+                if(tEntry && callerPos) tEntry[1].conn.send({type:'staff_tp',x:callerPos.x,y:callerPos.y,z:callerPos.z});
+              }
+            } else if(act==='freeze'){
+              if(target===myName){ /* host kendini dondurmasın */ }
+              else {
+                const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+                if(tEntry) tEntry[1].conn.send({type:'staff_freeze',on:!!data.on});
+              }
+              addServerLog('op',fromName+(data.on?' froze ':' unfroze ')+target+'.');
+            } else if(act==='heal_feed'){
+              if(target===myName){ HealthManager.reset(); hunger=20; updateBars(); }
+              else {
+                const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+                if(tEntry) tEntry[1].conn.send({type:'staff_heal_feed'});
+              }
+              addServerLog('op',fromName+' healed & fed '+target+'.');
+            } else if(act==='inv_request'){
+              if(target===myName){
+                conn.send({type:'staff_inv_data',target:target,slots:hotbarSlots.slice()});
+              } else {
+                const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+                if(tEntry) tEntry[1].conn.send({type:'staff_inv_request',requesterId:pid});
+              }
+            } else if(act==='inv_clear'){
+              if(target===myName){ hotbarSlots=[-1,-1,-1,-1,-1,-1,-1,-1,-1]; if(typeof initHotbar==='function') initHotbar(); }
+              else {
+                const tEntry=Object.entries(hostConns).find(([,p])=>p.name===target);
+                if(tEntry) tEntry[1].conn.send({type:'staff_inv_clear'});
+              }
+              addServerLog('op',fromName+' cleared inventory of '+target+'.');
+            } else if(act==='server_fly_all' || act==='server_god_all'){
+              const flagType = act==='server_fly_all' ? 'staff_fly_all' : 'staff_god_all';
+              Object.values(hostConns).forEach(({conn:c})=>{if(c.open) c.send({type:flagType,on:!!data.on});});
+              if(act==='server_fly_all'){ window.__staffServerFlyAll = !!data.on; }
+              else { window.__staffServerGodAll = !!data.on; }
+              addServerLog('op',fromName+' set server-wide '+(act==='server_fly_all'?'fly':'god')+' to '+(!!data.on)+'.');
+            }
+          }
+          else if(data.type==='staff_inv_data'){
+            // Bir guest'in envanter yanıtı host'a geldi; host bunu isteyen tarafa aktarır
+            if(!connTokens.has(pid)) return;
+            const requesterId = data.requesterId;
+            if(requesterId==='host'){ window.__staffInvResult={target:connTokens.get(pid),slots:data.slots}; }
+            else if(hostConns[requesterId]&&hostConns[requesterId].conn.open){
+              hostConns[requesterId].conn.send({type:'staff_inv_data',target:connTokens.get(pid),slots:data.slots});
+            }
+          }
         });
         conn.on('close',()=>{
           const pid=conn.peer,nm=connTokens.get(pid)||hostConns[pid]?.name||'Oyuncu';
@@ -10863,6 +10936,33 @@ document.getElementById('btn-do-join').addEventListener('click',()=>{
         if(data.target === myPeer.id) {
             CombatManager.applyLocalDamage(data.dmg, new THREE.Vector3(data.fromPos.x, data.fromPos.y, data.fromPos.z));
         }
+      }
+      // ── STAFF PANEL: host'tan gelen ışınlanma/dondurma/heal-feed/inventory/server-wide ──
+      else if(data.type==='staff_tp'){
+        camera.position.set(Number(data.x), Number(data.y), Number(data.z));
+      }
+      else if(data.type==='staff_freeze'){
+        window.__staffFrozen = !!data.on;
+      }
+      else if(data.type==='staff_heal_feed'){
+        HealthManager.reset(); hunger=20; updateBars();
+      }
+      else if(data.type==='staff_inv_request'){
+        // Host benim envanterimi istiyor; yanıtı host'a geri gönder
+        if(guestConn && guestConn.open) guestConn.send({type:'staff_inv_data', requesterId:data.requesterId, slots:hotbarSlots.slice()});
+      }
+      else if(data.type==='staff_inv_clear'){
+        hotbarSlots=[-1,-1,-1,-1,-1,-1,-1,-1,-1];
+        if(typeof initHotbar==='function') initHotbar();
+      }
+      else if(data.type==='staff_inv_data'){
+        window.__staffInvResult = {target:data.target, slots:data.slots};
+      }
+      else if(data.type==='staff_fly_all'){
+        window.__staffServerFlyAll = !!data.on;
+      }
+      else if(data.type==='staff_god_all'){
+        window.__staffServerGodAll = !!data.on;
       }
     });
     guestConn.on('close',()=>{
@@ -12866,6 +12966,8 @@ function animate(){
       matLava.emissiveIntensity = 0.40 + Math.sin(now * 0.0025) * 0.08;
       matLava.map.needsUpdate=true;
     }
+    // ─── Hava durumu efekti (yağmur/fırtına parçacıkları + gökyüzü kararması) ──
+    if(window.WeatherFX) window.WeatherFX.update(dt);
     // ───────────────────────────────────────────────────────────────────────
     SuffocationManager.checkSuffocation();
     if(isBreaking) tickBreaking(dt);
@@ -13915,6 +14017,22 @@ const RANK_ORDER = {
   'veteran': 13,
   'beta tester': 14,
 };
+
+// ── Staff Panel rütbe doğrulama (host tarafı otorite) ───────────────────
+// Guest tarafındaki UI kontrolü atlatılabileceği için host, staff_action
+// mesajı gelen her guest'in rütbesini burada TEKRAR doğrular. rank ham
+// metin olabilir ("Owner", "Owner / Developer" vb.), RANK_ORDER'daki tam
+// eşleşme olmazsa anahtar kelime taramasına düşer.
+var STAFF_RANK_KEYWORDS = ['owner','admin','developer','dev','mod','helper','staff'];
+function isStaffPlusRank(rank){
+  if(typeof rank !== 'string' || !rank.trim()) return false;
+  var r = rank.trim().toLowerCase();
+  if(RANK_ORDER.hasOwnProperty(r) && RANK_ORDER[r] <= 5) return true;
+  for(var i=0;i<STAFF_RANK_KEYWORDS.length;i++){
+    if(r.indexOf(STAFF_RANK_KEYWORDS[i]) > -1) return true;
+  }
+  return false;
+}
 
 // Host ve admin ikonlarını preload et
 let _hostImgPreloaded = false;
@@ -21734,6 +21852,116 @@ const DayNightCycle = {
 };
 window.DayNightCycle = DayNightCycle;
 
+// ═══════════════════════════════════════════════════════════════════════
+// HAVA DURUMU EFEKTİ (WeatherFX) — Manage Server > Weather ayarının
+// (serverWeather: 'clear'|'rain'|'storm') gerçek bir görsel karşılığı.
+// Eskiden serverWeather sadece bir state değişkeniydi, ağda paylaşılıyordu
+// ama hiçbir görsel/işitsel efekte bağlı değildi. Bu obje, kameranın
+// etrafında sürekli düşen parçacıklarla yağmur/fırtına hissi verir; ayrıca
+// gökyüzünü ve sis yoğunluğunu karartarak havayı hissettirir. DayNightCycle
+// scene.background/fog.color'ı her frame kendi hesabına göre set ettiği
+// için, WeatherFX kendi kararmasını animate() içinde DayNightCycle.update()
+// çağrısından SONRA uyguluyor (böylece üzerine yazılmıyor).
+const WeatherFX = {
+  points: null,
+  geometry: null,
+  velocities: null,
+  count: 0,
+  currentMode: 'clear', // uygulanmış son mod (serverWeather değişince yeniden kurulur)
+  VOLUME: 40,   // kamera etrafında parçacıkların yayıldığı yatay yarı-genişlik
+  HEIGHT: 30,   // parçacıkların düştüğü dikey aralık (kameranın üstünden başlar)
+
+  _ensurePoints(count){
+    if(this.points && this.count === count) return;
+    if(this.points){ scene.remove(this.points); this.geometry.dispose(); this.points.material.dispose(); }
+    this.count = count;
+    const positions = new Float32Array(count*3);
+    this.velocities = new Float32Array(count);
+    for(let i=0;i<count;i++){
+      positions[i*3+0] = (Math.random()*2-1)*this.VOLUME;
+      positions[i*3+1] = Math.random()*this.HEIGHT;
+      positions[i*3+2] = (Math.random()*2-1)*this.VOLUME;
+      this.velocities[i] = 18 + Math.random()*8; // düşüş hızı (birim/sn)
+    }
+    this.geometry = new THREE.BufferGeometry();
+    this.geometry.setAttribute('position', new THREE.BufferAttribute(positions,3));
+    const mat = new THREE.PointsMaterial({
+      color: 0xaecbe8, size: 0.14, transparent: true, opacity: 0.55,
+      depthWrite:false, fog:false
+    });
+    this.points = new THREE.Points(this.geometry, mat);
+    this.points.renderOrder = 5;
+    this.points.frustumCulled = false;
+    scene.add(this.points);
+  },
+
+  _teardown(){
+    if(this.points){
+      scene.remove(this.points);
+      this.geometry.dispose();
+      this.points.material.dispose();
+      this.points = null;
+      this.geometry = null;
+      this.velocities = null;
+      this.count = 0;
+    }
+  },
+
+  applyMode(mode){
+    this.currentMode = mode;
+    if(mode === 'clear'){
+      this._teardown();
+      return;
+    }
+    const count = mode === 'storm' ? 2200 : 900;
+    this._ensurePoints(count);
+    this.points.material.opacity = mode === 'storm' ? 0.75 : 0.5;
+    this.points.material.size = mode === 'storm' ? 0.16 : 0.12;
+  },
+
+  update(dt){
+    // serverWeather tanımsız olabilir (SP/menü ekranı vb.) — güvenli oku.
+    const mode = (typeof serverWeather !== 'undefined' && serverWeather) ? serverWeather : 'clear';
+    if(mode !== this.currentMode) this.applyMode(mode);
+    if(mode === 'clear' || !this.points) return;
+
+    const pos = this.geometry.attributes.position.array;
+    const speedMult = mode === 'storm' ? 1.6 : 1.0;
+    for(let i=0;i<this.count;i++){
+      pos[i*3+1] -= this.velocities[i]*speedMult*dt;
+      if(pos[i*3+1] < -2){
+        pos[i*3+0] = camera.position.x + (Math.random()*2-1)*this.VOLUME;
+        pos[i*3+1] = camera.position.y + this.HEIGHT*0.6 + Math.random()*this.HEIGHT*0.4;
+        pos[i*3+2] = camera.position.z + (Math.random()*2-1)*this.VOLUME;
+      }
+    }
+    this.geometry.attributes.position.needsUpdate = true;
+    // Parçacık kutusu kamerayla birlikte "sürüklenir" (sonsuz yağmur hissi):
+    // konumları mutlak dünya koordinatında tutuyoruz, kutunun merkezini de
+    // kameraya göre periyodik olarak yeniden hizalıyoruz.
+    this.points.position.set(0,0,0);
+
+    // Gökyüzü/sis kararması: DayNightCycle'ın bu frame yazdığı rengin üzerine,
+    // hava durumuna göre griye doğru bir miktar lerp uygula.
+    if(scene.background && scene.background.isColor){
+      const stormFactor = mode === 'storm' ? 0.55 : 0.28;
+      const greyCol = new THREE.Color(0x5a6470);
+      scene.background.lerp(greyCol, stormFactor);
+      if(scene.fog) scene.fog.color.copy(scene.background);
+    }
+    if(scene.fog && scene.fog.isFogExp2){
+      // scene.fog.density render distance'a göre dinamik hesaplanır
+      // (applyRenderDist → window.baseFogDensity). Onu ezmemek için, temiz
+      // havadaki baseline yoğunluktan çarparak hesaplıyoruz.
+      const base = (typeof window.baseFogDensity === 'number') ? window.baseFogDensity : scene.fog.density;
+      const mult = mode === 'storm' ? 2.2 : 1.5;
+      scene.fog.density = base * mult;
+    }
+  }
+};
+window.WeatherFX = WeatherFX;
+
+
 
 // ═══════════════════════════════════════════════════════════════════════
 // 4. YATAK (BED) SİSTEMİ — sadece Nightmare modunda envanterde görünür
@@ -23164,6 +23392,7 @@ window.ArrowManager = ArrowManager;
     <div class="sp-tabs">
       <button class="sp-tab active" data-sp-tab="self">SELF</button>
       <button class="sp-tab" data-sp-tab="players">PLAYERS</button>
+      <button class="sp-tab" data-sp-tab="server">SERVER</button>
       <button class="sp-tab" data-sp-tab="logs" id="sp-tab-logs-label">📜 LOGS</button>
     </div>
     <div class="sp-body">
@@ -23232,7 +23461,75 @@ window.ArrowManager = ArrowManager;
         <div class="sp-log-list" id="sp-log-list"></div>
         <button class="sp-btn sp-btn-danger sp-log-clear-btn" id="sp-log-clear-btn">🗑 CLEAR LOG</button>
       </div>
+
+      <div class="sp-section" id="sp-section-server">
+        <div class="sp-row">
+          <div>
+            <div class="sp-label">Fly (Everyone)</div>
+            <div class="sp-sublabel">Grants flight to every player on the server at once</div>
+          </div>
+          <div class="sp-toggle" id="sp-server-fly-toggle"></div>
+        </div>
+        <div class="sp-row">
+          <div>
+            <div class="sp-label">God Mode (Everyone)</div>
+            <div class="sp-sublabel">Makes every player immune to damage at once</div>
+          </div>
+          <div class="sp-toggle" id="sp-server-god-toggle"></div>
+        </div>
+        <div class="sp-row">
+          <div>
+            <div class="sp-label">Cheats</div>
+            <div class="sp-sublabel">Allow commands like /mode, /summon for non-staff players</div>
+          </div>
+          <div class="sp-toggle" id="sp-server-cheats-toggle"></div>
+        </div>
+        <div class="sp-row">
+          <div>
+            <div class="sp-label">PvP</div>
+            <div class="sp-sublabel">Allow players to damage each other</div>
+          </div>
+          <div class="sp-toggle" id="sp-server-pvp-toggle"></div>
+        </div>
+        <div class="sp-row">
+          <div class="sp-label">Difficulty</div>
+          <select class="sp-select" id="sp-server-difficulty-select">
+            <option value="peaceful">😌 Peaceful</option>
+            <option value="easy">🙂 Easy</option>
+            <option value="normal">😐 Normal</option>
+            <option value="hard">💀 Hard</option>
+          </select>
+        </div>
+        <div class="sp-row">
+          <div class="sp-label">Time</div>
+          <select class="sp-select" id="sp-server-time-select">
+            <option value="none">🔄 Cycle</option>
+            <option value="day">☀ Always Day</option>
+            <option value="night">🌙 Always Night</option>
+          </select>
+        </div>
+        <div class="sp-row">
+          <div class="sp-label">Weather</div>
+          <select class="sp-select" id="sp-server-weather-select">
+            <option value="clear">☀ Clear</option>
+            <option value="rain">🌧 Rain</option>
+            <option value="storm">⛈ Storm</option>
+          </select>
+        </div>
+      </div>
     </div>
+  </div>
+</div>
+
+<!-- Envanter görüntüleme popup'ı -->
+<div id="staff-inv-overlay" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);display:none;justify-content:center;align-items:center;z-index:99999;font-family:monospace;">
+  <div style="width:min(90vw,360px);max-height:80vh;overflow-y:auto;background:linear-gradient(180deg,#241a38,#150e22);border:1px solid rgba(180,140,255,.4);border-radius:12px;padding:16px;box-shadow:0 10px 40px rgba(0,0,0,.7);">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+      <h3 style="margin:0;font-size:13px;color:#e6d6ff;" id="staff-inv-title">Inventory</h3>
+      <button id="staff-inv-close-btn" style="width:24px;height:24px;border-radius:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.18);color:#fff;font-size:12px;cursor:pointer;">✕</button>
+    </div>
+    <div id="staff-inv-slots" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:10px;"></div>
+    <button class="sp-btn sp-btn-danger" id="staff-inv-clear-btn" style="width:100%;">🗑 CLEAR INVENTORY</button>
   </div>
 </div>
 
@@ -23272,6 +23569,61 @@ window.ArrowManager = ArrowManager;
       (0, eval)(name + ' = window.__spTmpVal;');
       return true;
     }catch(e){ console.warn('[StaffPanel] write failed:', name, e); return false; }
+  }
+
+  // ── Staff action gönderme: teleport/freeze/heal/inventory/server-wide ──
+  // Host isem doğrudan hostConns üzerinden işlemi kendim yürütüyorum (host
+  // otorite olduğu için ağ mesajına gerek yok). Guest isem host'a
+  // 'staff_action' mesajı gönderiyorum; host kendi tarafında rütbemi TEKRAR
+  // doğruluyor (isStaffPlusRank), böylece client tarafı atlatılamaz.
+  function sendStaffAction(action, target, extra){
+    var payload = Object.assign({type:'staff_action', action:action, target:target}, extra||{});
+    safeCall(function(){
+      var amHostVal = g('amHost');
+      if(amHostVal){
+        applyStaffActionAsHost(action, target, extra||{});
+      } else {
+        var gc = g('guestConn');
+        if(gc && gc.open) gc.send(payload);
+      }
+    });
+  }
+  // Host kendisi staff ise (kendi paneli), ağ turuna gerek kalmadan aynı
+  // mantığı yerel olarak da uygular — host handler'daki 'staff_action'
+  // bloğuyla birebir aynı davranışı üretir (bkz. conn.on('data') / staff_action).
+  function applyStaffActionAsHost(action, target, extra){
+    var myNameVal = g('myName');
+    var hostConnsVal = g('hostConns') || {};
+    var cameraVal = g('camera');
+    function findConn(name){
+      var entry = Object.entries(hostConnsVal).find(function(e){ return e[1].name === name; });
+      return entry ? entry[1] : null;
+    }
+    if(action==='tp_to'){
+      if(target===myNameVal) return;
+      var t = findConn(target);
+      if(t && cameraVal) cameraVal.position.set(t.x, t.y, t.z);
+    } else if(action==='tp_here'){
+      var t2 = findConn(target);
+      if(t2 && cameraVal && t2.conn.open) t2.conn.send({type:'staff_tp', x:cameraVal.position.x, y:cameraVal.position.y, z:cameraVal.position.z});
+    } else if(action==='freeze'){
+      var t3 = findConn(target);
+      if(t3 && t3.conn.open) t3.conn.send({type:'staff_freeze', on:!!extra.on});
+    } else if(action==='heal_feed'){
+      var t4 = findConn(target);
+      if(t4 && t4.conn.open) t4.conn.send({type:'staff_heal_feed'});
+    } else if(action==='inv_request'){
+      var t5 = findConn(target);
+      if(t5 && t5.conn.open) t5.conn.send({type:'staff_inv_request', requesterId:'host'});
+    } else if(action==='inv_clear'){
+      var t6 = findConn(target);
+      if(t6 && t6.conn.open) t6.conn.send({type:'staff_inv_clear'});
+    } else if(action==='server_fly_all' || action==='server_god_all'){
+      var flagType = action==='server_fly_all' ? 'staff_fly_all' : 'staff_god_all';
+      Object.values(hostConnsVal).forEach(function(p){ if(p.conn.open) p.conn.send({type:flagType, on:!!extra.on}); });
+      if(action==='server_fly_all') window.__staffServerFlyAll = !!extra.on;
+      else window.__staffServerGodAll = !!extra.on;
+    }
   }
 
   // ── Helper+ rütbe kontrolü ───────────────────────────────────────────────
@@ -23336,6 +23688,7 @@ window.ArrowManager = ArrowManager;
       document.getElementById('sp-section-'+tab).classList.add('active');
       if(tab==='players') renderPlayerList();
       if(tab==='logs') renderStaffLogs();
+      if(tab==='server') syncServerTabFromEngine();
     });
   });
 
@@ -23555,6 +23908,27 @@ window.ArrowManager = ArrowManager;
     requestAnimationFrame(tick);
   })();
 
+  // ── FREEZE (bu istemci başkası tarafından donduruldu) ────────────────────
+  // Host'tan 'staff_freeze' geldiğinde window.__staffFrozen set edilir
+  // (bkz. guest data handler). Hareket kodunun içine girmeden, her karede
+  // kamerayı dondurma anındaki son konumda sabit tutuyoruz — aynı hız
+  // çarpanı hook'unun kullandığı "dıştan pozisyon düzeltme" yöntemi.
+  (function hookFrozenState(){
+    var frozenPos = null;
+    function tick(){
+      var camera = g('camera');
+      if(window.__staffFrozen && camera){
+        if(!frozenPos) frozenPos = {x:camera.position.x, y:camera.position.y, z:camera.position.z};
+        camera.position.set(frozenPos.x, frozenPos.y, frozenPos.z);
+        s('velY', 0);
+      } else {
+        frozenPos = null;
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+
   // ── SUMMON ───────────────────────────────────────────────────────────────
   // [FIX] Eskiden processCmd('summon '+tür) çağrılıyordu; bunun 2 sorunu vardı:
   //  1) processCmd'deki /summon komutu cheatsEnabled/myOp kontrolüne takılıyordu
@@ -23636,6 +24010,12 @@ window.ArrowManager = ArrowManager;
     });
   });
 
+  // Freeze durumu her renderPlayerList çağrısında yeniden oluşturulan 'players'
+  // dizisine bağlı kalamayacağı için (o diziler geçici), kalıcı bir Map'te
+  // tutuyoruz — panel açık kaldığı sürece FREEZE/UNFREEZE butonu doğru metni
+  // gösterir.
+  var staffFrozenState = new Map();
+
   // ── PLAYERS: kill / kick / ban ──────────────────────────────────────────
   function renderPlayerList(){
     playerListEl.innerHTML = '';
@@ -23689,6 +24069,56 @@ window.ArrowManager = ArrowManager;
       actions.appendChild(mkBtn('KILL','warn','kill'));
       actions.appendChild(mkBtn('KICK','warn','kick'));
       actions.appendChild(mkBtn('BAN','danger','ban'));
+
+      // ── TELEPORT: bana ışınla / oyuncuyu bana ışınlat ────────────────
+      var tpToBtn = document.createElement('button');
+      tpToBtn.className = 'sp-mini-btn';
+      tpToBtn.textContent = '📍 TP TO';
+      tpToBtn.title = 'Teleport to '+p.name;
+      tpToBtn.addEventListener('click', function(){
+        sendStaffAction('tp_to', p.name);
+      });
+      actions.appendChild(tpToBtn);
+
+      var tpHereBtn = document.createElement('button');
+      tpHereBtn.className = 'sp-mini-btn';
+      tpHereBtn.textContent = '📍 TP HERE';
+      tpHereBtn.title = 'Teleport '+p.name+' to me';
+      tpHereBtn.addEventListener('click', function(){
+        sendStaffAction('tp_here', p.name);
+      });
+      actions.appendChild(tpHereBtn);
+
+      // ── FREEZE: oyuncuyu yerinde dondur ──────────────────────────────
+      var freezeBtn = document.createElement('button');
+      freezeBtn.className = 'sp-mini-btn warn';
+      var isFrozenNow = staffFrozenState.get(p.name) || false;
+      freezeBtn.textContent = isFrozenNow ? '🧊 UNFREEZE' : '🧊 FREEZE';
+      freezeBtn.addEventListener('click', function(){
+        var newState = !staffFrozenState.get(p.name);
+        staffFrozenState.set(p.name, newState);
+        sendStaffAction('freeze', p.name, {on: newState});
+        setTimeout(renderPlayerList, 200);
+      });
+      actions.appendChild(freezeBtn);
+
+      // ── HEAL & FEED: can + açlık doldur ──────────────────────────────
+      var healBtn = document.createElement('button');
+      healBtn.className = 'sp-mini-btn';
+      healBtn.textContent = '❤ HEAL & FEED';
+      healBtn.addEventListener('click', function(){
+        sendStaffAction('heal_feed', p.name);
+      });
+      actions.appendChild(healBtn);
+
+      // ── INVENTORY: görüntüle / temizle ───────────────────────────────
+      var invViewBtn = document.createElement('button');
+      invViewBtn.className = 'sp-mini-btn';
+      invViewBtn.textContent = '🎒 INVENTORY';
+      invViewBtn.addEventListener('click', function(){
+        openInventoryViewer(p.name);
+      });
+      actions.appendChild(invViewBtn);
 
       // ── WARN: sebep sorup kalıcı geçmişe yazan komut ─────────────────
       var warnBtn = document.createElement('button');
@@ -23779,6 +24209,187 @@ window.ArrowManager = ArrowManager;
   // Dropdown dışına tıklanınca kapansın (tek seferlik global listener)
   document.addEventListener('click', function(){
     document.querySelectorAll('.sp-mute-dropdown.open').forEach(function(dd){ dd.classList.remove('open'); });
+  });
+
+  // ── SERVER SEKMESİ: Fly/God (herkese), Cheats, PvP, Difficulty, Time, Weather ──
+  var serverFlyToggle = document.getElementById('sp-server-fly-toggle');
+  var serverGodToggle = document.getElementById('sp-server-god-toggle');
+  var serverCheatsToggle = document.getElementById('sp-server-cheats-toggle');
+  var serverPvpToggle = document.getElementById('sp-server-pvp-toggle');
+  var serverDifficultySelect = document.getElementById('sp-server-difficulty-select');
+  var serverTimeSelect = document.getElementById('sp-server-time-select');
+  var serverWeatherSelect = document.getElementById('sp-server-weather-select');
+
+  var serverFlyOn = false, serverGodOn = false;
+  serverFlyToggle.addEventListener('click', function(){
+    serverFlyOn = !serverFlyOn;
+    serverFlyToggle.classList.toggle('on', serverFlyOn);
+    sendStaffAction('server_fly_all', null, {on: serverFlyOn});
+    // Kendi ekranımda da anında uygula (host isem mesaj kendime dönmüyor)
+    window.__staffServerFlyAll = serverFlyOn;
+  });
+  serverGodToggle.addEventListener('click', function(){
+    serverGodOn = !serverGodOn;
+    serverGodToggle.classList.toggle('on', serverGodOn);
+    sendStaffAction('server_god_all', null, {on: serverGodOn});
+    window.__staffServerGodAll = serverGodOn;
+  });
+
+  // Server-wide Fly: her karede tüm oyuncularda (kendi istemcimde SADECE
+  // kendi kamerama uygulanabilir; diğer oyunculara etkisi guest tarafındaki
+  // staff_fly_all handler'ı üzerinden gerçekleşir — bkz. ana script guest
+  // data handler). Burada sadece KENDİ ekranımda flag açıksa fly'ı zorluyoruz.
+  (function hookServerFlyAll(){
+    function tick(){
+      if(window.__staffServerFlyAll){
+        var real = safe(function(){ return g('isFlying'); }, null);
+        if(real !== true) s('isFlying', true);
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
+  // Server-wide God: takeDamage sarmalayıcısı zaten godOn'u kontrol ediyor
+  // (bkz. setGod bloğu); server-wide flag açıkken de aynı korumayı sağlamak
+  // için o kontrolü genişletiyoruz — orijinal koşulu bulup yamıyoruz.
+  // (Bu IIFE'nin dışında setGod bloğunda tanımlı takeDamage sarmalayıcısı
+  // "godOn" değişkenini kapalı olarak (closure) kullanıyor; onu doğrudan
+  // değiştiremediğimiz için burada AYRI bir ikinci sarmalama katmanı ekliyoruz.)
+  (function hookServerGodAll(){
+    var hm = g('HealthManager');
+    if(!hm || typeof hm.takeDamage !== 'function' || hm.__staffServerGodWrapped) return;
+    hm.__staffServerGodWrapped = true;
+    var orig = hm.takeDamage;
+    hm.takeDamage = function(amount, source){
+      if(window.__staffServerGodAll && source !== 'void' && source !== 'worldborder'){
+        return; // hasarı tamamen iptal et
+      }
+      return orig.apply(this, arguments);
+    };
+  })();
+
+  serverCheatsToggle.addEventListener('click', function(){
+    var newVal = !serverCheatsToggle.classList.contains('on');
+    serverCheatsToggle.classList.toggle('on', newVal);
+    s('cheatsEnabled', newVal);
+  });
+  serverPvpToggle.addEventListener('click', function(){
+    var newVal = !serverPvpToggle.classList.contains('on');
+    serverPvpToggle.classList.toggle('on', newVal);
+    safeCall(function(){
+      s('serverPvpEnabled', newVal);
+      var hostConnsVal = g('hostConns');
+      if(hostConnsVal){
+        Object.values(hostConnsVal).forEach(function(p){ if(p.conn.open) p.conn.send({type:'server_pvp', enabled:newVal}); });
+      }
+    });
+  });
+  serverDifficultySelect.addEventListener('change', function(){
+    safeCall(function(){
+      var val = serverDifficultySelect.value;
+      s('serverDifficulty', val);
+      var hostConnsVal = g('hostConns');
+      if(hostConnsVal){
+        Object.values(hostConnsVal).forEach(function(p){ if(p.conn.open) p.conn.send({type:'server_difficulty', value:val}); });
+      }
+    });
+  });
+  serverTimeSelect.addEventListener('change', function(){
+    safeCall(function(){
+      var val = serverTimeSelect.value;
+      s('serverTimeLock', val);
+      var hostConnsVal = g('hostConns');
+      if(hostConnsVal){
+        Object.values(hostConnsVal).forEach(function(p){ if(p.conn.open) p.conn.send({type:'server_timelock', value:val}); });
+      }
+    });
+  });
+  serverWeatherSelect.addEventListener('change', function(){
+    safeCall(function(){
+      var val = serverWeatherSelect.value;
+      s('serverWeather', val);
+      var hostConnsVal = g('hostConns');
+      if(hostConnsVal){
+        Object.values(hostConnsVal).forEach(function(p){ if(p.conn.open) p.conn.send({type:'server_weather', value:val}); });
+      }
+    });
+  });
+  // SERVER sekmesi açıldığında mevcut dünya değerlerini göster
+  function syncServerTabFromEngine(){
+    safeCall(function(){
+      var cheats = g('cheatsEnabled');
+      if(typeof cheats === 'boolean') serverCheatsToggle.classList.toggle('on', cheats);
+      var pvp = g('serverPvpEnabled');
+      if(typeof pvp === 'boolean') serverPvpToggle.classList.toggle('on', pvp);
+      var diff = g('serverDifficulty');
+      if(typeof diff === 'string') serverDifficultySelect.value = diff;
+      var timeLock = g('serverTimeLock');
+      if(typeof timeLock === 'string') serverTimeSelect.value = timeLock;
+      var weather = g('serverWeather');
+      if(typeof weather === 'string') serverWeatherSelect.value = weather;
+    });
+  }
+
+  // ── INVENTORY VIEWER ─────────────────────────────────────────────────────
+  var invOverlay = document.getElementById('staff-inv-overlay');
+  var invTitle = document.getElementById('staff-inv-title');
+  var invSlotsEl = document.getElementById('staff-inv-slots');
+  var invClearBtn = document.getElementById('staff-inv-clear-btn');
+  var invCurrentTarget = null;
+  var invPollTimer = null;
+
+  function closeInventoryViewer(){
+    invOverlay.style.display = 'none';
+    invCurrentTarget = null;
+    if(invPollTimer){ clearInterval(invPollTimer); invPollTimer = null; }
+  }
+  document.getElementById('staff-inv-close-btn').addEventListener('click', closeInventoryViewer);
+  invOverlay.addEventListener('click', function(e){ if(e.target===invOverlay) closeInventoryViewer(); });
+
+  function renderInvSlots(slots){
+    invSlotsEl.innerHTML = '';
+    var blockDefs = safe(function(){ return g('BLOCK_DEFS'); }, null);
+    var langDataVal = safe(function(){ return g('langData'); }, null);
+    var curLang = safe(function(){ return g('currentLang'); }, 'en');
+    var names = (langDataVal && langDataVal[curLang] && langDataVal[curLang].bkNames) || null;
+    (slots||[]).forEach(function(blockIdx){
+      var cell = document.createElement('div');
+      cell.style.cssText = 'background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);border-radius:5px;padding:6px 4px;font-size:9px;color:#e6d6ff;text-align:center;min-height:32px;display:flex;align-items:center;justify-content:center;';
+      if(blockIdx===undefined || blockIdx===null || blockIdx<0){
+        cell.textContent = '—';
+        cell.style.opacity = '0.35';
+      } else {
+        var label = (names && names[blockIdx]) ? names[blockIdx] : ('#'+blockIdx);
+        cell.textContent = label;
+      }
+      invSlotsEl.appendChild(cell);
+    });
+  }
+
+  window.openInventoryViewer = function(targetName){
+    invCurrentTarget = targetName;
+    invTitle.textContent = 'Inventory — ' + targetName;
+    invSlotsEl.innerHTML = '<div style="grid-column:1/-1;text-align:center;color:rgba(255,255,255,.4);font-size:10px;padding:10px 0;">Loading...</div>';
+    invOverlay.style.display = 'flex';
+    window.__staffInvResult = null;
+    sendStaffAction('inv_request', targetName);
+    if(invPollTimer) clearInterval(invPollTimer);
+    invPollTimer = setInterval(function(){
+      var result = window.__staffInvResult;
+      if(result && result.target === targetName){
+        renderInvSlots(result.slots);
+        clearInterval(invPollTimer);
+        invPollTimer = null;
+      }
+    }, 200);
+  };
+
+  invClearBtn.addEventListener('click', function(){
+    if(!invCurrentTarget) return;
+    sendStaffAction('inv_clear', invCurrentTarget);
+    setTimeout(function(){
+      if(invCurrentTarget) window.openInventoryViewer(invCurrentTarget);
+    }, 300);
   });
 
   // ── Görünürlük: sadece Helper+ rütbeli kişide FAB görünür ───────────────
