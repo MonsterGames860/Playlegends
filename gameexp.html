@@ -22607,7 +22607,7 @@ window.ArrowManager = ArrowManager;
     <div id="staff-panel-header">
       <div>
         <h3>🛡 STAFF PANEL</h3>
-        <div class="sp-sub">Her zaman erişilebilir</div>
+        <div class="sp-sub">Always accessible</div>
       </div>
       <button class="sp-close-btn" id="sp-close-btn">✕</button>
     </div>
@@ -22620,14 +22620,14 @@ window.ArrowManager = ArrowManager;
         <div class="sp-row">
           <div>
             <div class="sp-label">Vanish</div>
-            <div class="sp-sublabel">Katılış/ayrılış mesajın gizlenir, TAB listesinde görünmezsin</div>
+            <div class="sp-sublabel">Hides your join/leave messages and removes you from the TAB list</div>
           </div>
           <div class="sp-toggle" id="sp-vanish-toggle"></div>
         </div>
         <div class="sp-row">
           <div>
             <div class="sp-label">Fly</div>
-            <div class="sp-sublabel">Yaratıcı moddaki gibi uçuş</div>
+            <div class="sp-sublabel">Flight, just like in Creative mode</div>
           </div>
           <div class="sp-toggle" id="sp-fly-toggle"></div>
         </div>
@@ -22657,6 +22657,10 @@ window.ArrowManager = ArrowManager;
               <option value="sheep">Sheep</option>
               <option value="cow">Cow</option>
               <option value="pig">Pig</option>
+              <option value="zombie">Zombie</option>
+              <option value="skeleton">Skeleton</option>
+              <option value="creeper">Creeper</option>
+              <option value="spider">Spider</option>
             </select>
             <button class="sp-btn" id="sp-summon-btn">SUMMON</button>
           </div>
@@ -22692,6 +22696,18 @@ window.ArrowManager = ArrowManager;
     try{
       return (0, eval)('typeof ' + name + " !== 'undefined' ? " + name + ' : undefined');
     }catch(e){ return undefined; }
+  }
+  // [FIX] Yazma erişimi: staff panel artık kritik alanlarda (fly, gamemode,
+  // summon) processCmd()'nin cheats/OP kontrolünden GEÇMİYOR — panel zaten
+  // kendi rütbe kontrolünü yapıyor (isStaffPlus), bu yüzden dünyada "Cheats"
+  // kapalı olsa bile bu paneldeki butonlar staff için her zaman çalışmalı.
+  // 's' ile motorun GERÇEK "let" değişkenine (window.xxx değil) yazıyoruz.
+  function s(name, value){
+    try{
+      window.__spTmpVal = value;
+      (0, eval)(name + ' = window.__spTmpVal;');
+      return true;
+    }catch(e){ console.warn('[StaffPanel] write failed:', name, e); return false; }
   }
 
   // ── Helper+ rütbe kontrolü ───────────────────────────────────────────────
@@ -22739,6 +22755,7 @@ window.ArrowManager = ArrowManager;
     renderPlayerList();
     var curMode = g('gameMode');
     if(curMode) modeSelect.value = curMode;
+    syncFlyFromEngine();
     safeCall(function(){ if(document.pointerLockElement) document.exitPointerLock(); });
   }
   function closePanel(){ overlay.classList.remove('active'); }
@@ -22807,28 +22824,80 @@ window.ArrowManager = ArrowManager;
       var d = g('langData') && g('currentLang') ? g('langData')[g('currentLang')] : null;
       var addChatFn = g('addChat');
       if(typeof addChatFn === 'function' && name){
-        addChatFn(null, name + (on ? (d && d.sysLeft ? d.sysLeft : ' sunucudan ayrıldı') : (d && d.sysJoin ? d.sysJoin : ' sunucuya katıldı')), true);
+        addChatFn(null, name + (on ? (d && d.sysLeft ? d.sysLeft : ' left the server') : (d && d.sysJoin ? d.sysJoin : ' joined the server')), true);
       }
     });
   }
   vanishToggle.addEventListener('click', function(){ setVanish(!vanishOn); });
 
   // ── FLY ──────────────────────────────────────────────────────────────────
+  // [FIX] Eskiden burada sadece `window.isFlying` set ediliyordu, ama oyun
+  // motoru `isFlying` diye AYRI bir global (window'a bağlı olmayan "let")
+  // değişken kullanıyor — window.isFlying'ı motor hiç okumuyordu, bu yüzden
+  // Fly görsel olarak "açık" görünse de hiçbir etkisi olmuyordu ve normal
+  // yerçekimi/düşme fiziği aynen devam ediyordu (kullanıcı raporundaki
+  // "yüksekten düşünce otomatik zıplatma" hissi de buradan geliyordu: fly
+  // motor tarafında hiç açılmadığı için oyuncu boşlukta "düşüyor", sonra
+  // zemine value bulunca normal iniş/knockback fiziği tetikleniyordu).
+  // Artık gerçek `isFlying` değişkenine yazıyoruz ve fly açılırken/kapanırken
+  // düşme durumunu (velY, grounded, fallStartY) da temizliyoruz ki düşme
+  // hasarı/knockback hiç tetiklenmesin.
   function setFly(on){
     flyOn = !!on;
     flyToggle.classList.toggle('on', flyOn);
     safeCall(function(){
-      window.isFlying = flyOn;
-      if(flyOn) window.velY = 0;
+      s('isFlying', flyOn);
+      window.isFlying = flyOn; // geriye dönük uyumluluk için de yazıyoruz
+      s('velY', 0);
+      if(flyOn){
+        s('grounded', false);
+        s('fallStartY', null); // düşüş mesafesi sıfırlanır → fly kapanınca ani hasar/knockback olmaz
+      }
     });
   }
   flyToggle.addEventListener('click', function(){ setFly(!flyOn); });
+  // Panel her açıldığında motorun GERÇEK isFlying durumunu göster (dış
+  // etkenlerle -ör. çift-space ile native fly- değişmiş olabilir).
+  function syncFlyFromEngine(){
+    var real = safe(function(){ return g('isFlying'); }, null);
+    if(typeof real === 'boolean' && real !== flyOn){
+      flyOn = real;
+      flyToggle.classList.toggle('on', flyOn);
+    }
+  }
+  // Staff panel'den Fly açıldığında, ölüm/mod değişimi/vs. gibi başka kod
+  // yolları isFlying'ı tekrar false'a çekebiliyor (bkz. setGameMode,
+  // DeathManager.triggerDeath). Oyunun kendi spectator sistemi de aynı
+  // sorunu "her karede isFlying=true zorla" yaklaşımıyla çözüyor — panel
+  // Fly'ı için de aynı deseni kullanıyoruz, böylece toggle gerçekten kalıcı
+  // ve güvenilir çalışır.
+  (function holdFlyEachFrame(){
+    function tick(){
+      if(flyOn){
+        var real = safe(function(){ return g('isFlying'); }, null);
+        if(real !== true) s('isFlying', true);
+      }
+      requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  })();
 
   // ── GAME MODE ────────────────────────────────────────────────────────────
+  // [FIX] Artık processCmd('mode ...') ÇAĞIRMIYORUZ. processCmd içindeki
+  // /mode komutu "cheatsEnabled || myOp" şartını arıyor; dünya "Cheats: Off"
+  // ile kurulmuşsa ve oyuncu (SP host'ta olsa bile) myOp=true değilse komut
+  // "[Server]: Cheats are disabled!" diyerek hiçbir şey yapmadan reddediliyordu.
+  // Staff panel zaten kendi rütbe kontrolünü (isStaffPlus) yapıyor, o yüzden
+  // motorun setGameMode() fonksiyonunu doğrudan çağırıyoruz — cheats açık/kapalı
+  // fark etmeksizin staff her zaman mod değiştirebilir.
   modeSelect.addEventListener('change', function(){
     safeCall(function(){
-      var pc = g('processCmd');
-      if(typeof pc === 'function') pc('mode '+modeSelect.value);
+      var sgm = g('setGameMode');
+      if(typeof sgm === 'function') sgm(modeSelect.value);
+      else s('gameMode', modeSelect.value); // setGameMode bulunamazsa son çare
+      // setGameMode creative dışına geçince isFlying'ı false yapıyor; staff
+      // Fly'ı açık tutmak isteyebilir, o yüzden panel durumunu senkronla.
+      syncFlyFromEngine();
     });
   });
 
@@ -22862,10 +22931,58 @@ window.ArrowManager = ArrowManager;
   })();
 
   // ── SUMMON ───────────────────────────────────────────────────────────────
+  // [FIX] Eskiden processCmd('summon '+tür) çağrılıyordu; bunun 2 sorunu vardı:
+  //  1) processCmd'deki /summon komutu cheatsEnabled/myOp kontrolüne takılıyordu
+  //     (dünya "Cheats: Off" ise staff bile spawnlayamıyordu).
+  //  2) Motorun vanilla /summon komutu sadece hayvanları (sheep/cow/pig)
+  //     tanıyordu — zombie/skeleton/creeper/spider oyunun AYRI bir sistemi olan
+  //     MobManager.spawnMobAt() ile spawn ediliyor, processCmd'nin hiç haberi yok.
+  // Artık türe göre doğru fonksiyonu DOĞRUDAN çağırıyoruz, cheats kontrolünü
+  // bypass ediyoruz (staff rütbesi zaten panelin kendi isStaffPlus kontrolünde).
+  var ANIMAL_TYPES = {sheep:0, cow:1, pig:2};
+  var MOB_TYPES = {zombie:1, skeleton:1, creeper:1, spider:1};
   summonBtn.addEventListener('click', function(){
     safeCall(function(){
-      var pc = g('processCmd');
-      if(typeof pc === 'function') pc('summon '+summonSelect.value);
+      var type = summonSelect.value;
+      var camPos = safe(function(){ return g('camera').position; }, null);
+      if(!camPos) return;
+      if(ANIMAL_TYPES.hasOwnProperty(type)){
+        var spawnAnimalFn = g('spawnAnimal');
+        if(typeof spawnAnimalFn === 'function'){
+          // spawnAnimal, chunk henüz üretilmemişse null döner — /summon komutu
+          // gibi burada da önce chunk'ı garanti ediyoruz.
+          safeCall(function(){
+            var getChunkAtFn = g('getChunkAt'), genChunkFn = g('genChunk'), CS = g('CS');
+            if(typeof getChunkAtFn === 'function'){
+              var chunk = getChunkAtFn(camPos.x, camPos.z);
+              if((!chunk || !chunk.blocks) && typeof genChunkFn === 'function' && CS){
+                genChunkFn(Math.floor(camPos.x/CS), Math.floor(camPos.z/CS));
+              }
+            }
+          });
+          spawnAnimalFn(camPos.x, camPos.z, ANIMAL_TYPES[type]);
+        }
+      } else if(MOB_TYPES.hasOwnProperty(type)){
+        var mm = window.MobManager;
+        if(mm && typeof mm.spawnMobAt === 'function'){
+          // Oyuncunun üstüne spawn olmasın diye MobManager kendi içinde
+          // 6 blokluk bir minimum mesafe kontrolü yapıyor; tam ayak
+          // noktasına gönderirsek reddedebilir, o yüzden biraz öteye,
+          // baktığı yöne doğru spawn noktası hesaplıyoruz.
+          var camObj = g('camera');
+          var fwd = null;
+          safeCall(function(){
+            fwd = new THREE.Vector3(0,0,-1).applyQuaternion(camObj.quaternion);
+          });
+          var ox = camPos.x + (fwd ? fwd.x*8 : 8);
+          var oz = camPos.z + (fwd ? fwd.z*8 : 0);
+          var mob = mm.spawnMobAt(type, ox, oz);
+          if(!mob){
+            // Çok yakınsa/uygun zemin yoksa biraz daha uzağı dene
+            mob = mm.spawnMobAt(type, camPos.x + 10, camPos.z + 10);
+          }
+        }
+      }
     });
   });
 
@@ -22883,7 +23000,7 @@ window.ArrowManager = ArrowManager;
     }
     players = players.filter(function(p){ return p.name && p.name !== myName; });
     if(!players.length){
-      playerListEl.innerHTML = '<div class="sp-empty-msg">Sunucuda başka oyuncu yok.</div>';
+      playerListEl.innerHTML = '<div class="sp-empty-msg">No other players on the server.</div>';
       return;
     }
     players.forEach(function(p){
