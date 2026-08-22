@@ -21969,8 +21969,18 @@ const MobManager = {
   },
 
   update(dt){
-    if(!window.nightmareMode) return;
-    this.trySpawnWave(dt);
+    // [FIX] Eskiden bu fonksiyon SADECE window.nightmareMode açıkken çalışıyordu.
+    // Bu yüzden staff panelden (veya /summon npc dışı bir yoldan) spawn edilen
+    // zombie/skeleton/creeper/spider normal Survival/Creative modda tamamen
+    // dondurulmuş kalıyordu: AI yok, yürüme animasyonu yok, yerçekimi/zemine
+    // oturma yok (spawn anındaki Y'de asılı kalabiliyordu) — kullanıcı raporu.
+    // Artık: eğer sahnede en az bir spawn edilmiş mob varsa (this.mobs.length),
+    // AI/animasyon/fizik döngüsü HER ZAMAN çalışır. Sadece "gece doğal spawn
+    // dalgası" (trySpawnWave) hâlâ nightmareMode'a özel bir oyun mekaniği
+    // olarak kalıyor — o olmadan mob'lar kendiliğinden doğmaz, sadece staff
+    // panelden veya nightmareMode'dan gelenler güncellenir.
+    if(window.nightmareMode) this.trySpawnWave(dt);
+    if(!window.nightmareMode && this.mobs.length === 0) return;
 
     for(var i = this.mobs.length - 1; i >= 0; i--){
       var m = this.mobs[i];
@@ -22466,8 +22476,12 @@ window.ArrowManager = ArrowManager;
   var _origUpdateAnimals = window.updateAnimals;
   window.updateAnimals = function(dt){
     if(typeof _origUpdateAnimals === 'function') _origUpdateAnimals(dt);
-    if(window.nightmareMode){
-      DayNightCycle.update(dt);
+    // [FIX] Eskiden bu sarmalayıcı da nightmareMode'a bağlıydı, MobManager.update
+    // içindeki düzeltmeyi hiçe sayıp fonksiyonu hiç çağırmıyordu. Artık nightmareMode
+    // açıkken VEYA sahnede spawn edilmiş bir mob varken her zaman çağrılıyor —
+    // gerçek "çalışsın mı" kararını MobManager.update kendi içinde veriyor.
+    if(window.nightmareMode || MobManager.mobs.length > 0){
+      if(window.nightmareMode) DayNightCycle.update(dt);
       MobManager.update(dt);
     }
   };
@@ -22478,7 +22492,10 @@ window.ArrowManager = ArrowManager;
   var _origLeft = window.doLeftClick;
   if(typeof _origLeft !== 'function') return;
   window.doLeftClick = function(x,y,isc){
-    if(window.nightmareMode){
+    // [FIX] Eskiden sadece nightmareMode'da mob'lara vurulabiliyordu — staff
+    // panelden normal survivalde spawnlanan zombie/creeper/vb. hiç
+    // saldırılamaz durumdaydı. Artık sahnede mob varsa her zaman vurulabilir.
+    if(window.nightmareMode || MobManager.mobs.length > 0){
       var mob = MobManager.findNearestMobInRange(5);
       if(mob){
         // Basit yön kontrolü: kameranın baktığı yön mob'a yeterince yakın olmalı
@@ -22626,6 +22643,13 @@ window.ArrowManager = ArrowManager;
         </div>
         <div class="sp-row">
           <div>
+            <div class="sp-label">God Mode</div>
+            <div class="sp-sublabel">Immune to all damage and kill attempts — only void and world border damage still apply</div>
+          </div>
+          <div class="sp-toggle" id="sp-god-toggle"></div>
+        </div>
+        <div class="sp-row">
+          <div>
             <div class="sp-label">Fly</div>
             <div class="sp-sublabel">Flight, just like in Creative mode</div>
           </div>
@@ -22736,6 +22760,7 @@ window.ArrowManager = ArrowManager;
   var fab = document.getElementById('staff-fab');
   var overlay = document.getElementById('staff-panel-overlay');
   var vanishToggle = document.getElementById('sp-vanish-toggle');
+  var godToggle = document.getElementById('sp-god-toggle');
   var flyToggle = document.getElementById('sp-fly-toggle');
   var modeSelect = document.getElementById('sp-mode-select');
   var speedSlider = document.getElementById('sp-speed-slider');
@@ -22745,6 +22770,7 @@ window.ArrowManager = ArrowManager;
   var playerListEl = document.getElementById('sp-player-list');
 
   var vanishOn = false;
+  var godOn = false;
   var flyOn = false;
   var speedMultiplier = 1;
   window._staffSpeedMultiplier = 1;
@@ -22829,6 +22855,36 @@ window.ArrowManager = ArrowManager;
     });
   }
   vanishToggle.addEventListener('click', function(){ setVanish(!vanishOn); });
+
+  // ── GOD MODE ─────────────────────────────────────────────────────────────
+  // takeDamage'ı bir kez sarmalıyoruz; içeride her çağrıda güncel godOn
+  // durumunu kontrol ediyoruz (toggle her açılıp kapandığında yeniden
+  // sarmalamaya gerek yok). Void ('void') ve dünya sınırı ('worldborder')
+  // hasarları İSTİSNA: kullanıcı isteğine göre bunlar God Mode'da bile
+  // uygulanmaya devam eder. Kill komutları (/kill, kick sonrası kill_cmd,
+  // vb.) her zaman HealthManager.takeDamage(999,...) çağırdığı için, bu
+  // sarmalama sayesinde God Mode açıkken hiçbir kill komutu can azaltamaz.
+  (function installGodModeGuard(){
+    var already = safe(function(){ return !!window._spGodGuardInstalled; }, false);
+    if(already) return;
+    safeCall(function(){
+      var HM = g('HealthManager');
+      if(!HM || typeof HM.takeDamage !== 'function') return;
+      var _origTakeDamage = HM.takeDamage.bind(HM);
+      HM.takeDamage = function(amount, source, ignoreCreative, meta){
+        if(godOn && source !== 'void' && source !== 'worldborder'){
+          return false; // hasar tamamen engellenir — kill komutları dahil
+        }
+        return _origTakeDamage(amount, source, ignoreCreative, meta);
+      };
+      window._spGodGuardInstalled = true;
+    });
+  })();
+  function setGod(on){
+    godOn = !!on;
+    godToggle.classList.toggle('on', godOn);
+  }
+  godToggle.addEventListener('click', function(){ setGod(!godOn); });
 
   // ── FLY ──────────────────────────────────────────────────────────────────
   // [FIX] Eskiden burada sadece `window.isFlying` set ediliyordu, ama oyun
@@ -22976,10 +23032,35 @@ window.ArrowManager = ArrowManager;
           });
           var ox = camPos.x + (fwd ? fwd.x*8 : 8);
           var oz = camPos.z + (fwd ? fwd.z*8 : 0);
+          // [FIX] spawnMobAt de spawnAnimal gibi, hedef chunk henüz
+          // üretilmemişse (blockMap'te blok yoksa) zemin bulamayıp null
+          // döner — bu, mob'un "havada asılı" görünmesinin sebeplerinden
+          // biriydi (chunk sonradan yüklenince mob'un Y'si hiç güncellenmiyordu,
+          // çünkü spawn zaten başarısız oluyordu ya da chunk sınırında yanlış
+          // zeminde kalıyordu). Chunk'ı önceden garanti ediyoruz.
+          safeCall(function(){
+            var getChunkAtFn = g('getChunkAt'), genChunkFn = g('genChunk'), CS = g('CS');
+            if(typeof getChunkAtFn === 'function'){
+              var chunk = getChunkAtFn(ox, oz);
+              if((!chunk || !chunk.blocks) && typeof genChunkFn === 'function' && CS){
+                genChunkFn(Math.floor(ox/CS), Math.floor(oz/CS));
+              }
+            }
+          });
           var mob = mm.spawnMobAt(type, ox, oz);
           if(!mob){
             // Çok yakınsa/uygun zemin yoksa biraz daha uzağı dene
-            mob = mm.spawnMobAt(type, camPos.x + 10, camPos.z + 10);
+            var ox2 = camPos.x + 10, oz2 = camPos.z + 10;
+            safeCall(function(){
+              var getChunkAtFn2 = g('getChunkAt'), genChunkFn2 = g('genChunk'), CS2 = g('CS');
+              if(typeof getChunkAtFn2 === 'function'){
+                var chunk2 = getChunkAtFn2(ox2, oz2);
+                if((!chunk2 || !chunk2.blocks) && typeof genChunkFn2 === 'function' && CS2){
+                  genChunkFn2(Math.floor(ox2/CS2), Math.floor(oz2/CS2));
+                }
+              }
+            });
+            mob = mm.spawnMobAt(type, ox2, oz2);
           }
         }
       }
