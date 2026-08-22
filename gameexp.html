@@ -22683,8 +22683,15 @@ window.ArrowManager = ArrowManager;
     try{ fn(); }catch(e){ console.warn('[StaffPanel] action failed:', e); }
   }
   function g(name){
-    // window üzerinden global bir değişkeni güvenli okur (tanımsızsa hata fırlatmaz)
-    try{ return window[name]; }catch(e){ return undefined; }
+    // Global bir değişkeni güvenli okur. NOT: playerRank/RANK_ORDER/amHost gibi
+    // değişkenler dosyada "let"/"const" ile tanımlı; bu tür değişkenler
+    // window nesnesine EKLENMEZ (window['playerRank'] her zaman undefined
+    // döner), o yüzden doğrudan tanımlayıcı adını eval benzeri bir Function
+    // ile okuyoruz — bu, aynı script ortamındaki (aynı sayfa) gerçek global
+    // scope'a erişir ve değişken tanımsızsa da hata fırlatmadan undefined döner.
+    try{
+      return (0, eval)('typeof ' + name + " !== 'undefined' ? " + name + ' : undefined');
+    }catch(e){ return undefined; }
   }
 
   // ── Helper+ rütbe kontrolü ───────────────────────────────────────────────
