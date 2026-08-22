@@ -19712,6 +19712,7 @@ animate();
       <button class="mm-report-btn-submit" id="mm-report-submit">Submit</button>
     </div>
   </div>
+</div>
 
 <script>
 (function(){
@@ -22502,43 +22503,40 @@ window.ArrowManager = ArrowManager;
 
 </script>
 <!-- ==================== END NIGHTMARE MODE PATCH ==================== -->
-<!-- ==================== STAFF ADMIN PANEL PATCH (Helper+) ==================== -->
+
+<!-- ==================== STAFF ADMIN PANEL PATCH v2 (standalone/floating) ==================== -->
 <style>
-/* Sağ üst köşe: sunucuya/dünyaya girildiğinde görünen sürüklenebilir Staff rozeti */
-#staff-hud-badge{
-  position:fixed;top:max(10px,env(safe-area-inset-top));right:10px;z-index:1400;
-  display:none;align-items:center;gap:6px;
-  background:linear-gradient(180deg,rgba(30,20,50,.9),rgba(15,10,30,.92));
-  border:1px solid rgba(180,140,255,.5);border-radius:8px;
-  padding:6px 10px;font-family:'Minecraft',monospace;font-size:10px;color:#e6d6ff;
-  box-shadow:0 2px 10px rgba(0,0,0,.5);cursor:grab;user-select:none;pointer-events:all;
-  letter-spacing:.5px;
+/* Roblox-tarzı: her zaman ekranda duran, sürüklenebilir, tıklanabilir yuvarlak açma butonu */
+#staff-fab{
+  position:fixed;top:50%;left:8px;transform:translateY(-50%);z-index:99999;
+  width:46px;height:46px;border-radius:50%;
+  background:linear-gradient(145deg,#5a3adf,#2a1560);
+  border:2px solid rgba(200,170,255,.7);
+  display:none;align-items:center;justify-content:center;
+  font-size:20px;cursor:grab;user-select:none;-webkit-user-select:none;touch-action:none;
+  box-shadow:0 3px 14px rgba(0,0,0,.55);
 }
-#staff-hud-badge.dragging{cursor:grabbing;}
-#staff-hud-badge .shb-dot{width:7px;height:7px;border-radius:50%;background:#b48cff;box-shadow:0 0 6px #b48cff;flex-shrink:0;}
-#staff-hud-badge .shb-vanish-tag{color:#8fd6ff;margin-left:2px;}
-#staff-hud-badge .shb-open-btn{
-  background:rgba(180,140,255,.18);border:1px solid rgba(180,140,255,.4);color:#e6d6ff;
-  border-radius:5px;padding:2px 7px;font-family:inherit;font-size:9px;cursor:pointer;margin-left:4px;
-}
+#staff-fab.dragging{cursor:grabbing;opacity:.85;}
+#staff-fab.locked{display:none !important;}
 
 #staff-panel-overlay{
-  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.82);
-  display:none;justify-content:center;align-items:center;z-index:2200;color:#fff;
+  position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.75);
+  display:none;justify-content:center;align-items:center;z-index:99998;color:#fff;
+  font-family:monospace;
 }
 #staff-panel-overlay.active{display:flex;}
 #staff-panel{
-  width:min(94vw,460px);max-height:86vh;display:flex;flex-direction:column;
+  width:min(94vw,440px);max-height:86vh;display:flex;flex-direction:column;
   background:linear-gradient(180deg,#241a38,#150e22);
-  border:1px solid rgba(180,140,255,.35);border-radius:12px;overflow:hidden;
-  box-shadow:0 10px 40px rgba(0,0,0,.6);
+  border:1px solid rgba(180,140,255,.4);border-radius:12px;overflow:hidden;
+  box-shadow:0 10px 40px rgba(0,0,0,.7);
 }
 #staff-panel-header{
   padding:14px 16px 10px;border-bottom:1px solid rgba(180,140,255,.2);
   display:flex;align-items:center;justify-content:space-between;
 }
-#staff-panel-header h3{margin:0;font-size:14px;letter-spacing:1px;color:#e6d6ff;font-family:'Minecraft',monospace;}
-#staff-panel-header .sp-sub{font-size:9px;color:rgba(230,214,255,.45);margin-top:2px;letter-spacing:.5px;}
+#staff-panel-header h3{margin:0;font-size:14px;letter-spacing:1px;color:#e6d6ff;}
+.sp-sub{font-size:9px;color:rgba(230,214,255,.45);margin-top:2px;letter-spacing:.5px;}
 .sp-close-btn{
   width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.08);
   border:1px solid rgba(255,255,255,.18);color:#fff;font-size:13px;cursor:pointer;
@@ -22548,32 +22546,30 @@ window.ArrowManager = ArrowManager;
 .sp-tab{
   flex:1;min-width:70px;padding:7px 6px;background:rgba(255,255,255,.05);
   border:1px solid rgba(180,140,255,.15);border-radius:6px 6px 0 0;color:rgba(230,214,255,.6);
-  font-family:'Minecraft',monospace;font-size:9.5px;cursor:pointer;text-align:center;letter-spacing:.3px;
+  font-size:9.5px;cursor:pointer;text-align:center;letter-spacing:.3px;
 }
 .sp-tab.active{background:rgba(180,140,255,.16);color:#e6d6ff;border-color:rgba(180,140,255,.4);}
-.sp-body{flex:1;overflow-y:auto;padding:12px 16px 16px;scrollbar-width:thin;scrollbar-color:rgba(180,140,255,.3) transparent;}
+.sp-body{flex:1;overflow-y:auto;padding:12px 16px 16px;}
 .sp-section{display:none;}
 .sp-section.active{display:block;}
 .sp-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.06);}
 .sp-row:last-child{border-bottom:none;}
-.sp-label{font-size:10.5px;color:rgba(230,214,255,.85);font-family:'Minecraft',monospace;}
+.sp-label{font-size:10.5px;color:rgba(230,214,255,.85);}
 .sp-sublabel{font-size:8.5px;color:rgba(230,214,255,.4);margin-top:2px;}
 .sp-select,.sp-input{
   background:rgba(0,0,0,.35);border:1px solid rgba(180,140,255,.3);color:#fff;
-  border-radius:5px;padding:6px 8px;font-family:'Minecraft',monospace;font-size:10px;
+  border-radius:5px;padding:6px 8px;font-family:inherit;font-size:10px;
 }
 .sp-select{min-width:110px;}
 .sp-input{width:100%;box-sizing:border-box;}
 .sp-btn{
   padding:8px 12px;background:linear-gradient(180deg,#4a3a7a,#2a1a5a);
   border:none;border-bottom:3px solid #0f0a2a;border-top:3px solid #7a5aca;
-  color:#fff;font-family:'Minecraft',monospace;font-size:10px;font-weight:bold;
+  color:#fff;font-family:inherit;font-size:10px;font-weight:bold;
   border-radius:4px;cursor:pointer;white-space:nowrap;letter-spacing:.5px;
 }
 .sp-btn.sp-btn-danger{background:linear-gradient(180deg,#8a2a2a,#5a1414);border-top-color:#c45a5a;}
 .sp-btn.sp-btn-warn{background:linear-gradient(180deg,#8a6a1a,#5a4400);border-top-color:#c49a3a;}
-.sp-btn.sp-btn-on{background:linear-gradient(180deg,#2a6a3a,#144a1f);border-top-color:#5aca6a;}
-.sp-btn:disabled{opacity:.4;cursor:not-allowed;}
 .sp-toggle{
   width:42px;height:22px;border-radius:11px;background:rgba(255,255,255,.15);
   border:1px solid rgba(255,255,255,.2);position:relative;cursor:pointer;flex-shrink:0;
@@ -22590,7 +22586,7 @@ window.ArrowManager = ArrowManager;
   background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);
   border-radius:6px;padding:7px 9px;flex-wrap:wrap;
 }
-.sp-player-name{font-size:10px;color:#fff;font-family:'Minecraft',monospace;flex:1;min-width:70px;}
+.sp-player-name{font-size:10px;color:#fff;flex:1;min-width:70px;}
 .sp-player-actions{display:flex;gap:4px;flex-wrap:wrap;}
 .sp-mini-btn{
   padding:4px 7px;font-size:8.5px;background:rgba(180,140,255,.15);
@@ -22600,42 +22596,26 @@ window.ArrowManager = ArrowManager;
 .sp-mini-btn.danger{background:rgba(200,60,60,.18);border-color:rgba(220,90,90,.4);color:#ffb0b0;}
 .sp-mini-btn.warn{background:rgba(200,150,40,.18);border-color:rgba(220,170,60,.4);color:#ffe0a0;}
 .sp-empty-msg{font-size:10px;color:rgba(255,255,255,.35);text-align:center;padding:14px 0;}
-.sp-speed-value{font-size:11px;color:#e6d6ff;font-family:'Minecraft',monospace;min-width:32px;text-align:right;}
-#staff-panel-btn{
-  position:fixed;top:max(10px,env(safe-area-inset-top));left:10px;z-index:1300;
-  display:none;align-items:center;gap:5px;background:rgba(30,20,50,.75);
-  border:1px solid rgba(180,140,255,.4);border-radius:8px;padding:6px 10px;
-  color:#e6d6ff;font-family:'Minecraft',monospace;font-size:10px;cursor:pointer;pointer-events:all;
-}
+.sp-speed-value{font-size:11px;color:#e6d6ff;min-width:32px;text-align:right;}
 </style>
 
-<!-- Sağ üst rozet: sadece Helper+ kişide ve vanish/fly/hız gibi durumlar aktifken -->
-<div id="staff-hud-badge">
-  <span class="shb-dot"></span>
-  <span id="shb-text">STAFF</span>
-  <button class="shb-open-btn" id="shb-open-btn">PANEL</button>
-</div>
-
-<!-- Sol üst: paneli açan küçük buton (sadece Helper+ iken, tek oyunculu/çok oyunculu her dünyada görünür) -->
-<button id="staff-panel-btn">🛡 ADMIN PANEL</button>
-<div id="staff-debug-line" style="position:fixed;top:2px;left:2px;z-index:5000;background:rgba(0,0,0,.75);color:#0f0;font-size:9px;font-family:monospace;padding:3px 6px;border-radius:4px;pointer-events:none;white-space:pre;"></div>
+<!-- Her zaman ekranda duran, sürüklenebilir yuvarlak buton -->
+<div id="staff-fab" title="Admin Panel">🛡</div>
 
 <div id="staff-panel-overlay">
   <div id="staff-panel">
     <div id="staff-panel-header">
       <div>
         <h3>🛡 STAFF PANEL</h3>
-        <div class="sp-sub" id="sp-rank-sub">Helper+</div>
+        <div class="sp-sub">Her zaman erişilebilir</div>
       </div>
       <button class="sp-close-btn" id="sp-close-btn">✕</button>
     </div>
     <div class="sp-tabs">
       <button class="sp-tab active" data-sp-tab="self">SELF</button>
       <button class="sp-tab" data-sp-tab="players">PLAYERS</button>
-      <button class="sp-tab" data-sp-tab="world">WORLD</button>
     </div>
     <div class="sp-body">
-      <!-- SELF: vanish, fly, speed, gamemode -->
       <div class="sp-section active" id="sp-section-self">
         <div class="sp-row">
           <div>
@@ -22669,7 +22649,6 @@ window.ArrowManager = ArrowManager;
         </div>
       </div>
 
-      <!-- PLAYERS: kill / summon / kick / ban -->
       <div class="sp-section" id="sp-section-players">
         <div class="sp-row" style="flex-direction:column;align-items:stretch;gap:6px;">
           <div class="sp-label">Summon Mob</div>
@@ -22685,65 +22664,53 @@ window.ArrowManager = ArrowManager;
         <div class="sp-label" style="margin-top:10px;">Players</div>
         <div class="sp-player-list" id="sp-player-list"></div>
       </div>
-
-      <!-- WORLD: (host-only alt bilgi, mevcut Manage Server paneline yönlendirme) -->
-      <div class="sp-section" id="sp-section-world">
-        <div class="sp-empty-msg" id="sp-world-hint">
-          World spawn, PvP, erişim ve sunucu ayarları için Manage Server panelini kullan.
-        </div>
-        <div class="sp-row">
-          <div class="sp-label">Manage Server</div>
-          <button class="sp-btn" id="sp-open-manage-server-btn">OPEN</button>
-        </div>
-      </div>
     </div>
   </div>
 </div>
 
 <script>
-(function staffAdminPanel(){
+(function staffAdminPanelStandalone(){
   "use strict";
 
-  // ── Helper+ rütbe kontrolü: mevcut RANK_ORDER hiyerarşisiyle uyumlu ────────
-  // helper = 5. Bundan düşük ya da eşit sayı (daha üst rütbe) Helper+ sayılır.
-  // NOT: playerRank sitenin gönderdiği ham metin olduğu için "Owner", "Owner Dev",
-  // "Owner / Developer" gibi farklı yazımlar gelebilir. RANK_ORDER'daki anahtarlar
-  // tam eşleşme aradığı için sadece "owner / developer" gibi tam yazımları tanır;
-  // bu yüzden burada ayrıca anahtar kelime (substring) tabanlı bir kontrol de
-  // yapılıyor — tıpkı dosyadaki isStaff()/isAdminRank() fonksiyonlarının yaptığı gibi.
-  var STAFF_MAX_ORDER = 5; // helper dahil ve üstü (owner, admin, dev, mod, helper)
-  var STAFF_KEYWORDS = ['owner','admin','developer','dev','mod','helper','staff'];
-  function getMyRankOrder(){
-    if(typeof playerRank !== 'string' || !playerRank) return 999;
-    var r = playerRank.trim().toLowerCase();
-    if(typeof RANK_ORDER !== 'undefined' && RANK_ORDER.hasOwnProperty(r)) return RANK_ORDER[r];
-    return 999;
+  // Bu panel oyunun iç değişkenlerine (deviceMode, DeathManager, playerRank vb.)
+  // ASLA doğrudan erişmez — hepsi try/catch içinde, güvenli bir "safe getter"
+  // üzerinden okunur. Böylece o değişkenler tanımsız/hazır değilse bile panel
+  // her zaman çalışır ve her zaman görünür kalır.
+  function safe(fn, fallback){
+    try{ var v = fn(); return (v===undefined) ? fallback : v; }catch(e){ return fallback; }
   }
+  function safeCall(fn){
+    try{ fn(); }catch(e){ console.warn('[StaffPanel] action failed:', e); }
+  }
+  function g(name){
+    // window üzerinden global bir değişkeni güvenli okur (tanımsızsa hata fırlatmaz)
+    try{ return window[name]; }catch(e){ return undefined; }
+  }
+
+  // ── Helper+ rütbe kontrolü ───────────────────────────────────────────────
+  // playerRank site tarafından postMessage ile gönderilen ham metin
+  // ("Owner", "Helper", "Owner / Developer" vb.) olabilir; RANK_ORDER'daki
+  // anahtarlarla illa tam eşleşmeyebilir, o yüzden anahtar kelime taraması da
+  // yapılıyor. Tamamen güvenli: playerRank/RANK_ORDER/amHost tanımsız olsa
+  // bile hata fırlatmaz, sadece "staff değil" sonucuna düşer.
+  var STAFF_KEYWORDS = ['owner','admin','developer','dev','mod','helper','staff'];
   function isStaffPlus(){
-    // Host her zaman kendi sunucusunda tam yetkiye sahip sayılır.
-    if(typeof amHost !== 'undefined' && amHost) return true;
-    if(getMyRankOrder() <= STAFF_MAX_ORDER) return true;
-    // RANK_ORDER'da tam eşleşme bulunamadıysa anahtar kelimeyle kontrol et
-    if(typeof playerRank === 'string' && playerRank.trim()){
-      var r2 = playerRank.trim().toLowerCase();
-      for(var i=0;i<STAFF_KEYWORDS.length;i++){
-        if(r2.indexOf(STAFF_KEYWORDS[i]) > -1) return true;
-      }
+    if(safe(function(){ return g('amHost'); }, false)) return true;
+    var rank = safe(function(){ return g('playerRank'); }, null);
+    if(typeof rank !== 'string' || !rank.trim()) return false;
+    var r = rank.trim().toLowerCase();
+    var order = safe(function(){
+      var RANK_ORDER = g('RANK_ORDER');
+      return (RANK_ORDER && RANK_ORDER.hasOwnProperty(r)) ? RANK_ORDER[r] : null;
+    }, null);
+    if(order !== null && order <= 5) return true; // helper=5 ve üstü (0-5 arası)
+    for(var i=0;i<STAFF_KEYWORDS.length;i++){
+      if(r.indexOf(STAFF_KEYWORDS[i]) > -1) return true;
     }
     return false;
   }
-  window.isStaffPlus = isStaffPlus;
 
-  // ── State ────────────────────────────────────────────────────────────────
-  var vanishOn = false;
-  var flyOverrideOn = false;
-  var speedMultiplier = 1;
-  window._staffSpeedMultiplier = 1; // SPD çarpanı olarak dışarıdan okunur
-
-  // ── UI element referansları ─────────────────────────────────────────────
-  var badge = document.getElementById('staff-hud-badge');
-  var badgeText = document.getElementById('shb-text');
-  var openBtnTop = document.getElementById('staff-panel-btn');
+  var fab = document.getElementById('staff-fab');
   var overlay = document.getElementById('staff-panel-overlay');
   var vanishToggle = document.getElementById('sp-vanish-toggle');
   var flyToggle = document.getElementById('sp-fly-toggle');
@@ -22754,49 +22721,23 @@ window.ArrowManager = ArrowManager;
   var summonSelect = document.getElementById('sp-summon-select');
   var playerListEl = document.getElementById('sp-player-list');
 
-  // ── Görünürlük: sadece Helper+ ve bir dünya/sunucu içindeyken (SP dahil) ──
-  function refreshVisibility(){
-    var inWorld = typeof deviceMode !== 'undefined' && !!deviceMode;
-    var show = isStaffPlus() && inWorld && !isPaused && !DeathManager.isDead;
-    openBtnTop.style.display = show ? 'flex' : 'none';
-    // Rozet: panel açık bir özellik varsa (vanish/fly/hız≠1) her zaman göster,
-    // aksi halde de staff kişiye küçük bir gösterge olarak göster.
-    badge.style.display = show ? 'flex' : 'none';
-    updateBadgeText();
-    var dbgEl = document.getElementById('staff-debug-line');
-    if(dbgEl){
-      dbgEl.textContent = 'rank='+JSON.stringify(playerRank)+' staff='+isStaffPlus()+' world='+inWorld+' host='+(typeof amHost!=='undefined'?amHost:'?')+' show='+show;
-    }
-    if(window._staffDebugLogged !== show+String(playerRank)+String(inWorld)){
-      window._staffDebugLogged = show+String(playerRank)+String(inWorld);
-      console.log('[StaffPanel debug] playerRank=', JSON.stringify(playerRank),
-        '| isStaffPlus=', isStaffPlus(), '| deviceMode=', typeof deviceMode!=='undefined'?deviceMode:'(yok)',
-        '| amHost=', typeof amHost!=='undefined'?amHost:'(yok)', '| show=', show);
-    }
-  }
-  function updateBadgeText(){
-    var bits = [];
-    if(vanishOn) bits.push('VANISH');
-    if(isFlying) bits.push('FLY');
-    if(speedMultiplier !== 1) bits.push(speedMultiplier.toFixed(2)+'x');
-    badgeText.textContent = bits.length ? ('STAFF · '+bits.join(' · ')) : 'STAFF';
-  }
+  var vanishOn = false;
+  var flyOn = false;
+  var speedMultiplier = 1;
+  window._staffSpeedMultiplier = 1;
 
   // ── Panel aç/kapa ────────────────────────────────────────────────────────
   function openPanel(){
-    if(!isStaffPlus()) return;
     overlay.classList.add('active');
     renderPlayerList();
-    modeSelect.value = (typeof gameMode !== 'undefined' && gameMode) ? gameMode : 'survival';
-    if(document.pointerLockElement===document.body) document.exitPointerLock();
+    var curMode = g('gameMode');
+    if(curMode) modeSelect.value = curMode;
+    safeCall(function(){ if(document.pointerLockElement) document.exitPointerLock(); });
   }
   function closePanel(){ overlay.classList.remove('active'); }
-  openBtnTop.addEventListener('click', openPanel);
-  document.getElementById('shb-open-btn').addEventListener('click', function(e){ e.stopPropagation(); openPanel(); });
   document.getElementById('sp-close-btn').addEventListener('click', closePanel);
   overlay.addEventListener('click', function(e){ if(e.target===overlay) closePanel(); });
 
-  // ── Sekmeler ─────────────────────────────────────────────────────────────
   document.querySelectorAll('.sp-tab').forEach(function(btn){
     btn.addEventListener('click', function(){
       document.querySelectorAll('.sp-tab').forEach(function(t){ t.classList.toggle('active', t===btn); });
@@ -22807,191 +22748,81 @@ window.ArrowManager = ArrowManager;
     });
   });
 
-  // ── Rozeti sürükleme ─────────────────────────────────────────────────────
-  (function makeBadgeDraggable(){
-    var dragging=false, startX=0, startY=0, origRight=10, origTop=10;
-    badge.addEventListener('pointerdown', function(e){
-      if(e.target.id==='shb-open-btn') return;
-      dragging=true; badge.classList.add('dragging');
-      startX=e.clientX; startY=e.clientY;
-      var rect=badge.getBoundingClientRect();
-      origRight = window.innerWidth - rect.right;
-      origTop = rect.top;
-      badge.setPointerCapture(e.pointerId);
-    });
-    badge.addEventListener('pointermove', function(e){
+  // ── Sürüklenebilir FAB (Roblox exploit menüsü tarzı) ────────────────────
+  (function makeDraggable(){
+    var dragging=false, moved=false, startX=0, startY=0, origX=0, origY=0;
+    function pos(e){ return e.touches ? e.touches[0] : e; }
+    function down(e){
+      dragging=true; moved=false; fab.classList.add('dragging');
+      var p = pos(e);
+      startX=p.clientX; startY=p.clientY;
+      var rect=fab.getBoundingClientRect();
+      origX=rect.left; origY=rect.top;
+      fab.style.transform='none';
+    }
+    function move(e){
       if(!dragging) return;
-      var dx = e.clientX - startX, dy = e.clientY - startY;
-      var newRight = Math.max(4, origRight - dx);
-      var newTop = Math.max(4, origTop + dy);
-      badge.style.right = newRight+'px';
-      badge.style.top = newTop+'px';
-    });
-    function endDrag(e){ dragging=false; badge.classList.remove('dragging'); };
-    badge.addEventListener('pointerup', endDrag);
-    badge.addEventListener('pointercancel', endDrag);
+      var p = pos(e);
+      var dx = p.clientX - startX, dy = p.clientY - startY;
+      if(Math.abs(dx)>4 || Math.abs(dy)>4) moved=true;
+      var nx = Math.max(2, Math.min(window.innerWidth - fab.offsetWidth - 2, origX + dx));
+      var ny = Math.max(2, Math.min(window.innerHeight - fab.offsetHeight - 2, origY + dy));
+      fab.style.left = nx+'px';
+      fab.style.top = ny+'px';
+      if(e.cancelable) e.preventDefault();
+    }
+    function up(){
+      // KRİTİK: sadece sürükleme FAB üzerinde başlamışsa (dragging===true) işlem yap.
+      // window'a bağlı olduğu için başka herhangi bir yerde yapılan mouseup/touchend
+      // bu fonksiyonu tetikler; dragging false ise hiçbir şey yapmadan çık.
+      if(!dragging) return;
+      dragging=false; fab.classList.remove('dragging');
+      if(!moved) openPanel();
+    }
+    fab.addEventListener('mousedown', down);
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+    fab.addEventListener('touchstart', down, {passive:true});
+    window.addEventListener('touchmove', move, {passive:false});
+    window.addEventListener('touchend', up);
   })();
 
   // ── VANISH ───────────────────────────────────────────────────────────────
-  // İstenen davranış:
-  //  - Vanish açıkken sunucuya girerse "X joined" mesajı ASLA çıkmaz.
-  //  - Vanish açıkken oyun içinde (server'dayken) açarsa "X left" mesajı görünür
-  //    ve kişi TAB listesinden tamamen kaybolur (diğerleri için).
-  //  - Vanish kapatılırsa sanki yeniden katılmış gibi "X joined" mesajı çıkar
-  //    ve TAB listesine geri döner.
-  //  - Kendi ekranında (staff oyuncunun kendi görüşünde) hiçbir şey gizlenmez.
-  function broadcastVanishState(on){
-    // Host isek doğrudan tüm guestlere bildiriyoruz; guest isek host'a iletip
-    // host'un dağıtmasını istiyoruz (mevcut 'cmd' kanalı genişletiliyor).
-    var payload = { type:'vanish_state', name: myName, on: !!on };
-    if(typeof amHost !== 'undefined' && amHost){
-      Object.values(hostConns).forEach(function(p){ if(p.conn.open) p.conn.send(payload); });
-      applyVanishLocally(myName, on, true);
-    } else if(typeof guestConn !== 'undefined' && guestConn && guestConn.open){
-      guestConn.send(payload);
-    }
-  }
-
-  // Diğer istemcilerde bir oyuncunun vanish durumunu uygular: TAB'dan gizle/göster,
-  // ve join/left mesajı üretir.
-  function applyVanishLocally(name, on, isSelfHost){
-    if(!name) return;
-    var d = langData[currentLang];
-    if(on){
-      // Sunucudaymış gibi "ayrıldı" mesajı + TAB'dan kaldırma
-      if(name !== myName){ // kendi ekranımda kendimi asla gizlemeyiz
-        window._vanishedPlayers = window._vanishedPlayers || new Set();
-        window._vanishedPlayers.add(name);
-        addChat(null, name+d.sysLeft, true);
-      } else {
-        window._iAmVanished = true;
-      }
-    } else {
-      if(name !== myName){
-        window._vanishedPlayers = window._vanishedPlayers || new Set();
-        window._vanishedPlayers.delete(name);
-        addChat(null, name+d.sysJoin, true);
-      } else {
-        window._iAmVanished = false;
-      }
-    }
-    if(typeof renderTabList === 'function') renderTabList();
-  }
-  window._vanishedPlayers = window._vanishedPlayers || new Set();
-  window._iAmVanished = false;
-
-  // TAB listesi ve Manage Server listesini gizli oyuncuları filtreleyecek şekilde sarmala
-  (function patchTabListForVanish(){
-    if(typeof renderTabList !== 'function') return;
-    var _origRenderTabList = renderTabList;
-    window.renderTabList = function(){
-      var result = _origRenderTabList.apply(this, arguments);
-      // renderTabList kendi DOM'unu bastıktan sonra vanish olan satırları kaldır
-      var grid = document.getElementById('tab-grid');
-      if(grid && window._vanishedPlayers && window._vanishedPlayers.size){
-        grid.querySelectorAll('.tab-player-row').forEach(function(row){
-          var nameEl = row.querySelector('.tab-name');
-          if(nameEl && window._vanishedPlayers.has(nameEl.textContent)) row.remove();
-        });
-      }
-      return result;
-    };
-  })();
-
-  // Host tarafı: guest'ten gelen vanish_state mesajını diğer guestlere yay
-  // ve kendi TAB'ından da gizle. Guest tarafı: host'tan gelen mesajı uygula.
-  (function hookConnDataForVanish(){
-    // Guest bağlantısı (guestConn) mesajlarını dinleyen mevcut handler'ı bulamıyoruz
-    // doğrudan çünkü closures içinde tanımlı; bunun yerine PeerJS conn nesnesine
-    // ikinci bir 'data' dinleyicisi ekleyerek non-invaziv şekilde genişletiyoruz.
-    var _origMyPeerOn = null;
-    function attachToGuestConn(){
-      if(typeof guestConn !== 'undefined' && guestConn && !guestConn._vanishHooked){
-        guestConn._vanishHooked = true;
-        guestConn.on('data', function(data){
-          if(data && data.type==='vanish_state'){
-            applyVanishLocally(data.name, data.on, false);
-          }
-        });
-      }
-    }
-    function attachToHostConns(){
-      if(typeof hostConns === 'undefined') return;
-      Object.entries(hostConns).forEach(function(entry){
-        var pid = entry[0], p = entry[1];
-        if(p.conn && !p.conn._vanishHooked){
-          p.conn._vanishHooked = true;
-          p.conn.on('data', function(data){
-            if(data && data.type==='vanish_state'){
-              // Bu guest'in vanish durumunu diğer TÜM bağlantılara (host dahil) yay
-              applyVanishLocally(data.name, data.on, true);
-              Object.entries(hostConns).forEach(function(e2){
-                if(e2[0]!==pid && e2[1].conn.open) e2[1].conn.send(data);
-              });
-            }
-          });
-        }
-      });
-    }
-    // Bağlantılar zaman içinde kurulduğu için periyodik olarak yeni conn'lara hook ekle
-    setInterval(function(){
-      attachToGuestConn();
-      attachToHostConns();
-    }, 700);
-  })();
-
-  // join mesajını bastırma: Eğer bir oyuncu vanish AÇIK şekilde sunucuya
-  // katılıyorsa (yani spawn anında zaten vanish aktifse) "joined" mesajı hiç
-  // çıkmasın. Bunu addChat çağrısını yeniden yorumlayarak değil, joinPreference
-  // bayrağını host/guest join akışına ekleyerek yapıyoruz: vanish açıkken
-  // openManage/join sırasında myVanishPref true ise chat mesajı bastırılır.
-  window._myVanishPref = false; // sonraki katılışta uygulanacak tercih
-  (function suppressJoinChatWhenVanished(){
-    if(typeof addChat !== 'function') return;
-    var _origAddChat = addChat;
-    window.addChat = function(name, msg, sys, cls, rank, rankColor){
-      try{
-        if(sys && typeof msg==='string'){
-          var d = langData[currentLang];
-          // "<isim> joined" mesajı ve isim vanish listesindeyse (ya da benim
-          // kendi join anımsa ve vanish tercihim açıksa) bastır.
-          if(d && msg.indexOf(d.sysJoin)>-1){
-            var nameOnly = msg.slice(0, msg.indexOf(d.sysJoin));
-            if(window._vanishedPlayers && window._vanishedPlayers.has(nameOnly)) return;
-            if(nameOnly===myName && window._myVanishPref) return;
-          }
-        }
-      }catch(e){}
-      return _origAddChat.call(this, name, msg, sys, cls, rank, rankColor);
-    };
-  })();
-
+  // Basit ve güvenli uygulama: oyunun TAB/chat sistemine dokunmadan,
+  // kendi ekran görünürlüğünü kontrol eder. Multiplayer senkronizasyonu
+  // oyunun kendi ağ katmanı stabil hale geldiğinde ayrıca genişletilebilir.
   function setVanish(on){
     vanishOn = !!on;
-    window._myVanishPref = vanishOn;
     vanishToggle.classList.toggle('on', vanishOn);
-    broadcastVanishState(vanishOn);
-    applyVanishLocally(myName, vanishOn, typeof amHost!=='undefined'&&amHost);
-    updateBadgeText();
+    window._iAmVanished = vanishOn;
+    safeCall(function(){
+      var name = g('myName');
+      var d = g('langData') && g('currentLang') ? g('langData')[g('currentLang')] : null;
+      var addChatFn = g('addChat');
+      if(typeof addChatFn === 'function' && name){
+        addChatFn(null, name + (on ? (d && d.sysLeft ? d.sysLeft : ' sunucudan ayrıldı') : (d && d.sysJoin ? d.sysJoin : ' sunucuya katıldı')), true);
+      }
+    });
   }
   vanishToggle.addEventListener('click', function(){ setVanish(!vanishOn); });
 
   // ── FLY ──────────────────────────────────────────────────────────────────
   function setFly(on){
-    flyOverrideOn = !!on;
-    flyToggle.classList.toggle('on', flyOverrideOn);
-    if(typeof isFlying !== 'undefined'){
-      isFlying = flyOverrideOn;
-      if(typeof velY !== 'undefined') velY = 0;
-      if(flyOverrideOn && typeof grounded !== 'undefined') grounded = false;
-    }
-    updateBadgeText();
+    flyOn = !!on;
+    flyToggle.classList.toggle('on', flyOn);
+    safeCall(function(){
+      window.isFlying = flyOn;
+      if(flyOn) window.velY = 0;
+    });
   }
-  flyToggle.addEventListener('click', function(){ setFly(!isFlying); });
+  flyToggle.addEventListener('click', function(){ setFly(!flyOn); });
 
   // ── GAME MODE ────────────────────────────────────────────────────────────
   modeSelect.addEventListener('change', function(){
-    if(typeof processCmd === 'function') processCmd('mode '+modeSelect.value);
+    safeCall(function(){
+      var pc = g('processCmd');
+      if(typeof pc === 'function') pc('mode '+modeSelect.value);
+    });
   });
 
   // ── SPEED ────────────────────────────────────────────────────────────────
@@ -22999,34 +22830,24 @@ window.ArrowManager = ArrowManager;
     speedMultiplier = parseFloat(speedSlider.value) || 1;
     window._staffSpeedMultiplier = speedMultiplier;
     speedValue.textContent = speedMultiplier.toFixed(2)+'x';
-    updateBadgeText();
   });
-
-  // SPD/FLY_SPD sabitlerini doğrudan değiştirmek yerine (const oldukları ve
-  // başka kodda referans alındığı için), hareket hesaplamasının her karede
-  // kullandığı 'spd' değişkenine çarpan uyguluyoruz. Bunun için animate loop
-  // içindeki hız hesaplamasını bulup dışarıdan okunabilir bir çarpan ekliyoruz.
-  // NOT: Oyunun ana hareket kodu 'const spd=isFlying?FLY_SPD:(...)' satırını
-  // her karede yeniden hesaplıyor; bu satırı bozmadan, konum güncellemesinden
-  // hemen önce ekstra bir çarpan uygulamak için camera pozisyon değişimini
-  // her karede yakalayan hafif bir "speed hook" kullanıyoruz.
   (function hookSpeedMultiplier(){
     var lastPos = null;
     function tick(){
-      if(window._staffSpeedMultiplier && window._staffSpeedMultiplier !== 1 && typeof camera !== 'undefined' && camera){
+      var camera = g('camera');
+      if(window._staffSpeedMultiplier && window._staffSpeedMultiplier !== 1 && camera){
         if(lastPos){
           var dx = camera.position.x - lastPos.x;
           var dy = camera.position.y - lastPos.y;
           var dz = camera.position.z - lastPos.z;
           var extra = window._staffSpeedMultiplier - 1;
-          // Sadece yatay harekete çarpan uygula (dikey/fly Y ekseni fly toggle'ı ile zaten yönetiliyor)
           camera.position.x += dx*extra;
           camera.position.z += dz*extra;
-          if(isFlying) camera.position.y += dy*extra;
+          if(flyOn) camera.position.y += dy*extra;
         }
-        lastPos = camera.position.clone();
-      } else if(typeof camera !== 'undefined' && camera){
-        lastPos = camera.position.clone();
+        lastPos = {x:camera.position.x, y:camera.position.y, z:camera.position.z};
+      } else if(camera){
+        lastPos = {x:camera.position.x, y:camera.position.y, z:camera.position.z};
       }
       requestAnimationFrame(tick);
     }
@@ -23035,16 +22856,22 @@ window.ArrowManager = ArrowManager;
 
   // ── SUMMON ───────────────────────────────────────────────────────────────
   summonBtn.addEventListener('click', function(){
-    if(typeof processCmd === 'function') processCmd('summon '+summonSelect.value);
+    safeCall(function(){
+      var pc = g('processCmd');
+      if(typeof pc === 'function') pc('summon '+summonSelect.value);
+    });
   });
 
-  // ── PLAYERS: kill / kick / ban listesi ──────────────────────────────────
+  // ── PLAYERS: kill / kick / ban ──────────────────────────────────────────
   function renderPlayerList(){
     playerListEl.innerHTML = '';
     var players = [];
-    if(typeof _serverPlayerList !== 'undefined' && _serverPlayerList && _serverPlayerList.length > 0){
-      players = _serverPlayerList.map(function(p){ return { name:p.username }; });
-    } else if(typeof hostConns !== 'undefined'){
+    var myName = safe(function(){ return g('myName'); }, '');
+    var hostConns = safe(function(){ return g('hostConns'); }, null);
+    var spList = safe(function(){ return g('_serverPlayerList'); }, null);
+    if(spList && spList.length){
+      players = spList.map(function(p){ return { name:p.username }; });
+    } else if(hostConns){
       players = Object.values(hostConns).map(function(p){ return { name:p.name }; });
     }
     players = players.filter(function(p){ return p.name && p.name !== myName; });
@@ -23062,74 +22889,39 @@ window.ArrowManager = ArrowManager;
       var actions = document.createElement('div');
       actions.className = 'sp-player-actions';
 
-      var killBtn = document.createElement('button');
-      killBtn.className = 'sp-mini-btn warn';
-      killBtn.textContent = 'KILL';
-      killBtn.addEventListener('click', function(){
-        if(typeof processCmd === 'function') processCmd('kill '+p.name);
-      });
-      actions.appendChild(killBtn);
-
-      var kickBtn = document.createElement('button');
-      kickBtn.className = 'sp-mini-btn warn';
-      kickBtn.textContent = 'KICK';
-      kickBtn.addEventListener('click', function(){
-        if(typeof processCmd === 'function') processCmd('kick '+p.name);
-        setTimeout(renderPlayerList, 300);
-      });
-      actions.appendChild(kickBtn);
-
-      var banBtn = document.createElement('button');
-      banBtn.className = 'sp-mini-btn danger';
-      banBtn.textContent = 'BAN';
-      banBtn.addEventListener('click', function(){
-        if(typeof processCmd === 'function') processCmd('ban '+p.name);
-        setTimeout(renderPlayerList, 300);
-      });
-      actions.appendChild(banBtn);
-
+      function mkBtn(label, cls, cmd){
+        var b = document.createElement('button');
+        b.className = 'sp-mini-btn '+cls;
+        b.textContent = label;
+        b.addEventListener('click', function(){
+          safeCall(function(){
+            var pc = g('processCmd');
+            if(typeof pc === 'function') pc(cmd+' '+p.name);
+          });
+          setTimeout(renderPlayerList, 300);
+        });
+        return b;
+      }
+      actions.appendChild(mkBtn('KILL','warn','kill'));
+      actions.appendChild(mkBtn('KICK','warn','kick'));
+      actions.appendChild(mkBtn('BAN','danger','ban'));
       row.appendChild(actions);
       playerListEl.appendChild(row);
     });
   }
 
-  // ── WORLD sekmesi: Manage Server paneline köprü (sadece çok oyunculu) ───
-  document.getElementById('sp-open-manage-server-btn').addEventListener('click', function(){
-    var mpActive = typeof isMP !== 'undefined' && isMP;
-    if(!mpActive){
-      var hint = document.getElementById('sp-world-hint');
-      if(hint) hint.textContent = 'Bu ayarlar sadece çok oyunculu bir sunucuda kullanılabilir.';
-      return;
-    }
-    closePanel();
-    if(typeof openManageServer === 'function') openManageServer();
-  });
-
-  // ── Periyodik görünürlük / rozet güncellemesi ───────────────────────────
-  setInterval(refreshVisibility, 1000);
-  setInterval(updateBadgeText, 1500);
-  refreshVisibility();
-
-  // Dünyaya/sunucuya her girişte vanish tercihini sıfırla (varsayılan: kapalı)
-  // — bu, "istediği zaman açıp kapatabilir" davranışına uygun bir başlangıç durumu sağlar.
-  var _origCleanupMP = window.cleanupMP;
-  if(typeof _origCleanupMP === 'function'){
-    window.cleanupMP = function(){
-      var r = _origCleanupMP.apply(this, arguments);
-      vanishOn = false; window._myVanishPref = false; window._iAmVanished = false;
-      window._vanishedPlayers = new Set();
-      vanishToggle.classList.remove('on');
-      flyOverrideOn = false; flyToggle.classList.remove('on');
-      speedMultiplier = 1; window._staffSpeedMultiplier = 1;
-      speedSlider.value = 1; speedValue.textContent = '1.0x';
-      refreshVisibility();
-      return r;
-    };
+  // ── Görünürlük: sadece Helper+ rütbeli kişide FAB görünür ───────────────
+  // playerRank site tarafından oyun yüklendikten SONRA postMessage ile
+  // gelebileceği için tek seferlik değil, periyodik kontrol yapılıyor.
+  function refreshFabVisibility(){
+    fab.style.display = isStaffPlus() ? 'flex' : 'none';
+    if(!isStaffPlus()) closePanel();
   }
-
+  refreshFabVisibility();
+  setInterval(refreshFabVisibility, 1000);
 })();
 </script>
-<!-- ==================== END STAFF ADMIN PANEL PATCH ==================== -->
+<!-- ==================== END STAFF ADMIN PANEL PATCH v2 ==================== -->
 
 </body>
 </html>
