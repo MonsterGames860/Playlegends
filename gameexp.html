@@ -22705,7 +22705,13 @@ window.ArrowManager = ArrowManager;
 
   // ── Helper+ rütbe kontrolü: mevcut RANK_ORDER hiyerarşisiyle uyumlu ────────
   // helper = 5. Bundan düşük ya da eşit sayı (daha üst rütbe) Helper+ sayılır.
+  // NOT: playerRank sitenin gönderdiği ham metin olduğu için "Owner", "Owner Dev",
+  // "Owner / Developer" gibi farklı yazımlar gelebilir. RANK_ORDER'daki anahtarlar
+  // tam eşleşme aradığı için sadece "owner / developer" gibi tam yazımları tanır;
+  // bu yüzden burada ayrıca anahtar kelime (substring) tabanlı bir kontrol de
+  // yapılıyor — tıpkı dosyadaki isStaff()/isAdminRank() fonksiyonlarının yaptığı gibi.
   var STAFF_MAX_ORDER = 5; // helper dahil ve üstü (owner, admin, dev, mod, helper)
+  var STAFF_KEYWORDS = ['owner','admin','developer','dev','mod','helper','staff'];
   function getMyRankOrder(){
     if(typeof playerRank !== 'string' || !playerRank) return 999;
     var r = playerRank.trim().toLowerCase();
@@ -22715,7 +22721,15 @@ window.ArrowManager = ArrowManager;
   function isStaffPlus(){
     // Host her zaman kendi sunucusunda tam yetkiye sahip sayılır.
     if(typeof amHost !== 'undefined' && amHost) return true;
-    return getMyRankOrder() <= STAFF_MAX_ORDER;
+    if(getMyRankOrder() <= STAFF_MAX_ORDER) return true;
+    // RANK_ORDER'da tam eşleşme bulunamadıysa anahtar kelimeyle kontrol et
+    if(typeof playerRank === 'string' && playerRank.trim()){
+      var r2 = playerRank.trim().toLowerCase();
+      for(var i=0;i<STAFF_KEYWORDS.length;i++){
+        if(r2.indexOf(STAFF_KEYWORDS[i]) > -1) return true;
+      }
+    }
+    return false;
   }
   window.isStaffPlus = isStaffPlus;
 
@@ -22748,6 +22762,12 @@ window.ArrowManager = ArrowManager;
     // aksi halde de staff kişiye küçük bir gösterge olarak göster.
     badge.style.display = show ? 'flex' : 'none';
     updateBadgeText();
+    if(window._staffDebugLogged !== show+String(playerRank)+String(inWorld)){
+      window._staffDebugLogged = show+String(playerRank)+String(inWorld);
+      console.log('[StaffPanel debug] playerRank=', JSON.stringify(playerRank),
+        '| isStaffPlus=', isStaffPlus(), '| deviceMode=', typeof deviceMode!=='undefined'?deviceMode:'(yok)',
+        '| amHost=', typeof amHost!=='undefined'?amHost:'(yok)', '| show=', show);
+    }
   }
   function updateBadgeText(){
     var bits = [];
