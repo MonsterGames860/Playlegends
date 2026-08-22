@@ -22616,7 +22616,7 @@ window.ArrowManager = ArrowManager;
   <button class="shb-open-btn" id="shb-open-btn">PANEL</button>
 </div>
 
-<!-- Sol üst: paneli açan küçük buton (sadece Helper+ ve çok oyunculu bir sunucudayken görünür) -->
+<!-- Sol üst: paneli açan küçük buton (sadece Helper+ iken, tek oyunculu/çok oyunculu her dünyada görünür) -->
 <button id="staff-panel-btn">🛡 ADMIN PANEL</button>
 
 <div id="staff-panel-overlay">
@@ -22739,9 +22739,10 @@ window.ArrowManager = ArrowManager;
   var summonSelect = document.getElementById('sp-summon-select');
   var playerListEl = document.getElementById('sp-player-list');
 
-  // ── Görünürlük: sadece Helper+ ve çok oyunculu bir sunucu/dünya içindeyken ─
+  // ── Görünürlük: sadece Helper+ ve bir dünya/sunucu içindeyken (SP dahil) ──
   function refreshVisibility(){
-    var show = isStaffPlus() && typeof isMP !== 'undefined' && isMP && !isPaused && !DeathManager.isDead;
+    var inWorld = typeof deviceMode !== 'undefined' && !!deviceMode;
+    var show = isStaffPlus() && inWorld && !isPaused && !DeathManager.isDead;
     openBtnTop.style.display = show ? 'flex' : 'none';
     // Rozet: panel açık bir özellik varsa (vanish/fly/hız≠1) her zaman göster,
     // aksi halde de staff kişiye küçük bir gösterge olarak göster.
@@ -23067,8 +23068,14 @@ window.ArrowManager = ArrowManager;
     });
   }
 
-  // ── WORLD sekmesi: Manage Server paneline köprü ─────────────────────────
+  // ── WORLD sekmesi: Manage Server paneline köprü (sadece çok oyunculu) ───
   document.getElementById('sp-open-manage-server-btn').addEventListener('click', function(){
+    var mpActive = typeof isMP !== 'undefined' && isMP;
+    if(!mpActive){
+      var hint = document.getElementById('sp-world-hint');
+      if(hint) hint.textContent = 'Bu ayarlar sadece çok oyunculu bir sunucuda kullanılabilir.';
+      return;
+    }
     closePanel();
     if(typeof openManageServer === 'function') openManageServer();
   });
