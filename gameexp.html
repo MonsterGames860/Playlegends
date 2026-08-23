@@ -2774,7 +2774,7 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 #kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:'Minecraft',monospace;margin-bottom:28px;}
 #btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-kick-menu:hover{filter:brightness(1.2);}
-#inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:800;color:#fff;}
+#inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:2050;color:#fff;}
 #inv-overlay.active{display:flex;}
 #inv-box{background:rgba(12,18,30,.97);border:2px solid rgba(117,167,255,.35);border-radius:10px;padding:16px 18px;max-width:660px;width:96%;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;}
 #inv-title{font-size:17px;font-weight:bold;letter-spacing:5px;color:#75a7ff;text-shadow:0 0 12px rgba(117,167,255,.5);margin-bottom:8px;}
@@ -7726,6 +7726,19 @@ function renderInvHotbarRow(){
 }
 function openInv(){
   if(invOpen||isPaused||isChatOpen||!deviceMode) return;
+  // [FIX] Nightmare (ve genel olarak "small" olmayan dünyalarda hızlı açılış)
+  // akışında, LoadingScreen.hide() çağrıldıktan sonra bile DOM'daki 'active'
+  // class'ı ~800ms gecikmeyle (200ms + 600ms fade-out) kaldırılıyordu. Eğer
+  // oyuncu bu pencerede E'ye basarsa envanter DOM'da açılıyordu ama
+  // #loading-screen'in z-index'i (2000) #inv-overlay'inkinden (800) yüksek
+  // olduğu için envanter GÖRSEL OLARAK loading ekranının ARKASINDA kalıyor,
+  // yani "envanter açılıyor ama GUI gözükmüyor" hissi veriyordu. Envanteri
+  // açmadan hemen önce loading ekranını kesin olarak (gecikmesiz) kapatıyoruz.
+  if(typeof LoadingScreen!=='undefined' && LoadingScreen.isActive && LoadingScreen.isActive()){
+    var _ls = document.getElementById('loading-screen');
+    if(_ls){ _ls.classList.remove('active'); _ls.classList.remove('fade-out'); }
+    if(LoadingScreen.hide) LoadingScreen.hide();
+  }
   invOpen=true;
   if(document.pointerLockElement===document.body) document.exitPointerLock();
   renderInvGrid();renderInvHotbarRow();
@@ -21764,21 +21777,32 @@ const DayNightCycle = {
   // gökyüzü disklerine en yakın davranış. Sadece ilk çağrıda inşa edilir,
   // sonraki start() çağrılarında mevcut sprite'lar yeniden kullanılır.
   _buildCelestialSprites(){
+    // [FIX] Güneş ve Ay farklı scale (14 vs 11) kullanıyordu — sun.png ve
+    // moon.png kaynak dosyalarının piksel oranı ne olursa olsun, ekranda
+    // ikisi de AYNI görünür büyüklükte olmalı (kullanıcı raporu: "fotoğraf
+    // boyu farketmek sizin aynı boyutta olacak"). Tek bir ortak sabit
+    // kullanıyoruz.
+    var CELESTIAL_SIZE = 12;
     if(!this.sunSprite){
       var sunTex = new THREE.TextureLoader().load('sun.png');
       sunTex.magFilter = THREE.NearestFilter; sunTex.minFilter = THREE.NearestFilter;
-      var sunMat = new THREE.SpriteMaterial({ map: sunTex, transparent: true, depthTest: false, depthWrite: false, fog: false });
+      // [FIX] depthTest:false demek "her zaman en önde çiz" demekti — güneş/ay
+      // bloklar/dağlar arkasında kalsa bile üstlerinde göründüğü rapor edildi
+      // ("blokların arkasından gözükebiliyor"). depthTest:true ile artık
+      // normal 3B derinlik sıralamasına tabiler; bir dağın/bloğun arkasına
+      // geçtiklerinde gerçekten gizleniyorlar.
+      var sunMat = new THREE.SpriteMaterial({ map: sunTex, transparent: true, depthTest: true, depthWrite: false, fog: false });
       this.sunSprite = new THREE.Sprite(sunMat);
-      this.sunSprite.scale.set(14, 14, 1);
+      this.sunSprite.scale.set(CELESTIAL_SIZE, CELESTIAL_SIZE, 1);
       this.sunSprite.renderOrder = -1;
       scene.add(this.sunSprite);
     }
     if(!this.moonSprite){
       var moonTex = new THREE.TextureLoader().load('moon.png');
       moonTex.magFilter = THREE.NearestFilter; moonTex.minFilter = THREE.NearestFilter;
-      var moonMat = new THREE.SpriteMaterial({ map: moonTex, transparent: true, depthTest: false, depthWrite: false, fog: false });
+      var moonMat = new THREE.SpriteMaterial({ map: moonTex, transparent: true, depthTest: true, depthWrite: false, fog: false });
       this.moonSprite = new THREE.Sprite(moonMat);
-      this.moonSprite.scale.set(11, 11, 1);
+      this.moonSprite.scale.set(CELESTIAL_SIZE, CELESTIAL_SIZE, 1);
       this.moonSprite.renderOrder = -1;
       scene.add(this.moonSprite);
     }
@@ -21851,29 +21875,34 @@ const DayNightCycle = {
     //   time=dayLength          -> günbatımı    (sunHeight=0, isNight() burada başlıyor — senkron)
     //   time=dayLength+night/2  -> gece yarısı  (moonHeight=1)
     //   time=totalLength        -> tekrar gündoğumu
+    // [FIX] Güneş ile Ay eskiden AYRI açı formülleriyle hesaplanıyordu (ikisi
+    // de "ufkun altındayken" aynı sabit X eksenine gidiyordu) — bu yüzden
+    // ikisi hiçbir zaman gerçek anlamda birbirinin KARŞISINDA olmuyordu,
+    // sanki ikisi de aynı taraftan doğup batıyormuş gibi duruyordu (kullanıcı
+    // raporu: "karşı karşıya değiller"). Artık TEK bir sürekli açı (0..2π,
+    // tüm day+night döngüsünü kapsıyor, dayLength/nightLength oranını
+    // koruyarak) hesaplanıyor; Ay bu açının TAM ZITTINI (angle+π) kullanıyor.
+    // Böylece Güneş batarken Ay ufkun diğer ucundan doğuyor — gerçek
+    // Minecraft/gökyüzü mantığı — ve sunHeight hâlâ isNight() ile birebir
+    // senkron (time=dayLength'te angle=π, sin(π)=0 → gün batımı ANI).
     var angle;
     if(!this.isNight()){
-      var dayT = this.time / this.dayLength; // 0..1, gündüz içindeki ilerleme
-      angle = dayT * Math.PI; // 0 -> PI (yarım daire: doğudan batıya)
+      angle = (this.time / this.dayLength) * Math.PI; // 0 -> π (gündüz yarısı)
     } else {
-      var nightT = (this.time - this.dayLength) / this.nightLength; // 0..1
-      angle = nightT * Math.PI; // güneş için bu aralık ufkun ALTINDA sayılacak
+      angle = Math.PI + ((this.time - this.dayLength) / this.nightLength) * Math.PI; // π -> 2π (gece yarısı)
     }
+    var moonAngle = angle + Math.PI;
     var radius = 60;
-    // Güneş: sadece gündüz yarım-dairesinde yukarıda; gece boyunca ufkun altında sabit tutulur.
-    var sunAngle = this.isNight() ? -0.05 : angle; // gece: neredeyse tam ufkun altı (negatif sin)
-    var sunY = this.isNight() ? -radius*0.15 : Math.sin(sunAngle) * radius;
-    var sunX = Math.cos(this.isNight() ? Math.PI*0.5 : sunAngle) * radius;
-    // Ay: sadece gece yarım-dairesinde yukarıda; gündüz boyunca ufkun altında sabit tutulur.
-    var moonAngle = this.isNight() ? angle : -0.05;
-    var moonY = this.isNight() ? Math.sin(moonAngle) * radius : -radius*0.15;
-    var moonX = Math.cos(this.isNight() ? moonAngle : Math.PI*0.5) * radius;
+    var sunY = Math.sin(angle) * radius;
+    var sunX = Math.cos(angle) * radius;
+    var moonY = Math.sin(moonAngle) * radius;
+    var moonX = Math.cos(moonAngle) * radius;
 
     if(this.sunLight){
       this.sunLight.position.set(camera.position.x + sunX, Math.max(sunY, -20), camera.position.z + 20);
       this.sunLight.target.position.copy(camera.position);
       this.sunLight.target.updateMatrixWorld();
-      var sunUp = this.isNight() ? 0 : Math.max(0, Math.sin(sunAngle));
+      var sunUp = Math.max(0, Math.sin(angle));
       this.sunLight.intensity = sunUp * 0.95;
     }
     if(this.sunSprite){
@@ -21883,7 +21912,7 @@ const DayNightCycle = {
       this.moonLight.position.set(camera.position.x + moonX, Math.max(moonY, -20), camera.position.z + 20);
       this.moonLight.target.position.copy(camera.position);
       this.moonLight.target.updateMatrixWorld();
-      var moonUp = this.isNight() ? Math.max(0, Math.sin(moonAngle)) : 0;
+      var moonUp = Math.max(0, Math.sin(moonAngle));
       this.moonLight.intensity = moonUp * 0.35;
     }
     if(this.moonSprite){
@@ -21897,7 +21926,7 @@ const DayNightCycle = {
     var duskColor = new THREE.Color(0xff9a5c);
     var nightColor = new THREE.Color(0x050818);
     var skyCol = new THREE.Color();
-    var sunHeight = this.isNight() ? -Math.sin(angle) : Math.sin(angle); // gündüz: 0..1..0, gece: 0..-1..0
+    var sunHeight = Math.sin(angle); // gündüz: 0..1..0, gece: 0..-1..0 (aynı sürekli açıdan)
 
     if(sunHeight > 0.15){
       skyCol.copy(dayColor);
@@ -22173,13 +22202,14 @@ const LightningFX = {
     this._ensureFlashLight();
     this._flashLight.position.set(x, groundY+20, z);
     this._flashLight.intensity = 9 + Math.random()*3;
-    this._flashTimer = 0.12;
-
-    // Gökyüzünü çok kısa süreliğine beyaza yaklaştıran bir flaş.
-    if(scene.background && scene.background.isColor){
-      this._flashSkyBackup = scene.background.clone();
-      scene.background.lerp(new THREE.Color(0xffffff), 0.85);
-    }
+    // [FIX] Flaş süresi (0.12sn) ile sönüş hızı (dt*40) uyumsuzdu: ~9-12
+    // yoğunluğun dt*40 hızında sıfıra inmesi ~0.22-0.3sn sürüyordu, yani
+    // süreden UZUN. _flashTimer<=0 olduğunda kod artık intensity'yi hiç
+    // güncellemiyordu — ışık o anki değerde DONUP KALIYORDU (asıl hata:
+    // "etraf bayağı parlıyor ve kalıyor"). Süreyi ışığın gerçekten
+    // sönebileceği kadar uzun tutuyoruz; ayrıca alttaki söndürme bloğunda
+    // artık _flashTimer<=0 olunca intensity'yi de kesin olarak 0'a çekiyoruz.
+    this._flashTimer = 0.35;
 
     this._playThunder();
 
@@ -22196,10 +22226,17 @@ const LightningFX = {
     // Aktif flaşı zamanla söndür.
     if(this._flashTimer > 0){
       this._flashTimer -= dt;
-      if(this._flashLight) this._flashLight.intensity = Math.max(0, this._flashLight.intensity - dt*40);
-      if(this._flashTimer <= 0 && this._flashSkyBackup && scene.background && scene.background.isColor){
-        scene.background.copy(this._flashSkyBackup);
-        this._flashSkyBackup = null;
+      if(this._flashLight){
+        // [FIX] Işık artık _flashTimer oranına göre (kalan süre/toplam süre)
+        // düzgünce sıfıra iniyor — sabit dt*40 azaltma, flaş süresinden daha
+        // yavaş sönüp "donma" hissi veriyordu.
+        this._flashLight.intensity = Math.max(0, this._flashLight.intensity - dt*45);
+      }
+      if(this._flashTimer <= 0){
+        // Süre bittiğinde ışığı KESİN olarak kapat — henüz tam sönmemiş bile
+        // olsa (yoğunluk artığı kalmasın), aksi halde bir sonraki yıldırıma
+        // kadar ekranda hafif bir parlaklık asılı kalabiliyordu.
+        if(this._flashLight) this._flashLight.intensity = 0;
       }
     }
     if(this._timer >= this._nextStrike){
@@ -22991,6 +23028,17 @@ const MobManager = {
         if(m.mesh) m.mesh.position.set(m.x, m.y, m.z);
         continue; // AI/knockback/hitflash tamamen atlanır — spectator "yok" sayılır
       }
+
+      // ── [FIX] Creative modu: canavarlar hasar veremiyordu (takeDamage zaten
+      // engelliyordu) ama yine de oyuncuyu görüyor/kovalıyordu — kullanıcı
+      // raporu ("creative modda bile kovalıyor"). Gerçek Minecraft'ta
+      // Creative'deki oyuncu mob'lar için görünmez/hedef alınamaz sayılır.
+      // Burada mob'u tamamen gizlemiyoruz (creative'de görüp kırabilmek
+      // gerekebilir), sadece AI'ya "oyuncu sonsuz uzaklıkta" gibi gösteriyoruz
+      // — böylece her tür kendi wander/rastgele-dolaşma davranışına düşer,
+      // saldırı/kovalama tetiklenmez.
+      var _playerIsCreative = (typeof gameMode !== 'undefined' && gameMode === 'creative');
+      if(_playerIsCreative) distToPlayer = Infinity;
 
       // ── Tür bazlı AI ──
       if(m.type === 'zombie') ZombieAI.update(m, dt, distToPlayer);
