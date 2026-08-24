@@ -5665,23 +5665,17 @@ function createModSelectionModal(){
       </div>
       <div style="padding:8px 12px 0;text-align:center;color:#7f93b8;font-size:10px;font-family:'Minecraft',monospace;">Drag &amp; drop or import a .lens file, then move mods between the two lists</div>
       <div style="padding:10px 12px 0;display:flex;gap:8px;">
-        <button class="mbtn primary sp-modal-btn" onclick="window.open('https://legendsforce.vercel.app', '_blank');" style="flex:1;font-size:11px;">📥 OPEN LEGENDSFORCE</button>
-        <button class="mbtn primary sp-modal-btn" id="btn-sp-import-lens" style="flex:1;font-size:11px;">⬆ IMPORT .lens FILE</button>
+        <button class="mbtn primary sp-modal-btn" id="btn-sp-add-file" style="flex:1;font-size:11px;">➕ Add file (.lens)</button>
         <input type="file" id="sp-lens-file-input" accept=".lens" style="display:none;">
       </div>
       <div id="sp-mod-import-status" style="padding:2px 12px 0;font-size:11px;color:#8fd39a;min-height:14px;"></div>
 
       <!-- ── İKİ PANEL: Available / Selected ── -->
-      <div style="display:flex;gap:0;padding:12px;flex:1;min-height:0;">
+      <div style="display:flex;gap:12px;padding:12px;flex:1;min-height:0;">
         <!-- SOL: Available -->
         <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
           <div style="text-align:center;color:#fff;font-family:'Minecraft',monospace;font-size:12px;font-weight:bold;text-decoration:underline;padding-bottom:6px;">Available</div>
           <div id="sp-mod-available-list" style="flex:1;overflow-y:auto;background:rgba(0,0,0,.35);border:1px solid rgba(117,167,255,.15);border-radius:6px;padding:6px;display:flex;flex-direction:column;gap:4px;min-height:260px;max-height:44vh;"></div>
-        </div>
-        <!-- ORTA: Ok butonları -->
-        <div style="display:flex;flex-direction:column;justify-content:center;align-items:center;gap:10px;padding:0 10px;">
-          <button class="mbtn primary sp-modal-btn" id="btn-sp-mod-add" title="Add to world" style="width:42px;height:34px;font-size:14px;padding:0;">→</button>
-          <button class="mbtn back sp-modal-btn" id="btn-sp-mod-remove" title="Remove from world" style="width:42px;height:34px;font-size:14px;padding:0;">←</button>
         </div>
         <!-- SAĞ: Selected -->
         <div style="flex:1;display:flex;flex-direction:column;min-width:0;">
@@ -5691,8 +5685,7 @@ function createModSelectionModal(){
       </div>
 
       <div style="padding:12px;border-top:1px solid rgba(117,167,255,.2);display:flex;gap:8px;justify-content:flex-end;">
-        <button class="mbtn back sp-modal-btn" onclick="this.closest('#sp-mod-selection-modal').style.display='none';" style="flex:1;">BACK</button>
-        <button class="mbtn primary sp-modal-btn" onclick="confirmModSelection();" style="flex:1;">DONE</button>
+        <button class="mbtn primary sp-modal-btn" onclick="confirmModSelection();" style="flex:0.5;font-size:11px;">DONE</button>
       </div>
     </div>
   `;
@@ -5709,7 +5702,7 @@ function createModSelectionModal(){
 
   // ── .lens dosyası içe aktarma (buton) ─────────────────────────────────
   var fileInput = modal.querySelector('#sp-lens-file-input');
-  modal.querySelector('#btn-sp-import-lens').addEventListener('click', function(){ fileInput.click(); });
+  modal.querySelector('#btn-sp-add-file').addEventListener('click', function(){ fileInput.click(); });
   fileInput.addEventListener('change', function(){
     var file = fileInput.files && fileInput.files[0];
     if(!file) return;
@@ -5728,23 +5721,7 @@ function createModSelectionModal(){
     files.forEach(function(f){ _spImportLensFile(modal, f); });
   });
 
-  // ── Ok butonları: Available ⇄ Selected arası taşıma ───────────────────
-  modal.querySelector('#btn-sp-mod-add').addEventListener('click', function(){
-    var avEl = modal.querySelector('#sp-mod-available-list');
-    var picked = avEl.querySelector('.sp-mod-row.picked');
-    if(!picked) return;
-    var id = picked.dataset.modId;
-    if(!_spPendingSelected.includes(id)) _spPendingSelected.push(id);
-    renderModPanels();
-  });
-  modal.querySelector('#btn-sp-mod-remove').addEventListener('click', function(){
-    var selEl = modal.querySelector('#sp-mod-selected-list');
-    var picked = selEl.querySelector('.sp-mod-row.picked');
-    if(!picked) return;
-    var id = picked.dataset.modId;
-    _spPendingSelected = _spPendingSelected.filter(function(x){ return x !== id; });
-    renderModPanels();
-  });
+  // ── Ok ikonları artık mod satırlarında hover olunca gösteriliyor ───────
   
   return modal;
 }
@@ -5788,28 +5765,49 @@ function _spModRow(mod, extraClass){
   var row = document.createElement('div');
   row.className = 'sp-mod-row' + (extraClass ? (' '+extraClass) : '');
   row.dataset.modId = mod.id;
-  row.style.cssText = 'display:flex;align-items:flex-start;gap:8px;padding:6px;border-radius:5px;cursor:pointer;background:rgba(117,167,255,.06);border:1px solid transparent;';
+  var isAvailable = extraClass === 'sp-mod-in-available';
   var entryCount = (mod.entries || []).length;
-  row.innerHTML = _spModIconHTML(mod) +
-    '<div style="display:flex;flex-direction:column;gap:1px;min-width:0;">' +
+  
+  row.style.cssText = 'display:flex;align-items:center;gap:8px;padding:6px;border-radius:5px;cursor:pointer;background:rgba(117,167,255,.06);border:1px solid transparent;position:relative;transition:background 0.15s, border-color 0.15s;';
+  
+  var iconHTML = _spModIconHTML(mod);
+  var textHTML = '<div style="display:flex;flex-direction:column;gap:1px;min-width:0;flex:1;">' +
       '<div style="color:#fff;font-family:\'Minecraft\',monospace;font-size:12px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">'+ (mod.name||'Unknown Mod').replace(/</g,'&lt;') +'</div>' +
       '<div style="color:#8aa0c8;font-size:10px;">'+ entryCount +' entries</div>' +
     '</div>';
-  row.addEventListener('click', function(){
-    row.parentElement.querySelectorAll('.sp-mod-row').forEach(function(r){ r.classList.remove('picked'); r.style.background='rgba(117,167,255,.06)'; r.style.borderColor='transparent'; });
-    row.classList.add('picked');
-    row.style.background = 'rgba(117,167,255,.22)';
-    row.style.borderColor = '#75a7ff';
+  
+  // Sağda hover olunca gösterilecek ok ikonu
+  var arrowHTML = '<div class="sp-mod-arrow" style="opacity:0;transition:opacity 0.15s;font-size:18px;color:#75a7ff;margin-left:auto;flex-shrink:0;">' + 
+    (isAvailable ? '→' : '←') + 
+    '</div>';
+  
+  row.innerHTML = iconHTML + textHTML + arrowHTML;
+  
+  // Hover: ok ikonu göster
+  row.addEventListener('mouseenter', function(){
+    row.querySelector('.sp-mod-arrow').style.opacity = '1';
   });
-  row.addEventListener('dblclick', function(){
-    // Çift tık: hangi panelde olduğuna göre karşı tarafa taşı (hızlı erişim için ok butonlarına ek kolaylık)
-    if(extraClass === 'sp-mod-in-available'){
+  row.addEventListener('mouseleave', function(){
+    row.querySelector('.sp-mod-arrow').style.opacity = '0';
+  });
+  
+  // Mobilde her zaman göster (güvenli)
+  if(window.innerWidth <= 768){
+    row.querySelector('.sp-mod-arrow').style.opacity = '1';
+  }
+  
+  // Tıklama: mod taşı (renk değiştir + selected listine ekle/çıkar)
+  row.addEventListener('click', function(){
+    if(isAvailable){
+      // Available'dan Selected'a taşı
       if(!_spPendingSelected.includes(mod.id)) _spPendingSelected.push(mod.id);
     } else {
+      // Selected'dan Available'a taşı
       _spPendingSelected = _spPendingSelected.filter(function(x){ return x !== mod.id; });
     }
     renderModPanels();
   });
+  
   return row;
 }
 function renderModPanels(){
