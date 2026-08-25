@@ -2532,6 +2532,12 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .rp-tab-btn.active{color:#75a7ff;border-bottom-color:#75a7ff;}
 .rp-tab-pane{display:none;}
 .rp-tab-pane.active{display:flex;flex-direction:column;gap:8px;}
+.rp-upload-row{display:flex;flex-direction:column;gap:8px;margin-bottom:10px;padding:10px;background:rgba(117,167,255,.08);border:2px dashed rgba(117,167,255,.3);border-radius:6px;}
+.rp-upload-btn{padding:12px 16px;background:linear-gradient(180deg,#2a4a7a,#1a2a5a);border:none;border-bottom:3px solid #0a1030;border-right:3px solid #0a1030;border-top:3px solid #4a6aba;border-left:3px solid #4a6aba;color:#75a7ff;font-size:12px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:4px;transition:all .15s;width:100%;letter-spacing:1px;}
+.rp-upload-btn:hover{background:linear-gradient(180deg,#3a5a8a,#2a3a6a);border-bottom-color:#1a2050;}
+.rp-status-msg{font-size:11px;color:rgba(255,255,255,.55);text-align:center;min-height:14px;padding:4px 0;}
+.rp-status-msg.success{color:#90EE90;}
+.rp-status-msg.error{color:#FF6B6B;}
 .rp-search-row{display:flex;gap:6px;margin-bottom:4px;}
 .rp-search-input{flex:1;padding:8px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:11px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;}
 .rp-search-input::placeholder{color:rgba(255,255,255,.3);}
@@ -3752,11 +3758,13 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
           <button type="button" class="rp-tab-btn" data-rp-tab="active">Active</button>
         </div>
         <div class="rp-tab-pane active" id="rp-available-pane" data-rp-pane="available">
-          <div class="rp-search-row">
-            <input type="text" id="rp-search-input" class="rp-search-input" placeholder="Search resource packs...">
+          <div class="rp-upload-row">
+            <input type="file" id="rp-file-input" class="rp-file-input" accept=".texls" style="display:none;">
+            <button class="rp-upload-btn" id="rp-upload-btn">📁 UPLOAD TEXTURE PACK</button>
+            <div id="rp-upload-status" class="rp-status-msg"></div>
           </div>
           <div class="rp-grid" id="rp-available-grid">
-            <div class="rp-empty-msg">No resource packs available. Download one to get started!</div>
+            <div class="rp-empty-msg">No resource packs available. Upload one to get started!</div>
           </div>
         </div>
         <div class="rp-tab-pane" id="rp-active-pane" data-rp-pane="active">
@@ -3821,11 +3829,13 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
           <button type="button" class="rp-tab-btn" data-rp-tab="active">Active</button>
         </div>
         <div class="rp-tab-pane active" id="rp-available-pane" data-rp-pane="available">
-          <div class="rp-search-row">
-            <input type="text" id="rp-search-input" class="rp-search-input" placeholder="Search resource packs...">
+          <div class="rp-upload-row">
+            <input type="file" id="rp-file-input" class="rp-file-input" accept=".texls" style="display:none;">
+            <button class="rp-upload-btn" id="rp-upload-btn">📁 UPLOAD TEXTURE PACK</button>
+            <div id="rp-upload-status" class="rp-status-msg"></div>
           </div>
           <div class="rp-grid" id="rp-available-grid">
-            <div class="rp-empty-msg">No resource packs available. Download one to get started!</div>
+            <div class="rp-empty-msg">No resource packs available. Upload one to get started!</div>
           </div>
         </div>
         <div class="rp-tab-pane" id="rp-active-pane" data-rp-pane="active">
@@ -25727,21 +25737,125 @@ window.ArrowManager = ArrowManager;
     }
   });
   
-  // Handle Resource Packs search
-  var rpSearchInput = document.getElementById('rp-search-input');
-  if(rpSearchInput){
-    rpSearchInput.addEventListener('input', function(e){
-      var query = e.target.value.toLowerCase();
-      var cards = document.querySelectorAll('#rp-available-grid .rp-card');
-      cards.forEach(function(card){
-        var name = card.querySelector('.rp-card-name').textContent.toLowerCase();
-        card.style.display = name.includes(query) ? 'flex' : 'none';
-      });
+  // File upload handler
+  var rpUploadBtn = document.getElementById('rp-upload-btn');
+  var rpFileInput = document.getElementById('rp-file-input');
+  var rpUploadStatus = document.getElementById('rp-upload-status');
+  
+  if(rpUploadBtn && rpFileInput){
+    rpUploadBtn.addEventListener('click', function(){
+      rpFileInput.click();
+    });
+    
+    rpFileInput.addEventListener('change', function(e){
+      var file = e.target.files[0];
+      if(!file) return;
+      
+      if(!file.name.endsWith('.texls')){
+        rpUploadStatus.textContent = '❌ Only .texls files allowed';
+        rpUploadStatus.classList.add('error');
+        setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('error'); }, 3000);
+        return;
+      }
+      
+      rpUploadStatus.textContent = '⏳ Loading...';
+      
+      var reader = new FileReader();
+      reader.onload = function(event){
+        try {
+          var content = event.target.result;
+          var packData = parseTexlsData(content);
+          
+          if(!packData || !packData.id || !packData.textures){
+            throw new Error('Invalid pack format');
+          }
+          
+          // Check if pack already exists
+          var existing = window.resourcePacksState.available.find(function(p){ return p.id === packData.id; });
+          if(existing){
+            rpUploadStatus.textContent = '⚠️ Pack already uploaded';
+            rpUploadStatus.classList.add('error');
+            setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('error'); }, 3000);
+            return;
+          }
+          
+          // Add new pack
+          var newPack = {
+            id: packData.id,
+            name: packData.displayName || packData.id,
+            author: packData.author || 'Unknown',
+            thumb: '📦',
+            active: false,
+            texlsData: packData
+          };
+          
+          window.resourcePacksState.available.push(newPack);
+          
+          // Save to localStorage
+          try {
+            var stored = localStorage.getItem('legends_texture_packs') || '{}';
+            var packs = JSON.parse(stored);
+            packs[packData.id] = {
+              id: packData.id,
+              displayName: packData.displayName,
+              author: packData.author,
+              content: content
+            };
+            localStorage.setItem('legends_texture_packs', JSON.stringify(packs));
+          } catch(err){
+            console.warn('Failed to save to localStorage:', err);
+          }
+          
+          rpUploadStatus.textContent = '✅ Pack uploaded successfully!';
+          rpUploadStatus.classList.add('success');
+          rpFileInput.value = '';
+          
+          renderResourcePacksGrids();
+          
+          setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('success'); }, 3000);
+        } catch(err){
+          console.error('Error loading pack:', err);
+          rpUploadStatus.textContent = '❌ Error: ' + err.message;
+          rpUploadStatus.classList.add('error');
+          rpFileInput.value = '';
+          setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('error'); }, 3000);
+        }
+      };
+      
+      reader.readAsText(file);
     });
   }
   
   // Initialize on load
   loadActiveResourcePacks();
+  
+  // Load uploaded packs from localStorage
+  try {
+    var storedPacks = localStorage.getItem('legends_texture_packs');
+    if(storedPacks){
+      var packs = JSON.parse(storedPacks);
+      Object.keys(packs).forEach(function(packId){
+        var packInfo = packs[packId];
+        var alreadyExists = window.resourcePacksState.available.find(function(p){ return p.id === packId; });
+        if(!alreadyExists){
+          var parsed = parseTexlsData(packInfo.content);
+          if(parsed){
+            var newPack = {
+              id: packId,
+              name: packInfo.displayName || packId,
+              author: packInfo.author || 'Unknown',
+              thumb: '📦',
+              active: false,
+              texlsData: parsed
+            };
+            window.resourcePacksState.available.push(newPack);
+          }
+        }
+      });
+    }
+  } catch(err){
+    console.warn('Failed to load stored packs:', err);
+  }
   
   // Try to load sun_moon_pack.texls if available
   // For now, we'll embed it as a string or load via fetch
