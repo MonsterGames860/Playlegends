@@ -25738,8 +25738,18 @@ window.ArrowManager = ArrowManager;
   });
   
   // File upload handler
-  var rpUploadBtn = document.getElementById('rp-upload-btn');
+  // Eğer file input yoksa oluştur
   var rpFileInput = document.getElementById('rp-file-input');
+  if(!rpFileInput){
+    rpFileInput = document.createElement('input');
+    rpFileInput.id = 'rp-file-input';
+    rpFileInput.type = 'file';
+    rpFileInput.accept = '.texls';
+    rpFileInput.style.display = 'none';
+    document.body.appendChild(rpFileInput);
+  }
+  
+  var rpUploadBtn = document.getElementById('rp-upload-btn');
   var rpUploadStatus = document.getElementById('rp-upload-status');
   
   if(rpUploadBtn && rpFileInput){
