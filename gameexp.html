@@ -116,6 +116,7 @@
     "gameModeSectionLabel": "GAME MODE",
     "cheatsLabel": "CHEATS",
     "modsLabel": "MODS",
+    "resourcePacksLabel": "RESOURCE PACKS",
     "cheatOff": "OFF",
     "cheatOn": "ON",
     "deathTitle": "You Died!",
@@ -448,6 +449,7 @@
     "gameModeSectionLabel": "OYUN MODU",
     "cheatsLabel": "HİLELER",
     "modsLabel": "MODLAR",
+    "resourcePacksLabel": "KAYNAK PAKETLERI",
     "cheatOff": "KAPALI",
     "cheatOn": "AÇIK",
     "deathTitle": "Öldün!",
@@ -2521,6 +2523,34 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .lang-tab-opt{background:rgba(0,0,0,.35);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-family:'Minecraftia',monospace;font-size:12px;padding:12px 8px;cursor:pointer;letter-spacing:.5px;transition:border-color .15s,background .15s;}
 .lang-tab-opt:hover{border-color:rgba(117,167,255,.5);}
 .lang-tab-opt.active{border-color:#75a7ff;background:rgba(117,167,255,.15);color:#75a7ff;}
+
+/* ── RESOURCE PACKS SECTION ── */
+.rp-tabs-container{width:100%;display:flex;flex-direction:column;gap:10px;}
+.rp-tabs-header{display:flex;gap:6px;border-bottom:2px solid rgba(255,255,255,.12);flex-shrink:0;}
+.rp-tab-btn{flex:1;background:transparent;border:none;border-bottom:3px solid transparent;color:rgba(255,255,255,.5);font-family:'Minecraftia',monospace;font-size:12px;padding:10px 4px;cursor:pointer;letter-spacing:1px;transition:color .15s,border-color .15s;}
+.rp-tab-btn:hover{color:rgba(255,255,255,.8);}
+.rp-tab-btn.active{color:#75a7ff;border-bottom-color:#75a7ff;}
+.rp-tab-pane{display:none;}
+.rp-tab-pane.active{display:flex;flex-direction:column;gap:8px;}
+.rp-search-row{display:flex;gap:6px;margin-bottom:4px;}
+.rp-search-input{flex:1;padding:8px 10px;background:rgba(0,0,0,.45);border:2px solid rgba(255,255,255,.15);border-radius:4px;color:#fff;font-size:11px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;}
+.rp-search-input::placeholder{color:rgba(255,255,255,.3);}
+.rp-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;max-height:280px;overflow-y:auto;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
+.rp-grid::-webkit-scrollbar{width:4px;}
+.rp-grid::-webkit-scrollbar-thumb{background:rgba(117,167,255,.3);border-radius:2px;}
+.rp-card{background:linear-gradient(180deg,rgba(30,50,80,.7),rgba(15,25,50,.7));border:1px solid rgba(117,167,255,.12);border-radius:8px;padding:10px;display:flex;flex-direction:column;gap:6px;cursor:pointer;transition:border-color .15s,background .15s;}
+.rp-card:hover{border-color:rgba(117,167,255,.35);background:linear-gradient(180deg,rgba(40,60,90,.8),rgba(20,35,60,.8));}
+.rp-card-header{display:flex;align-items:center;gap:8px;margin-bottom:2px;}
+.rp-card-thumb{width:48px;height:48px;flex-shrink:0;border-radius:4px;background:rgba(0,0,0,.35);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:20px;overflow:hidden;}
+.rp-card-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;}
+.rp-card-name{font-size:11px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.rp-card-author{font-size:9px;color:rgba(255,255,255,.4);}
+.rp-card-actions{display:flex;gap:4px;flex-shrink:0;}
+.rp-action-btn{padding:4px 8px;background:rgba(117,167,255,.15);border:1px solid rgba(117,167,255,.3);border-radius:3px;color:#75a7ff;font-size:9px;font-weight:bold;cursor:pointer;font-family:inherit;transition:background .15s,border-color .15s;}
+.rp-action-btn:hover{background:rgba(117,167,255,.28);border-color:rgba(117,167,255,.65);}
+.rp-action-btn.remove{background:rgba(255,80,80,.1);border-color:rgba(255,100,100,.3);color:rgba(255,140,140,.85);}
+.rp-action-btn.remove:hover{background:rgba(255,80,80,.22);border-color:rgba(255,100,100,.6);}
+.rp-empty-msg{grid-column:1/-1;text-align:center;color:rgba(255,255,255,.4);font-size:11px;padding:20px 0;}
 .menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
 .menu-input::placeholder{letter-spacing:1px;color:rgba(255,255,255,.3);}
 .menu-input:focus{border-color:rgba(117,167,255,.6);}
@@ -3665,6 +3695,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
     <div class="settings-tabs" id="pc-settings-tabs">
       <button type="button" class="settings-tab-btn active" id="pc-tab-controls-btn" data-tab="controls" data-settings-scope="pc">Controls</button>
       <button type="button" class="settings-tab-btn" id="pc-tab-language-btn" data-tab="language" data-settings-scope="pc">Language</button>
+      <button type="button" class="settings-tab-btn" id="pc-tab-resourcepacks-btn" data-tab="resourcepacks" data-settings-scope="pc">Resource Packs</button>
     </div>
     <div class="settings-tab-panel active" id="pc-tab-controls-panel" data-tab-panel="controls">
     <div class="setting-row">
@@ -3713,6 +3744,28 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
         <button type="button" class="lang-tab-opt" data-lang="pt">Português</button>
       </div>
     </div>
+    <div class="settings-tab-panel" id="pc-tab-resourcepacks-panel" data-tab-panel="resourcepacks">
+      <div class="sub-title" id="txt-resourcepacks-tab-title">RESOURCE PACKS</div>
+      <div class="rp-tabs-container">
+        <div class="rp-tabs-header">
+          <button type="button" class="rp-tab-btn active" data-rp-tab="available">Available</button>
+          <button type="button" class="rp-tab-btn" data-rp-tab="active">Active</button>
+        </div>
+        <div class="rp-tab-pane active" id="rp-available-pane" data-rp-pane="available">
+          <div class="rp-search-row">
+            <input type="text" id="rp-search-input" class="rp-search-input" placeholder="Search resource packs...">
+          </div>
+          <div class="rp-grid" id="rp-available-grid">
+            <div class="rp-empty-msg">No resource packs available. Download one to get started!</div>
+          </div>
+        </div>
+        <div class="rp-tab-pane" id="rp-active-pane" data-rp-pane="active">
+          <div class="rp-grid" id="rp-active-grid">
+            <div class="rp-empty-msg">No active resource packs. Add one from the Available tab!</div>
+          </div>
+        </div>
+      </div>
+    </div>
     <button class="mbtn back" id="btn-back-pc-settings"></button>
   </div>
   <div class="menu-screen" id="screen-mobile-settings">
@@ -3722,6 +3775,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
     <div class="settings-tabs" id="mobile-settings-tabs">
       <button type="button" class="settings-tab-btn active" id="mobile-tab-controls-btn" data-tab="controls" data-settings-scope="mobile">Controls</button>
       <button type="button" class="settings-tab-btn" id="mobile-tab-language-btn" data-tab="language" data-settings-scope="mobile">Language</button>
+      <button type="button" class="settings-tab-btn" id="mobile-tab-resourcepacks-btn" data-tab="resourcepacks" data-settings-scope="mobile">Resource Packs</button>
     </div>
     <div class="settings-tab-panel active" id="mobile-tab-controls-panel" data-tab-panel="controls">
     <div class="setting-row">
@@ -3757,6 +3811,28 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
         <button type="button" class="lang-tab-opt" data-lang="es">Español</button>
         <button type="button" class="lang-tab-opt" data-lang="ru">Русский</button>
         <button type="button" class="lang-tab-opt" data-lang="pt">Português</button>
+      </div>
+    </div>
+    <div class="settings-tab-panel" id="mobile-tab-resourcepacks-panel" data-tab-panel="resourcepacks">
+      <div class="sub-title" id="txt-resourcepacks-tab-title">RESOURCE PACKS</div>
+      <div class="rp-tabs-container">
+        <div class="rp-tabs-header">
+          <button type="button" class="rp-tab-btn active" data-rp-tab="available">Available</button>
+          <button type="button" class="rp-tab-btn" data-rp-tab="active">Active</button>
+        </div>
+        <div class="rp-tab-pane active" id="rp-available-pane" data-rp-pane="available">
+          <div class="rp-search-row">
+            <input type="text" id="rp-search-input" class="rp-search-input" placeholder="Search resource packs...">
+          </div>
+          <div class="rp-grid" id="rp-available-grid">
+            <div class="rp-empty-msg">No resource packs available. Download one to get started!</div>
+          </div>
+        </div>
+        <div class="rp-tab-pane" id="rp-active-pane" data-rp-pane="active">
+          <div class="rp-grid" id="rp-active-grid">
+            <div class="rp-empty-msg">No active resource packs. Add one from the Available tab!</div>
+          </div>
+        </div>
       </div>
     </div>
     <button class="mbtn back" id="btn-back-mobile-settings"></button>
@@ -5492,12 +5568,24 @@ document.addEventListener('click', e=>{
   // Ayarlar ekranındaki "Kontroller / Dil" sekme geçişi (PC + Mobil ortak)
   const tabBtn = e.target.closest && e.target.closest('.settings-tab-btn');
   if(tabBtn){
-    const tab = tabBtn.getAttribute('data-tab'); // 'controls' | 'language'
+    const tab = tabBtn.getAttribute('data-tab'); // 'controls' | 'language' | 'resourcepacks'
     const container = tabBtn.closest('.menu-screen');
     if(!container) return;
     container.querySelectorAll('.settings-tab-btn').forEach(b=>b.classList.toggle('active', b===tabBtn));
     container.querySelectorAll('.settings-tab-panel').forEach(p=>{
       p.classList.toggle('active', p.getAttribute('data-tab-panel')===tab);
+    });
+  }
+  
+  // Resource Packs tab buttons
+  const rpTabBtn = e.target.closest && e.target.closest('.rp-tab-btn');
+  if(rpTabBtn){
+    const rpTab = rpTabBtn.getAttribute('data-rp-tab'); // 'available' | 'active'
+    const container = rpTabBtn.closest('.rp-tabs-container');
+    if(!container) return;
+    container.querySelectorAll('.rp-tab-btn').forEach(b=>b.classList.toggle('active', b===rpTabBtn));
+    container.querySelectorAll('.rp-tab-pane').forEach(p=>{
+      p.classList.toggle('active', p.getAttribute('data-rp-pane')===rpTab);
     });
   }
 });
@@ -5723,6 +5811,24 @@ function createModSelectionModal(){
 
   // ── Ok ikonları artık mod satırlarında hover olunca gösteriliyor ───────
   
+  // ── Mod silme fonksiyonu ──────────────────────────────────────────────
+  window._spDeleteMod = function(modId){
+    if(!confirm('Bu modı silmek istediğinizden emin misiniz?\n\n"' + modId + '"')) return;
+    
+    var mods = JSON.parse(localStorage.getItem('spImportedMods') || '{}');
+    delete mods[modId];
+    localStorage.setItem('spImportedMods', JSON.stringify(mods));
+    
+    // Seçili modlardan da çıkar
+    _spPendingSelected = _spPendingSelected.filter(function(id){ return id !== modId; });
+    
+    if(typeof showToast === 'function'){
+      showToast('Mod silindi: ' + modId);
+    }
+    
+    renderModPanels();
+  };
+  
   return modal;
 }
 // Ortak .lens içe aktarma yardımcı fonksiyonu (buton + drag&drop tarafından kullanılır)
@@ -5781,19 +5887,31 @@ function _spModRow(mod, extraClass){
     (isAvailable ? '→' : '←') + 
     '</div>';
   
-  row.innerHTML = iconHTML + textHTML + arrowHTML;
+  // Silme X butonu (yalnızca Available listinde)
+  var deleteHTML = '';
+  if(isAvailable){
+    deleteHTML = '<button class="sp-mod-delete-btn" onclick="event.stopPropagation(); window._spDeleteMod(\'' + mod.id.replace(/'/g, "\\'") + '\');" style="opacity:0;transition:opacity 0.15s;background:#c41e3a;border:none;color:#fff;border-radius:3px;width:20px;height:20px;padding:0;cursor:pointer;font-size:12px;flex-shrink:0;display:flex;align-items:center;justify-content:center;">✕</button>';
+  }
   
-  // Hover: ok ikonu göster
+  row.innerHTML = iconHTML + textHTML + arrowHTML + deleteHTML;
+  
+  // Hover: ok ikonu ve delete butonu göster
   row.addEventListener('mouseenter', function(){
     row.querySelector('.sp-mod-arrow').style.opacity = '1';
+    var delBtn = row.querySelector('.sp-mod-delete-btn');
+    if(delBtn) delBtn.style.opacity = '1';
   });
   row.addEventListener('mouseleave', function(){
     row.querySelector('.sp-mod-arrow').style.opacity = '0';
+    var delBtn = row.querySelector('.sp-mod-delete-btn');
+    if(delBtn) delBtn.style.opacity = '0';
   });
   
   // Mobilde her zaman göster (güvenli)
   if(window.innerWidth <= 768){
     row.querySelector('.sp-mod-arrow').style.opacity = '1';
+    var delBtn = row.querySelector('.sp-mod-delete-btn');
+    if(delBtn) delBtn.style.opacity = '1';
   }
   
   // Tıklama: mod taşı (renk değiştir + selected listine ekle/çıkar)
@@ -16639,6 +16757,7 @@ preloadTabIcons();
       { id:'nature',   label: en ? '🌿 Nature'   : '🌿 Doğa',  filter:[1,2,3,7,8,16] },
       { id:'building', label: en ? '🧱 Building' : '🧱 Yapı',  filter:[0,4,5,6,12,13,14,15,17]},
       { id:'special',  label: en ? '⚗ Special'  : '⚗ Özel',  filter:[9,10,11] },
+      { id:'items',    label: en ? '🎁 Items'   : '🎁 Itemler', filter: null, isItemTab:true },
       { id:'mods',     label: en ? '📦 Mods'    : '📦 Modlar', filter: null, isModTab:true },
     ];
   }
@@ -16722,30 +16841,112 @@ preloadTabIcons();
     const tabObj  = TABS.find(t => t.id === _activeTab);
     let shown = 0;
 
-    BLOCK_DEFS.forEach((def, i) => {
-      if(!def) return;
-      const isModBlock = !!(window.LF && window.LF._blockNames && window.LF._blockNames[i]);
-      if(tabObj && tabObj.isModTab && !isModBlock) return; // "Mods" sekmesi sadece mod bloklarını gösterir
-      if(tabObj && !tabObj.isModTab && tabObj.filter && !tabObj.filter.includes(i)) return;
-      const modName = (typeof window._lfResolveBlockName==='function') && window._lfResolveBlockName(i);
-      const bName = (modName || names[i] || def[0] || '').toLowerCase();
-      if(searchQ && !bName.includes(searchQ)) return;
+    // ── BLOK RENDER ──────────────────────────────────────────────────
+    if(_activeTab !== 'items' && _activeTab !== 'mods'){
+      BLOCK_DEFS.forEach((def, i) => {
+        if(!def) return;
+        const isModBlock = !!(window.LF && window.LF._blockNames && window.LF._blockNames[i]);
+        if(tabObj && tabObj.filter && !tabObj.filter.includes(i)) return;
+        const modName = (typeof window._lfResolveBlockName==='function') && window._lfResolveBlockName(i);
+        const bName = (modName || names[i] || def[0] || '').toLowerCase();
+        if(searchQ && !bName.includes(searchQ)) return;
 
-      const item = document.createElement('div');
-      item.className = 'inv-item' + (invSelectedBlock===i?' selected':'');
-      const c = document.createElement('canvas'); c.width=50; c.height=50;
-      const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
-      if(rawTexC[def[0]] && rawTexC[def[1]]) drawIsoBlock(ctx, rawTexC[def[0]], rawTexC[def[1]]);
-      const lbl = document.createElement('div'); lbl.className='inv-item-name'; lbl.textContent=modName||names[i]||'';
-      item.appendChild(c); item.appendChild(lbl);
-      item.addEventListener('click', () => {
-        invSelectedBlock = i;
-        if(typeof playClickSound==='function') playClickSound();
-        _renderInvTabbed();
+        const item = document.createElement('div');
+        item.className = 'inv-item' + (invSelectedBlock===i?' selected':'');
+        const c = document.createElement('canvas'); c.width=50; c.height=50;
+        const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+        if(rawTexC[def[0]] && rawTexC[def[1]]) drawIsoBlock(ctx, rawTexC[def[0]], rawTexC[def[1]]);
+        const lbl = document.createElement('div'); lbl.className='inv-item-name'; lbl.textContent=modName||names[i]||'';
+        item.appendChild(c); item.appendChild(lbl);
+        item.addEventListener('click', () => {
+          invSelectedBlock = i;
+          if(typeof playClickSound==='function') playClickSound();
+          _renderInvTabbed();
+        });
+        grid.appendChild(item);
+        shown++;
       });
-      grid.appendChild(item);
-      shown++;
-    });
+    }
+    
+    // ── ITEM RENDER (ModLand item'leri) ──────────────────────────────
+    if(_activeTab === 'items' || _activeTab === 'all'){
+      if(window.LF && window.LF._items){
+        Object.keys(window.LF._items).forEach(itemId => {
+          const itemData = window.LF._items[itemId];
+          if(!itemData) return;
+          
+          const iName = (itemData.displayName || itemId || '').toLowerCase();
+          if(searchQ && !iName.includes(searchQ)) return;
+          
+          const item = document.createElement('div');
+          item.className = 'inv-item';
+          
+          const c = document.createElement('canvas'); c.width=50; c.height=50;
+          const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+          if(itemData._icon instanceof HTMLCanvasElement){
+            ctx.drawImage(itemData._icon, 0, 0);
+          } else {
+            ctx.fillStyle = '#cccccc';
+            ctx.fillRect(5, 5, 40, 40);
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 20px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('?', 25, 30);
+          }
+          
+          const lbl = document.createElement('div'); lbl.className='inv-item-name'; lbl.textContent=itemData.displayName||itemId||'';
+          item.appendChild(c); item.appendChild(lbl);
+          
+          item.addEventListener('click', () => {
+            if(typeof playClickSound==='function') playClickSound();
+            if(typeof showToast === 'function') showToast('Item: ' + itemData.displayName);
+          });
+          
+          grid.appendChild(item);
+          shown++;
+        });
+      }
+    }
+    
+    // ── MOD RENDER ───────────────────────────────────────────────────
+    if(_activeTab === 'mods'){
+      const savedMods = (window.LF && typeof window.LF._getSavedModsList === 'function') ? window.LF._getSavedModsList() : [];
+      savedMods.forEach(modData => {
+        const mName = (modData.modName || modData.id || '').toLowerCase();
+        if(searchQ && !mName.includes(searchQ)) return;
+        
+        const item = document.createElement('div');
+        item.className = 'inv-item';
+        
+        const c = document.createElement('canvas'); c.width=50; c.height=50;
+        const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+        
+        // Mod icon (SVG var mı?)
+        if(modData.icon && modData.icon.startsWith('data:image')){
+          const img = new Image();
+          img.onload = function(){ ctx.drawImage(img, 0, 0, 50, 50); };
+          img.src = modData.icon;
+        } else {
+          ctx.fillStyle = '#4488ff';
+          ctx.fillRect(0, 0, 50, 50);
+          ctx.fillStyle = '#ffffff';
+          ctx.font = 'bold 16px Arial';
+          ctx.textAlign = 'center';
+          ctx.fillText('MOD', 25, 28);
+        }
+        
+        const lbl = document.createElement('div'); lbl.className='inv-item-name'; lbl.textContent=modData.modName||modData.id||'';
+        item.appendChild(c); item.appendChild(lbl);
+        
+        item.addEventListener('click', () => {
+          if(typeof playClickSound==='function') playClickSound();
+          if(typeof showToast === 'function') showToast('Mod: ' + (modData.modName || modData.id));
+        });
+        
+        grid.appendChild(item);
+        shown++;
+      });
+    }
 
     const counter2 = document.getElementById('inv-item-count');
     const _lEn2 = (typeof currentLang!=='undefined')&&currentLang==='en';
@@ -25331,7 +25532,236 @@ window.ArrowManager = ArrowManager;
   setInterval(refreshFabVisibility, 1000);
 })();
 </script>
-<!-- ==================== END STAFF ADMIN PANEL PATCH v2 ==================== -->
+<!-- ==================== RESOURCE PACKS MANAGER ==================== -->
+<script>
+(function(){
+  'use strict';
+  
+  // Resource Packs state
+  window.resourcePacksState = {
+    available: [
+      { 
+        id: 'custom:sun_moon_pack', 
+        name: 'Sun & Moon Custom Pack', 
+        author: 'LegendsForce', 
+        thumb: '🌞', 
+        active: false,
+        texlsData: null // Will be loaded from .texls file
+      },
+      { id: 'vanilla', name: 'Vanilla+', author: 'Official', thumb: '📦', active: false },
+      { id: 'ui-update', name: 'UI Update Pack', author: 'Dev Team', thumb: '🎨', active: false },
+      { id: 'textures-hd', name: 'HD Textures', author: 'Community', thumb: '✨', active: false }
+    ],
+    active: []
+  };
+  
+  // Resource Packs localStorage key
+  const RP_STORAGE_KEY = 'legends_active_resource_packs';
+  
+  // Load active resource packs from localStorage
+  function loadActiveResourcePacks(){
+    try {
+      var stored = localStorage.getItem(RP_STORAGE_KEY);
+      if(stored){
+        window.resourcePacksState.active = JSON.parse(stored);
+        // Update available list
+        window.resourcePacksState.available.forEach(function(rp){
+          rp.active = window.resourcePacksState.active.some(function(a){ return a.id === rp.id; });
+        });
+      }
+    } catch(e){
+      console.warn('Failed to load active resource packs:', e);
+    }
+  }
+  
+  // Parse .texls file format
+  function parseTexlsData(texlsContent){
+    try {
+      // Remove header lines
+      var lines = texlsContent.split('\n');
+      var jsonStart = -1;
+      
+      for(var i = 0; i < lines.length; i++){
+        if(lines[i].includes('texture_pack')){
+          jsonStart = i;
+          break;
+        }
+      }
+      
+      if(jsonStart === -1) return null;
+      
+      // Extract JSON part (everything after "texture_pack ")
+      var jsonStr = lines[jsonStart].substring(lines[jsonStart].indexOf('{'));
+      
+      // If JSON spans multiple lines, concatenate them
+      for(var i = jsonStart + 1; i < lines.length; i++){
+        jsonStr += '\n' + lines[i];
+      }
+      
+      var parsed = JSON.parse(jsonStr);
+      return parsed;
+    } catch(e){
+      console.warn('Failed to parse .texls data:', e);
+      return null;
+    }
+  }
+  
+  // Load .texls file and add to available packs
+  function loadTexturePack(texlsUrl, callback){
+    fetch(texlsUrl)
+      .then(function(response){ return response.text(); })
+      .then(function(content){
+        var pack = parseTexlsData(content);
+        if(pack && callback){
+          callback(pack);
+        }
+      })
+      .catch(function(err){
+        console.warn('Failed to load texture pack:', err);
+      });
+  }
+  
+  // Apply texture pack to game
+  function applyTexturePack(packData){
+    if(!packData || !packData.textures) return;
+    
+    try {
+      Object.keys(packData.textures).forEach(function(category){
+        var base64Data = packData.textures[category];
+        
+        // Store in window for game engine to access
+        window.texturePackOverrides = window.texturePackOverrides || {};
+        window.texturePackOverrides[category] = base64Data;
+      });
+      
+      console.log('✅ Texture pack applied:', packData.displayName || packData.id);
+    } catch(e){
+      console.warn('Failed to apply texture pack:', e);
+    }
+  }
+  
+  // Apply all active texture packs
+  function applyAllActiveTexturePacks(){
+    window.texturePackOverrides = {};
+    
+    window.resourcePacksState.active.forEach(function(activePack){
+      var packDef = window.resourcePacksState.available.find(function(p){
+        return p.id === activePack.id;
+      });
+      
+      if(packDef && packDef.texlsData){
+        applyTexturePack(packDef.texlsData);
+      }
+    });
+  }
+  
+  // Save active resource packs to localStorage
+  function saveActiveResourcePacks(){
+    try {
+      localStorage.setItem(RP_STORAGE_KEY, JSON.stringify(window.resourcePacksState.active));
+    } catch(e){
+      console.warn('Failed to save active resource packs:', e);
+    }
+  }
+  
+  // Render Resource Packs grids
+  function renderResourcePacksGrids(){
+    var availableGrid = document.getElementById('rp-available-grid');
+    var activeGrid = document.getElementById('rp-active-grid');
+    
+    if(availableGrid){
+      availableGrid.innerHTML = '';
+      window.resourcePacksState.available.forEach(function(rp){
+        var card = document.createElement('div');
+        card.className = 'rp-card';
+        card.innerHTML = '<div class="rp-card-header"><div class="rp-card-thumb">'+rp.thumb+'</div><div class="rp-card-info"><div class="rp-card-name">'+rp.name+'</div><div class="rp-card-author">by '+rp.author+'</div></div></div><div class="rp-card-actions"><button class="rp-action-btn" data-rp-id="'+rp.id+'" data-rp-action="'+(rp.active?'remove':'add')+'">'+(rp.active?'Remove':'Add')+'</button></div>';
+        availableGrid.appendChild(card);
+      });
+      
+      if(window.resourcePacksState.available.length === 0){
+        availableGrid.innerHTML = '<div class="rp-empty-msg">No resource packs available.</div>';
+      }
+    }
+    
+    if(activeGrid){
+      activeGrid.innerHTML = '';
+      window.resourcePacksState.active.forEach(function(activeRp){
+        var rp = window.resourcePacksState.available.find(function(a){ return a.id === activeRp.id; });
+        if(!rp) return;
+        var card = document.createElement('div');
+        card.className = 'rp-card';
+        card.innerHTML = '<div class="rp-card-header"><div class="rp-card-thumb">'+rp.thumb+'</div><div class="rp-card-info"><div class="rp-card-name">'+rp.name+'</div><div class="rp-card-author">by '+rp.author+'</div></div></div><div class="rp-card-actions"><button class="rp-action-btn remove" data-rp-id="'+rp.id+'" data-rp-action="remove">Remove</button></div>';
+        activeGrid.appendChild(card);
+      });
+      
+      if(window.resourcePacksState.active.length === 0){
+        activeGrid.innerHTML = '<div class="rp-empty-msg">No active resource packs. Add one from the Available tab!</div>';
+      }
+    }
+  }
+  
+  // Handle Resource Pack actions
+  document.addEventListener('click', function(e){
+    var btn = e.target.closest && e.target.closest('[data-rp-action]');
+    if(!btn) return;
+    
+    var rpId = btn.getAttribute('data-rp-id');
+    var action = btn.getAttribute('data-rp-action');
+    
+    if(action === 'add'){
+      var rp = window.resourcePacksState.available.find(function(a){ return a.id === rpId; });
+      if(rp && !rp.active){
+        rp.active = true;
+        window.resourcePacksState.active.push({ id: rpId, name: rp.name });
+        saveActiveResourcePacks();
+        applyAllActiveTexturePacks();
+        renderResourcePacksGrids();
+      }
+    } else if(action === 'remove'){
+      window.resourcePacksState.active = window.resourcePacksState.active.filter(function(a){ return a.id !== rpId; });
+      var rp = window.resourcePacksState.available.find(function(a){ return a.id === rpId; });
+      if(rp) rp.active = false;
+      saveActiveResourcePacks();
+      applyAllActiveTexturePacks();
+      renderResourcePacksGrids();
+    }
+  });
+  
+  // Handle Resource Packs search
+  var rpSearchInput = document.getElementById('rp-search-input');
+  if(rpSearchInput){
+    rpSearchInput.addEventListener('input', function(e){
+      var query = e.target.value.toLowerCase();
+      var cards = document.querySelectorAll('#rp-available-grid .rp-card');
+      cards.forEach(function(card){
+        var name = card.querySelector('.rp-card-name').textContent.toLowerCase();
+        card.style.display = name.includes(query) ? 'flex' : 'none';
+      });
+    });
+  }
+  
+  // Initialize on load
+  loadActiveResourcePacks();
+  
+  // Try to load sun_moon_pack.texls if available
+  // For now, we'll embed it as a string or load via fetch
+  var sunMoonPackData = {
+    "id": "custom:sun_moon_pack",
+    "displayName": "Sun & Moon Custom Pack",
+    "version": "1.0.0",
+    "textures": {}
+  };
+  
+  // Find and store the pack data
+  var sunMoonPack = window.resourcePacksState.available.find(function(p){ return p.id === 'custom:sun_moon_pack'; });
+  if(sunMoonPack){
+    sunMoonPack.texlsData = sunMoonPackData;
+  }
+  
+  renderResourcePacksGrids();
+})();
+</script>
+<!-- ==================== END RESOURCE PACKS MANAGER ==================== -->
 
 </body>
 </html>
