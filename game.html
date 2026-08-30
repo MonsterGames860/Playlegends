@@ -15691,6 +15691,7 @@ window._spHardcore  = false;
         cheats:!!(cheats||spCheatsEnabled),
         hardcore:!!(window._spHardcore),
         seed:(typeof worldSeed!=='undefined'?worldSeed:0),
+        gameVersion:(window.CURRENT_GAME_VERSION||'Preview 1.7.LIp1'),
         createdAt:new Date().toISOString()
       });
       saveSpWorlds(ws4);
@@ -16779,6 +16780,156 @@ function T2(tr, en){ return (typeof currentLang !== 'undefined' && currentLang =
 // (LegendsLanguage.readStoredLang) önceden ayarlanmıştır.
 setLanguage(currentLang);
 animate();
+</script>
+<script>
+/* Legends version control — standalone patch for the uploaded game.html. */
+(function(root){
+  'use strict';
+  var STAGE_WEIGHTS={Indev:1,Alpha:2,Beta:3,Release:4};
+  var WORLD_TOO_NEW='WORLD_TOO_NEW';
+  var INVALID_VERSION='INVALID_VERSION';
+  var MESSAGE='Eski sürümde yeni sürüm dünyası kullanamazsınız';
+  function text(value){return typeof value==='string'?value.trim():'';}
+  function parseVersion(value){
+    var raw=text(value), match=raw.match(/(\d+(?:\.\d+)+)/);
+    if(!match)throw new Error('Geçersiz Legends sürüm kodu: '+String(value));
+    var parts=match[1].split('.').map(function(part){return Number.parseInt(part,10);});
+    var code=raw.slice((match.index||0)+match[0].length).toUpperCase();
+    var stage=code.indexOf('I')!==-1?'Indev':code.indexOf('A')!==-1?'Alpha':code.indexOf('B')!==-1?'Beta':'Release';
+    return {raw:raw,mainVersion:match[1],parts:parts,stage:stage,stageWeight:STAGE_WEIGHTS[stage],code:code,valid:true};
+  }
+  function compareVersions(currentVersion,worldVersion){
+    var current=typeof currentVersion==='string'?parseVersion(currentVersion):currentVersion;
+    var world=typeof worldVersion==='string'?parseVersion(worldVersion):worldVersion;
+    var length=Math.max(current.parts.length,world.parts.length);
+    for(var i=0;i<length;i+=1){
+      var a=Number.isFinite(current.parts[i])?current.parts[i]:0;
+      var b=Number.isFinite(world.parts[i])?world.parts[i]:0;
+      if(a!==b)return a>b?1:-1;
+    }
+    return current.stageWeight===world.stageWeight?0:(current.stageWeight>world.stageWeight?1:-1);
+  }
+  function getCompatibility(currentVersion,worldVersion){
+    if(!text(worldVersion))return {status:'LEGACY',isWorldTooNew:false,comparison:1,message:''};
+    try{
+      var comparison=compareVersions(currentVersion,worldVersion);
+      return {status:comparison<0?WORLD_TOO_NEW:'COMPATIBLE',isWorldTooNew:comparison<0,comparison:comparison,message:comparison<0?MESSAGE:''};
+    }catch(error){
+      return {status:INVALID_VERSION,isWorldTooNew:true,comparison:-1,error:error,message:'Dünya sürümü okunamadı; güvenlik için dünya kilitlendi.'};
+    }
+  }
+  function readPublishedVersions(database){
+    if(!database||typeof database.ref!=='function')return Promise.resolve(null);
+    return database.ref('gameConfig/versions').once('value').then(function(snapshot){
+      var data=snapshot&&snapshot.val?snapshot.val():null;
+      if(!data||typeof data!=='object')return null;
+      return {stable:typeof data.stable==='string'?data.stable:null,preview:typeof data.preview==='string'?data.preview:null,updatedAt:data.updatedAt||null};
+    });
+  }
+  function preferred(versions,channel){
+    if(!versions)return null;
+    var value=channel==='preview'?versions.preview:versions.stable;
+    if(text(value))return value.trim();
+    value=channel==='preview'?versions.stable:versions.preview;
+    return text(value)?value.trim():null;
+  }
+  function latest(versions){
+    var values=versions?[versions.stable,versions.preview].filter(function(value){return text(value);}):[];
+    return values.reduce(function(current,value){try{return !current||compareVersions(current,value)<0?value:current;}catch(error){return current;}},null);
+  }
+  root.LegendsVersionManager={
+    STAGE_WEIGHTS:STAGE_WEIGHTS,WORLD_TOO_NEW:WORLD_TOO_NEW,INVALID_VERSION:INVALID_VERSION,
+    DEFAULT_WORLD_TOO_NEW_MESSAGE:MESSAGE,parseVersion:parseVersion,compareVersions:compareVersions,
+    getCompatibility:getCompatibility,isWorldTooNew:function(current,world){return getCompatibility(current,world).isWorldTooNew;},
+    readPublishedVersions:readPublishedVersions,getPreferredPublishedVersion:preferred,
+    getLatestPublishedVersion:latest
+  };
+}(window));
+
+(function(){
+  'use strict';
+  var fallback='Preview 1.7.LIp1';
+  var channel=/gameexp(?:\.html)?$/i.test(String(window.location.pathname||''))?'preview':'stable';
+  if(!window.CURRENT_GAME_VERSION)window.CURRENT_GAME_VERSION=fallback;
+  var message=window.LegendsVersionManager.DEFAULT_WORLD_TOO_NEW_MESSAGE;
+  function worlds(){
+    try{
+      if(typeof loadSpWorldsV18==='function')return loadSpWorldsV18();
+      if(typeof loadSpWorlds==='function')return loadSpWorlds();
+    }catch(error){}
+    return [];
+  }
+  function isTooNew(world){
+    return !!(world&&world.gameVersion&&window.LegendsVersionManager.isWorldTooNew(window.CURRENT_GAME_VERSION,world.gameVersion));
+  }
+  function decorate(){
+    var list=document.getElementById('sp-worlds-list');
+    if(!list)return;
+    var items=list.querySelectorAll('.sp-world-item'), saved=worlds();
+    items.forEach(function(item,index){
+      var world=saved[index], button=item.querySelector('.swi-btn.play');
+      if(!world||!button)return;
+      var locked=isTooNew(world);
+      item.classList.toggle('version-locked-world',locked);
+      if(locked){
+        item.style.border='1px solid rgba(255,90,90,.72)';
+        item.style.background='linear-gradient(90deg,rgba(110,0,0,.28),rgba(35,20,28,.88))';
+        item.title=message;
+        button.disabled=true;
+        button.textContent='LOCKED';
+        button.title=message;
+        var name=item.querySelector('.swi-name');
+        if(name&&!name.querySelector('.world-version-lock-badge')){
+          var badge=document.createElement('span');
+          badge.className='world-version-lock-badge';
+          badge.textContent='LOCKED · '+world.gameVersion;
+          badge.style.cssText='display:inline-block;margin-left:5px;padding:1px 4px;border-radius:2px;font-size:7px;color:#ffb0b0;background:rgba(150,20,20,.35);border:1px solid rgba(255,110,110,.4);vertical-align:middle;';
+          name.appendChild(badge);
+        }
+      }else{
+        button.disabled=false;
+        if(button.textContent==='LOCKED')button.textContent='▶';
+        item.style.border='';
+        item.style.background='';
+        item.title='';
+      }
+    });
+  }
+  var originalRender=window._renderSpWorldsList;
+  if(typeof originalRender==='function'&&!originalRender.__legendsVersionWrapped){
+    var wrapped=function(){var result=originalRender.apply(this,arguments);decorate();return result;};
+    wrapped.__legendsVersionWrapped=true;
+    window._renderSpWorldsList=wrapped;
+  }
+  document.addEventListener('click',function(event){
+    var button=event.target&&event.target.closest?event.target.closest('.swi-btn.play'):null;
+    if(!button)return;
+    var saved=worlds(), index=button.dataset.i!==undefined?Number(button.dataset.i):-1;
+    if(index<0&&button.dataset.wid)index=saved.findIndex(function(world){return world.id===button.dataset.wid;});
+    if(index>=0&&isTooNew(saved[index])){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.alert(message);
+    }
+  },true);
+  function applyPublishedVersion(){
+    if(!window.LegendsVersionManager||typeof firebase==='undefined'||!firebase.database)return;
+    window.LegendsVersionManager.readPublishedVersions(firebase.database()).then(function(versions){
+      var published=window.LegendsVersionManager.getPreferredPublishedVersion(versions,channel);
+      if(!published)return;
+      try{
+        window.LegendsVersionManager.parseVersion(published);
+        window.CURRENT_GAME_VERSION=published;
+        decorate();
+      }catch(error){console.warn('[VersionManager] kayıtlı sürüm geçersiz:',error);}
+    }).catch(function(error){console.warn('[VersionManager] yayın sürümü okunamadı:',error);});
+  }
+  var style=document.createElement('style');
+  style.textContent='.version-locked-world .swi-name{color:#ffb0b0!important}.version-locked-world .swi-btn.play:disabled{cursor:not-allowed;opacity:1;background:rgba(120,35,35,.48);border-color:rgba(255,120,120,.45);color:#ffaaaa}';
+  document.head.appendChild(style);
+  decorate();
+  setTimeout(applyPublishedVersion,1200);
+})();
 </script>
 </body>
 </html>

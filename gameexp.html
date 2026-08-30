@@ -62,7 +62,7 @@
     "errTitle": "Graphics Engine Error!",
     "errDesc": "Please check your internet connection.",
     "resume": "RESUME",
-    "quit": "QUIT",
+    "quit": "SAVE & EXIT",
     "pauseTitle": "GAME MENU",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "JUMP",
@@ -395,7 +395,7 @@
     "errTitle": "Grafik Motoru Hatası!",
     "errDesc": "İnternet bağlantınızı kontrol edin.",
     "resume": "DEVAM ET",
-    "quit": "ÇIK",
+    "quit": "KAYDET VE ÇIK",
     "pauseTitle": "OYUN MENÜSÜ",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "ZIPLA",
@@ -727,7 +727,7 @@
     "errTitle": "Grafik-Engine-Fehler!",
     "errDesc": "Bitte überprüfe deine Internetverbindung.",
     "resume": "FORTSETZEN",
-    "quit": "BEENDEN",
+    "quit": "SPEICHERN & BEENDEN",
     "pauseTitle": "SPIELMENÜ",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "SPRINGEN",
@@ -1058,7 +1058,7 @@
     "errTitle": "Erreur du moteur graphique !",
     "errDesc": "Veuillez vérifier votre connexion internet.",
     "resume": "REPRENDRE",
-    "quit": "QUITTER",
+    "quit": "SAUVEGARDER & QUITTER",
     "pauseTitle": "MENU DU JEU",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "SAUTER",
@@ -1389,7 +1389,7 @@
     "errTitle": "¡Error del motor gráfico!",
     "errDesc": "Comprueba tu conexión a internet.",
     "resume": "REANUDAR",
-    "quit": "SALIR",
+    "quit": "GUARDAR Y SALIR",
     "pauseTitle": "MENÚ DEL JUEGO",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "SALTAR",
@@ -1720,7 +1720,7 @@
     "errTitle": "Ошибка графического движка!",
     "errDesc": "Проверьте подключение к интернету.",
     "resume": "ПРОДОЛЖИТЬ",
-    "quit": "ВЫЙТИ",
+    "quit": "СОХРАНИТЬ И ВЫЙТИ",
     "pauseTitle": "МЕНЮ ИГРЫ",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "ПРЫЖОК",
@@ -2051,7 +2051,7 @@
     "errTitle": "Erro do motor gráfico!",
     "errDesc": "Verifique sua conexão com a internet.",
     "resume": "CONTINUAR",
-    "quit": "SAIR",
+    "quit": "SALVAR E SAIR",
     "pauseTitle": "MENU DO JOGO",
     "gameTitle": "Legends Preview v1.7.Lp1",
     "jumpBtn": "PULAR",
@@ -2557,6 +2557,20 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .rp-action-btn.remove{background:rgba(255,80,80,.1);border-color:rgba(255,100,100,.3);color:rgba(255,140,140,.85);}
 .rp-action-btn.remove:hover{background:rgba(255,80,80,.22);border-color:rgba(255,100,100,.6);}
 .rp-empty-msg{grid-column:1/-1;text-align:center;color:rgba(255,255,255,.4);font-size:11px;padding:20px 0;}
+.rp-reset-btn{width:100%;padding:6px 8px;background:rgba(255,80,80,.15);border:1px solid rgba(255,100,100,.4);border-radius:3px;color:rgba(255,140,140,.8);font-size:10px;font-weight:bold;cursor:pointer;font-family:'Minecraft',monospace;transition:background .15s,border-color .15s;}
+.rp-reset-btn:hover{background:rgba(255,80,80,.28);border-color:rgba(255,100,100,.7);}
+
+/* ── MOBIL RESPONSIVE ── */
+@media (max-width: 480px) {
+  .rp-tab-btn{font-size:10px;padding:8px 2px;}
+  .rp-upload-btn{font-size:10px;padding:10px 12px;}
+  .rp-status-msg{font-size:9px;}
+  .rp-card-thumb{width:40px;height:40px;font-size:16px;}
+  .rp-card-name{font-size:9px;}
+  .rp-card-author{font-size:8px;}
+  .rp-action-btn{font-size:8px;padding:3px 6px;}
+  .rp-grid{gap:6px;max-height:240px;}
+}
 .menu-input{width:100%;padding:10px 12px;margin:4px 0;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.2);border-radius:4px;color:#fff;font-size:14px;font-family:'Minecraft',monospace;outline:none;user-select:text;-webkit-user-select:text;letter-spacing:3px;text-align:center;}
 .menu-input::placeholder{letter-spacing:1px;color:rgba(255,255,255,.3);}
 .menu-input:focus{border-color:rgba(117,167,255,.6);}
@@ -2681,8 +2695,8 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 #mobile-pause-btn{position:absolute;top:max(1vh,8px);left:50%;transform:translateX(-50%);display:none;z-index:20;background:rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.4);border-radius:20px;padding:clamp(3px,0.6vh,7px) clamp(10px,2.5vw,18px);color:#fff;font-size:clamp(10px,1.8vw,14px);font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;letter-spacing:1px;}
 #error-msg{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:rgba(210,40,40,.95);color:#fff;padding:20px;border-radius:12px;text-align:center;z-index:1100;border:2px solid #fff;display:none;}
 /* ─── Kırma Çatlak Overlay ─── */
-#pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.72);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:900;color:#fff;}
-#pause-overlay.active{display:flex;}
+#pause-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.72);display:none;flex-direction:column;justify-content:center;align-items:center;z-index:900;color:#fff;pointer-events:auto;}
+#pause-overlay.active{display:flex;pointer-events:auto;}
 #pause-box{display:flex;flex-direction:column;align-items:center;width:100%;max-width:320px;padding:0 24px;}
 
 /* ─── MANAGE SERVER PANEL ─── */
@@ -2810,7 +2824,7 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 #kick-by{font-size:14px;color:rgba(255,220,180,.75);text-shadow:1px 1px #000;font-family:'Minecraft',monospace;margin-bottom:28px;}
 #btn-kick-menu{padding:12px 28px;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:14px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;letter-spacing:1px;}
 #btn-kick-menu:hover{filter:brightness(1.2);}
-#inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:2050;color:#fff;}
+#inv-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.8);display:none;justify-content:center;align-items:center;z-index:2050;color:#fff;pointer-events:auto;}
 #inv-overlay.active{display:flex;}
 #inv-box{background:rgba(12,18,30,.97);border:2px solid rgba(117,167,255,.35);border-radius:10px;padding:16px 18px;max-width:660px;width:96%;max-height:90vh;overflow-y:auto;display:flex;flex-direction:column;align-items:center;}
 #inv-title{font-size:17px;font-weight:bold;letter-spacing:5px;color:#75a7ff;text-shadow:0 0 12px rgba(117,167,255,.5);margin-bottom:8px;}
@@ -3618,7 +3632,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
 // ══════════════════════════════════════════════════════════════════════════
 (function(){
   // Sağ tık menüsünü kapat (kaynak görüntüleme/inceleme kısayolunu bir tık zorlaştırır)
-  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('contextmenu',function(e){e.preventDefault()});
 
   // Yaygın DevTools/kaynak-görme kısayollarını yakala
   document.addEventListener('keydown', e => {
@@ -3633,7 +3647,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
   // Basit DevTools-açık tespiti: pencere boyutu ile viewport arasındaki fark eşiği aşarsa
   // (DevTools panel açıkken tarayıcı penceresi küçülür) bir konsol uyarısı basılır.
   // Bu bilgi amaçlıdır, oyunu durdurmaz (yanlış pozitifler mümkün — dar ekran/mobil klavye vb).
-  let _devtoolsWarned = false;
+  var _devtoolsWarned = false;
   setInterval(() => {
     const threshold = 160;
     const widthDiff  = window.outerWidth  - window.innerWidth;
@@ -3752,6 +3766,9 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
     </div>
     <div class="settings-tab-panel" id="pc-tab-resourcepacks-panel" data-tab-panel="resourcepacks">
       <div class="sub-title" id="txt-resourcepacks-tab-title">RESOURCE PACKS</div>
+      <div style="color: rgba(255,255,255,.5); font-size: 10px; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 10px;">
+        💡 Paketleri "Add" ile aktifleştir. Aktif paketler otomatik tüm dünyalara uygulanacak.
+      </div>
       <div class="rp-tabs-container">
         <div class="rp-tabs-header">
           <button type="button" class="rp-tab-btn active" data-rp-tab="available">Available</button>
@@ -3762,6 +3779,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
             <input type="file" id="rp-file-input" class="rp-file-input" accept=".texls" style="display:none;">
             <button class="rp-upload-btn" id="rp-upload-btn">📁 UPLOAD TEXTURE PACK</button>
             <div id="rp-upload-status" class="rp-status-msg"></div>
+            <button class="rp-reset-btn" id="rp-reset-btn" style="margin-top:8px;font-size:9px;">Clear All Packs (Reset)</button>
           </div>
           <div class="rp-grid" id="rp-available-grid">
             <div class="rp-empty-msg">No resource packs available. Upload one to get started!</div>
@@ -3823,23 +3841,26 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
     </div>
     <div class="settings-tab-panel" id="mobile-tab-resourcepacks-panel" data-tab-panel="resourcepacks">
       <div class="sub-title" id="txt-resourcepacks-tab-title">RESOURCE PACKS</div>
+      <div style="color: rgba(255,255,255,.5); font-size: 9px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.1); margin-bottom: 8px;">
+        💡 "Add" ile aktifleştir → Tüm dünyalara otomatik uygulanır
+      </div>
       <div class="rp-tabs-container">
         <div class="rp-tabs-header">
           <button type="button" class="rp-tab-btn active" data-rp-tab="available">Available</button>
           <button type="button" class="rp-tab-btn" data-rp-tab="active">Active</button>
         </div>
-        <div class="rp-tab-pane active" id="rp-available-pane" data-rp-pane="available">
+        <div class="rp-tab-pane active" id="rp-available-pane-m" data-rp-pane="available">
           <div class="rp-upload-row">
-            <input type="file" id="rp-file-input" class="rp-file-input" accept=".texls" style="display:none;">
-            <button class="rp-upload-btn" id="rp-upload-btn">📁 UPLOAD TEXTURE PACK</button>
-            <div id="rp-upload-status" class="rp-status-msg"></div>
+            <button class="rp-upload-btn rp-mobile-upload-btn">📁 UPLOAD TEXTURE PACK</button>
+            <div id="rp-upload-status-m" class="rp-status-msg"></div>
+            <button class="rp-reset-btn" id="rp-reset-btn-m" style="margin-top:8px;font-size:9px;">Clear All Packs (Reset)</button>
           </div>
-          <div class="rp-grid" id="rp-available-grid">
+          <div class="rp-grid" id="rp-available-grid-m">
             <div class="rp-empty-msg">No resource packs available. Upload one to get started!</div>
           </div>
         </div>
-        <div class="rp-tab-pane" id="rp-active-pane" data-rp-pane="active">
-          <div class="rp-grid" id="rp-active-grid">
+        <div class="rp-tab-pane" id="rp-active-pane-m" data-rp-pane="active">
+          <div class="rp-grid" id="rp-active-grid-m">
             <div class="rp-empty-msg">No active resource packs. Add one from the Available tab!</div>
           </div>
         </div>
@@ -12253,6 +12274,13 @@ function startGame(device,world,mp=false,gm='survival',cheats=true){
   // (blockSoundPool tarafından yönetilir – kullanıcı etkileşimi zaten burada gerçekleşir)
   resetWorld();
   deviceMode=device;worldType=world;cheatsEnabled=cheats;DeathManager.isDead=false;
+  
+  // 🎨 AUTO-LOAD ACTIVE TEXTURE PACKS & MODS on game start
+  if(typeof applyAllActiveTexturePacks === 'function'){
+    console.log('🎨 Applying active texture packs...');
+    applyAllActiveTexturePacks();
+  }
+  
   // Dünya sınırı duvarını oluştur
   _buildWorldBorderMesh();
   if(device==='mobile'){const el=document.documentElement;if(el.requestFullscreen) el.requestFullscreen().catch(()=>{});else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen();}
@@ -13176,7 +13204,7 @@ function setupPC(){
       }
     }
   });
-  window.addEventListener('contextmenu',e=>e.preventDefault());
+  window.addEventListener('contextmenu',function(e){e.preventDefault()});
   window.addEventListener('wheel',e=>{if(deviceMode==='pc'&&!isChatOpen){slot=(slot+(e.deltaY>0?1:-1)+9)%9;selSlot(slot);}});
 }
  
@@ -18095,35 +18123,25 @@ window._spHardcore  = false;
       var mLbl=w.hardcore?'💀 HARDCORE':(w.nightmare?'☠️ NIGHTMARE':(MLBL[w.gameMode]||w.gameMode||MLBL.survival));
       var chLbl=(!w.hardcore&&!w.nightmare&&w.cheats)?(' · '+_cheatsSuffix):'';
       var hcBadge=w.hardcore?'<span style="font-size:8px;color:#ff8888;background:rgba(160,0,0,.35);padding:1px 4px;border-radius:2px;margin-left:4px;">HC</span>':(w.nightmare?'<span style="font-size:8px;color:#d9a3ff;background:rgba(120,0,180,.35);padding:1px 4px;border-radius:2px;margin-left:4px;">NM</span>':'');
-      var dt=w.createdAt?(new Date(w.createdAt).toLocaleDateString(_dateLocale)):'';
+      var dt=w.lastPlayed||w.createdAt;
+      dt=dt?(new Date(dt).toLocaleDateString(_dateLocale,{year:'numeric',month:'short',day:'numeric'})):'';
       item.innerHTML=[
-        '<span class="swi-icon">'+icon+'</span>',
+        '<span class="swi-icon" aria-hidden="true">'+icon+'</span>',
         '<div class="swi-info">',
         '  <div class="swi-name">'+sanitizeText(w.name||_defaultWorldName)+hcBadge+'</div>',
-        '  <div class="swi-meta">'+sanitizeText(mLbl+chLbl)+(dt?' · '+dt:'')+'</div>',
+         '  <div class="swi-meta">'+(dt?((currentLang==='tr'?'Son oynama · ':'Last played · ')+dt):(currentLang==='tr'?'Henüz oynanmadı':'Never played'))+(mLbl?' · '+sanitizeText(mLbl+chLbl):'')+'</div>',
         '</div>',
         '<div class="swi-btns">',
-        '  <button class="swi-btn edit" data-i="'+i+'" data-wid="'+w.id+'">✏</button>',
-        '  <button class="swi-btn del"  data-i="'+i+'" data-wid="'+w.id+'">🗑</button>',
-        '  <button class="swi-btn play" data-i="'+i+'" data-wid="'+w.id+'">▶</button>',
+         '  <button class="swi-btn play" data-i="'+i+'" data-wid="'+w.id+'">PLAY</button>',
+         '  <button class="swi-btn export" data-i="'+i+'" data-wid="'+w.id+'">EXPORT ZIP</button>',
+         '  <button class="swi-btn del" data-i="'+i+'" data-wid="'+w.id+'">DELETE</button>',
         '</div>'
       ].join('');
 
-      // Düzenle
-      item.querySelector('.swi-btn.edit').addEventListener('click', function(e){
+      // Dünya kartları deliberately stay focused: Play, Export ZIP, Delete.
+      item.querySelector('.swi-btn.export').addEventListener('click', function(e){
         e.stopPropagation();
-        var _editWid=this.dataset.wid;
-        var wi=loadSpWorlds().find(function(w){return w.id===_editWid;}); if(!wi) return;
-        _eid=wi.id; _ewt=wi.worldType||'infinite'; _egm=wi.gameMode||'survival';
-        _ech=!!wi.cheats; _ehc=!!wi.hardcore||!!wi.nightmare;
-        document.getElementById('sp-edit-name').value=wi.name||'';
-        sepSel('sep-type-row','wt',_ewt);
-        sepSel('sep-mode-row','gm',_egm);
-        sepSel('sep-cheats-row','ch',String(_ech));
-        // Hardcore/Nightmare → mod/cheats kilitle
-        document.querySelectorAll('#sep-mode-row .sep-mini:not([data-gm="survival"])').forEach(function(el){el.classList.toggle('sep-locked',_ehc);});
-        document.querySelectorAll('#sep-cheats-row .sep-mini[data-ch="true"]').forEach(function(el){el.classList.toggle('sep-locked',_ehc);});
-        document.getElementById('sp-edit-panel').classList.add('active');
+        if(typeof window.exportWorldToZip==='function') window.exportWorldToZip(this.dataset.wid);
       });
       // Sil
       item.querySelector('.swi-btn.del').addEventListener('click', function(e){
@@ -18132,8 +18150,15 @@ window._spHardcore  = false;
         var ws3=loadSpWorlds();
         var _delIdx=ws3.findIndex(function(w){return w.id===_delWid;});
         if(_delIdx<0) return;
+         if(!window.confirm(currentLang==='tr'
+           ? 'Bu dünya ve kayıtlı yedekleri silinsin mi?'
+           : 'Delete this world and its saved backups?')) return;
         ws3.splice(_delIdx,1);
-        saveSpWorlds(ws3); renderSpWorlds();
+         saveSpWorlds(ws3);
+         if(window.LegendsWorldStorage && typeof window.LegendsWorldStorage.deleteWorldFiles==='function'){
+           window.LegendsWorldStorage.deleteWorldFiles(_delWid).catch(function(error){console.warn('[WorldStorage] delete failed',error);});
+         }
+         renderSpWorlds();
       });
       // Oyna
       item.querySelector('.swi-btn.play').addEventListener('click', function(e){
@@ -18229,6 +18254,7 @@ window._spHardcore  = false;
         hardcore:_isGuestSave ? false : !!(window._spHardcore),
         nightmare:_isGuestSave ? false : !!(window._spNightmare),
         seed:(typeof worldSeed!=='undefined'?worldSeed:0),
+        gameVersion:(window.CURRENT_GAME_VERSION||CURRENT_GAME_VERSION),
         enabledModIds:[],
         createdAt:new Date().toISOString()
       });
@@ -25549,19 +25575,7 @@ window.ArrowManager = ArrowManager;
   
   // Resource Packs state
   window.resourcePacksState = {
-    available: [
-      { 
-        id: 'custom:sun_moon_pack', 
-        name: 'Sun & Moon Custom Pack', 
-        author: 'LegendsForce', 
-        thumb: '🌞', 
-        active: false,
-        texlsData: null // Will be loaded from .texls file
-      },
-      { id: 'vanilla', name: 'Vanilla+', author: 'Official', thumb: '📦', active: false },
-      { id: 'ui-update', name: 'UI Update Pack', author: 'Dev Team', thumb: '🎨', active: false },
-      { id: 'textures-hd', name: 'HD Textures', author: 'Community', thumb: '✨', active: false }
-    ],
+    available: [],  // Boş başla - sadece kullanıcı yüklediği paketler gösteril
     active: []
   };
   
@@ -25587,31 +25601,70 @@ window.ArrowManager = ArrowManager;
   // Parse .texls file format
   function parseTexlsData(texlsContent){
     try {
-      // Remove header lines
+      if(!texlsContent) return null;
+      
+      // Remove header lines (lines starting with @)
       var lines = texlsContent.split('\n');
       var jsonStart = -1;
       
       for(var i = 0; i < lines.length; i++){
-        if(lines[i].includes('texture_pack')){
+        if(lines[i].trim().startsWith('texture_pack')){
           jsonStart = i;
           break;
         }
       }
       
-      if(jsonStart === -1) return null;
+      if(jsonStart === -1) {
+        console.warn('No texture_pack section found');
+        return null;
+      }
       
       // Extract JSON part (everything after "texture_pack ")
-      var jsonStr = lines[jsonStart].substring(lines[jsonStart].indexOf('{'));
+      var firstLine = lines[jsonStart];
+      var jsonStart_char = firstLine.indexOf('{');
+      if(jsonStart_char === -1) return null;
+      
+      var jsonStr = firstLine.substring(jsonStart_char);
       
       // If JSON spans multiple lines, concatenate them
       for(var i = jsonStart + 1; i < lines.length; i++){
         jsonStr += '\n' + lines[i];
       }
       
+      // Clean up: remove trailing non-JSON chars
+      jsonStr = jsonStr.trim();
+      if(jsonStr.endsWith('}')) {
+        // Count braces to find actual end
+        var braceCount = 0;
+        var endIndex = -1;
+        for(var j = 0; j < jsonStr.length; j++){
+          if(jsonStr[j] === '{') braceCount++;
+          if(jsonStr[j] === '}') {
+            braceCount--;
+            if(braceCount === 0){
+              endIndex = j;
+              break;
+            }
+          }
+        }
+        if(endIndex !== -1){
+          jsonStr = jsonStr.substring(0, endIndex + 1);
+        }
+      }
+      
+      console.log('Parsing JSON string:', jsonStr.substring(0, 100) + '...');
       var parsed = JSON.parse(jsonStr);
+      
+      // Validate required fields
+      if(!parsed.id || !parsed.textures){
+        console.warn('Missing required fields: id or textures');
+        return null;
+      }
+      
       return parsed;
     } catch(e){
-      console.warn('Failed to parse .texls data:', e);
+      console.error('Failed to parse .texls data:', e.message);
+      console.log('Content preview:', texlsContent.substring(0, 200));
       return null;
     }
   }
@@ -25654,15 +25707,27 @@ window.ArrowManager = ArrowManager;
   function applyAllActiveTexturePacks(){
     window.texturePackOverrides = {};
     
+    if(window.resourcePacksState.active.length === 0){
+      console.log('📦 No active texture packs');
+      return;
+    }
+    
+    console.log('🎨 Applying ' + window.resourcePacksState.active.length + ' active pack(s)...');
+    
     window.resourcePacksState.active.forEach(function(activePack){
       var packDef = window.resourcePacksState.available.find(function(p){
         return p.id === activePack.id;
       });
       
       if(packDef && packDef.texlsData){
+        console.log('✅ Applying: ' + packDef.name);
         applyTexturePack(packDef.texlsData);
+      } else {
+        console.warn('⚠️ Pack not found: ' + activePack.id);
       }
     });
+    
+    console.log('🎨 All packs applied to game');
   }
   
   // Save active resource packs to localStorage
@@ -25674,12 +25739,14 @@ window.ArrowManager = ArrowManager;
     }
   }
   
-  // Render Resource Packs grids
+  // Render Resource Packs grids (both desktop and mobile)
   function renderResourcePacksGrids(){
-    var availableGrid = document.getElementById('rp-available-grid');
-    var activeGrid = document.getElementById('rp-active-grid');
+    // Desktop grids
+    var availableGrids = [document.getElementById('rp-available-grid'), document.getElementById('rp-available-grid-m')];
+    var activeGrids = [document.getElementById('rp-active-grid'), document.getElementById('rp-active-grid-m')];
     
-    if(availableGrid){
+    availableGrids.forEach(function(availableGrid){
+      if(!availableGrid) return;
       availableGrid.innerHTML = '';
       window.resourcePacksState.available.forEach(function(rp){
         var card = document.createElement('div');
@@ -25691,9 +25758,10 @@ window.ArrowManager = ArrowManager;
       if(window.resourcePacksState.available.length === 0){
         availableGrid.innerHTML = '<div class="rp-empty-msg">No resource packs available.</div>';
       }
-    }
+    });
     
-    if(activeGrid){
+    activeGrids.forEach(function(activeGrid){
+      if(!activeGrid) return;
       activeGrid.innerHTML = '';
       window.resourcePacksState.active.forEach(function(activeRp){
         var rp = window.resourcePacksState.available.find(function(a){ return a.id === activeRp.id; });
@@ -25707,7 +25775,7 @@ window.ArrowManager = ArrowManager;
       if(window.resourcePacksState.active.length === 0){
         activeGrid.innerHTML = '<div class="rp-empty-msg">No active resource packs. Add one from the Available tab!</div>';
       }
-    }
+    });
   }
   
   // Handle Resource Pack actions
@@ -25726,6 +25794,9 @@ window.ArrowManager = ArrowManager;
         saveActiveResourcePacks();
         applyAllActiveTexturePacks();
         renderResourcePacksGrids();
+        
+        // Show confirmation
+        console.log('✅ Pack activated: ' + rp.name + ' (will apply to all worlds)');
       }
     } else if(action === 'remove'){
       window.resourcePacksState.active = window.resourcePacksState.active.filter(function(a){ return a.id !== rpId; });
@@ -25752,40 +25823,82 @@ window.ArrowManager = ArrowManager;
   var rpUploadBtn = document.getElementById('rp-upload-btn');
   var rpUploadStatus = document.getElementById('rp-upload-status');
   
+  // Desktop upload handler
   if(rpUploadBtn && rpFileInput){
     rpUploadBtn.addEventListener('click', function(){
       rpFileInput.click();
     });
-    
+  }
+  
+  // Mobile upload button handler
+  var rpMobileUploadBtn = document.querySelector('.rp-mobile-upload-btn');
+  if(rpMobileUploadBtn){
+    rpMobileUploadBtn.addEventListener('click', function(){
+      rpFileInput.click();
+    });
+  }
+  
+  // File input change handler (works for both desktop and mobile)
+  if(rpFileInput){
     rpFileInput.addEventListener('change', function(e){
       var file = e.target.files[0];
       if(!file) return;
       
       if(!file.name.endsWith('.texls')){
-        rpUploadStatus.textContent = '❌ Only .texls files allowed';
-        rpUploadStatus.classList.add('error');
-        setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('error'); }, 3000);
+        var statusEls = document.querySelectorAll('[id*="upload-status"]');
+        statusEls.forEach(function(el){
+          el.textContent = '❌ Only .texls files allowed';
+          el.classList.add('error');
+        });
+        setTimeout(function(){ 
+          statusEls.forEach(function(el){
+            el.textContent = ''; 
+            el.classList.remove('error');
+          });
+        }, 3000);
         return;
       }
       
-      rpUploadStatus.textContent = '⏳ Loading...';
+      var statusEls = document.querySelectorAll('[id*="upload-status"]');
+      statusEls.forEach(function(el){ el.textContent = '⏳ Loading...'; });
       
       var reader = new FileReader();
       reader.onload = function(event){
         try {
           var content = event.target.result;
+          console.log('📦 File loaded, parsing...');
           var packData = parseTexlsData(content);
           
-          if(!packData || !packData.id || !packData.textures){
-            throw new Error('Invalid pack format');
+          console.log('📦 Parsed data:', packData);
+          
+          if(!packData){
+            throw new Error('Invalid pack format - could not parse JSON');
           }
+          
+          if(!packData.id){
+            throw new Error('Pack missing "id" field');
+          }
+          
+          if(!packData.textures || Object.keys(packData.textures).length === 0){
+            throw new Error('Pack has no textures');
+          }
+          
+          console.log('✅ Pack valid! ID:', packData.id, 'Textures:', Object.keys(packData.textures).length);
           
           // Check if pack already exists
           var existing = window.resourcePacksState.available.find(function(p){ return p.id === packData.id; });
           if(existing){
-            rpUploadStatus.textContent = '⚠️ Pack already uploaded';
-            rpUploadStatus.classList.add('error');
-            setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('error'); }, 3000);
+            var statusEls = document.querySelectorAll('[id*="upload-status"]');
+            statusEls.forEach(function(el){
+              el.textContent = '⚠️ Pack already uploaded';
+              el.classList.add('error');
+            });
+            setTimeout(function(){ 
+              statusEls.forEach(function(el){
+                el.textContent = ''; 
+                el.classList.remove('error');
+              });
+            }, 3000);
             return;
           }
           
@@ -25801,34 +25914,56 @@ window.ArrowManager = ArrowManager;
           
           window.resourcePacksState.available.push(newPack);
           
-          // Save to localStorage
+          // Save only metadata to localStorage (not the huge base64 textures)
           try {
             var stored = localStorage.getItem('legends_texture_packs') || '{}';
             var packs = JSON.parse(stored);
+            
+            // Store ONLY metadata, not textures
             packs[packData.id] = {
               id: packData.id,
               displayName: packData.displayName,
               author: packData.author,
-              content: content
+              // DON'T store content - it's too big for localStorage
+              // Textures stay in memory in window.resourcePacksState.available
             };
             localStorage.setItem('legends_texture_packs', JSON.stringify(packs));
+            console.log('✅ Metadata saved to localStorage (textures in memory)');
           } catch(err){
             console.warn('Failed to save to localStorage:', err);
+            // If localStorage fails, pack still works - it's in memory!
+            console.log('⚠️ localStorage may be full, but pack works in memory');
           }
           
-          rpUploadStatus.textContent = '✅ Pack uploaded successfully!';
-          rpUploadStatus.classList.add('success');
+          var statusEls = document.querySelectorAll('[id*="upload-status"]');
+          statusEls.forEach(function(el){
+            el.textContent = '✅ Pack uploaded successfully!';
+            el.classList.add('success');
+          });
           rpFileInput.value = '';
           
           renderResourcePacksGrids();
           
-          setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('success'); }, 3000);
+          setTimeout(function(){ 
+            statusEls.forEach(function(el){
+              el.textContent = ''; 
+              el.classList.remove('success');
+            });
+          }, 3000);
         } catch(err){
           console.error('Error loading pack:', err);
-          rpUploadStatus.textContent = '❌ Error: ' + err.message;
-          rpUploadStatus.classList.add('error');
+          var statusEls = document.querySelectorAll('[id*="upload-status"]');
+          statusEls.forEach(function(el){
+            el.textContent = '❌ Error: ' + err.message;
+            el.classList.add('error');
+          });
           rpFileInput.value = '';
-          setTimeout(function(){ rpUploadStatus.textContent = ''; rpUploadStatus.classList.remove('error'); }, 3000);
+          setTimeout(function(){ 
+            statusEls.forEach(function(el){
+              el.textContent = ''; 
+              el.classList.remove('error');
+            });
+          }, 3000);
         }
       };
       
@@ -25839,6 +25974,11 @@ window.ArrowManager = ArrowManager;
   // Initialize on load
   loadActiveResourcePacks();
   
+  // BAŞLANGIÇTA: localStorage'ı temizle (sadece ilk kez yüklendikten sonra)
+  // Eğer eski paketler varsa ve temizlemek istersen, aşağıdaki comment'i aç:
+  // localStorage.removeItem('legends_texture_packs');
+  // localStorage.removeItem('legends_active_packs');
+  
   // Load uploaded packs from localStorage
   try {
     var storedPacks = localStorage.getItem('legends_texture_packs');
@@ -25848,18 +25988,10 @@ window.ArrowManager = ArrowManager;
         var packInfo = packs[packId];
         var alreadyExists = window.resourcePacksState.available.find(function(p){ return p.id === packId; });
         if(!alreadyExists){
-          var parsed = parseTexlsData(packInfo.content);
-          if(parsed){
-            var newPack = {
-              id: packId,
-              name: packInfo.displayName || packId,
-              author: packInfo.author || 'Unknown',
-              thumb: '📦',
-              active: false,
-              texlsData: parsed
-            };
-            window.resourcePacksState.available.push(newPack);
-          }
+          // Only metadata is stored, not textures
+          // So we create a placeholder - textures need to be re-uploaded
+          // This is actually good - prevents localStorage bloat
+          console.log('📦 Pack metadata found: ' + packInfo.displayName + ' (textures not persisted)');
         }
       });
     }
@@ -25867,25 +25999,1243 @@ window.ArrowManager = ArrowManager;
     console.warn('Failed to load stored packs:', err);
   }
   
-  // Try to load sun_moon_pack.texls if available
-  // For now, we'll embed it as a string or load via fetch
-  var sunMoonPackData = {
-    "id": "custom:sun_moon_pack",
-    "displayName": "Sun & Moon Custom Pack",
-    "version": "1.0.0",
-    "textures": {}
-  };
+  // Reset buttons handler
+  var resetBtns = document.querySelectorAll('[id*="reset-btn"]');
+  resetBtns.forEach(function(btn){
+    btn.addEventListener('click', function(){
+      if(confirm('🗑️ Clear all resource packs from storage?\n\nThis will remove all uploaded packs permanently.')){
+        localStorage.removeItem('legends_texture_packs');
+        localStorage.removeItem('legends_active_resource_packs');
+        window.resourcePacksState.available = [];
+        window.resourcePacksState.active = [];
+        renderResourcePacksGrids();
+        alert('✅ All packs cleared!');
+      }
+    });
+  });
   
-  // Find and store the pack data
-  var sunMoonPack = window.resourcePacksState.available.find(function(p){ return p.id === 'custom:sun_moon_pack'; });
-  if(sunMoonPack){
-    sunMoonPack.texlsData = sunMoonPackData;
-  }
+  // Çıkarılan Sun & Moon pack kodunun yerine hiçbir şey yapma
+  // (Artık sabit paketler yok, sadece kullanıcı yüklediği paketler var)
   
   renderResourcePacksGrids();
 })();
 </script>
 <!-- ==================== END RESOURCE PACKS MANAGER ==================== -->
+
+
+<!-- ==================== NIGHTMARE MODE GUI FIX ==================== -->
+<script>
+(function(){
+  "use strict";
+  
+  // Nightmare modunda GUI problemleri çöz
+  var nightmareGUIFixes = {
+    
+    // 1. Inventory açılmasını Nightmare modda engelle
+    disableInventoryInNightmare: function() {
+      var originalOpen = window.openInventory;
+      if (typeof originalOpen === 'function') {
+        window.openInventory = function() {
+          if (window.gameState && window.gameState.mode === 'NIGHTMARE') {
+            console.log('⚠️ Inventory disabled in NIGHTMARE mode');
+            return false; // Inventory açılmasını engelle
+          }
+          return originalOpen();
+        };
+      }
+    },
+    
+    // 2. Pause menüsünü doğru render et
+    ensurePauseRendering: function() {
+      var pauseOverlay = document.getElementById('pause-overlay');
+      if (pauseOverlay) {
+        // Z-index'i garanti alt
+        pauseOverlay.style.zIndex = '900';
+        pauseOverlay.style.pointerEvents = 'auto';
+      }
+    },
+    
+    // 3. Memory leak'i önle - uzun süre Nightmare'de kalınca
+    cleanupNightmareDOM: function() {
+      if (!window.gameState || window.gameState.mode !== 'NIGHTMARE') return;
+      
+      // Eski effect element'lerini temizle
+      var effectElements = document.querySelectorAll('[class*="vignette"]');
+      if (effectElements.length > 20) {
+        for (var i = 0; i < effectElements.length - 10; i++) {
+          if (effectElements[i] && effectElements[i].parentNode) {
+            effectElements[i].parentNode.removeChild(effectElements[i]);
+          }
+        }
+        console.log('🧹 Cleaned up ' + (effectElements.length - 10) + ' old vignette elements');
+      }
+    },
+    
+    // 4. GUI repaint'i zorla
+    repaintGUIForced: function() {
+      var inv = document.getElementById('inv-overlay');
+      var pause = document.getElementById('pause-overlay');
+      
+      if (inv) {
+        inv.style.visibility = 'visible';
+        inv.style.visibility = 'visible';
+      }
+      if (pause) {
+        pause.style.visibility = 'visible';
+        pause.style.visibility = 'visible';
+      }
+    },
+    
+    // 5. Event listener conflict'leri çöz
+    setupEventListenerGuards: function() {
+      document.addEventListener('keydown', function(e) {
+        // Nightmare modda Escape tuşu
+        if (e.key === 'Escape' && window.gameState && window.gameState.mode === 'NIGHTMARE') {
+          e.preventDefault();
+          console.log('⚠️ Escape key blocked in NIGHTMARE mode');
+          return false;
+        }
+        
+        // Nightmare modda E tuşu (Inventory)
+        if ((e.key === 'e' || e.key === 'E') && window.gameState && window.gameState.mode === 'NIGHTMARE') {
+          e.preventDefault();
+          console.log('⚠️ E key (Inventory) blocked in NIGHTMARE mode');
+          return false;
+        }
+      }, true); // Capture phase
+    },
+    
+    // 6. Tüm fix'leri çalıştır
+    init: function() {
+      console.log('🎮 Initializing Nightmare GUI Fixes...');
+      
+      this.disableInventoryInNightmare();
+      this.ensurePauseRendering();
+      this.setupEventListenerGuards();
+      
+      // Cleanup her 10 saniyede
+      if (window.gameState && window.gameState.mode === 'NIGHTMARE') {
+        setInterval(this.cleanupNightmareDOM.bind(this), 10000);
+      }
+      
+      // GUI repaint her frame
+      setInterval(this.repaintGUIForced.bind(this), 100);
+      
+      console.log('✅ Nightmare GUI Fixes loaded!');
+    }
+  };
+  
+  // Sayfa yüklendikten sonra başlat
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', function() {
+      nightmareGUIFixes.init();
+    });
+  } else {
+    nightmareGUIFixes.init();
+  }
+  
+  // Global olarak erişilebilir yap
+  window.nightmareGUIFixes = nightmareGUIFixes;
+})();
+</script>
+<!-- ==================== END NIGHTMARE MODE GUI FIX ==================== -->
+
+<!-- ==================== 4 MODÜLER HATA DÜZELTMESI (FIX) ==================== -->
+<script>
+/**
+ * ═══════════════════════════════════════════════════════════════════════════
+ *  VOXEL/MINECRAFT OYUNU — 4 MODÜLER HATA DÜZELTMESI
+ *  (Güneş/Ay Yörüngesi, Spectator Adım Sesi, Yağmur/Şimşek Sesleri, Blok Koyma Lock)
+ * ═══════════════════════════════════════════════════════════════════════════
+ */
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 1. GÜNEŞ VE AY'IN YÖRÜNGE / AÇISAL ROTASYONU (Düzeltme)
+// ─────────────────────────────────────────────────────────────────────────────
+// Problem: Güneş ve Ay yamuk/açılı dönüyor
+// Çözüm: Doğudan doğup batıdan batacak şekilde tam dikey yörünge
+
+(function fixCelestialOrbit() {
+  if (typeof window !== 'undefined' && window.DayNightCycle) {
+    const originalUpdate = window.DayNightCycle.update;
+    
+    window.DayNightCycle.update = function(dt) {
+      if (!this.active) return;
+      this.time += dt;
+      if (this.time >= this.totalLength) this.time -= this.totalLength;
+
+      var angle;
+      if (!this.isNight()) {
+        angle = (this.time / this.dayLength) * Math.PI;
+      } else {
+        angle = Math.PI + ((this.time - this.dayLength) / this.nightLength) * Math.PI;
+      }
+      
+      var moonAngle = angle + Math.PI;
+      var radius = 60;
+      
+      // [FIX 1] DÜZGÜN YÖRÜNGESİ: Doğu-Batı ekseni boyunca saf dikey yörünge
+      var sunY = Math.sin(angle) * radius;      // Yükseklik: 0 -> max -> 0
+      var sunX = 0;                             // Doğu-batı: SABIT
+      var sunZ = Math.cos(angle) * radius;      // Kuzey-güney: açıya göre
+      
+      var moonY = Math.sin(moonAngle) * radius;
+      var moonX = 0;
+      var moonZ = Math.cos(moonAngle) * radius;
+
+      if (this.sunLight) {
+        this.sunLight.position.set(
+          camera.position.x + sunX, 
+          Math.max(sunY, -20), 
+          camera.position.z + sunZ
+        );
+        this.sunLight.target.position.copy(camera.position);
+        this.sunLight.target.updateMatrixWorld();
+        var sunUp = Math.max(0, Math.sin(angle));
+        this.sunLight.intensity = sunUp * 0.95;
+      }
+      
+      if (this.sunSprite) {
+        this.sunSprite.position.set(
+          camera.position.x + sunX, 
+          camera.position.y + sunY, 
+          camera.position.z + sunZ
+        );
+      }
+      
+      if (this.moonLight) {
+        this.moonLight.position.set(
+          camera.position.x + moonX, 
+          Math.max(moonY, -20), 
+          camera.position.z + moonZ
+        );
+        this.moonLight.target.position.copy(camera.position);
+        this.moonLight.target.updateMatrixWorld();
+        var moonUp = Math.max(0, Math.sin(moonAngle));
+        this.moonLight.intensity = moonUp * 0.35;
+      }
+      
+      if (this.moonSprite) {
+        this.moonSprite.position.set(
+          camera.position.x + moonX, 
+          camera.position.y + moonY, 
+          camera.position.z + moonZ
+        );
+      }
+
+      var dayColor = new THREE.Color(0x75a7ff);
+      var duskColor = new THREE.Color(0xff9a5c);
+      var nightColor = new THREE.Color(0x050818);
+      var skyCol = new THREE.Color();
+      var sunHeight = Math.sin(angle);
+
+      if (sunHeight > 0.15) {
+        skyCol.copy(dayColor);
+      } else if (sunHeight > -0.15) {
+        var f = (0.15 - sunHeight) / 0.30;
+        skyCol.copy(dayColor).lerp(duskColor, f);
+      } else if (sunHeight > -0.35) {
+        var f2 = (-0.15 - sunHeight) / 0.20;
+        skyCol.copy(duskColor).lerp(nightColor, f2);
+      } else {
+        skyCol.copy(nightColor);
+      }
+      scene.background = skyCol;
+      if (scene.fog) scene.fog.color = skyCol;
+
+      if (this.ambientRef === null) {
+        scene.children.forEach(function(c) { 
+          if (c.isAmbientLight) window.DayNightCycle.ambientRef = c; 
+        });
+      }
+      if (this.ambientRef) {
+        this.ambientRef.intensity = 0.25 + Math.max(0, sunHeight) * 0.6;
+      }
+    };
+    
+    console.log('✅ [FIX 1] Güneş ve Ay yörüngesi düzeltildi (doğu-batı > dikey)');
+  }
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 2. SPECTATOR (İZLEYİCİ) MODUNDA ADIM SESİ HATASI (Düzeltme)
+// ─────────────────────────────────────────────────────────────────────────────
+// Problem: Spectator modda ayak sesi tetikleniyor
+// Çözüm: Adım sesi tetikleyen fonksiyona isSpectator/isFlying kontrolü ekle
+
+(function fixSpectatorFootstepBug() {
+  window._originalPlayFootstep = window._originalPlayFootstep || 
+    (function() {
+      if (typeof window.playFootstepSound === 'function') {
+        const original = window.playFootstepSound;
+        window.playFootstepSound = function() {
+          // [FIX 2] Spectator modda veya uçarken adım sesi çalma
+          if (typeof gameMode !== 'undefined' && gameMode === 'spectator') {
+            return;
+          }
+          if (typeof isFlying !== 'undefined' && isFlying === true) {
+            return;
+          }
+          return original.apply(this, arguments);
+        };
+        console.log('✅ [FIX 2] playFootstepSound() Spectator kontrolü eklendi');
+      }
+    })();
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 3. YAĞMUR VE ŞİMŞEK SES YÖNETİMİ (Direct File / Non-Buffer)
+// ─────────────────────────────────────────────────────────────────────────────
+
+(function setupWeatherAudio() {
+  window.WeatherAudio = {
+    rainAudio: null,
+    thunderAudio: null,
+    isRaining: false,
+    
+    initRainAudio: function() {
+      try {
+        if (!this.rainAudio) {
+          this.rainAudio = new Audio('./rain.mp3');
+          this.rainAudio.loop = true;
+          this.rainAudio.volume = 0.4;
+          console.log('✅ Rain audio loaded: ./rain.mp3 (loop=true)');
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not load rain.mp3:', err);
+      }
+    },
+    
+    initThunderAudio: function() {
+      try {
+        if (!this.thunderAudio) {
+          this.thunderAudio = new Audio('./thunder.mp3');
+          this.thunderAudio.volume = 0.6;
+          console.log('✅ Thunder audio loaded: ./thunder.mp3 (oneshot)');
+        }
+      } catch (err) {
+        console.warn('⚠️ Could not load thunder.mp3:', err);
+      }
+    },
+    
+    startRain: function() {
+      if (this.isRaining) return;
+      this.initRainAudio();
+      if (this.rainAudio) {
+        this.rainAudio.currentTime = 0;
+        this.rainAudio.play().catch(err => {
+          console.warn('⚠️ Could not play rain:', err);
+        });
+      }
+      this.isRaining = true;
+      console.log('🌧 Rain audio started');
+    },
+    
+    stopRain: function() {
+      if (!this.isRaining) return;
+      if (this.rainAudio) {
+        this.rainAudio.pause();
+        this.rainAudio.currentTime = 0;
+      }
+      this.isRaining = false;
+      console.log('🌧 Rain audio stopped');
+    },
+    
+    playThunder: function() {
+      this.initThunderAudio();
+      if (this.thunderAudio) {
+        this.thunderAudio.currentTime = 0;
+        this.thunderAudio.play().catch(err => {
+          console.warn('⚠️ Could not play thunder:', err);
+        });
+      }
+      console.log('⚡ Thunder audio played');
+    }
+  };
+  
+  // Hook: WeatherFX.applyMode() override
+  if (typeof window.WeatherFX !== 'undefined') {
+    const originalApplyMode = window.WeatherFX.applyMode;
+    window.WeatherFX.applyMode = function(mode) {
+      originalApplyMode.call(this, mode);
+      
+      // [FIX 3] Mode değiştiğinde ses başlat/durdur
+      if (mode === 'rain' || mode === 'storm') {
+        window.WeatherAudio.startRain();
+      } else if (mode === 'clear') {
+        window.WeatherAudio.stopRain();
+      }
+    };
+    
+    // Hook: LightningFX.strikeNear() override
+    if (typeof window.LightningFX !== 'undefined') {
+      const originalStrike = window.LightningFX.strikeNear;
+      window.LightningFX.strikeNear = function(x, z, isPlayerTarget) {
+        originalStrike.call(this, x, z, isPlayerTarget);
+        window.WeatherAudio.playThunder();
+      };
+    }
+  }
+  
+  console.log('✅ [FIX 3] Yağmur/Şimşek ses yönetimi hazırlandı (direct files)');
+})();
+
+// ─────────────────────────────────────────────────────────────────────────────
+// 4. BLOK KOYMA SONRASI KAMERA / MOUSE LOCK KILITLENMESI (Kritik Bug Düzeltme)
+// ─────────────────────────────────────────────────────────────────────────────
+
+(function fixBlockPlaceCameraLock() {
+  // Pointer lock otomatik restore (100ms'de bir kontrol)
+  if (typeof window !== 'undefined') {
+    window._pointerLockMonitor = setInterval(function() {
+      if (typeof deviceMode !== 'undefined' && 
+          deviceMode === 'pc' && 
+          typeof isPaused !== 'undefined' && !isPaused && 
+          typeof invOpen !== 'undefined' && !invOpen && 
+          document.pointerLockElement !== document.body) {
+        
+        if (typeof isGameRunning !== 'undefined' && isGameRunning === true) {
+          document.body.requestPointerLock?.();
+          console.log('🔒 Pointer lock re-acquired (auto-restore)');
+        }
+      }
+    }, 100);
+  }
+  
+  // Jump state koruması
+  window._originalJumpBehavior = window._originalJumpBehavior || (function() {
+    if (typeof window.doJump === 'function') {
+      const originalJump = window.doJump;
+      window.doJump = function() {
+        // [FIX 4] Zıplama öncesi camera rotation state'i koru
+        if (typeof camera !== 'undefined' && camera) {
+          if (typeof camera.updateMatrix === 'function') {
+            camera.updateMatrix();
+          }
+          const savedRotX = camera.rotation.x;
+          const savedRotY = camera.rotation.y;
+          
+          originalJump.apply(this, arguments);
+          
+          camera.rotation.x = savedRotX;
+          camera.rotation.y = savedRotY;
+        } else {
+          originalJump.apply(this, arguments);
+        }
+      };
+      console.log('✅ [FIX 4a] Jump rotation protection added');
+    }
+  })();
+  
+  console.log('✅ [FIX 4] Blok koyma kamera lock koruması eklendi + Jump state güvenliği');
+})();
+
+console.log(`
+╔════════════════════════════════════════════════════════════════╗
+║  🎮 LEGENDS PREVIEW — 4 MODÜLER HATA DÜZELTMESI UYGULANMIŞ   ║
+╚════════════════════════════════════════════════════════════════╝
+
+✅ [FIX 1] Güneş/Ay Yörüngesi      → Doğu-Batı (Dikey yörünge)
+✅ [FIX 2] Spectator Adım Sesi     → gameMode kontrolü eklendi
+✅ [FIX 3] Yağmur/Şimşek Sesleri   → Direct files (./rain.mp3, ./thunder.mp3)
+✅ [FIX 4] Blok Koyma Lock+Jump    → Pointer lock + rotation güvenliği
+
+📋 Kullanım:
+   • rain.mp3 ve thunder.mp3 dosyalarını proje kök dizinine koy
+   • DevConsole: window.WeatherAudio.startRain() ile test et
+`);
+</script>
+<!-- ==================== END 4 MODÜLER HATA DÜZELTMESI ==================== -->
+
+<!-- =========================================================================
+     LEGENDS WORLD STORAGE v1
+     Hybrid client-side save system:
+       - File System Access API when the player selects a Saves directory
+       - IndexedDB virtual directories everywhere else
+       - atomic-ish writes with .bak recovery, quota protection, RLE chunks,
+         version checks, missing-block rendering and ZIP import/export
+     ========================================================================= -->
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
+(function(){
+  'use strict';
+
+  var CURRENT_GAME_VERSION = 'Preview 1.7.LIp1';
+  var DB_NAME = 'legends-world-storage-v1';
+  var DB_VERSION = 1;
+  var STORE_NAME = 'files';
+  var CRITICAL_REMAINING_BYTES = 5 * 1024 * 1024;
+  var CHUNK_SIZE = 16;
+  var BLOCK_IDS = [
+    'planks','grass','dirt','stone','log','cobblestone','glass','leaves',
+    'sand','water','bedrock','lava','obsidian','andesite','granite','diorite',
+    'gravel','barrier','crafting_table'
+  ];
+  var _dbPromise = null;
+  var _savesDirectory = null;
+  var _mode = 'indexeddb';
+  var _savePromise = Promise.resolve();
+  var _halted = false;
+  var _alertShown = false;
+  var _activeWorldId = null;
+  var _blockChanges = Object.create(null);
+  var _blockSaveTimer = null;
+  var _missingMaterial = null;
+  var _lastEstimate = null;
+  var _lastSavedAt = 0;
+
+  function tr(en, trText){ return (typeof currentLang !== 'undefined' && currentLang === 'tr') ? trText : en; }
+  function safeSegment(value){ return String(value || 'world').replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 80) || 'world'; }
+  function keyFor(x,y,z){ return String(x) + '_' + String(y) + '_' + String(z); }
+  function isQuotaError(error){
+    return !!error && (error.name === 'QuotaExceededError' || error.code === 22 ||
+      /quota|storage.?full|disk.?full/i.test(String(error.message || error)));
+  }
+  function idForType(type){
+    if(type === null || type === undefined || type === -1) return null;
+    if(type === 99 || String(type).toLowerCase() === '99') return 'barrier';
+    if(typeof type === 'string' && /^\d+$/.test(type) && BLOCK_IDS[+type]) return BLOCK_IDS[+type];
+    if(typeof type === 'number' && BLOCK_IDS[type]) return BLOCK_IDS[type];
+    if(typeof type === 'string' && BLOCK_IDS.indexOf(type) > -1) return type;
+    return typeof type === 'string' ? type : 'missing_block_' + String(type);
+  }
+  function slotForId(id){
+    if(String(id || '').toLowerCase() === 'barrier') return 99;
+    var i = BLOCK_IDS.indexOf(String(id || '').toLowerCase());
+    return i > -1 ? i : null;
+  }
+
+  function openDb(){
+    if(_dbPromise) return _dbPromise;
+    _dbPromise = new Promise(function(resolve,reject){
+      if(!window.indexedDB) return reject(new Error('IndexedDB is not available'));
+      var req = indexedDB.open(DB_NAME, DB_VERSION);
+      req.onupgradeneeded = function(){
+        var db = req.result;
+        if(!db.objectStoreNames.contains(STORE_NAME)) db.createObjectStore(STORE_NAME, {keyPath:'path'});
+      };
+      req.onsuccess = function(){ resolve(req.result); };
+      req.onerror = function(){ reject(req.error || new Error('IndexedDB open failed')); };
+    });
+    return _dbPromise;
+  }
+  function idbRequest(request){
+    return new Promise(function(resolve,reject){
+      request.onsuccess = function(){ resolve(request.result); };
+      request.onerror = function(){ reject(request.error || new Error('IndexedDB request failed')); };
+    });
+  }
+  async function idbGet(path){
+    var db=await openDb(), tx=db.transaction(STORE_NAME,'readonly');
+    return idbRequest(tx.objectStore(STORE_NAME).get(path));
+  }
+  async function idbKeys(prefix){
+    var db=await openDb(), tx=db.transaction(STORE_NAME,'readonly');
+    var keys=await idbRequest(tx.objectStore(STORE_NAME).getAllKeys());
+    return keys.filter(function(k){return String(k).indexOf(prefix)===0;});
+  }
+  async function idbPut(record){
+    var db=await openDb();
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(STORE_NAME,'readwrite');
+      tx.objectStore(STORE_NAME).put(record);
+      tx.oncomplete=function(){resolve(true);};
+      tx.onerror=function(){reject(tx.error || new Error('IndexedDB write failed'));};
+      tx.onabort=function(){reject(tx.error || new Error('IndexedDB transaction aborted'));};
+    });
+  }
+  async function idbDelete(path){
+    var db=await openDb();
+    return new Promise(function(resolve,reject){
+      var tx=db.transaction(STORE_NAME,'readwrite');
+      tx.objectStore(STORE_NAME).delete(path);
+      tx.oncomplete=function(){resolve(true);};
+      tx.onerror=function(){reject(tx.error || new Error('IndexedDB delete failed'));};
+    });
+  }
+  async function readText(path){
+    if(_savesDirectory){
+      try{
+        var parts=path.split('/'), dir=_savesDirectory;
+        for(var i=0;i<parts.length-1;i++) dir=await dir.getDirectoryHandle(parts[i],{create:false});
+        var file=await dir.getFileHandle(parts[parts.length-1],{create:false});
+        return await (await file.getFile()).text();
+      }catch(error){
+        if(error && error.name==='NotFoundError') return null;
+        throw error;
+      }
+    }
+    var record=await idbGet(path);
+    return record && typeof record.data==='string' ? record.data : null;
+  }
+  async function readJsonWithBackup(path){
+    var text=await readText(path);
+    if(text!==null){
+      try{return JSON.parse(text);}catch(ignore){}
+    }
+    if(_savesDirectory){
+      var backupText=await readText(path+'.bak');
+      try{return backupText===null?null:JSON.parse(backupText);}catch(ignore2){return null;}
+    }
+    var record=await idbGet(path);
+    if(record && typeof record.backup==='string'){
+      try{return JSON.parse(record.backup);}catch(ignore3){}
+    }
+    return null;
+  }
+  async function writeTextAtomic(path,text){
+    if(_halted) throw new Error('World storage is halted');
+    var previous=null;
+    try{previous=await readText(path);}catch(ignore){}
+    if(_savesDirectory){
+      var parts=path.split('/'),dir=_savesDirectory;
+      for(var i=0;i<parts.length-1;i++) dir=await dir.getDirectoryHandle(parts[i],{create:true});
+      var filename=parts[parts.length-1];
+      if(previous!==null){
+        var bak=await dir.getFileHandle(filename+'.bak',{create:true});
+        var bw=await bak.createWritable();await bw.write(previous);await bw.close();
+      }
+      var tmp=await dir.getFileHandle(filename+'.tmp',{create:true});
+      var tw=await tmp.createWritable();await tw.write(text);await tw.close();
+      var finalFile=await dir.getFileHandle(filename,{create:true});
+      var fw=await finalFile.createWritable();await fw.write(text);await fw.close();
+      try{await dir.removeEntry(filename+'.tmp');}catch(ignore2){}
+      return true;
+    }
+    await idbPut({path:path,data:text,backup:previous,savedAt:Date.now()});
+    return true;
+  }
+  async function deletePath(path){
+    if(_savesDirectory){
+      var parts=path.split('/'),dir=_savesDirectory;
+      for(var i=0;i<parts.length-1;i++) dir=await dir.getDirectoryHandle(parts[i],{create:false});
+      try{await dir.removeEntry(parts[parts.length-1]);}catch(error){
+        if(!error || error.name!=='NotFoundError') throw error;
+      }
+    }else await idbDelete(path);
+  }
+
+  function haltForStorage(error){
+    if(_halted) return;
+    _halted=true;
+    console.error('[WorldStorage] Save halted:',error);
+    if(!_alertShown){
+      _alertShown=true;
+      window.alert('Depolama Alanı Dolu! Dünyanız veri kaybını önlemek için kaydedilmedi.');
+    }
+    kickToTitle();
+  }
+  function kickToTitle(){
+    try{if(document.pointerLockElement)document.exitPointerLock();}catch(ignore){}
+    try{if(typeof cleanupMP==='function')cleanupMP();}catch(ignore2){}
+    try{
+      if(typeof isPaused!=='undefined')isPaused=false;
+      if(typeof deviceMode!=='undefined')deviceMode=null;
+      var pause=document.getElementById('pause-overlay');if(pause)pause.classList.remove('active');
+      var menu=document.getElementById('menu-overlay');
+      if(menu){menu.style.display='flex';menu.style.pointerEvents='auto';menu.style.zIndex='1000';}
+      if(typeof showScreen==='function')showScreen('screen-main');
+    }catch(ignore3){}
+  }
+  async function estimateStorage(){
+    try{
+      if(!navigator.storage || !navigator.storage.estimate)return null;
+      var e=await navigator.storage.estimate(),quota=Number(e.quota||0),usage=Number(e.usage||0);
+      var result={usage:usage,quota:quota,remaining:Math.max(0,quota-usage)};
+      _lastEstimate=result;
+      if(quota && (result.remaining<=CRITICAL_REMAINING_BYTES || usage/quota>=.95)) haltForStorage(new Error('Critical storage level'));
+      updateStorageUi();
+      return result;
+    }catch(error){console.warn('[WorldStorage] estimate failed',error);return null;}
+  }
+
+  function getWorlds(){
+    try{return JSON.parse(localStorage.getItem('legendsSpWorlds')||'[]');}catch(error){return [];}
+  }
+  function getWorld(id){return getWorlds().filter(function(w){return w&&w.id===id;})[0]||null;}
+  function updateWorldIndex(id,fields){
+    try{
+      var worlds=getWorlds(),i=worlds.findIndex(function(w){return w&&w.id===id;});
+      if(i<0)return;
+      Object.keys(fields||{}).forEach(function(k){worlds[i][k]=fields[k];});
+      localStorage.setItem('legendsSpWorlds',JSON.stringify(worlds));
+    }catch(error){console.warn('[WorldStorage] index update failed',error);}
+  }
+  function capturePlayer(){
+    var position={x:0,y:0,z:0},rotation={x:0,y:0};
+    try{
+      if(typeof camera!=='undefined'&&camera){
+        position={x:+camera.position.x.toFixed(2),y:+camera.position.y.toFixed(2),z:+camera.position.z.toFixed(2)};
+        rotation={x:+camera.rotation.x.toFixed(3),y:+camera.rotation.y.toFixed(3)};
+      }
+    }catch(ignore){}
+    var hp=20;
+    try{hp=typeof HealthManager!=='undefined'?HealthManager.currentHealth:(typeof health!=='undefined'?health:20);}catch(ignore2){}
+    return {position:position,rotation:rotation,
+      inventory:(typeof hotbarSlots!=='undefined'&&Array.isArray(hotbarSlots))?hotbarSlots.slice():[],
+      hotbar:(typeof hotbarSlots!=='undefined'&&Array.isArray(hotbarSlots))?hotbarSlots.slice():[],
+      health:hp,hunger:(typeof hunger!=='undefined'?hunger:20),savedAt:Date.now()};
+  }
+  function readLegacyChanges(id){
+    var out=[];
+    try{
+      var raw=localStorage.getItem('legendsSpFullState_'+id+'_blocks'),old=raw?JSON.parse(raw):[];
+      if(Array.isArray(old))old.forEach(function(c){
+        if(c&&Number.isFinite(+c.x)&&Number.isFinite(+c.y)&&Number.isFinite(+c.z))
+          out.push({x:+c.x,y:+c.y,z:+c.z,type:c.type});
+      });
+    }catch(ignore){}
+    return out;
+  }
+  function mergedChanges(id){
+    var map=Object.create(null);
+    readLegacyChanges(id).forEach(function(c){map[keyFor(c.x,c.y,c.z)]=c;});
+    Object.keys(_blockChanges).forEach(function(k){map[k]=_blockChanges[k];});
+    return Object.keys(map).map(function(k){return map[k];});
+  }
+  function encodeChunk(changes,cx,cz){
+    var records=changes.map(function(c){
+      var lx=c.x-cx*16,lz=c.z-cz*16,y=+c.y;
+      var index=(lx>=0&&lx<16&&lz>=0&&lz<16&&y>=0&&y<256)?lx+16*(lz+16*y):null;
+      return {x:lx,y:y,z:lz,index:index,type:c.type===undefined?-1:c.type};
+    }).sort(function(a,b){return a.index===null?1:b.index===null?-1:a.index-b.index;});
+    if(!records.every(function(r){return r.index!==null;}))
+      return {version:1,cx:cx,cz:cz,encoding:'records',records:records.map(function(r){return [r.x,r.y,r.z,r.type];})};
+    var runs=[];
+    records.forEach(function(r){
+      var last=runs[runs.length-1];
+      if(last&&last[0]+last[1]===r.index&&last[2]===r.type)last[1]++;
+      else runs.push([r.index,1,r.type]);
+    });
+    return {version:1,cx:cx,cz:cz,encoding:'rle',runs:runs};
+  }
+  function decodeChunk(chunk){
+    if(!chunk||typeof chunk!=='object')return [];
+    var out=[];
+    if(chunk.encoding==='rle'&&Array.isArray(chunk.runs))chunk.runs.forEach(function(run){
+      var start=+run[0],count=Math.max(0,+run[1]),type=run[2];
+      for(var i=0;i<count;i++){
+        var index=start+i,y=Math.floor(index/256),rem=index%256,z=Math.floor(rem/16),x=rem%16;
+        out.push({x:(+chunk.cx||0)*16+x,y:y,z:(+chunk.cz||0)*16+z,type:type});
+      }
+    });else if(Array.isArray(chunk.records))chunk.records.forEach(function(r){
+      if(Array.isArray(r)&&r.length>=4)out.push({x:(+chunk.cx||0)*16 + +r[0],y:+r[1],z:(+chunk.cz||0)*16 + +r[2],type:r[3]});
+    });
+    return out;
+  }
+  function makeChunkFiles(changes){
+    var grouped=Object.create(null);
+    changes.forEach(function(c){
+      var cx=Math.floor(c.x/16),cz=Math.floor(c.z/16),name='chunk_'+cx+'_'+cz+'.json';
+      (grouped[name]||(grouped[name]=[])).push(c);
+    });
+    var files={};
+    Object.keys(grouped).forEach(function(name){
+      var m=name.match(/^chunk_(-?\d+)_(-?\d+)\.json$/);
+      files[name]=encodeChunk(grouped[name],+m[1],+m[2]);
+    });
+    return files;
+  }
+  function buildPackage(id){
+    var w=getWorld(id)||{},now=Date.now();
+    var level={id:id,name:String(w.name||'New World').slice(0,32),
+      seed:typeof w.seed==='number'?w.seed:0,gameMode:w.gameMode||w.mode||'survival',
+      worldType:w.worldType||'infinite',cheats:!!w.cheats,createdAt:w.createdAt||now,
+      lastPlayed:now,gameVersion:(window.CURRENT_GAME_VERSION||CURRENT_GAME_VERSION)};
+    var chunks=makeChunkFiles(mergedChanges(id));
+    var files={'level.json':level,'player.json':capturePlayer()};
+    Object.keys(chunks).forEach(function(n){files['chunks/'+n]=chunks[n];});
+    return {level:level,player:files['player.json'],chunks:chunks,files:files};
+  }
+  async function removeOldChunks(id,keep){
+    var prefix=safeSegment(id)+'/chunks/';
+    if(_savesDirectory){
+      try{
+        var root=await _savesDirectory.getDirectoryHandle(safeSegment(id),{create:false});
+        var dir=await root.getDirectoryHandle('chunks',{create:false});
+        for await(var entry of dir.values())if(entry.kind==='file'&&keep.indexOf(entry.name)<0){
+          try{await dir.removeEntry(entry.name);}catch(ignore){}
+          try{await dir.removeEntry(entry.name+'.bak');}catch(ignore2){}
+        }
+      }catch(error){if(!error||error.name!=='NotFoundError')throw error;}
+    }else{
+      var keys=await idbKeys(prefix);
+      for(var i=0;i<keys.length;i++){
+        var leaf=String(keys[i]).slice(prefix.length).replace(/\.bak$|\.tmp$/,'');
+        if(keep.indexOf(leaf)<0)await idbDelete(keys[i]);
+      }
+    }
+  }
+  async function writePackage(id,pkg){
+    var root=safeSegment(id)+'/',names=Object.keys(pkg.chunks);
+    await removeOldChunks(id,names);
+    await writeTextAtomic(root+'level.json',JSON.stringify(pkg.level,null,2));
+    await writeTextAtomic(root+'player.json',JSON.stringify(pkg.player,null,2));
+    for(var i=0;i<names.length;i++)await writeTextAtomic(root+'chunks/'+names[i],JSON.stringify(pkg.chunks[names[i]]));
+    _lastSavedAt=Date.now();updateWorldIndex(id,{gameVersion:(window.CURRENT_GAME_VERSION||CURRENT_GAME_VERSION),lastPlayed:_lastSavedAt});
+  }
+  async function deleteWorldFiles(id){
+    if(!id)return false;
+    if(_savesDirectory){
+      try{await _savesDirectory.removeEntry(safeSegment(id),{recursive:true});}
+      catch(error){if(!error||error.name!=='NotFoundError')throw error;}
+    }else{
+      var keys=await idbKeys(safeSegment(id)+'/');
+      for(var i=0;i<keys.length;i++)await idbDelete(keys[i]);
+    }
+    if(_activeWorldId===id)_activeWorldId=null;
+    return true;
+  }
+  async function saveWorldFiles(id){
+    id=id||_activeWorldId||(typeof getActiveSpWorldId==='function'?getActiveSpWorldId():null);
+    if(!id||_halted||(typeof isMP!=='undefined'&&isMP))return false;
+    _activeWorldId=id;
+    _savePromise=_savePromise.then(async function(){
+      if(_halted)return false;
+      var e=await estimateStorage();
+      if(e&&e.quota&&e.remaining<=CRITICAL_REMAINING_BYTES)return false;
+      await writePackage(id,buildPackage(id));return true;
+    }).catch(function(error){
+      if(isQuotaError(error))haltForStorage(error);else console.error('[WorldStorage] save failed',error);
+      return false;
+    });
+    return _savePromise;
+  }
+  async function readPackage(id){
+    var root=safeSegment(id)+'/',level=await readJsonWithBackup(root+'level.json'),player=await readJsonWithBackup(root+'player.json'),chunks={};
+    if(!level&&!player)return null;
+    if(_savesDirectory){
+      try{
+        var wd=await _savesDirectory.getDirectoryHandle(safeSegment(id),{create:false});
+        var cd=await wd.getDirectoryHandle('chunks',{create:false});
+        for await(var entry of cd.values())if(entry.kind==='file'&&/^chunk_.*\.json$/.test(entry.name))
+          try{chunks[entry.name]=JSON.parse(await (await entry.getFile()).text());}catch(ignore){}
+      }catch(ignore2){}
+    }else{
+      var keys=await idbKeys(root+'chunks/');
+      for(var i=0;i<keys.length;i++){var rec=await idbGet(keys[i]);try{if(rec&&rec.data)chunks[String(keys[i]).split('/').pop()]=JSON.parse(rec.data);}catch(ignore3){}}
+    }
+    return {level:level,player:player,chunks:chunks};
+  }
+  function createMissingMaterial(){
+    var canvas=document.createElement('canvas');canvas.width=32;canvas.height=32;
+    var ctx=canvas.getContext('2d');ctx.fillStyle='#050505';ctx.fillRect(0,0,32,32);
+    ctx.fillStyle='#ff00ff';ctx.fillRect(0,0,16,16);ctx.fillRect(16,16,16,16);
+    var texture=new THREE.CanvasTexture(canvas);texture.magFilter=THREE.NearestFilter;texture.minFilter=THREE.NearestFilter;
+    return new THREE.MeshLambertMaterial({map:texture});
+  }
+  function applyMissingBlock(c){
+    if(typeof blockMap==='undefined'||typeof pk!=='function')return;
+    var k=pk(c.x,c.y,c.z),old=blockMap[k];
+    if(old){try{if(typeof hideBlock==='function')hideBlock(old);}catch(ignore){}delete blockMap[k];}
+    if(c.type===null||c.type===-1)return;
+    if(!_missingMaterial)_missingMaterial=createMissingMaterial();
+    var block={id:idForType(c.type),pos:new THREE.Vector3(c.x,c.y,c.z),mat:_missingMaterial,visible:false,
+      isSolid:true,solid:true,hardness:0,breakTime:0,breakDuration:0,unbreakable:true,
+      missingTexture:true,unknownBlock:true};
+    blockMap[k]=block;
+    try{
+      var cx=Math.floor(c.x/16),cz=Math.floor(c.z/16);
+      if(typeof chunks!=='undefined'&&typeof ck==='function'){
+        if(!chunks[ck(cx,cz)]&&typeof genChunk==='function')genChunk(cx,cz);
+        if(chunks[ck(cx,cz)]&&Array.isArray(chunks[ck(cx,cz)].blocks))chunks[ck(cx,cz)].blocks.push(block);
+      }
+      if(typeof showBlock==='function')showBlock(block);
+      if(typeof refreshNbr==='function')refreshNbr(c.x,c.y,c.z);
+      if(typeof instancesDirty!=='undefined')instancesDirty=true;
+      if(typeof stopBreaking==='function')stopBreaking();
+    }catch(error){console.warn('[WorldStorage] missing block apply failed',error);}
+  }
+  function applyPlayer(p){
+    if(!p)return;
+    try{
+      if(p.position&&typeof camera!=='undefined')camera.position.set(+p.position.x,+p.position.y,+p.position.z);
+      if(p.rotation&&typeof camera!=='undefined'){camera.rotation.x=+p.rotation.x;camera.rotation.y=+p.rotation.y;
+        if(typeof lat!=='undefined')lat=camera.rotation.x;if(typeof lon!=='undefined')lon=camera.rotation.y;}
+      if(Array.isArray(p.inventory)&&p.inventory.length===9&&typeof hotbarSlots!=='undefined'){
+        hotbarSlots=p.inventory.slice();if(typeof initHotbar==='function')initHotbar();
+      }
+      if(typeof p.health==='number'&&typeof HealthManager!=='undefined'){HealthManager.currentHealth=Math.max(0,Math.min(HealthManager.maxHealth,p.health));if(typeof health!=='undefined')health=HealthManager.currentHealth;}
+      if(typeof p.hunger==='number'&&typeof hunger!=='undefined')hunger=p.hunger;
+      if(typeof updateBars==='function')updateBars();
+    }catch(error){console.warn('[WorldStorage] player apply failed',error);}
+  }
+  function applyPackage(pkg){
+    if(!pkg)return;
+    var changes=[];Object.keys(pkg.chunks||{}).forEach(function(n){changes=changes.concat(decodeChunk(pkg.chunks[n]));});
+    var known=[],unknown=[];
+    changes.forEach(function(c){
+      var id=idForType(c.type);
+      if(slotForId(id)!==null||c.type===null||c.type===-1)
+        known.push({x:c.x,y:c.y,z:c.z,type:c.type===null||c.type===-1?null:slotForId(id)});
+      else unknown.push(c);
+    });
+    try{if(known.length&&typeof applyStoredBlockChanges==='function')applyStoredBlockChanges({blockChanges:known});}catch(error){console.warn('[WorldStorage] block apply failed',error);}
+    unknown.forEach(applyMissingBlock);applyPlayer(pkg.player);
+  }
+  async function beginWorld(id){
+    _activeWorldId=id;_halted=false;_alertShown=false;_blockChanges=Object.create(null);
+    readLegacyChanges(id).forEach(function(c){_blockChanges[keyFor(c.x,c.y,c.z)]=c;});
+    var pkg=await readPackage(id).catch(function(error){console.warn('[WorldStorage] read failed',error);return null;});
+    if(pkg)applyPackage(pkg);return pkg;
+  }
+
+  async function chooseSavesFolder(){
+    if(!window.showDirectoryPicker){
+      _mode='indexeddb';await openDb();updateStorageUi();
+      window.alert(tr('File System Access is unavailable. IndexedDB virtual Saves storage is active.','File System Access desteklenmiyor. IndexedDB sanal Saves depolaması aktif.'));
+      return false;
+    }
+    try{_savesDirectory=await window.showDirectoryPicker({id:'legends-saves',mode:'readwrite'});_mode='filesystem';updateStorageUi();return true;}
+    catch(error){
+      if(error&&error.name!=='AbortError')window.alert(tr('Saves folder could not be opened. IndexedDB remains active.','Saves klasörü açılamadı. IndexedDB kullanılmaya devam ediyor.'));
+      return false;
+    }
+  }
+  function recordBlock(data){
+    if(!data||!_activeWorldId||(typeof isMP!=='undefined'&&isMP))return;
+    var x=+data.bx,y=+data.by,z=+data.bz;if(!Number.isFinite(x)||!Number.isFinite(y)||!Number.isFinite(z))return;
+    var c={x:Math.round(x),y:Math.round(y),z:Math.round(z),type:data.action==='break'?-1:(data.blockId||data.slot)};
+    _blockChanges[keyFor(c.x,c.y,c.z)]=c;
+    clearTimeout(_blockSaveTimer);
+    _blockSaveTimer=setTimeout(function(){_blockSaveTimer=null;saveWorldFiles(_activeWorldId);},800);
+  }
+  async function exportWorldToZip(id){
+    if(!window.JSZip){window.alert('JSZip yüklenemedi. ZIP dışa aktarma kullanılamıyor.');return false;}
+    id=id||_activeWorldId;if(!id){window.alert(tr('Önce bir dünya seçin.','Select a world first.'));return false;}
+    await saveWorldFiles(id);var pkg=buildPackage(id),zip=new JSZip(),folder=zip.folder(safeSegment(id));
+    folder.file('level.json',JSON.stringify(pkg.level,null,2));folder.file('player.json',JSON.stringify(pkg.player,null,2));
+    Object.keys(pkg.chunks).forEach(function(n){folder.file('chunks/'+n,JSON.stringify(pkg.chunks[n]));});
+    var blob=await zip.generateAsync({type:'blob',compression:'DEFLATE',compressionOptions:{level:6}});
+    var link=document.createElement('a');link.href=URL.createObjectURL(blob);link.download=safeSegment(pkg.level.name)+'.zip';
+    document.body.appendChild(link);link.click();link.remove();setTimeout(function(){URL.revokeObjectURL(link.href);},1000);return true;
+  }
+  async function importWorldFromZip(file){
+    if(!window.JSZip){window.alert('JSZip yüklenemedi. ZIP içe aktarma kullanılamıyor.');return null;}
+    if(!file)return null;
+    try{
+      var zip=await JSZip.loadAsync(file),levelEntry=null;
+      Object.keys(zip.files).some(function(n){var p=n.replace(/^\/+/,'').split('/');if(p.length===2&&p[1]==='level.json'){levelEntry=zip.files[n];return true;}return false;});
+      if(!levelEntry)throw new Error('level.json not found');
+      var level=JSON.parse(await levelEntry.async('string')),id='sp_import_'+Date.now()+'_'+Math.floor(Math.random()*10000);
+      level.id=id;
+      var world={id:id,name:String(level.name||'Imported World').slice(0,32),worldType:level.worldType||'infinite',
+        gameMode:level.gameMode||'survival',mode:level.gameMode||'survival',seed:+level.seed||0,cheats:!!level.cheats,
+        createdAt:level.createdAt||Date.now(),lastPlayed:Date.now(),gameVersion:level.gameVersion||(window.CURRENT_GAME_VERSION||CURRENT_GAME_VERSION),
+        enabledModIds:[],dead:false,gameStatus:'ALIVE'};
+      var worlds=getWorlds();worlds.unshift(world);try{localStorage.setItem('legendsSpWorlds',JSON.stringify(worlds));}catch(ignore){}
+      var packageFiles={'level.json':level},playerEntry=null;
+      for(var name in zip.files){
+        var entry=zip.files[name],parts=name.replace(/^\/+/,'').split('/');
+        if(parts.some(function(p){return p==='..'||p==='.'||p==='';}))continue;
+        if(parts.length===2&&parts[1]==='player.json')playerEntry=entry;
+        if(parts.length===3&&parts[1]==='chunks'&&/^chunk_-?\d+_-?\d+\.json$/.test(parts[2]))
+          try{packageFiles['chunks/'+parts[2]]=JSON.parse(await entry.async('string'));}catch(ignore2){}
+      }
+      packageFiles['player.json']=playerEntry?JSON.parse(await playerEntry.async('string')):capturePlayer();
+      var chunkFiles=Object.keys(packageFiles).filter(function(p){return p.indexOf('chunks/')===0;}).reduce(function(out,p){out[p.slice(7)]=packageFiles[p];return out;},{});
+      await writePackage(id,{level:level,player:packageFiles['player.json'],chunks:chunkFiles});
+      if(typeof window._renderSpWorldsList==='function')window._renderSpWorldsList();updateStorageUi();
+      window.alert(tr('Dünya içe aktarıldı.','World imported successfully.'));return id;
+    }catch(error){console.error('[WorldStorage] import failed',error);window.alert(tr('ZIP dünyası okunamadı.','The ZIP world could not be read.'));return null;}
+  }
+
+  function versionIsOld(level,world){
+    var version=(level&&level.gameVersion)||(world&&world.gameVersion);
+    // Worlds made before the structured save layer have no version field;
+    // treat those as legacy and keep them loadable.
+    if(!version)return false;
+    return window.LegendsVersionManager
+      ? window.LegendsVersionManager.isWorldTooNew(window.CURRENT_GAME_VERSION||CURRENT_GAME_VERSION,version)
+      : false;
+  }
+  async function playWorldWithVersionGate(id){
+    if(window._worldVersionGateBusy)return;window._worldVersionGateBusy=true;
+    try{
+      var world=getWorld(id),pkg=await readPackage(id),level=pkg&&pkg.level;
+      if(versionIsOld(level,world)){
+        window.alert('Eski sürümde yeni sürüm dünyası kullanamazsınız');
+        return;
+      }
+      if(!world)return;
+      window._spHardcore=!!world.hardcore;window.hardcoreMode=window._spHardcore;
+      window._spNightmare=!!world.nightmare;window.nightmareMode=window._spNightmare;
+      if(typeof spGameMode!=='undefined')spGameMode=(world.hardcore||world.nightmare)?'survival':(world.gameMode||'survival');
+      if(typeof spCheatsEnabled!=='undefined')spCheatsEnabled=(world.hardcore||world.nightmare)?false:!!world.cheats;
+      if(typeof worldSeed!=='undefined')worldSeed=world.seed||(Math.floor(Math.random()*2147483647));
+      window._spLoadedWorldId=world.id;window._spActiveWorldId=world.id;window._spNewWorldMode=false;
+      window.startGame(selectedDevice||autoDevice(),world.worldType||'infinite',false,spGameMode,spCheatsEnabled);
+    }finally{window._worldVersionGateBusy=false;}
+  }
+  function updateStorageUi(){
+    var status=document.getElementById('lws-status');
+    if(status){
+      var mode=_mode==='filesystem'?'FileSystem':'IndexedDB';
+      status.textContent='Storage: '+mode;
+    }
+  }
+  function installWorldsCss(){
+    if(document.getElementById('lws-clean-worlds-css'))return;
+    var style=document.createElement('style');
+    style.id='lws-clean-worlds-css';
+    style.textContent=
+      '#screen-sp-worlds{box-sizing:border-box;max-height:96vh;overflow:hidden!important;display:none;'+
+      'flex-direction:column;align-items:center;gap:12px;padding:0 18px 14px;}'+
+      '#screen-sp-worlds.active{display:flex;}'+
+      '#screen-sp-worlds #btn-new-sp-world{flex:0 0 auto;width:100%;margin:0!important;}'+
+      '#screen-sp-worlds .sp-worlds-list{box-sizing:border-box;width:100%;flex:1 1 auto;min-height:0;'+
+      'display:flex;flex-direction:column;gap:8px;margin:0;overflow-y:auto;overflow-x:hidden;scrollbar-width:none;}'+
+      '#screen-sp-worlds .sp-worlds-list::-webkit-scrollbar{display:none;width:0;}'+
+      '#screen-sp-worlds #sp-worlds-empty{box-sizing:border-box;width:100%;margin:auto 0;padding:28px 8px!important;}'+
+      '#screen-sp-worlds .sp-world-item{box-sizing:border-box;width:100%;margin:0;min-height:58px;padding:8px 9px;'+
+      'gap:8px;border-radius:6px;flex:0 0 auto;}'+
+      '#screen-sp-worlds .swi-info{min-width:0;overflow:hidden;}'+
+      '#screen-sp-worlds .swi-name{font-size:11px;}'+
+      '#screen-sp-worlds .swi-meta{font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}'+
+      '#screen-sp-worlds .swi-btns{display:flex;align-items:center;gap:4px;flex:0 0 auto;}'+
+      '#screen-sp-worlds .swi-btn{padding:6px 6px;font-size:7px;white-space:nowrap;letter-spacing:.35px;}'+
+      '#screen-sp-worlds .swi-btn.export{background:rgba(117,167,255,.14);color:#9fc1ff;border:1px solid rgba(117,167,255,.32);}'+
+      '#screen-sp-worlds .swi-btn.export:hover{background:rgba(117,167,255,.28);}'+
+      '#screen-sp-worlds .swi-btn.play{background:linear-gradient(180deg,#2a7a2a,#1a5a1a);color:#7fff7f;}'+
+      '#screen-sp-worlds .swi-btn.del{background:rgba(255,80,80,.12);color:#ff9999;}'+
+      '#screen-sp-worlds #sp-edit-panel{display:none!important;}'+
+      '#screen-sp-worlds .lws-footer{box-sizing:border-box;width:100%;display:flex;align-items:center;'+
+      'justify-content:center;gap:9px;min-height:24px;margin:0;padding:0;flex:0 0 auto;}'+
+      '#screen-sp-worlds .lws-import-btn{padding:4px 7px;background:transparent;border:1px solid rgba(255,255,255,.18);'+
+      'border-radius:3px;color:rgba(255,255,255,.58);font:8px "Minecraft",monospace;cursor:pointer;white-space:nowrap;}'+
+      '#screen-sp-worlds .lws-import-btn:hover{color:#fff;border-color:rgba(117,167,255,.55);}'+
+      '#screen-sp-worlds .lws-status{font:8px "Minecraft",monospace;color:rgba(255,255,255,.38);white-space:nowrap;}'+
+      '#screen-sp-worlds #btn-back-sp-worlds{flex:0 0 auto;width:68%;margin:0!important;}'+
+      '@media(max-width:430px){#screen-sp-worlds{padding-left:12px;padding-right:12px;gap:10px;}'+
+      '#screen-sp-worlds .swi-btn{padding-left:4px;padding-right:4px;font-size:6px;}'+
+      '#screen-sp-worlds .swi-icon{font-size:16px;}}';
+    document.head.appendChild(style);
+  }
+  function installFolderSetting(){
+    ['screen-pc-settings','screen-mobile-settings'].forEach(function(screenId){
+      var screen=document.getElementById(screenId);
+      if(!screen||screen.querySelector('.lws-settings-row'))return;
+      var row=document.createElement('div');
+      row.className='lws-settings-row';
+      row.style.cssText='width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px;padding:8px 0;border-top:1px solid rgba(255,255,255,.08);';
+      row.innerHTML='<span style="font:9px Minecraft,monospace;color:rgba(255,255,255,.48);">WORLD STORAGE</span>'+
+        '<button class="mbtn" id="lws-settings-folder-'+screenId+'" type="button" style="margin:0;padding:6px 8px;font-size:8px;">📁 SAVES FOLDER</button>';
+      var back=screen.querySelector('.mbtn.back');
+      if(back)screen.insertBefore(row,back);else screen.appendChild(row);
+      row.querySelector('button').addEventListener('click',chooseSavesFolder);
+    });
+  }
+  function installStorageUi(){
+    var screen=document.getElementById('screen-sp-worlds');
+    if(!screen||document.getElementById('lws-panel'))return;
+    var panel=document.createElement('div');panel.id='lws-panel';
+    panel.className='lws-footer';
+    panel.innerHTML='<button id="lws-import" class="lws-import-btn" type="button">Import World (.zip)</button>'+
+      '<span id="lws-status" class="lws-status">Storage: IndexedDB</span>'+
+      '<input id="lws-import-input" type="file" accept=".zip,application/zip" style="display:none;">';
+    screen.insertBefore(panel,screen.querySelector('#btn-back-sp-worlds'));
+    document.getElementById('lws-import').addEventListener('click',function(){document.getElementById('lws-import-input').click();});
+    document.getElementById('lws-import-input').addEventListener('change',function(){var f=this.files&&this.files[0];this.value='';if(f)importWorldFromZip(f);});
+    updateStorageUi();
+  }
+
+  window.CURRENT_GAME_VERSION=CURRENT_GAME_VERSION;
+  window.LegendsWorldStorage={chooseSavesFolder:chooseSavesFolder,saveWorldFiles:saveWorldFiles,
+    saveAndExit:async function(){await saveWorldFiles();var b=document.getElementById('btn-quit');if(b)b.click();},
+    exportWorldToZip:exportWorldToZip,importWorldFromZip:importWorldFromZip,deleteWorldFiles:deleteWorldFiles,estimateStorage:estimateStorage,
+    getMode:function(){return _mode;},isHalted:function(){return _halted;},recordBlock:recordBlock,loadWorld:beginWorld};
+  window.exportWorldToZip=exportWorldToZip;window.importWorldFromZip=importWorldFromZip;
+
+  if(typeof window.sendBlock==='function'){
+    var originalSendBlock=window.sendBlock;
+    window.sendBlock=function(data){var result=originalSendBlock.apply(this,arguments);try{recordBlock(data);}catch(error){console.warn('[WorldStorage] block record failed',error);}return result;};
+    try{sendBlock=window.sendBlock;}catch(ignore){}
+  }
+  if(typeof window.startGame==='function'){
+    var originalStartGame=window.startGame;
+    window.startGame=function(){
+      var result=originalStartGame.apply(this,arguments);
+      if(!arguments[2]){
+        var id=window._spActiveWorldId||window._spLoadedWorldId;
+        if(id){
+          _activeWorldId=id;
+          setTimeout(function(){
+            beginWorld(id).then(function(pkg){if(!pkg)saveWorldFiles(id);});
+          },850);
+        }
+      }
+      return result;
+    };
+    try{startGame=window.startGame;}catch(ignore2){}
+  }
+  document.addEventListener('click',function(e){if(e.target&&e.target.id==='btn-quit')saveWorldFiles();},true);
+  window.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')saveWorldFiles();});
+  window.addEventListener('pagehide',function(){saveWorldFiles();});
+  window.addEventListener('beforeunload',function(){saveWorldFiles();});
+  document.addEventListener('click',function(e){
+    var b=e.target.closest&&e.target.closest('.swi-btn.play');if(!b)return;
+    e.preventDefault();e.stopImmediatePropagation();playWorldWithVersionGate(b.dataset.wid);
+  },true);
+  setInterval(function(){
+    if(typeof isMP!=='undefined'&&isMP)return;
+    if(_activeWorldId&&typeof deviceMode!=='undefined'&&deviceMode)saveWorldFiles(_activeWorldId);
+    estimateStorage();
+  },10000);
+  setTimeout(function(){installWorldsCss();installFolderSetting();installStorageUi();estimateStorage();},0);
+  installWorldsCss();
+  installFolderSetting();
+  setTimeout(installStorageUi,500);
+})();
+</script>
+<script>
+/* Legends version control — standalone patch for the uploaded gameexp-FIXED-FINAL.html. */
+(function(root){
+  'use strict';
+  var STAGE_WEIGHTS={Indev:1,Alpha:2,Beta:3,Release:4};
+  var WORLD_TOO_NEW='WORLD_TOO_NEW';
+  var INVALID_VERSION='INVALID_VERSION';
+  var MESSAGE='Eski sürümde yeni sürüm dünyası kullanamazsınız';
+  function text(value){return typeof value==='string'?value.trim():'';}
+  function parseVersion(value){
+    var raw=text(value), match=raw.match(/(\d+(?:\.\d+)+)/);
+    if(!match)throw new Error('Geçersiz Legends sürüm kodu: '+String(value));
+    var parts=match[1].split('.').map(function(part){return Number.parseInt(part,10);});
+    var code=raw.slice((match.index||0)+match[0].length).toUpperCase();
+    var stage=code.indexOf('I')!==-1?'Indev':code.indexOf('A')!==-1?'Alpha':code.indexOf('B')!==-1?'Beta':'Release';
+    return {raw:raw,mainVersion:match[1],parts:parts,stage:stage,stageWeight:STAGE_WEIGHTS[stage],code:code,valid:true};
+  }
+  function compareVersions(currentVersion,worldVersion){
+    var current=typeof currentVersion==='string'?parseVersion(currentVersion):currentVersion;
+    var world=typeof worldVersion==='string'?parseVersion(worldVersion):worldVersion;
+    var length=Math.max(current.parts.length,world.parts.length);
+    for(var i=0;i<length;i+=1){
+      var a=Number.isFinite(current.parts[i])?current.parts[i]:0;
+      var b=Number.isFinite(world.parts[i])?world.parts[i]:0;
+      if(a!==b)return a>b?1:-1;
+    }
+    return current.stageWeight===world.stageWeight?0:(current.stageWeight>world.stageWeight?1:-1);
+  }
+  function getCompatibility(currentVersion,worldVersion){
+    if(!text(worldVersion))return {status:'LEGACY',isWorldTooNew:false,comparison:1,message:''};
+    try{
+      var comparison=compareVersions(currentVersion,worldVersion);
+      return {status:comparison<0?WORLD_TOO_NEW:'COMPATIBLE',isWorldTooNew:comparison<0,comparison:comparison,message:comparison<0?MESSAGE:''};
+    }catch(error){
+      return {status:INVALID_VERSION,isWorldTooNew:true,comparison:-1,error:error,message:'Dünya sürümü okunamadı; güvenlik için dünya kilitlendi.'};
+    }
+  }
+  function readPublishedVersions(database){
+    if(!database||typeof database.ref!=='function')return Promise.resolve(null);
+    return database.ref('gameConfig/versions').once('value').then(function(snapshot){
+      var data=snapshot&&snapshot.val?snapshot.val():null;
+      if(!data||typeof data!=='object')return null;
+      return {stable:typeof data.stable==='string'?data.stable:null,preview:typeof data.preview==='string'?data.preview:null,updatedAt:data.updatedAt||null};
+    });
+  }
+  function preferred(versions,channel){
+    if(!versions)return null;
+    var value=channel==='preview'?versions.preview:versions.stable;
+    if(text(value))return value.trim();
+    value=channel==='preview'?versions.stable:versions.preview;
+    return text(value)?value.trim():null;
+  }
+  function latest(versions){
+    var values=versions?[versions.stable,versions.preview].filter(function(value){return text(value);}):[];
+    return values.reduce(function(current,value){try{return !current||compareVersions(current,value)<0?value:current;}catch(error){return current;}},null);
+  }
+  root.LegendsVersionManager={
+    STAGE_WEIGHTS:STAGE_WEIGHTS,WORLD_TOO_NEW:WORLD_TOO_NEW,INVALID_VERSION:INVALID_VERSION,
+    DEFAULT_WORLD_TOO_NEW_MESSAGE:MESSAGE,parseVersion:parseVersion,compareVersions:compareVersions,
+    getCompatibility:getCompatibility,isWorldTooNew:function(current,world){return getCompatibility(current,world).isWorldTooNew;},
+    readPublishedVersions:readPublishedVersions,getPreferredPublishedVersion:preferred,
+    getLatestPublishedVersion:latest
+  };
+}(window));
+
+(function(){
+  'use strict';
+  var fallback='Preview 1.7.LIp1';
+  var channel=/gameexp(?:\.html)?$/i.test(String(window.location.pathname||''))?'preview':'stable';
+  if(!window.CURRENT_GAME_VERSION)window.CURRENT_GAME_VERSION=fallback;
+  var message=window.LegendsVersionManager.DEFAULT_WORLD_TOO_NEW_MESSAGE;
+  function worlds(){
+    try{
+      if(typeof loadSpWorldsV18==='function')return loadSpWorldsV18();
+      if(typeof loadSpWorlds==='function')return loadSpWorlds();
+    }catch(error){}
+    return [];
+  }
+  function isTooNew(world){
+    return !!(world&&world.gameVersion&&window.LegendsVersionManager.isWorldTooNew(window.CURRENT_GAME_VERSION,world.gameVersion));
+  }
+  function decorate(){
+    var list=document.getElementById('sp-worlds-list');
+    if(!list)return;
+    var items=list.querySelectorAll('.sp-world-item'), saved=worlds();
+    items.forEach(function(item,index){
+      var world=saved[index], button=item.querySelector('.swi-btn.play');
+      if(!world||!button)return;
+      var locked=isTooNew(world);
+      item.classList.toggle('version-locked-world',locked);
+      if(locked){
+        item.style.border='1px solid rgba(255,90,90,.72)';
+        item.style.background='linear-gradient(90deg,rgba(110,0,0,.28),rgba(35,20,28,.88))';
+        item.title=message;
+        button.disabled=true;
+        button.textContent='LOCKED';
+        button.title=message;
+        var name=item.querySelector('.swi-name');
+        if(name&&!name.querySelector('.world-version-lock-badge')){
+          var badge=document.createElement('span');
+          badge.className='world-version-lock-badge';
+          badge.textContent='LOCKED · '+world.gameVersion;
+          badge.style.cssText='display:inline-block;margin-left:5px;padding:1px 4px;border-radius:2px;font-size:7px;color:#ffb0b0;background:rgba(150,20,20,.35);border:1px solid rgba(255,110,110,.4);vertical-align:middle;';
+          name.appendChild(badge);
+        }
+      }else{
+        button.disabled=false;
+        item.style.border='';
+        item.style.background='';
+        item.title='';
+      }
+    });
+  }
+  var originalRender=window._renderSpWorldsList;
+  if(typeof originalRender==='function'&&!originalRender.__legendsVersionWrapped){
+    var wrapped=function(){var result=originalRender.apply(this,arguments);decorate();return result;};
+    wrapped.__legendsVersionWrapped=true;
+    window._renderSpWorldsList=wrapped;
+  }
+  document.addEventListener('click',function(event){
+    var button=event.target&&event.target.closest?event.target.closest('.swi-btn.play'):null;
+    if(!button)return;
+    var saved=worlds(), index=button.dataset.i!==undefined?Number(button.dataset.i):-1;
+    if(index<0&&button.dataset.wid)index=saved.findIndex(function(world){return world.id===button.dataset.wid;});
+    if(index>=0&&isTooNew(saved[index])){
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      window.alert(message);
+    }
+  },true);
+  function applyPublishedVersion(){
+    if(!window.LegendsVersionManager||typeof firebase==='undefined'||!firebase.database)return;
+    window.LegendsVersionManager.readPublishedVersions(firebase.database()).then(function(versions){
+      var published=window.LegendsVersionManager.getPreferredPublishedVersion(versions,channel);
+      if(!published)return;
+      try{
+        window.LegendsVersionManager.parseVersion(published);
+        window.CURRENT_GAME_VERSION=published;
+        decorate();
+      }catch(error){console.warn('[VersionManager] kayıtlı sürüm geçersiz:',error);}
+    }).catch(function(error){console.warn('[VersionManager] yayın sürümü okunamadı:',error);});
+  }
+  var style=document.createElement('style');
+  style.textContent='.version-locked-world .swi-name{color:#ffb0b0!important}.version-locked-world .swi-btn.play:disabled{cursor:not-allowed;opacity:1;background:rgba(120,35,35,.48);border-color:rgba(255,120,120,.45);color:#ffaaaa}';
+  document.head.appendChild(style);
+  decorate();
+  setTimeout(applyPublishedVersion,1200);
+})();
+</script>
 
 </body>
 </html>
