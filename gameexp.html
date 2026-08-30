@@ -27236,6 +27236,142 @@ console.log(`
   setTimeout(applyPublishedVersion,1200);
 })();
 </script>
+<script>
+/* Final weather/audio corrections for the uploaded Experimental game. */
+(function(){
+  'use strict';
+
+  /* The previous orbit patch put the horizontal part on Z. Keep its
+     day/night colours and timing, but correct the actual east/west positions
+     after it has run. In this world +X is east and -X is west. */
+  if(window.DayNightCycle){
+    var previousCycleUpdate=window.DayNightCycle.update;
+    window.DayNightCycle.update=function(dt){
+      previousCycleUpdate.call(this,dt);
+      if(!this.active||typeof camera==='undefined')return;
+      var angle;
+      if(!this.isNight()) angle=(this.time/this.dayLength)*Math.PI;
+      else angle=Math.PI+((this.time-this.dayLength)/this.nightLength)*Math.PI;
+      var moonAngle=angle+Math.PI, radius=60;
+      var sunX=Math.cos(angle)*radius, moonX=Math.cos(moonAngle)*radius;
+      var cx=camera.position.x, cy=camera.position.y, cz=camera.position.z;
+      if(this.sunLight){
+        this.sunLight.position.set(cx+sunX,Math.max(Math.sin(angle)*radius,-20),cz);
+        this.sunLight.target.position.copy(camera.position);
+        this.sunLight.target.updateMatrixWorld();
+      }
+      if(this.sunSprite)this.sunSprite.position.set(cx+sunX,cy+Math.sin(angle)*radius,cz);
+      if(this.moonLight){
+        this.moonLight.position.set(cx+moonX,Math.max(Math.sin(moonAngle)*radius,-20),cz);
+        this.moonLight.target.position.copy(camera.position);
+        this.moonLight.target.updateMatrixWorld();
+      }
+      if(this.moonSprite)this.moonSprite.position.set(cx+moonX,cy+Math.sin(moonAngle)*radius,cz);
+    };
+  }
+
+  var audio=window.WeatherAudio;
+  if(!audio)return;
+  audio.bloodAudio=audio.bloodAudio||null;
+  audio.activeWeather='clear';
+  audio._lastThunderAt=0;
+
+  function configure(element,src,volume){
+    if(!element){
+      try{element=new Audio(src);}catch(error){return null;}
+    }
+    element.preload='auto';
+    element.loop=true;
+    element.volume=volume;
+    element.playsInline=true;
+    try{element.load();}catch(error){}
+    return element;
+  }
+  audio.initRainAudio=function(){
+    this.rainAudio=configure(this.rainAudio,'rain.mp3',0.72);
+  };
+  audio.initBloodAudio=function(){
+    this.bloodAudio=configure(this.bloodAudio,'blood.mp3',0.72);
+  };
+  audio.initThunderAudio=function(){
+    if(!this.thunderAudio){
+      try{this.thunderAudio=new Audio('thunder.mp3');}catch(error){this.thunderAudio=null;}
+    }
+    if(this.thunderAudio){
+      this.thunderAudio.preload='auto';
+      this.thunderAudio.loop=false;
+      this.thunderAudio.volume=0.78;
+      this.thunderAudio.playsInline=true;
+      try{this.thunderAudio.load();}catch(error){}
+    }
+  };
+  function playElement(element,fallback){
+    if(!element)return;
+    try{
+      element.currentTime=0;
+      var result=element.play();
+      if(result&&typeof result.catch==='function'){
+        result.catch(function(){
+          if(fallback&&fallback!==element)playElement(fallback,null);
+        });
+      }
+    }catch(error){
+      if(fallback&&fallback!==element)playElement(fallback,null);
+    }
+  }
+  audio.startRain=function(mode){
+    mode=mode||((window.WeatherFX&&window.WeatherFX.currentMode)||'rain');
+    this.stopRain();
+    this.activeWeather=mode;
+    this.initRainAudio();
+    var rain=this.rainAudio;
+    if(mode==='blood'){
+      this.initBloodAudio();
+      /* blood.mp3 is optional; a missing file falls back to clear rain
+         instead of leaving Blood weather silent. */
+      playElement(this.bloodAudio,rain);
+      this.isRaining=true;
+      return;
+    }
+    playElement(rain,null);
+    this.isRaining=true;
+  };
+  audio.stopRain=function(){
+    [this.rainAudio,this.bloodAudio].forEach(function(element){
+      if(!element)return;
+      try{element.pause();element.currentTime=0;}catch(error){}
+    });
+    this.isRaining=false;
+    this.activeWeather='clear';
+  };
+  audio.playThunder=function(){
+    this.initThunderAudio();
+    if(!this.thunderAudio)return;
+    var now=performance.now();
+    if(now-this._lastThunderAt<120)return;
+    this._lastThunderAt=now;
+    playElement(this.thunderAudio,null);
+  };
+
+  /* Disable the older generated low-pass thunder. The existing strike hook
+     now plays only the preloaded thunder.mp3 once, without the late duplicate. */
+  if(window.LightningFX)window.LightningFX._playThunder=function(){};
+
+  if(window.WeatherFX){
+    var previousApplyMode=window.WeatherFX.applyMode;
+    if(!previousApplyMode.__weatherAudioFinalFix){
+      var finalApplyMode=function(mode){
+        previousApplyMode.call(this,mode);
+        if(mode==='blood')audio.startRain('blood');
+        else if(mode==='clear')audio.stopRain();
+        else if((mode==='rain'||mode==='storm')&&!audio.isRaining)audio.startRain(mode);
+      };
+      finalApplyMode.__weatherAudioFinalFix=true;
+      window.WeatherFX.applyMode=finalApplyMode;
+    }
+  }
+})();
+</script>
 
 </body>
 </html>

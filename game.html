@@ -11320,6 +11320,11 @@ function setupMobile(){
       if(id===jTid){jActive=false;jTid=null;jx=0;jy=0;jT.style.transform='translate(0px,0px)';}
       if(aT[id]){
         clearTimeout(aT[id].to);
+        // Blok koyma/kırma bitmeden önce kamera referansını son parmak
+        // konumuna getir. Aksi halde blok işlemi veya zıplama sırasında
+        // gelen sonraki touchmove eski sx/sy değerini kullanıp kamerayı
+        // tek seferde başka yöne sıçratabiliyordu.
+        if(id===lkId){sx=t.clientX;sy=t.clientY;}
         if(aT[id].breaking){
           stopBreaking();
         } else if(!aT[id].mv){
