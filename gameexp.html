@@ -2490,6 +2490,8 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .menu-screen.active{display:flex;}
 .game-logo{font-size:clamp(24px,9vw,42px);font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:1px;margin-bottom:4px;white-space:nowrap;text-align:center;max-width:100%;}
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
+#screen-main .game-version{position:fixed;left:14px;bottom:12px;margin:0;z-index:2;font-size:11px;color:rgba(255,255,255,.62);text-shadow:0 1px 3px #000;letter-spacing:.4px;}
+.menu-logo-image{display:block;width:min(100%,420px);height:auto;max-height:150px;object-fit:contain;margin:0 auto 12px;}
 .mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
 .mbtn:hover{filter:brightness(1.2);}
 .mbtn:active{border-top-color:#1a1a1a;border-left-color:#1a1a1a;border-bottom-color:#7a7a7a;border-right-color:#7a7a7a;filter:brightness(.9);}
@@ -3007,9 +3009,8 @@ body.low-health::after {
 #loading-screen.active { display: flex; }
 #loading-screen.fade-out { opacity: 0; pointer-events: none; }
 #loading-title {
-  font-size: 28px; font-weight: bold; color: #75a7ff;
-  text-shadow: 0 0 20px rgba(117,167,255,.5), 3px 3px #000;
-  letter-spacing: 3px; margin-bottom: 6px; font-family: 'Minecraft', monospace;
+  display:block;width:min(90vw,560px);height:auto;max-height:190px;object-fit:contain;
+  margin:0 auto 18px;
 }
 #loading-subtitle {
   font-size: 13px; color: rgba(255,255,255,.55); margin-bottom: 32px; letter-spacing: 2px;
@@ -3664,7 +3665,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
 <body>
 <!-- ═══ LOADING SCREEN ═══ -->
 <div id="loading-screen">
-  <div id="loading-title">LEGENDS PREVIEW</div>
+  <img id="loading-title" src="i-preview-icon.png" alt="Legends I-Preview">
   <div id="loading-subtitle">DÜNYA YÜKLENİYOR... / LOADING WORLD...</div>
   <div id="loading-bar-wrap"><div id="loading-bar-fill"></div></div>
   <div id="loading-pct">0%</div>
@@ -3688,8 +3689,8 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
   <!-- [MODÜLER DİL MİMARİSİ] Köşedeki TR/EN hızlı geçiş butonu kaldırıldı.
        Dil artık Ayarlar → Dil sekmesinden, 7 dil arasından seçiliyor. -->
   <div class="menu-screen active" id="screen-main">
-    <div class="game-logo" id="txt-title">LEGENDS PREVIEW</div>
-    <div class="game-version">v1.7.Lp1 - Perlin World</div>
+    <div class="menu-logo-image"><img src="i-preview-icon.png" alt="Legends I-Preview"></div>
+    <div class="game-version">Legends I-Preview v1.7Ip1</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
     <button class="mbtn" id="btn-skin-menu"></button>
