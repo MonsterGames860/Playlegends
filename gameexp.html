@@ -2491,7 +2491,11 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .game-logo{font-size:clamp(24px,9vw,42px);font-weight:bold;color:#75a7ff;text-shadow:0 0 20px rgba(117,167,255,.5),3px 3px #000;letter-spacing:1px;margin-bottom:4px;white-space:nowrap;text-align:center;max-width:100%;}
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
 #screen-main .game-version{position:fixed;left:14px;bottom:12px;margin:0;z-index:2;font-size:11px;color:rgba(255,255,255,.62);text-shadow:0 1px 3px #000;letter-spacing:.4px;}
-.menu-logo-image{display:block;width:min(100%,420px);height:auto;max-height:150px;object-fit:contain;margin:0 auto 12px;}
+#screen-main .game-version{position:fixed!important;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none;}
+.menu-logo-image{display:block;width:min(100%,420px);height:auto;max-height:150px;object-fit:contain;margin:0 auto 12px;overflow:hidden;}
+.menu-logo-image img{display:block;width:100%;height:auto;max-width:100%;max-height:150px;object-fit:contain;}
+/* All pre-game menu headers use the uploaded I-Preview mark. */
+#menu-overlay .game-logo{display:block;width:100%;max-width:420px;height:clamp(78px,20vw,132px);flex:0 0 auto;margin:0 auto 10px;padding:0;background:url('i-preview-icon.png') center/contain no-repeat;font-size:0!important;color:transparent!important;letter-spacing:0;text-shadow:none;white-space:normal;overflow:visible;}
 .mbtn{width:100%;padding:13px 20px;margin:5px 0;background:linear-gradient(180deg,#5a5a5a,#3a3a3a);border:none;border-bottom:4px solid #1a1a1a;border-right:4px solid #1a1a1a;border-top:4px solid #7a7a7a;border-left:4px solid #7a7a7a;color:#fff;font-size:15px;font-weight:bold;font-family:'Minecraft',monospace;cursor:pointer;border-radius:3px;text-align:center;letter-spacing:1px;transition:filter .1s;}
 .mbtn:hover{filter:brightness(1.2);}
 .mbtn:active{border-top-color:#1a1a1a;border-left-color:#1a1a1a;border-bottom-color:#7a7a7a;border-right-color:#7a7a7a;filter:brightness(.9);}
@@ -17917,7 +17921,7 @@ window._spHardcore  = false;
   spWsEl.className = 'menu-screen';
   spWsEl.id = 'screen-sp-worlds';
   spWsEl.innerHTML = [
-    '<div class="game-logo">LEGENDS PREVIEW</div>',
+    '<div class="game-logo" aria-label="Legends I-Preview">LEGENDS PREVIEW</div>',
     '<div class="screen-title">DÜNYALARIM</div>',
     '<button class="mbtn primary" id="btn-new-sp-world" style="margin-bottom:8px;padding:10px;">',
     '  ➕ YENİ DÜNYA OLUŞTUR',
