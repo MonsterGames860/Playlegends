@@ -1,0 +1,2007 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0b0c10" />
+  <meta name="description" content="Legends Core Edition Launcher - Voxel game platform" />
+  
+  <title>Legends Core Edition Launcher</title>
+  <link rel="manifest" href="./ce-manifest.json" />
+  <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" />
+  <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" />
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+  
+  <style>
+    /* ============= GLOBAL RESET & VARIABLES ============= */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Dark Neon Palette */
+      --bg-primary: #0b0c10;
+      --bg-secondary: #1a1e2e;
+      --bg-tertiary: #16213e;
+      
+      /* Neon Colors */
+      --neon-cyan: #00d9ff;
+      --neon-purple: #9d4edd;
+      --neon-pink: #ff006e;
+      --neon-blue: #3a86ff;
+      --neon-green: #06ffa5;
+      
+      /* Text Colors */
+      --text-primary: #ffffff;
+      --text-secondary: #a0a0a0;
+      --text-tertiary: #606060;
+      
+      /* Borders & Shadows */
+      --border-color: #2a2d3a;
+      --shadow-sm: 0 2px 8px rgba(0, 217, 255, 0.1);
+      --shadow-md: 0 4px 16px rgba(157, 78, 221, 0.2);
+      --shadow-lg: 0 8px 32px rgba(255, 0, 110, 0.15);
+      
+      --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+      overflow: hidden;
+    }
+
+    /* ============= LAYOUT CONTAINER ============= */
+    .launcher-container {
+      display: flex;
+      width: 100%;
+      height: 100%;
+      gap: 0;
+    }
+
+    /* ============= LEFT SIDEBAR ============= */
+    .sidebar {
+      width: 280px;
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      gap: 24px;
+      overflow-y: auto;
+    }
+
+    /* Scrollbar Styling */
+    .sidebar::-webkit-scrollbar {
+      width: 6px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: var(--neon-cyan);
+      border-radius: 3px;
+    }
+    .sidebar::-webkit-scrollbar-thumb:hover {
+      background: var(--neon-purple);
+    }
+
+    /* --- Profile Card --- */
+    .profile-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 16px;
+      background: rgba(0, 217, 255, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .profile-card:hover {
+      background: rgba(0, 217, 255, 0.1);
+      border-color: var(--neon-cyan);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .profile-avatar {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, var(--neon-cyan), var(--neon-purple));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: bold;
+      color: var(--bg-primary);
+      flex-shrink: 0;
+    }
+
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .profile-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .profile-status {
+      font-size: 12px;
+      color: var(--text-secondary);
+      margin-top: 2px;
+    }
+
+    .profile-status.guest {
+      color: var(--neon-pink);
+    }
+
+    .profile-status.player {
+      color: var(--neon-green);
+    }
+
+    .profile-status.owner {
+      color: #FFD700;
+    }
+
+    .profile-status.dev {
+      color: var(--neon-purple);
+    }
+
+    /* --- Game Selection Tabs --- */
+    .game-tabs {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      flex: 1;
+    }
+
+    .game-tab {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(26, 30, 46, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: var(--transition);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+    }
+
+    .game-tab:hover {
+      background: rgba(58, 134, 255, 0.1);
+      border-color: var(--neon-blue);
+      color: var(--text-primary);
+    }
+
+    .game-tab.active {
+      background: linear-gradient(135deg, rgba(0, 217, 255, 0.2), rgba(157, 78, 221, 0.2));
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .game-tab-icon {
+      width: 24px;
+      height: 24px;
+      flex-shrink: 0;
+      object-fit: contain;
+      opacity: 0.8;
+      transition: var(--transition);
+    }
+
+    /* Eğer emoji ise */
+    .game-tab-icon:not(img) {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .game-tab.active .game-tab-icon {
+      opacity: 1;
+      filter: drop-shadow(0 0 8px var(--neon-cyan));
+    }
+
+    /* Active state'de resim filter'ı */
+    .game-tab.active .game-tab-icon[src] {
+      filter: drop-shadow(0 0 8px var(--neon-cyan)) brightness(1.2);
+    }
+
+    .game-tab-label {
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    /* --- Logout Button --- */
+    .logout-btn {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255, 0, 110, 0.05);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .logout-btn:hover {
+      background: rgba(255, 0, 110, 0.15);
+      border-color: var(--neon-pink);
+      color: var(--neon-pink);
+    }
+
+    /* ============= MAIN CONTENT AREA ============= */
+    .main-content {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* --- Top Header Bar --- */
+    .header-bar {
+      height: 48px;
+      background: linear-gradient(90deg, var(--bg-secondary) 0%, rgba(26, 30, 46, 0.8) 100%);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      gap: 16px;
+      position: relative;
+    }
+
+    .header-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .header-spacer {
+      flex: 1;
+    }
+
+    .my-versions-btn {
+      padding: 8px 16px;
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .my-versions-btn:hover {
+      background: rgba(58, 134, 255, 0.1);
+      border-color: var(--neon-blue);
+      color: var(--neon-blue);
+    }
+
+    .my-versions-btn.active {
+      background: rgba(0, 217, 255, 0.1);
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    /* ============= CONTENT AREA ============= */
+    .content-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    /* --- Banner Section --- */
+    .banner-section {
+      height: 300px;
+      background-size: cover;
+      background-position: center;
+      background-image: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .banner-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(11, 12, 16, 0) 0%,
+        rgba(11, 12, 16, 0.3) 50%,
+        rgba(11, 12, 16, 0.8) 100%
+      );
+    }
+
+    .banner-content {
+      position: absolute;
+      bottom: 24px;
+      left: 24px;
+      right: 24px;
+      z-index: 2;
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+    }
+
+    .banner-text {
+      flex: 1;
+    }
+
+    .banner-title {
+      font-size: 32px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      text-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+    }
+
+    .banner-description {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    }
+
+    /* --- Play Bar --- */
+    .play-bar {
+      padding: 24px;
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .play-btn {
+      padding: 14px 48px;
+      background: linear-gradient(135deg, var(--neon-green) 0%, #00b878 100%);
+      border: none;
+      border-radius: 6px;
+      color: #000;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 16px rgba(6, 255, 165, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .play-btn::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: rgba(255, 255, 255, 0.2);
+      transition: left 0.5s ease;
+    }
+
+    .play-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 24px rgba(6, 255, 165, 0.5);
+    }
+
+    .play-btn:hover::before {
+      left: 100%;
+    }
+
+    .play-btn:active {
+      transform: translateY(0);
+    }
+
+    .version-select {
+      padding: 10px 14px;
+      background: rgba(26, 30, 46, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: var(--transition);
+      min-width: 180px;
+    }
+
+    .version-select:hover {
+      background: rgba(58, 134, 255, 0.1);
+      border-color: var(--neon-blue);
+    }
+
+    .version-select:focus {
+      outline: none;
+      background: rgba(58, 134, 255, 0.15);
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 12px rgba(58, 134, 255, 0.3);
+    }
+
+    /* --- News/Content Section --- */
+    .content-section {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .content-section::-webkit-scrollbar {
+      width: 8px;
+    }
+    .content-section::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .content-section::-webkit-scrollbar-thumb {
+      background: var(--neon-cyan);
+      border-radius: 4px;
+    }
+    .content-section::-webkit-scrollbar-thumb:hover {
+      background: var(--neon-purple);
+    }
+
+    .news-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 12px;
+    }
+
+    .news-title-section {
+      flex: 1;
+    }
+
+    .news-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .edit-news-btn {
+      padding: 8px 16px;
+      background: rgba(157, 78, 221, 0.1);
+      border: 1px solid var(--neon-purple);
+      border-radius: 4px;
+      color: var(--neon-purple);
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .edit-news-btn:hover {
+      background: rgba(157, 78, 221, 0.2);
+      box-shadow: 0 0 12px rgba(157, 78, 221, 0.3);
+    }
+
+    .add-news-form {
+      background: rgba(26, 30, 46, 0.8);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: none;
+    }
+
+    .add-news-form.active {
+      display: block;
+    }
+
+    .add-news-form-group {
+      margin-bottom: 12px;
+    }
+
+    .add-news-form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .add-news-form-input {
+      width: 100%;
+      padding: 8px 12px;
+      background: rgba(11, 12, 16, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: inherit;
+    }
+
+    .add-news-form-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    .add-news-form-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .add-news-form-btn {
+      flex: 1;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 4px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .add-news-form-btn.submit {
+      background: rgba(6, 255, 165, 0.2);
+      border: 1px solid var(--neon-green);
+      color: var(--neon-green);
+    }
+
+    .add-news-form-btn.submit:hover {
+      background: rgba(6, 255, 165, 0.3);
+    }
+
+    .add-news-form-btn.cancel {
+      background: rgba(255, 0, 110, 0.2);
+      border: 1px solid var(--neon-pink);
+      color: var(--neon-pink);
+    }
+
+    .add-news-form-btn.cancel:hover {
+      background: rgba(255, 0, 110, 0.3);
+    }
+
+    .news-card {
+      background: linear-gradient(135deg, rgba(26, 30, 46, 0.8) 0%, rgba(22, 33, 62, 0.6) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 16px;
+      transition: var(--transition);
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 12px;
+    }
+
+    .news-card:hover {
+      background: linear-gradient(135deg, rgba(26, 30, 46, 0.95) 0%, rgba(22, 33, 62, 0.75) 100%);
+      border-color: var(--neon-cyan);
+      box-shadow: var(--shadow-sm);
+      transform: translateX(4px);
+    }
+
+    .news-card-content {
+      flex: 1;
+    }
+
+    .news-card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    .news-card-date {
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    .news-card-delete-btn {
+      padding: 4px 12px;
+      background: rgba(255, 0, 110, 0.1);
+      border: 1px solid var(--neon-pink);
+      border-radius: 4px;
+      color: var(--neon-pink);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    .news-card-delete-btn:hover {
+      background: rgba(255, 0, 110, 0.2);
+    }
+
+    .no-news-message {
+      text-align: center;
+      padding: 32px 24px;
+      color: var(--text-secondary);
+      font-size: 14px;
+    }
+
+    /* ============= MODAL STYLES ============= */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+
+    .modal-overlay.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .modal {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 32px;
+      max-width: 600px;
+      width: 90%;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 24px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .modal-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 16px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* --- Auth Tabs --- */
+    .auth-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 24px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .auth-tab {
+      flex: 1;
+      padding: 12px 16px;
+      background: transparent;
+      border: none;
+      border-bottom: 3px solid transparent;
+      color: var(--text-secondary);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+    }
+
+    .auth-tab.active {
+      color: var(--neon-cyan);
+      border-bottom-color: var(--neon-cyan);
+    }
+
+    .auth-tab:hover {
+      color: var(--text-primary);
+    }
+
+    /* --- Forms --- */
+    .auth-form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-input,
+    .form-select {
+      padding: 12px 14px;
+      background: rgba(11, 12, 16, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 13px;
+      font-family: inherit;
+      transition: var(--transition);
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      outline: none;
+      background: rgba(11, 12, 16, 0.7);
+      border-color: var(--neon-blue);
+      box-shadow: 0 0 12px rgba(58, 134, 255, 0.3);
+    }
+
+    .form-input::placeholder {
+      color: var(--text-tertiary);
+    }
+
+    /* --- Buttons --- */
+    .btn {
+      padding: 12px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--neon-cyan) 0%, var(--neon-blue) 100%);
+      color: var(--bg-primary);
+      box-shadow: 0 4px 12px rgba(0, 217, 255, 0.3);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 217, 255, 0.5);
+    }
+
+    .btn-secondary {
+      background: rgba(26, 30, 46, 0.8);
+      border: 1px solid var(--border-color);
+      color: var(--text-secondary);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(58, 134, 255, 0.1);
+      border-color: var(--neon-blue);
+      color: var(--text-primary);
+    }
+
+    .btn-guest {
+      background: rgba(157, 78, 221, 0.1);
+      border: 1px solid var(--neon-purple);
+      color: var(--neon-purple);
+    }
+
+    .btn-guest:hover {
+      background: rgba(157, 78, 221, 0.2);
+      color: var(--text-primary);
+    }
+
+    /* --- Versions Modal --- */
+    .versions-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .versions-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .version-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      background: rgba(11, 12, 16, 0.5);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      transition: var(--transition);
+    }
+
+    .version-item:hover {
+      background: rgba(11, 12, 16, 0.8);
+      border-color: var(--neon-cyan);
+    }
+
+    .version-item-icon {
+      font-size: 24px;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+    }
+
+    .version-item-icon img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .version-item-info {
+      flex: 1;
+    }
+
+    .version-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .version-item-detail {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 2px;
+    }
+
+    .version-item-delete {
+      padding: 6px 12px;
+      background: rgba(255, 0, 110, 0.1);
+      border: 1px solid var(--neon-pink);
+      border-radius: 4px;
+      color: var(--neon-pink);
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+      white-space: nowrap;
+    }
+
+    .version-item-delete:hover {
+      background: rgba(255, 0, 110, 0.2);
+    }
+
+    .empty-versions-message {
+      text-align: center;
+      padding: 24px;
+      color: var(--text-secondary);
+      font-size: 13px;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Main Container -->
+  <div class="launcher-container">
+    <!-- Left Sidebar -->
+    <div class="sidebar">
+      <!-- Profile Card -->
+      <div class="profile-card" id="profileCard">
+        <div class="profile-avatar" id="profileAvatar">👤</div>
+        <div class="profile-info">
+          <div class="profile-name" id="profileName">Guest User</div>
+          <div class="profile-status guest" id="profileStatus">Guest</div>
+        </div>
+      </div>
+
+      <!-- Game Selection Tabs -->
+      <div class="game-tabs">
+        <button class="game-tab active" data-game="legends" data-banner="banner-legends.jpg" data-icon="/final-icon.png">
+          <img class="game-tab-icon" src="/final-icon.png" alt="Legends" />
+          <span class="game-tab-label">Legends</span>
+        </button>
+        <button class="game-tab" data-game="preview" data-banner="banner-preview.jpg" data-icon="/preview-icon.png">
+          <img class="game-tab-icon" src="/preview-icon.png" alt="Legends Preview" />
+          <span class="game-tab-label">Legends Preview</span>
+        </button>
+      </div>
+
+      <!-- Logout Button -->
+      <button class="logout-btn" id="logoutBtn">Log Out</button>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Header Bar -->
+      <div class="header-bar">
+        <div class="header-title" id="headerTitle">LEGENDS</div>
+        <div class="header-spacer"></div>
+        <button class="my-versions-btn" id="myVersionsBtn">My Versions</button>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        <!-- Banner Section -->
+        <div class="banner-section" id="bannerSection">
+          <div class="banner-overlay"></div>
+          <div class="banner-content">
+            <div class="banner-text">
+              <h1 class="banner-title" id="bannerTitle">Legends</h1>
+              <p class="banner-description" id="bannerDesc">
+                Welcome to the world of voxel games
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Play Bar -->
+        <div class="play-bar">
+          <button class="play-btn" id="playBtn">▶ PLAY</button>
+          <select class="version-select" id="versionSelect">
+            <option value="">No versions available</option>
+          </select>
+        </div>
+
+        <!-- News/Content Section -->
+        <div class="content-section" id="contentSection">
+          <div class="news-header">
+            <div class="news-title-section">
+              <div class="news-title">News & Updates</div>
+            </div>
+            <button class="edit-news-btn" id="editNewsBtn" style="display: none;">
+              Edit News
+            </button>
+          </div>
+
+          <div class="add-news-form" id="addNewsForm">
+            <div class="add-news-form-group">
+              <label class="add-news-form-label">Announcement Title</label>
+              <input type="text" class="add-news-form-input" id="newsTitle" placeholder="Enter title" />
+            </div>
+            <div class="add-news-form-group">
+              <label class="add-news-form-label">Date (YYYY-MM-DD)</label>
+              <input type="text" class="add-news-form-input" id="newsDate" placeholder="2024-12-15" />
+            </div>
+            <div class="add-news-form-group">
+              <div class="add-news-form-buttons">
+                <button type="button" class="add-news-form-btn submit" id="saveNewsBtn">Save</button>
+                <button type="button" class="add-news-form-btn cancel" id="cancelNewsBtn">Cancel</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="newsContainer">
+            <div class="no-news-message">No announcements available</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Auth Modal -->
+  <div class="modal-overlay active" id="authModal">
+    <div class="modal">
+      <div class="modal-header">Welcome to Legends</div>
+
+      <!-- Auth Tabs -->
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-auth-type="google">Google</button>
+        <button class="auth-tab" data-auth-type="email">Email</button>
+        <button class="auth-tab" data-auth-type="guest">Guest</button>
+      </div>
+
+      <!-- Google Auth Form -->
+      <form id="googleAuthForm" class="auth-form-group">
+        <div class="form-group">
+          <button type="button" class="btn btn-primary" id="googleLoginBtn">
+            🔐 LOG IN with Google
+          </button>
+        </div>
+        <div class="form-group">
+          <button type="button" class="btn btn-secondary" id="googleSignupBtn">
+            📝 SIGN UP with Google
+          </button>
+        </div>
+      </form>
+
+      <!-- Email Auth Form (Hidden) -->
+      <form id="emailAuthForm" class="auth-form-group" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-input" id="emailInput" placeholder="you@example.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Password</label>
+          <input type="password" class="form-input" id="passwordInput" placeholder="••••••••" />
+        </div>
+        <div class="form-group">
+          <button type="button" class="btn btn-primary" id="emailLoginBtn">LOG IN</button>
+          <button type="button" class="btn btn-secondary" id="emailSignupBtn">SIGN UP</button>
+        </div>
+      </form>
+
+      <!-- Guest Auth Form (Hidden) -->
+      <form id="guestAuthForm" class="auth-form-group" style="display: none;">
+        <div class="form-group">
+          <label class="form-label">Guest Name (Optional)</label>
+          <input type="text" class="form-input" id="guestNameInput" placeholder="Choose a name (leave blank for auto-generated)" />
+        </div>
+        <div class="form-group">
+          <button type="button" class="btn btn-guest" id="guestLoginBtn">
+            👤 Continue as Guest
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- My Versions Modal -->
+  <div class="modal-overlay" id="versionsModal">
+    <div class="modal" style="max-width: 500px;">
+      <div class="modal-header">My Versions</div>
+
+      <div class="versions-container">
+        <!-- Add New Version Form -->
+        <div>
+          <div class="modal-title">Create New Profile</div>
+          <div class="form-group">
+            <label class="form-label">Profile Name</label>
+            <input type="text" class="form-input" id="versionNameInput" placeholder="e.g. Latest Version" />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Select Icon</label>
+            <select class="form-select" id="versionIconSelect">
+              <option value="default">Default (Game Icon)</option>
+              <option value="grass">Grass Block</option>
+              <option value="stone">Stone Block</option>
+              <option value="gold">Gold Block</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Select Version</label>
+            <select class="form-select" id="newVersionSelect">
+              <option value="">Select a version...</option>
+            </select>
+          </div>
+          <button type="button" class="btn btn-primary" id="createVersionBtn">
+            ✓ Create Profile
+          </button>
+        </div>
+
+        <!-- Existing Versions List -->
+        <div>
+          <div class="modal-title">Current Profiles</div>
+          <div class="versions-list" id="versionsList">
+            <div class="empty-versions-message">No profiles created yet</div>
+          </div>
+        </div>
+      </div>
+
+      <button type="button" class="btn btn-secondary" id="closeVersionsBtn" style="margin-top: 16px; width: 100%;">
+        Close
+      </button>
+    </div>
+  </div>
+
+  <!-- Service Worker Registration & Script Tag Opening -->
+  <script>
+    // ============= SERVICE WORKER & PWA REGISTRATION =============
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./ce-service-worker.js')
+        .then(reg => console.log('Service Worker registered:', reg))
+        .catch(err => console.warn('Service Worker registration failed:', err));
+    }
+
+    // ============= FIREBASE CONFIG (Index'le senkronize) =============
+    // Index.html ile aynı Firebase project kullan (play-legends)
+    const firebaseConfig = {
+      apiKey: "AIzaSyAG6FsNjMgIXIGQmmmHC6GWjWuzNVDq5KM",
+      projectId: "play-legends",
+      databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
+    };
+
+    // Firebase SDK yüklü mü diye kontrol et
+    if (typeof firebase !== 'undefined') {
+      try {
+        firebase.initializeApp(firebaseConfig);
+        console.log('✅ Firebase initialized in launcher');
+      } catch (err) {
+        console.warn('Firebase already initialized:', err);
+      }
+    } else {
+      console.warn('⚠️ Firebase SDK not loaded. Add Firebase script tag in HTML head.');
+    }
+
+    // ============= GOOGLE OAUTH SETUP =============
+    window.LegendsOAuth = {
+      provider: null,
+      
+      init: function() {
+        if (typeof firebase === 'undefined' || !firebase.auth) return;
+        this.provider = new firebase.auth.GoogleAuthProvider();
+        this.setupListeners();
+      },
+      
+      setupListeners: function() {
+        const googleLoginBtn = document.getElementById('googleLoginBtn');
+        const googleSignupBtn = document.getElementById('googleSignupBtn');
+        
+        if (googleLoginBtn) {
+          googleLoginBtn.addEventListener('click', () => this.googleLogin());
+        }
+        if (googleSignupBtn) {
+          googleSignupBtn.addEventListener('click', () => this.googleSignup());
+        }
+      },
+      
+      googleLogin: async function() {
+        try {
+          const result = await firebase.auth().signInWithPopup(this.provider);
+          const user = result.user;
+          
+          const userData = {
+            uid: user.uid,
+            username: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            type: 'player',
+            photoURL: user.photoURL,
+            isGuest: false,
+            loginMethod: 'google',
+            lastLogin: new Date().toISOString()
+          };
+          
+          saveUser(userData);
+          updateProfileCard(userData);
+          closeAuthModal();
+          
+          // Sync with game.html
+          window.postMessage({
+            type: 'legends-user-login',
+            data: userData
+          }, '*');
+          
+          console.log('✅ Logged in with Google:', userData.username);
+        } catch (error) {
+          console.error('Google login error:', error);
+          alert('Google login failed: ' + error.message);
+        }
+      },
+      
+      googleSignup: async function() {
+        try {
+          const result = await firebase.auth().signInWithPopup(this.provider);
+          const user = result.user;
+          
+          const userData = {
+            uid: user.uid,
+            username: user.displayName || user.email.split('@')[0],
+            email: user.email,
+            type: 'player',
+            photoURL: user.photoURL,
+            isGuest: false,
+            loginMethod: 'google',
+            lastLogin: new Date().toISOString()
+          };
+          
+          saveUser(userData);
+          updateProfileCard(userData);
+          closeAuthModal();
+          
+          // Sync with game.html
+          window.postMessage({
+            type: 'legends-user-signup',
+            data: userData
+          }, '*');
+          
+          console.log('✅ Signed up with Google:', userData.username);
+        } catch (error) {
+          console.error('Google signup error:', error);
+          alert('Google signup failed: ' + error.message);
+        }
+      }
+    };
+
+    // ============= CONSTANTS & CONFIG =============
+    const BANNED_USERNAMES = [
+      'admin', 'moderator', 'system', 'user', 'test', 'root',
+      'nobody', 'guest', 'undefined', 'null', 'player', 'operator'
+    ];
+
+    const STORAGE_KEYS = {
+      USER: 'ceUser',
+      VERSIONS: 'ceVersions',
+      LAST_PLAYED: 'ceLastPlayed',
+      NEWS: 'ceNews'
+    };
+
+    // ============= VERSION PARSING REGEX =============
+    const VERSION_PATTERNS = {
+      // Final/Normal Versions
+      final: [
+        { regex: /^game-([ib])-(\d+\.\d+\.\d+)\.html$/i, type: 'final', phase: (m) => `${m[1].toUpperCase()}-` },
+        { regex: /^game-([ia])-(\d+\.\d+\.\d+)\.html$/i, type: 'final', phase: (m) => `${m[1].toUpperCase()}-` },
+        { regex: /^game-([ab])-(\d+\.\d+\.\d+)\.html$/i, type: 'final', phase: (m) => `${m[1].toUpperCase()}-` },
+        { regex: /^game-(\d+\.\d+\.\d+)\.html$/i, type: 'final', phase: () => '' },
+        { regex: /^game\.html$/i, type: 'final', phase: () => '', version: '1.0.0' }
+      ],
+      // Preview Versions
+      preview: [
+        { regex: /^game-(\d+\.\d+)([VIAB])p(\d+)\.html$/i, type: 'preview' },
+        { regex: /^game-(\d+\.\d+)p(\d+)\.html$/i, type: 'preview' },
+        { regex: /^gameexp\.html$/i, type: 'preview', version: '0.1.0p1' }
+      ]
+    };
+
+    // ============= UTILITY FUNCTIONS =============
+    
+    /**
+     * Check if username is banned
+     */
+    function isNameBanned(name) {
+      return BANNED_USERNAMES.includes(name.toLowerCase());
+    }
+
+    /**
+     * Generate random guest ID
+     */
+    function generateGuestId() {
+      return 'Guest_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    }
+
+    /**
+     * Save user to localStorage
+     */
+    function saveUser(user) {
+      localStorage.setItem(STORAGE_KEYS.USER, JSON.stringify(user));
+    }
+
+    /**
+     * Get user from localStorage
+     */
+    function getUser() {
+      const user = localStorage.getItem(STORAGE_KEYS.USER);
+      return user ? JSON.parse(user) : null;
+    }
+
+    /**
+     * Logout user
+     */
+    function logoutUser() {
+      localStorage.removeItem(STORAGE_KEYS.USER);
+      location.reload();
+    }
+
+    /**
+     * Check user permission
+     */
+    function hasEditNewsPermission(user) {
+      if (!user) return false;
+      return user.rank === 'Owner' || user.rank === 'Dev';
+    }
+
+    /**
+     * Update profile card display
+     */
+    function updateProfileCard(user) {
+      if (!user) return;
+      
+      const avatar = document.getElementById('profileAvatar');
+      const name = document.getElementById('profileName');
+      const status = document.getElementById('profileStatus');
+      
+      avatar.textContent = user.username.charAt(0).toUpperCase();
+      name.textContent = user.username;
+      
+      status.textContent = user.rank || (user.type === 'guest' ? 'Guest' : 'Player');
+      status.className = 'profile-status ' + (user.rank ? user.rank.toLowerCase() : user.type);
+    }
+
+    /**
+     * Close auth modal
+     */
+    function closeAuthModal() {
+      document.getElementById('authModal').classList.remove('active');
+    }
+
+    /**
+     * Parse version number
+     */
+    function parseVersion(versionStr) {
+      const parts = versionStr.split('.').map(p => parseInt(p) || 0);
+      return [parts[0] || 0, parts[1] || 0, parts[2] || 0];
+    }
+
+    /**
+     * Sort versions
+     */
+    function compareVersions(versionA, versionB) {
+      const [majA, minA, patchA] = parseVersion(versionA);
+      const [majB, minB, patchB] = parseVersion(versionB);
+      if (majA !== majB) return majB - majA;
+      if (minA !== minB) return minB - minA;
+      return patchB - patchA;
+    }
+
+    /**
+     * Update version dropdown from scanned versions
+     */
+    async function updateVersionDropdown() {
+      try {
+        const response = await fetch('./api/versions');
+        if (!response.ok) throw new Error('Failed to fetch versions');
+        
+        const versions = await response.json();
+        const dropdown = document.getElementById('versionSelect');
+        const newVersionSelect = document.getElementById('newVersionSelect');
+        
+        // Clear existing options
+        dropdown.innerHTML = '';
+        newVersionSelect.innerHTML = '<option value="">Select a version...</option>';
+        
+        if (versions.length === 0) {
+          dropdown.innerHTML = '<option value="">No versions available</option>';
+          return;
+        }
+        
+        // Sort versions
+        versions.sort((a, b) => compareVersions(a.version, b.version));
+        
+        // Add versions to dropdowns
+        versions.forEach(v => {
+          const option1 = document.createElement('option');
+          option1.value = v.filename;
+          option1.textContent = `Version: ${v.version}${v.type === 'preview' ? ' (Preview)' : ''}`;
+          dropdown.appendChild(option1);
+          
+          const option2 = document.createElement('option');
+          option2.value = v.filename;
+          option2.textContent = `Version: ${v.version}${v.type === 'preview' ? ' (Preview)' : ''}`;
+          newVersionSelect.appendChild(option2);
+        });
+      } catch (error) {
+        console.error('Error updating versions:', error);
+        document.getElementById('versionSelect').innerHTML = '<option value="">No versions available</option>';
+      }
+    }
+
+    /**
+     * Load and display news from localStorage
+     */
+    function loadAndDisplayNews() {
+      const newsData = localStorage.getItem(STORAGE_KEYS.NEWS);
+      const news = newsData ? JSON.parse(newsData) : [];
+      const container = document.getElementById('newsContainer');
+      
+      if (news.length === 0) {
+        container.innerHTML = '<div class="no-news-message">No announcements available</div>';
+        return;
+      }
+      
+      container.innerHTML = news.map((item, index) => `
+        <div class="news-card">
+          <div class="news-card-content">
+            <div class="news-card-title">${item.title}</div>
+            <div class="news-card-date">${item.date}</div>
+          </div>
+          ${hasEditNewsPermission(getUser()) ? `
+            <button type="button" class="news-card-delete-btn" onclick="deleteNews(${index})">Delete</button>
+          ` : ''}
+        </div>
+      `).join('');
+    }
+
+    /**
+     * Delete news item
+     */
+    function deleteNews(index) {
+      if (!hasEditNewsPermission(getUser())) return;
+      
+      const newsData = localStorage.getItem(STORAGE_KEYS.NEWS);
+      const news = newsData ? JSON.parse(newsData) : [];
+      news.splice(index, 1);
+      localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(news));
+      loadAndDisplayNews();
+    }
+
+    /**
+     * Add new news item
+     */
+    function addNews(title, date) {
+      if (!hasEditNewsPermission(getUser())) {
+        alert('You do not have permission to add announcements.');
+        return;
+      }
+      
+      if (!title.trim()) {
+        alert('Please enter a title.');
+        return;
+      }
+      
+      if (!date.trim()) {
+        alert('Please enter a date.');
+        return;
+      }
+      
+      const newsData = localStorage.getItem(STORAGE_KEYS.NEWS);
+      const news = newsData ? JSON.parse(newsData) : [];
+      
+      news.unshift({ title, date });
+      localStorage.setItem(STORAGE_KEYS.NEWS, JSON.stringify(news));
+      
+      loadAndDisplayNews();
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsDate').value = '';
+      document.getElementById('addNewsForm').classList.remove('active');
+    }
+
+    /**
+     * Toggle edit news form
+     */
+    function toggleEditNewsForm() {
+      const form = document.getElementById('addNewsForm');
+      form.classList.toggle('active');
+    }
+
+    /**
+     * Save custom version profile
+     */
+    function saveCustomVersion(version) {
+      const versionsData = localStorage.getItem(STORAGE_KEYS.VERSIONS);
+      const versions = versionsData ? JSON.parse(versionsData) : [];
+      versions.push(version);
+      localStorage.setItem(STORAGE_KEYS.VERSIONS, JSON.stringify(versions));
+      populateVersionsList();
+    }
+
+    /**
+     * Populate versions list in modal
+     */
+    function populateVersionsList() {
+      const versionsData = localStorage.getItem(STORAGE_KEYS.VERSIONS);
+      const versions = versionsData ? JSON.parse(versionsData) : [];
+      const versionsList = document.getElementById('versionsList');
+      
+      if (versions.length === 0) {
+        versionsList.innerHTML = '<div class="empty-versions-message">No profiles created yet</div>';
+        return;
+      }
+      
+      versionsList.innerHTML = versions.map((v, idx) => {
+        // Icon file path mi yoksa emoji mi kontrol et
+        const iconHTML = v.icon.startsWith('/') ? 
+          `<img src="${v.icon}" alt="Icon" style="width: 24px; height: 24px; object-fit: contain;" />` :
+          v.icon;
+        
+        return `
+          <div class="version-item">
+            <div class="version-item-icon">${iconHTML}</div>
+            <div class="version-item-info">
+              <div class="version-item-name">${v.displayName}</div>
+              <div class="version-item-detail">Version: ${v.version}</div>
+            </div>
+            <button type="button" class="version-item-delete" onclick="deleteCustomVersion(${idx})">Delete</button>
+          </div>
+        `;
+      }).join('');
+    }
+
+    /**
+     * Delete custom version
+     */
+    function deleteCustomVersion(index) {
+      const versionsData = localStorage.getItem(STORAGE_KEYS.VERSIONS);
+      const versions = versionsData ? JSON.parse(versionsData) : [];
+      versions.splice(index, 1);
+      localStorage.setItem(STORAGE_KEYS.VERSIONS, JSON.stringify(versions));
+      populateVersionsList();
+    }
+
+    // ============= AUTH MODAL LOGIC =============
+
+    /**
+     * Auth tab switching
+     */
+    document.querySelectorAll('.auth-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        const authType = tab.getAttribute('data-auth-type');
+        document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        document.querySelectorAll('.auth-form-group').forEach(form => form.style.display = 'none');
+        
+        if (authType === 'google') {
+          document.getElementById('googleAuthForm').style.display = 'flex';
+        } else if (authType === 'email') {
+          document.getElementById('emailAuthForm').style.display = 'flex';
+        } else if (authType === 'guest') {
+          document.getElementById('guestAuthForm').style.display = 'flex';
+        }
+      });
+    });
+
+    /**
+     * Google Login (Firebase)
+     */
+    document.getElementById('googleLoginBtn').addEventListener('click', () => {
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        alert('Firebase not loaded. Please refresh the page.');
+        return;
+      }
+
+      const auth = firebase.auth();
+      const provider = new firebase.auth.GoogleAuthProvider();
+
+      auth.signInWithPopup(provider)
+        .then((result) => {
+          const firebaseUser = result.user;
+          const user = {
+            username: firebaseUser.displayName || firebaseUser.email.split('@')[0],
+            email: firebaseUser.email,
+            type: 'authenticated',
+            rank: 'Player',
+            uid: firebaseUser.uid,
+            loginDate: new Date().toISOString()
+          };
+
+          if (isNameBanned(user.username)) {
+            alert('This username is not available.');
+            return;
+          }
+
+          saveUser(user);
+          updateProfileCard(user);
+          closeAuthModal();
+          console.log('✅ Google Login Success:', user.username);
+        })
+        .catch((error) => {
+          console.error('Google Login Error:', error);
+          alert('Login failed. Please try again.');
+        });
+    });
+
+    /**
+     * Google Signup
+     */
+    document.getElementById('googleSignupBtn').addEventListener('click', () => {
+      alert('Google signup feature is under development.');
+    });
+
+    /**
+     * Email Login (Firebase)
+     */
+    document.getElementById('emailLoginBtn').addEventListener('click', () => {
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        alert('Firebase not loaded. Please refresh the page.');
+        return;
+      }
+
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+      if (!email || !password) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const auth = firebase.auth();
+      auth.signInWithEmailAndPassword(email, password)
+        .then((result) => {
+          const firebaseUser = result.user;
+          const user = {
+            username: firebaseUser.displayName || email.split('@')[0],
+            email: firebaseUser.email,
+            type: 'authenticated',
+            rank: 'Player',
+            uid: firebaseUser.uid,
+            loginDate: new Date().toISOString()
+          };
+
+          if (isNameBanned(user.username)) {
+            alert('This username is not available.');
+            return;
+          }
+
+          saveUser(user);
+          updateProfileCard(user);
+          closeAuthModal();
+          console.log('✅ Email Login Success:', user.username);
+        })
+        .catch((error) => {
+          console.error('Email Login Error:', error);
+          alert('Login failed. Wrong email or password.');
+        });
+    });
+
+    /**
+     * Email Signup (Firebase)
+     */
+    document.getElementById('emailSignupBtn').addEventListener('click', () => {
+      if (typeof firebase === 'undefined' || !firebase.auth) {
+        alert('Firebase not loaded. Please refresh the page.');
+        return;
+      }
+
+      const email = document.getElementById('emailInput').value.trim();
+      const password = document.getElementById('passwordInput').value.trim();
+
+      if (!email || !password) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      if (password.length < 6) {
+        alert('Password must be at least 6 characters.');
+        return;
+      }
+
+      const auth = firebase.auth();
+      auth.createUserWithEmailAndPassword(email, password)
+        .then((result) => {
+          const firebaseUser = result.user;
+          const user = {
+            username: email.split('@')[0],
+            email: firebaseUser.email,
+            type: 'authenticated',
+            rank: 'Player',
+            uid: firebaseUser.uid,
+            loginDate: new Date().toISOString()
+          };
+
+          if (isNameBanned(user.username)) {
+            alert('This username is not available.');
+            return;
+          }
+
+          saveUser(user);
+          updateProfileCard(user);
+          closeAuthModal();
+          console.log('✅ Email Signup Success:', user.username);
+        })
+        .catch((error) => {
+          console.error('Email Signup Error:', error);
+          if (error.code === 'auth/email-already-in-use') {
+            alert('This email is already registered.');
+          } else if (error.code === 'auth/invalid-email') {
+            alert('Invalid email address.');
+          } else {
+            alert('Signup failed. ' + error.message);
+          }
+        });
+    });
+
+    /**
+     * Guest Login
+     */
+    document.getElementById('guestLoginBtn').addEventListener('click', () => {
+      let guestName = document.getElementById('guestNameInput').value.trim();
+
+      if (!guestName) {
+        guestName = generateGuestId();
+      } else if (isNameBanned(guestName)) {
+        alert('This username is not available.');
+        return;
+      }
+
+      const user = {
+        username: guestName,
+        type: 'guest',
+        rank: 'Guest',
+        loginDate: new Date().toISOString()
+      };
+
+      saveUser(user);
+      updateProfileCard(user);
+      closeAuthModal();
+    });
+
+    // ============= GAME SELECTION & BANNER LOGIC =============
+
+    /**
+     * Game tab selection
+     */
+    document.querySelectorAll('.game-tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+
+        const game = tab.getAttribute('data-game');
+        const bannerFile = tab.getAttribute('data-banner');
+        const bannerSection = document.getElementById('bannerSection');
+
+        if (game === 'legends') {
+          document.getElementById('bannerTitle').textContent = 'Legends';
+          document.getElementById('bannerDesc').textContent = 'Welcome to the world of voxel games';
+        } else if (game === 'preview') {
+          document.getElementById('bannerTitle').textContent = 'Legends Preview';
+          document.getElementById('bannerDesc').textContent = 'Test upcoming features';
+        }
+
+        // Update banner background (without assets/)
+        bannerSection.style.backgroundImage = `linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
+      });
+    });
+
+    // ============= MY VERSIONS MODAL LOGIC =============
+
+    /**
+     * Open My Versions modal
+     */
+    document.getElementById('myVersionsBtn').addEventListener('click', () => {
+      if (!navigator.onLine) {
+        alert('Cannot add new versions in offline mode.');
+        return;
+      }
+      populateVersionsList();
+      document.getElementById('versionsModal').classList.add('active');
+    });
+
+    /**
+     * Close My Versions modal
+     */
+    document.getElementById('closeVersionsBtn').addEventListener('click', () => {
+      document.getElementById('versionsModal').classList.remove('active');
+    });
+
+    /**
+     * Create new version profile
+     */
+    document.getElementById('createVersionBtn').addEventListener('click', () => {
+      const name = document.getElementById('versionNameInput').value.trim();
+      const icon = document.getElementById('versionIconSelect').value;
+      const version = document.getElementById('newVersionSelect').value;
+
+      if (!name) {
+        alert('Please enter a profile name.');
+        return;
+      }
+
+      if (isNameBanned(name)) {
+        alert('This name is not available.');
+        return;
+      }
+
+      if (!version) {
+        alert('Please select a version.');
+        return;
+      }
+
+      const iconMap = {
+        default: '/final-icon.png',
+        grass: '/grass-icon.png',
+        stone: '/stone-icon.png',
+        gold: '/gold-icon.png'
+      };
+
+      const newVersion = {
+        displayName: name,
+        filename: version,
+        version: version.replace(/game-|\.html/g, ''),
+        icon: iconMap[icon] || '🎮',
+        type: version.includes('p') ? 'preview' : 'final'
+      };
+
+      saveCustomVersion(newVersion);
+      document.getElementById('versionNameInput').value = '';
+      alert('Profile created successfully!');
+    });
+
+    // ============= OFFLINE MODE LOGIC =============
+
+    /**
+     * Online/Offline status listener
+     */
+    window.addEventListener('online', () => {
+      console.log('Back online');
+      document.getElementById('myVersionsBtn').disabled = false;
+      document.getElementById('myVersionsBtn').style.opacity = '1';
+    });
+
+    window.addEventListener('offline', () => {
+      console.log('Going offline');
+      document.getElementById('myVersionsBtn').disabled = true;
+      document.getElementById('myVersionsBtn').style.opacity = '0.5';
+      alert('⚠️ Internet connection lost. You can only play previously loaded versions.');
+    });
+
+    if (!navigator.onLine) {
+      document.getElementById('myVersionsBtn').disabled = true;
+      document.getElementById('myVersionsBtn').style.opacity = '0.5';
+    }
+
+    // ============= PLAY BUTTON LOGIC =============
+
+    /**
+     * Play button
+     */
+    document.getElementById('playBtn').addEventListener('click', () => {
+      const versionSelect = document.getElementById('versionSelect');
+      const selectedFile = versionSelect.value;
+
+      if (!selectedFile) {
+        alert('Please select a version.');
+        return;
+      }
+
+      const user = getUser();
+      
+      // Index.html ile uyumlu format'ta user bilgisini kaydet
+      localStorage.setItem('gameUser', JSON.stringify({
+        username: user.username,
+        rank: user.rank,
+        email: user.email,
+        uid: user.uid || '',
+        type: user.type,
+        loginTime: new Date().toISOString()
+      }));
+
+      localStorage.setItem(STORAGE_KEYS.LAST_PLAYED, JSON.stringify({
+        file: selectedFile,
+        timestamp: new Date().toISOString()
+      }));
+
+      const gameWindow = window.open('./' + selectedFile, '_blank', 'width=1280,height=720,fullscreen=1');
+      
+      if (!gameWindow) {
+        alert('Game window could not be opened. Check your pop-up blocker settings.');
+      } else {
+        console.log(`✅ Launching: ${selectedFile} with user: ${user.username}`);
+      }
+    });
+
+    // ============= LOGOUT LOGIC =============
+
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      if (confirm('Are you sure you want to log out?')) {
+        if (typeof firebase !== 'undefined' && firebase.auth) {
+          firebase.auth().signOut()
+            .then(() => {
+              logoutUser();
+              console.log('✅ Firebase Logout Success');
+            })
+            .catch((error) => {
+              console.error('Logout Error:', error);
+              logoutUser(); // Yine de ç local logout yap
+            });
+        } else {
+          logoutUser();
+        }
+      }
+    });
+
+    // ============= NEWS MANAGEMENT LOGIC =============
+
+    /**
+     * Edit News button visibility and toggle
+     */
+    function updateNewsEditButton() {
+      const user = getUser();
+      const editBtn = document.getElementById('editNewsBtn');
+      
+      if (hasEditNewsPermission(user)) {
+        editBtn.style.display = 'block';
+        editBtn.addEventListener('click', toggleEditNewsForm);
+      } else {
+        editBtn.style.display = 'none';
+      }
+    }
+
+    /**
+     * Save news button
+     */
+    document.getElementById('saveNewsBtn').addEventListener('click', () => {
+      const title = document.getElementById('newsTitle').value.trim();
+      const date = document.getElementById('newsDate').value.trim();
+      addNews(title, date);
+    });
+
+    /**
+     * Cancel news button
+     */
+    document.getElementById('cancelNewsBtn').addEventListener('click', () => {
+      document.getElementById('addNewsForm').classList.remove('active');
+      document.getElementById('newsTitle').value = '';
+      document.getElementById('newsDate').value = '';
+    });
+
+    // ============= INITIALIZATION =============
+
+    /**
+     * Initialize launcher on page load
+     */
+    async function initializeLauncher() {
+      try {
+        // Initialize Google OAuth
+        window.LegendsOAuth.init();
+        
+        const user = getUser();
+
+        if (user) {
+          updateProfileCard(user);
+          closeAuthModal();
+        } else {
+          document.getElementById('authModal').classList.add('active');
+        }
+
+        // Update versions dropdown from API
+        await updateVersionDropdown();
+
+        // Load and display news
+        loadAndDisplayNews();
+        updateNewsEditButton();
+
+        // Set active game tab
+        const firstTab = document.querySelector('.game-tab.active');
+        if (firstTab) {
+          firstTab.click();
+        }
+
+        // Check offline status
+        if (!navigator.onLine) {
+          document.getElementById('myVersionsBtn').disabled = true;
+          document.getElementById('myVersionsBtn').style.opacity = '0.5';
+        }
+
+        // Load last played version
+        const lastPlayed = localStorage.getItem(STORAGE_KEYS.LAST_PLAYED);
+        if (lastPlayed) {
+          const { file } = JSON.parse(lastPlayed);
+          const dropdown = document.getElementById('versionSelect');
+          const option = Array.from(dropdown.options).find(opt => opt.value === file);
+          if (option) {
+            dropdown.value = file;
+          }
+        }
+
+        console.log('🎮 Legends CE Launcher initialized');
+        console.log(`📡 Loaded versions: ${document.getElementById('versionSelect').length - 1} available`);
+      } catch (error) {
+        console.error('Initialization error:', error);
+      }
+    }
+
+    // Start initialization
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeLauncher);
+    } else {
+      initializeLauncher();
+    }
+
+  </script>
+</body>
+</html>

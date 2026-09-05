@@ -1,0 +1,46 @@
+{
+  "name": "Legends Core Edition Launcher - Preview",
+  "short_name": "Legends CE Preview",
+  "description": "Legends Core Edition Launcher - Preview Release",
+  "start_url": "./ce-launcher.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "theme_color": "#0b0c10",
+  "background_color": "#0b0c10",
+  "icons": [
+    {
+      "src": "./preview-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./preview-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./preview-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "./preview-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ],
+  "categories": ["games"],
+  "screenshots": [
+    {
+      "src": "./preview-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ]
+}

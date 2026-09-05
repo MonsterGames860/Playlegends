@@ -3614,6 +3614,11 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
   .ss-docs-body{padding:14px;}
   .ss-docs-code{font-size:10px;}
 }
+
+/* ═══ FIREBASE AUTH & ACCOUNT STYLES ═══ */
+.legends-modal{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.85);display:flex;align-items:center;justify-content:center;z-index:9999;opacity:0;pointer-events:none;transition:opacity .3s}.legends-modal.active{opacity:1;pointer-events:all}.legends-modal-content{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 100%);border:2px solid #0f3460;border-radius:8px;padding:30px;max-width:400px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,.6)}.legends-modal-header{font-size:22px;font-weight:bold;color:#00d4ff;margin-bottom:20px;text-align:center;text-shadow:0 2px 4px rgba(0,0,0,.5)}.legends-modal-body{display:flex;flex-direction:column;gap:15px}#auth-form-container{display:flex;flex-direction:column;gap:12px}.legends-input{padding:10px 14px;background:rgba(255,255,255,.08);border:1px solid #0f3460;border-radius:4px;color:#fff;font-size:14px;transition:all .2s}.legends-input:focus{outline:none;border-color:#00d4ff;background:rgba(0,212,255,.1)}.legends-btn{padding:10px 16px;border:none;border-radius:4px;font-size:14px;font-weight:bold;cursor:pointer;transition:all .2s;text-transform:uppercase}.legends-btn.primary{background:#00d4ff;color:#000}.legends-btn.primary:hover{background:#00f0ff;transform:translateY(-2px)}.legends-btn.secondary{background:rgba(255,255,255,.1);color:#00d4ff;border:1px solid #00d4ff}.legends-btn.secondary:hover{background:rgba(0,212,255,.15)}.auth-divider{text-align:center;color:#888;font-size:12px;margin:5px 0}.auth-signup-hint{font-size:12px;color:#aaa;text-align:center;line-height:1.4}.auth-signup-hint a{color:#00d4ff;text-decoration:none}.auth-signup-hint a:hover{text-decoration:underline}.legends-notification{position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#1a3a52 0%,#0d2438 100%);border:2px solid #00d4ff;border-radius:8px;padding:20px;max-width:350px;box-shadow:0 8px 32px rgba(0,0,0,.6);opacity:0;pointer-events:none;transform:translateY(-20px);transition:all .3s;z-index:9998}.legends-notification.active{opacity:1;pointer-events:all;transform:translateY(0)}.notification-content{display:flex;flex-direction:column;gap:12px}.notification-title{font-size:16px;font-weight:bold;color:#00d4ff}.notification-message{font-size:13px;color:#ddd}.notification-buttons{display:flex;gap:10px}.update-confirm-btn,.update-cancel-btn{flex:1;padding:8px 12px;border:none;border-radius:4px;cursor:pointer;font-size:12px;font-weight:bold;transition:all .2s}.update-confirm-btn{background:#00d4ff;color:#000}.update-confirm-btn:hover{background:#00f0ff}.update-cancel-btn{background:rgba(255,255,255,.1);color:#00d4ff;border:1px solid #00d4ff}.update-cancel-btn:hover{background:rgba(0,212,255,.15)}.account-info{background:rgba(255,255,255,.05);border:1px solid #0f3460;border-radius:4px;padding:15px;margin-bottom:15px}.info-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05)}.info-row:last-child{border-bottom:none}.info-label{font-size:12px;color:#aaa;font-weight:bold}.info-value{font-size:14px;color:#00d4ff}.account-section{background:rgba(255,255,255,.05);border:1px solid #0f3460;border-radius:4px;padding:12px;margin-bottom:15px}.account-section-title{font-size:12px;font-weight:bold;color:#00d4ff;margin-bottom:10px;text-transform:uppercase}.account-input{width:100%;padding:8px 10px;background:rgba(255,255,255,.08);border:1px solid #0f3460;border-radius:4px;color:#fff;font-size:13px;margin-bottom:8px;box-sizing:border-box}.account-input:focus{outline:none;border-color:#00d4ff;background:rgba(0,212,255,.1)}.account-btn{width:100%;padding:8px 12px;border:none;border-radius:4px;font-size:13px;font-weight:bold;cursor:pointer;transition:all .2s;text-transform:uppercase;margin-bottom:10px}.account-btn.primary{background:#00d4ff;color:#000}.account-btn.primary:hover{background:#00f0ff;transform:translateY(-1px)}.account-btn.danger{background:#ff4444;color:#fff}.account-btn.danger:hover{background:#ff6666}
+
+.account-guest-lock{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;background:linear-gradient(135deg,rgba(10,10,20,.8) 0%,rgba(20,10,30,.8) 100%);border:2px dashed rgba(255,100,100,.4);border-radius:8px;text-align:center;margin-bottom:20px}.lock-icon{font-size:48px;margin-bottom:15px}.lock-title{font-size:16px;font-weight:bold;color:#ff6666;margin-bottom:8px}.lock-message{font-size:12px;color:#aaa;margin-bottom:20px}#pc-guest-login-btn,#mobile-guest-login-btn{width:100%;background:#00d4ff;color:#000;padding:12px;font-weight:bold;border:none;border-radius:4px;cursor:pointer;transition:all .2s}#pc-guest-login-btn:hover,#mobile-guest-login-btn:hover{background:#00f0ff;transform:translateY(-2px)}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/three@0.128.0/build/three.min.js';document.head.appendChild(s);"></script>
 <script src="https://cdn.jsdelivr.net/npm/peerjs@1.5.4/dist/peerjs.min.js" onerror="this.onerror=null;var s=document.createElement('script');s.src='https://unpkg.com/peerjs@1.5.4/dist/peerjs.min.js';document.head.appendChild(s);"></script>
@@ -3667,6 +3672,37 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
 </script>
 </head>
 <body>
+<!-- ═══ FIREBASE AUTH MODAL ═══ -->
+<div id="legends-auth-modal" class="legends-modal legends-modal-blocking">
+  <div class="legends-modal-content">
+    <div class="legends-modal-header">LEGENDS LOGIN</div>
+    <div class="legends-modal-body">
+      <div id="auth-form-container">
+        <input type="email" id="auth-email" placeholder="Email address" class="legends-input">
+        <input type="password" id="auth-password" placeholder="Password" class="legends-input">
+        <button id="auth-login-btn" class="legends-btn primary">LOG IN</button>
+        <div class="auth-divider">OR</div>
+        <button id="auth-guest-btn" class="legends-btn secondary">PLAY AS GUEST</button>
+      </div>
+      <div class="auth-signup-hint">
+        Don't have an account? <a href="https://playlegends.vercel.app" target="_blank">Click here to sign in from our website.</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ UPDATE NOTIFICATION ═══ -->
+<div id="legends-update-notification" class="legends-notification">
+  <div class="notification-content">
+    <div class="notification-title">New update available!</div>
+    <div class="notification-message">Would you like to update now?</div>
+    <div class="notification-buttons">
+      <button class="update-confirm-btn legends-btn primary">UPDATE NOW</button>
+      <button class="update-cancel-btn legends-btn secondary">LATER</button>
+    </div>
+  </div>
+</div>
+
 <!-- ═══ LOADING SCREEN ═══ -->
 <div id="loading-screen">
   <img id="loading-title" src="i-preview-icon.png" alt="Legends I-Preview">
@@ -3721,6 +3757,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
       <button type="button" class="settings-tab-btn active" id="pc-tab-controls-btn" data-tab="controls" data-settings-scope="pc">Controls</button>
       <button type="button" class="settings-tab-btn" id="pc-tab-language-btn" data-tab="language" data-settings-scope="pc">Language</button>
       <button type="button" class="settings-tab-btn" id="pc-tab-resourcepacks-btn" data-tab="resourcepacks" data-settings-scope="pc">Resource Packs</button>
+      <button type="button" class="settings-tab-btn" id="pc-tab-account-btn" data-tab="account" data-settings-scope="pc">My Account</button>
     </div>
     <div class="settings-tab-panel active" id="pc-tab-controls-panel" data-tab-panel="controls">
     <div class="setting-row">
@@ -3797,6 +3834,42 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
         </div>
       </div>
     </div>
+    <div class="settings-tab-panel" id="pc-tab-account-panel" data-tab-panel="account">
+      <div class="sub-title">MY ACCOUNT</div>
+      
+      <!-- Guest Locked Panel -->
+      <div id="pc-account-guest-lock" class="account-guest-lock" style="display:none;">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Guest Account</div>
+        <div class="lock-message">Sign in to access account features</div>
+        <button id="pc-guest-login-btn" class="account-btn primary">LOG IN</button>
+      </div>
+      
+      <!-- Logged-in User Panel -->
+      <div id="pc-account-content">
+        <div class="account-info">
+          <div class="info-row">
+            <span class="info-label">Username:</span>
+            <span class="info-value" id="account-username-display">Guest</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value" id="account-email-display">-</span>
+          </div>
+        </div>
+        <div class="account-section">
+          <div class="account-section-title">Change Username</div>
+          <input type="text" id="account-new-username" placeholder="New username" class="account-input">
+          <button id="account-update-username-btn" class="account-btn primary">UPDATE USERNAME</button>
+        </div>
+        <div class="account-section">
+          <div class="account-section-title">Change Password</div>
+          <input type="password" id="account-new-password" placeholder="New password" class="account-input">
+          <button id="account-update-password-btn" class="account-btn primary">UPDATE PASSWORD</button>
+        </div>
+        <button id="account-logout-btn" class="account-btn danger">LOG OUT</button>
+      </div>
+    </div>
     <button class="mbtn back" id="btn-back-pc-settings"></button>
   </div>
   <div class="menu-screen" id="screen-mobile-settings">
@@ -3807,6 +3880,7 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
       <button type="button" class="settings-tab-btn active" id="mobile-tab-controls-btn" data-tab="controls" data-settings-scope="mobile">Controls</button>
       <button type="button" class="settings-tab-btn" id="mobile-tab-language-btn" data-tab="language" data-settings-scope="mobile">Language</button>
       <button type="button" class="settings-tab-btn" id="mobile-tab-resourcepacks-btn" data-tab="resourcepacks" data-settings-scope="mobile">Resource Packs</button>
+      <button type="button" class="settings-tab-btn" id="mobile-tab-account-btn" data-tab="account" data-settings-scope="mobile">My Account</button>
     </div>
     <div class="settings-tab-panel active" id="mobile-tab-controls-panel" data-tab-panel="controls">
     <div class="setting-row">
@@ -3869,6 +3943,42 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
             <div class="rp-empty-msg">No active resource packs. Add one from the Available tab!</div>
           </div>
         </div>
+      </div>
+    </div>
+    <div class="settings-tab-panel" id="mobile-tab-account-panel" data-tab-panel="account">
+      <div class="sub-title">MY ACCOUNT</div>
+      
+      <!-- Guest Locked Panel -->
+      <div id="mobile-account-guest-lock" class="account-guest-lock" style="display:none;">
+        <div class="lock-icon">🔒</div>
+        <div class="lock-title">Guest Account</div>
+        <div class="lock-message">Sign in to access account features</div>
+        <button id="mobile-guest-login-btn" class="account-btn primary">LOG IN</button>
+      </div>
+      
+      <!-- Logged-in User Panel -->
+      <div id="mobile-account-content">
+        <div class="account-info">
+          <div class="info-row">
+            <span class="info-label">Username:</span>
+            <span class="info-value" id="account-username-display-mobile">Guest</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Email:</span>
+            <span class="info-value" id="account-email-display-mobile">-</span>
+          </div>
+        </div>
+        <div class="account-section">
+          <div class="account-section-title">Change Username</div>
+          <input type="text" id="account-new-username-mobile" placeholder="New username" class="account-input">
+          <button id="account-update-username-btn-mobile" class="account-btn primary">UPDATE USERNAME</button>
+        </div>
+        <div class="account-section">
+          <div class="account-section-title">Change Password</div>
+          <input type="password" id="account-new-password-mobile" placeholder="New password" class="account-input">
+          <button id="account-update-password-btn-mobile" class="account-btn primary">UPDATE PASSWORD</button>
+        </div>
+        <button id="account-logout-btn-mobile" class="account-btn danger">LOG OUT</button>
       </div>
     </div>
     <button class="mbtn back" id="btn-back-mobile-settings"></button>
@@ -19369,6 +19479,356 @@ function T2(tr, en){ return (typeof currentLang !== 'undefined' && currentLang =
     }
   });
 })();
+
+/* ══════════════════════════════════════════════════════════════
+   FIREBASE AUTH & ACCOUNT SYSTEM
+   ══════════════════════════════════════════════════════════════ */
+
+// Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyC8VJ7N-8Z5jZq9xRqA-xWzP5-1a2b3c4d",
+  authDomain: "playlegends.firebaseapp.com",
+  projectId: "playlegends",
+  storageBucket: "playlegends.appspot.com",
+  messagingSenderId: "123456789012",
+  appId: "1:123456789012:web:abc123def456"
+};
+
+// Initialize Firebase
+if(!window.firebase){
+  const script=document.createElement('script');
+  script.src='https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js';
+  document.head.appendChild(script);
+}
+
+window.LegendsAuthSystem = {
+  user: null,
+  isGuest: false,
+  
+  init: async function(){
+    const stored = localStorage.getItem('legends_user');
+    if(stored){
+      try{
+        this.user = JSON.parse(stored);
+        this.isGuest = this.user.isGuest || false;
+        this.checkAuthStatus();
+      }catch(e){
+        localStorage.removeItem('legends_user');
+        this.showAuthModal();
+      }
+    } else {
+      this.showAuthModal();
+    }
+  },
+  
+  showAuthModal: function(){
+    const modal = document.getElementById('legends-auth-modal');
+    if(!modal) return;
+    modal.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  },
+  
+  closeAuthModal: function(){
+    const modal = document.getElementById('legends-auth-modal');
+    if(!modal) return;
+    modal.classList.remove('active');
+    document.body.style.overflow = 'auto';
+  },
+  
+  loginWithEmail: async function(email, password){
+    if(!email || !password){
+      alert('Please enter email and password');
+      return false;
+    }
+    try{
+      // Firebase Auth Login
+      const userCred = await firebase.auth().signInWithEmailAndPassword(email, password);
+      const userData = {
+        uid: userCred.user.uid,
+        email: userCred.user.email,
+        username: email.split('@')[0],
+        isGuest: false,
+        lastLogin: new Date().toISOString()
+      };
+      localStorage.setItem('legends_user', JSON.stringify(userData));
+      this.user = userData;
+      this.isGuest = false;
+      this.closeAuthModal();
+      this.syncUserData();
+      return true;
+    }catch(error){
+      console.error('Login Error:', error);
+      alert('Login failed: ' + error.message);
+      return false;
+    }
+  },
+  
+  playAsGuest: function(){
+    const userData = {
+      uid: 'guest_' + Date.now(),
+      email: 'guest@legends',
+      username: 'Guest_' + Math.floor(Math.random() * 10000),
+      isGuest: true,
+      lastLogin: new Date().toISOString()
+    };
+    localStorage.setItem('legends_user', JSON.stringify(userData));
+    this.user = userData;
+    this.isGuest = true;
+    this.closeAuthModal();
+  },
+  
+  logout: function(){
+    localStorage.removeItem('legends_user');
+    localStorage.removeItem('legends_world_data');
+    this.user = null;
+    this.isGuest = false;
+    this.showAuthModal();
+  },
+  
+  updateUsername: async function(newUsername){
+    if(!this.user || !newUsername.trim()) return false;
+    try{
+      this.user.username = newUsername.trim();
+      localStorage.setItem('legends_user', JSON.stringify(this.user));
+      
+      // Firebase Firestore update
+      if(window.firebase && window.firebase.firestore && !this.isGuest){
+        const db = firebase.firestore();
+        await db.collection('users').doc(this.user.uid).update({
+          username: newUsername,
+          updatedAt: new Date()
+        });
+      }
+      return true;
+    }catch(error){
+      console.error('Username update error:', error);
+      return false;
+    }
+  },
+  
+  updatePassword: async function(newPassword){
+    if(!this.user || !newPassword || this.isGuest) return false;
+    try{
+      const user = firebase.auth().currentUser;
+      if(user){
+        await user.updatePassword(newPassword);
+        return true;
+      }
+      return false;
+    }catch(error){
+      console.error('Password update error:', error);
+      alert('Password update failed: ' + error.message);
+      return false;
+    }
+  },
+  
+  syncUserData: function(){
+    if(this.isGuest || !this.user) return;
+    try{
+      const worldData = localStorage.getItem('legends_world_data');
+      if(window.firebase && window.firebase.firestore && worldData){
+        const db = firebase.firestore();
+        db.collection('users').doc(this.user.uid).set({
+          email: this.user.email,
+          username: this.user.username,
+          lastLogin: new Date(),
+          worldData: worldData
+        }, { merge: true });
+      }
+    }catch(error){
+      console.warn('Data sync error:', error);
+    }
+  },
+  
+  checkAuthStatus: function(){
+    // Check every 5 minutes if user is still valid
+    setInterval(() => {
+      const stored = localStorage.getItem('legends_user');
+      if(!stored && !this.isGuest){
+        this.showAuthModal();
+      }
+    }, 300000);
+  },
+  
+  checkVersionUpdate: async function(){
+    try{
+      if(!window.firebase) return;
+      const db = firebase.firestore();
+      const versionDoc = await db.collection('gameConfig').doc('versions').get();
+      if(versionDoc.exists){
+        const data = versionDoc.data();
+        const currentVersion = window.CURRENT_GAME_VERSION || '1.7.LIp1';
+        const latestVersion = data.stable || data.preview;
+        if(latestVersion && latestVersion !== currentVersion){
+          this.showUpdateNotification(latestVersion);
+        }
+      }
+    }catch(error){
+      console.warn('Version check error:', error);
+    }
+  },
+  
+  showUpdateNotification: function(newVersion){
+    const notify = document.getElementById('legends-update-notification');
+    if(notify){
+      notify.classList.add('active');
+      const btn = notify.querySelector('.update-confirm-btn');
+      if(btn){
+        btn.onclick = () => {
+          if('serviceWorker' in navigator){
+            navigator.serviceWorker.ready.then(reg => {
+              if(reg.waiting){
+                reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+                window.location.reload();
+              }
+            });
+          } else {
+            location.reload();
+          }
+        };
+      }
+    }
+  }
+};
+
+// Load Firebase libs
+function loadFirebase(){
+  if(window.firebase && window.firebase.auth) return;
+  const scripts = [
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-app.js',
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-auth.js',
+    'https://www.gstatic.com/firebasejs/9.22.1/firebase-firestore.js'
+  ];
+  let loaded = 0;
+  scripts.forEach(src => {
+    const script = document.createElement('script');
+    script.src = src;
+    script.async = true;
+    script.onload = () => {
+      loaded++;
+      if(loaded === scripts.length){
+        try{
+          firebase.initializeApp(firebaseConfig);
+        }catch(e){}
+      }
+    };
+    document.head.appendChild(script);
+  });
+}
+
+// Account Settings Event Handlers
+window.LegendsAccountUI = {
+  init: function(){
+    // Auth Modal
+    const loginBtn = document.getElementById('auth-login-btn');
+    const guestBtn = document.getElementById('auth-guest-btn');
+    const emailInput = document.getElementById('auth-email');
+    const passInput = document.getElementById('auth-password');
+    
+    if(loginBtn) loginBtn.addEventListener('click', () => {
+      window.LegendsAuthSystem.loginWithEmail(emailInput.value, passInput.value);
+    });
+    if(guestBtn) guestBtn.addEventListener('click', () => {
+      window.LegendsAuthSystem.playAsGuest();
+    });
+    if(emailInput) emailInput.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') passInput.focus();
+    });
+    if(passInput) passInput.addEventListener('keypress', (e) => {
+      if(e.key === 'Enter') window.LegendsAuthSystem.loginWithEmail(emailInput.value, passInput.value);
+    });
+    
+    // PC Account Settings
+    this.setupAccountPanel('pc');
+    this.setupAccountPanel('mobile');
+    
+    // Update notification cancel btn
+    const cancelBtn = document.querySelector('.update-cancel-btn');
+    if(cancelBtn) cancelBtn.addEventListener('click', () => {
+      const notify = document.getElementById('legends-update-notification');
+      if(notify) notify.classList.remove('active');
+    });
+  },
+  
+  setupAccountPanel: function(device){
+    const prefix = device === 'mobile' ? '-mobile' : '';
+    const guestLockPanel = document.getElementById(device === 'mobile' ? 'mobile-account-guest-lock' : 'pc-account-guest-lock');
+    const accountContent = document.getElementById(device === 'mobile' ? 'mobile-account-content' : 'pc-account-content');
+    const usernameDisplay = document.getElementById('account-username-display' + prefix);
+    const emailDisplay = document.getElementById('account-email-display' + prefix);
+    const updateUsernameBtn = document.getElementById('account-update-username-btn' + prefix);
+    const updatePasswordBtn = document.getElementById('account-update-password-btn' + prefix);
+    const logoutBtn = document.getElementById('account-logout-btn' + prefix);
+    const usernameInput = document.getElementById('account-new-username' + prefix);
+    const passwordInput = document.getElementById('account-new-password' + prefix);
+    const guestLoginBtn = document.getElementById(device === 'mobile' ? 'mobile-guest-login-btn' : 'pc-guest-login-btn');
+    
+    const updateDisplay = () => {
+      if(!window.LegendsAuthSystem.user) return;
+      
+      // Show/hide based on guest status
+      const isGuest = window.LegendsAuthSystem.isGuest;
+      if(guestLockPanel) guestLockPanel.style.display = isGuest ? 'flex' : 'none';
+      if(accountContent) accountContent.style.display = isGuest ? 'none' : 'block';
+      
+      // Update info only if logged in
+      if(!isGuest){
+        if(usernameDisplay) usernameDisplay.textContent = window.LegendsAuthSystem.user.username || 'Guest';
+        if(emailDisplay) emailDisplay.textContent = window.LegendsAuthSystem.user.email || '-';
+      }
+    };
+    
+    updateDisplay();
+    
+    // Guest login button
+    if(guestLoginBtn) guestLoginBtn.addEventListener('click', () => {
+      window.LegendsAuthSystem.showAuthModal();
+    });
+    
+    if(updateUsernameBtn) updateUsernameBtn.addEventListener('click', async () => {
+      const newUsername = usernameInput.value.trim();
+      if(!newUsername){
+        alert('Please enter a username');
+        return;
+      }
+      const success = await window.LegendsAuthSystem.updateUsername(newUsername);
+      if(success){
+        alert('Username updated successfully!');
+        usernameInput.value = '';
+        updateDisplay();
+      }
+    });
+    
+    if(updatePasswordBtn) updatePasswordBtn.addEventListener('click', async () => {
+      const newPassword = passwordInput.value;
+      if(!newPassword || newPassword.length < 6){
+        alert('Password must be at least 6 characters');
+        return;
+      }
+      const success = await window.LegendsAuthSystem.updatePassword(newPassword);
+      if(success){
+        alert('Password updated successfully!');
+        passwordInput.value = '';
+      }
+    });
+    
+    if(logoutBtn) logoutBtn.addEventListener('click', () => {
+      if(confirm('Are you sure you want to log out?')){
+        window.LegendsAuthSystem.logout();
+        updateDisplay();
+      }
+    });
+  }
+};
+
+// Init on page load
+window.addEventListener('DOMContentLoaded', () => {
+  loadFirebase();
+  setTimeout(() => {
+    window.LegendsAuthSystem.init();
+    window.LegendsAccountUI.init();
+  }, 1000);
+});
 
 // [MODÜLER DİL MİMARİSİ] Oyun açılışında localStorage'da kayıtlı bir dil
 // tercihi varsa o yüklenir; hiç tercih yoksa (ilk açılış) varsayılan EN

@@ -1,0 +1,32 @@
+{
+  "name": "Legends Core Edition Launcher",
+  "short_name": "Legends CE",
+  "start_url": "./ce-launcher.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "landscape-primary",
+  "theme_color": "#0b0c10",
+  "background_color": "#0b0c10",
+  "icons": [
+    {
+      "src": "./ce-launcher-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./ce-launcher-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "categories": ["games"],
+  "screenshots": [
+    {
+      "src": "./ce-launcher-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
