@@ -2,7 +2,7 @@
   "name": "Legends Pocket Edition - Final",
   "short_name": "Legends PE Final",
   "description": "Legends Pocket Edition - Final Release",
-  "start_url": "./index.html",
+  "start_url": "./game.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
