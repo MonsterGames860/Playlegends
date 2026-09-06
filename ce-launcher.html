@@ -1442,7 +1442,69 @@
       ]
     };
 
-    // ============= UTILITY FUNCTIONS =============
+    // ============= GOOGLE LOGIN HANDLERS =============
+
+    /**
+     * Google Log In with detailed error handling
+     */
+    function handleGoogleLoginLauncher() {
+      const provider = new firebase.auth.GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const auth = firebase.auth();
+      const database = firebase.database();
+
+      auth.signInWithPopup(provider).then((cred) => {
+        const user = cred.user;
+        
+        // Save user info
+        localStorage.setItem('gameUser', JSON.stringify({
+          username: user.displayName || "Player",
+          email: user.email,
+          uid: user.uid,
+          rank: 'Player',
+          type: 'google',
+          loginTime: new Date().toISOString()
+        }));
+
+        updateProfileCard({
+          username: user.displayName || "Player",
+          rank: 'Player',
+          type: 'google'
+        });
+
+        closeAuthModal();
+        console.log('✅ Google Login Success:', user.displayName);
+
+      }).catch((error) => {
+        console.error("Google Login Error:", error.code, error.message);
+        
+        let errorMsg = 'Google Login failed';
+        switch(error.code) {
+          case 'auth/popup-closed-by-user':
+            return; // User closed popup, no error needed
+          case 'auth/account-exists-with-different-credential':
+            errorMsg = 'This email is already registered with a different sign-in method.';
+            break;
+          case 'auth/network-request-failed':
+            errorMsg = 'Network error. Please check your connection.';
+            break;
+          case 'auth/user-disabled':
+            errorMsg = 'This account has been disabled.';
+            break;
+        }
+        
+        alert(errorMsg);
+      });
+    }
+
+    // Attach Google login button handler
+    document.addEventListener('DOMContentLoaded', () => {
+      const googleBtn = document.getElementById('googleLoginBtn');
+      if (googleBtn) {
+        googleBtn.addEventListener('click', handleGoogleLoginLauncher);
+      }
+    });
     
     /**
      * Check if username is banned

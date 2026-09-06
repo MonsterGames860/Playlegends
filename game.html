@@ -3013,6 +3013,10 @@ body.low-health::after {
         <input type="password" id="auth-password" placeholder="Password" class="legends-input">
         <button id="auth-login-btn" class="legends-btn primary">LOG IN</button>
         <div class="auth-divider">OR</div>
+        <button id="auth-google-btn" class="legends-btn secondary" style="background: white; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px;">
+          <span>LOG IN WITH GOOGLE</span>
+        </button>
+        <div class="auth-divider">OR</div>
         <button id="auth-guest-btn" class="legends-btn secondary">PLAY AS GUEST</button>
       </div>
       <div class="auth-signup-hint">
@@ -17459,6 +17463,64 @@ animate();
     document.addEventListener('DOMContentLoaded', initializeGameFirebase);
   } else {
     initializeGameFirebase();
+  }
+
+  // ============= GOOGLE LOGIN HANDLER =============
+  document.addEventListener('DOMContentLoaded', () => {
+    const googleBtn = document.getElementById('auth-google-btn');
+    if (googleBtn) {
+      googleBtn.addEventListener('click', handleGameGoogleLogin);
+    }
+  });
+
+  function handleGameGoogleLogin() {
+    if (typeof firebase === 'undefined' || !firebase.auth) {
+      alert('Firebase not loaded. Please refresh the page.');
+      return;
+    }
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ prompt: "select_account" });
+    const auth = firebase.auth();
+
+    auth.signInWithPopup(provider).then((cred) => {
+      const user = cred.user;
+      
+      // Save user info
+      localStorage.setItem('gameUser', JSON.stringify({
+        username: user.displayName || "Player",
+        email: user.email,
+        uid: user.uid,
+        rank: 'Player',
+        type: 'google',
+        loginTime: new Date().toISOString()
+      }));
+
+      // Hide auth modal
+      const authModal = document.getElementById('legends-auth-modal');
+      if (authModal) authModal.style.display = 'none';
+      
+      console.log('✅ Google Login Success:', user.displayName);
+
+    }).catch((error) => {
+      console.error("Google Login Error:", error.code, error.message);
+      
+      if (error.code === 'auth/popup-closed-by-user') {
+        return; // User closed popup, no error needed
+      }
+      
+      let errorMsg = 'Google Login failed';
+      switch(error.code) {
+        case 'auth/account-exists-with-different-credential':
+          errorMsg = 'This email is already registered with a different sign-in method.';
+          break;
+        case 'auth/network-request-failed':
+          errorMsg = 'Network error. Please check your connection.';
+          break;
+      }
+      
+      alert(errorMsg);
+    });
   }
 </script>
 

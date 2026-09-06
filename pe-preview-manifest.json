@@ -2,7 +2,7 @@
   "name": "Legends Pocket Edition - Preview",
   "short_name": "Legends PE Preview",
   "description": "Legends Pocket Edition - Preview Release",
-  "start_url": "./index.html",
+  "start_url": "./gameexp.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
