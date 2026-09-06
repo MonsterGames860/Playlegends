@@ -27861,24 +27861,32 @@ console.log(`
     databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
   };
 
-  // Firebase Initialize
-  if (typeof firebase !== 'undefined') {
+  // Firebase Initialize - Retry logic
+  function initializeGameFirebase() {
+    if (typeof firebase === 'undefined' || !firebase.app) {
+      console.warn('⚠️ Firebase SDK not loaded. Retrying...');
+      setTimeout(initializeGameFirebase, 500);
+      return;
+    }
+
     try {
+      if (firebase.apps.length > 0) {
+        console.log('✅ Firebase already initialized in gameexp');
+        return;
+      }
       firebase.initializeApp(firebaseConfig);
-      console.log('✅ Firebase initialized in game');
+      console.log('✅ Firebase initialized in gameexp');
     } catch (err) {
-      console.warn('Firebase already initialized:', err);
+      console.warn('Firebase initialization:', err.message);
     }
   }
 
-  // Google Sign-In Button (Show only if not logged in)
-  window.addEventListener('load', function() {
-    const gameUser = localStorage.getItem('gameUser');
-    if (!gameUser && typeof google !== 'undefined') {
-      // Opsiyonal: Login butonunu oyunun üstüne eklemek isterseniz
-      console.log('Google Sign-In ready. User can login from launcher.');
-    }
-  });
+  // Load Firebase when page is ready
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeGameFirebase);
+  } else {
+    initializeGameFirebase();
+  }
 </script>
 
 </body>

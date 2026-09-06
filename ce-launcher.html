@@ -11,7 +11,7 @@
   <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" />
   <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==" />
   
-  <!-- Firebase SDK -->
+  <!-- Firebase SDK - Strict order -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
@@ -1153,15 +1153,31 @@
     };
 
     // Firebase SDK yüklü mü diye kontrol et
-    if (typeof firebase !== 'undefined') {
+    function initializeFirebase() {
+      if (typeof firebase === 'undefined' || !firebase.app) {
+        console.warn('⚠️ Firebase SDK not loaded. Retrying...');
+        setTimeout(initializeFirebase, 500);
+        return;
+      }
+
       try {
+        // Eğer zaten initialize edilmişse skip et
+        if (firebase.apps.length > 0) {
+          console.log('✅ Firebase already initialized');
+          return;
+        }
         firebase.initializeApp(firebaseConfig);
         console.log('✅ Firebase initialized in launcher');
       } catch (err) {
-        console.warn('Firebase already initialized:', err);
+        console.warn('Firebase initialization:', err.message);
       }
+    }
+
+    // Sayfan yükleme sırasında başlat
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initializeFirebase);
     } else {
-      console.warn('⚠️ Firebase SDK not loaded. Add Firebase script tag in HTML head.');
+      initializeFirebase();
     }
 
     // ============= GOOGLE OAUTH SETUP =============
@@ -1357,13 +1373,17 @@
       if (!allVersions || allVersions.length === 0) {
         const option = document.createElement('option');
         option.value = '';
-        option.textContent = '⚠️ Versiyon bulunamadı';
+        option.textContent = '⚠️ No versions available';
         dropdown.appendChild(option);
+        console.warn('⚠️ No versions to display');
         return;
       }
 
-      const officialVersions = allVersions.filter(v => v.category === 'final');
-      
+      // Filter ve grup oluştur
+      const officialVersions = allVersions.filter(v => v.category === 'final' || v.type === 'release' || v.type === 'indev' || v.type === 'alpha' || v.type === 'beta');
+      const previewVersions = allVersions.filter(v => v.category === 'preview' || v.type === 'preview' || v.type === 'indev_preview' || v.type === 'alpha_preview' || v.type === 'beta_preview');
+
+      // Official group
       if (officialVersions.length > 0) {
         const officialGroup = document.createElement('optgroup');
         officialGroup.label = '📦 Official Releases';
@@ -1371,7 +1391,7 @@
         officialVersions.forEach(ver => {
           const option = document.createElement('option');
           option.value = ver.filename;
-          option.setAttribute('data-type', ver.type);
+          option.setAttribute('data-type', ver.type || 'release');
           option.setAttribute('data-category', 'final');
           option.textContent = parseVersionLabel(ver.filename, ver.version, ver.type);
           officialGroup.appendChild(option);
@@ -1380,8 +1400,7 @@
         dropdown.appendChild(officialGroup);
       }
 
-      const previewVersions = allVersions.filter(v => v.category === 'preview');
-      
+      // Preview group
       if (previewVersions.length > 0) {
         const previewGroup = document.createElement('optgroup');
         previewGroup.label = '🔮 Preview Builds';
@@ -1389,7 +1408,7 @@
         previewVersions.forEach(ver => {
           const option = document.createElement('option');
           option.value = ver.filename;
-          option.setAttribute('data-type', ver.type);
+          option.setAttribute('data-type', ver.type || 'preview');
           option.setAttribute('data-category', 'preview');
           option.textContent = parseVersionLabel(ver.filename, ver.version, ver.type);
           previewGroup.appendChild(option);
@@ -1398,7 +1417,15 @@
         dropdown.appendChild(previewGroup);
       }
 
-      console.log(`✅ Dropdown dolduruldu: ${dropdown.options.length} seçenek`);
+      if (officialVersions.length === 0 && previewVersions.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '⚠️ No versions available';
+        dropdown.appendChild(option);
+        console.warn('⚠️ Versions array has no filterable items:', allVersions);
+      } else {
+        console.log(`✅ Dropdown populated: ${dropdown.options.length} total options`);
+      }
     }
 
     
@@ -2127,8 +2154,18 @@
      */
     async function initializeLauncher() {
       try {
-        // Initialize Google OAuth
-        window.LegendsOAuth.init();
+        // Wait for Firebase to initialize
+        let retries = 0;
+        while ((typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) && retries < 20) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          retries++;
+        }
+
+        if (typeof firebase !== 'undefined' && firebase.apps.length > 0) {
+          console.log('✅ Firebase ready');
+        } else {
+          console.warn('⚠️ Firebase may not be fully loaded');
+        }
         
         const user = getUser();
 

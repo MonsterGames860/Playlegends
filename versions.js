@@ -99,7 +99,8 @@ function getCategory(type) {
  */
 function scanGameFiles() {
   try {
-    const gameDir = path.join(__dirname, 'public');
+    // Direk root klasöre bak (public olmadan)
+    const gameDir = __dirname;
     
     if (!fs.existsSync(gameDir)) {
       console.warn(`⚠️ Dizin bulunamadı: ${gameDir}`);
