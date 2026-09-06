@@ -1270,9 +1270,28 @@
     };
 
     // ============= STATIC FALLBACK VERSIONS =============
-    const STATIC_AVAILABLE_VERSIONS = [
-      // Boş - Sunucudan versiyonlar yüklenecek
-    ];
+    let STATIC_AVAILABLE_VERSIONS = [];
+
+    /**
+     * Load versions from versions.json on startup
+     */
+    async function loadStaticVersions() {
+      try {
+        const response = await fetch('/versions.json');
+        if (response.ok) {
+          const data = await response.json();
+          STATIC_AVAILABLE_VERSIONS = data.versions || [];
+          localStorage.setItem('versionsLastUpdate', data.lastUpdated || new Date().toISOString());
+          console.log(`✅ Loaded ${STATIC_AVAILABLE_VERSIONS.length} versions from versions.json`);
+        }
+      } catch (error) {
+        console.warn('Could not load versions.json:', error);
+        STATIC_AVAILABLE_VERSIONS = [];
+      }
+    }
+
+    // Load versions immediately
+    loadStaticVersions();
 
     /**
      * Versiyonu kategoriye ayır (final veya preview)
@@ -1324,27 +1343,10 @@
      */
     async function updateVersionDropdown() {
       try {
-        console.log('📡 /versions endpoint\'inden versiyonlar çekiliyor...');
-        const response = await fetch('/versions', {
-          method: 'GET',
-          headers: {
-            'Accept': 'application/json'
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}`);
-        }
-
-        const data = await response.json();
-        const versions = data.versions || data || [];
-
-        console.log(`✅ ${versions.length} versiyon sunucudan yüklendi`);
-        populateVersionDropdown(versions);
-      } catch (error) {
-        console.warn(`⚠️ /versions çekilemedi: ${error.message}`);
-        console.log('📦 Yedek versiyon listesi kullanılıyor...');
+        console.log('📦 Loading versions from versions.json...');
         populateVersionDropdown(STATIC_AVAILABLE_VERSIONS);
+      } catch (error) {
+        console.error('Error:', error);
       }
     }
 
@@ -2189,9 +2191,45 @@
 
         console.log('🎮 Legends CE Launcher initialized');
         console.log(`📡 Loaded versions: ${document.getElementById('versionSelect').length - 1} available`);
+
+        // ============= AUTO-UPDATE VERSIONS EVERY 30 SECONDS =============
+        startVersionsAutoUpdate();
       } catch (error) {
         console.error('Initialization error:', error);
       }
+    }
+
+    /**
+     * Auto-update versions from versions.json
+     * Checks every 30 seconds for new versions
+     */
+    function startVersionsAutoUpdate() {
+      let lastUpdateTime = localStorage.getItem('versionsLastUpdate') || '0';
+
+      setInterval(async () => {
+        try {
+          // Cache bust with timestamp
+          const response = await fetch('/versions.json?t=' + Date.now());
+          
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+
+          const data = await response.json();
+          const currentUpdateTime = data.lastUpdated || new Date().toISOString();
+
+          // Check if versions were updated
+          if (currentUpdateTime > lastUpdateTime && data.versions && data.versions.length > 0) {
+            lastUpdateTime = currentUpdateTime;
+            localStorage.setItem('versionsLastUpdate', lastUpdateTime);
+            
+            console.log(`✅ New versions detected! Updating dropdown...`);
+            populateVersionDropdown(data.versions);
+          }
+        } catch (error) {
+          console.warn(`Auto-update check failed: ${error.message}`);
+        }
+      }, 30000); // Check every 30 seconds
     }
 
     // Start initialization
