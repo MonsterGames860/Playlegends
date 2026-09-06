@@ -1,6 +1,6 @@
 {
   "name": "Legends Core Edition Launcher",
-  "short_name": "Legends CE",
+  "short_name": "Legends CE Launcher",
   "start_url": "./ce-launcher.html",
   "scope": "./",
   "display": "standalone",

@@ -1271,16 +1271,7 @@
 
     // ============= STATIC FALLBACK VERSIONS =============
     const STATIC_AVAILABLE_VERSIONS = [
-      // ANA SÜRÜMLER
-      { filename: 'game-1.9.0.html', version: '1.9.0', type: 'release', category: 'final' },
-      { filename: 'game-b-5.3.2.html', version: '5.3.2', type: 'beta', category: 'final' },
-      { filename: 'game-a-1.0.2.html', version: '1.0.2', type: 'alpha', category: 'final' },
-      { filename: 'game-i-1.6.2.html', version: '1.6.2', type: 'indev', category: 'final' },
-      // PREVIEW SÜRÜMLER
-      { filename: 'game-1.0p1.html', version: '1.0p1', type: 'preview', category: 'preview' },
-      { filename: 'game-1.0Ip1.html', version: '1.0Ip1', type: 'indev_preview', category: 'preview' },
-      { filename: 'game-1.0Ap1.html', version: '1.0Ap1', type: 'alpha_preview', category: 'preview' },
-      { filename: 'game-1.0Bp1.html', version: '1.0Bp1', type: 'beta_preview', category: 'preview' }
+      // Boş - Sunucudan versiyonlar yüklenecek
     ];
 
     /**
@@ -1383,38 +1374,28 @@
       const officialVersions = allVersions.filter(v => v.category === 'final' || v.type === 'release' || v.type === 'indev' || v.type === 'alpha' || v.type === 'beta');
       const previewVersions = allVersions.filter(v => v.category === 'preview' || v.type === 'preview' || v.type === 'indev_preview' || v.type === 'alpha_preview' || v.type === 'beta_preview');
 
-      // Official group
+      // Official versions (no group header, just options)
       if (officialVersions.length > 0) {
-        const officialGroup = document.createElement('optgroup');
-        officialGroup.label = '📦 Official Releases';
-
         officialVersions.forEach(ver => {
           const option = document.createElement('option');
           option.value = ver.filename;
           option.setAttribute('data-type', ver.type || 'release');
           option.setAttribute('data-category', 'final');
           option.textContent = parseVersionLabel(ver.filename, ver.version, ver.type);
-          officialGroup.appendChild(option);
+          dropdown.appendChild(option);
         });
-
-        dropdown.appendChild(officialGroup);
       }
 
-      // Preview group
+      // Preview versions (no group header, just options)
       if (previewVersions.length > 0) {
-        const previewGroup = document.createElement('optgroup');
-        previewGroup.label = '🔮 Preview Builds';
-
         previewVersions.forEach(ver => {
           const option = document.createElement('option');
           option.value = ver.filename;
           option.setAttribute('data-type', ver.type || 'preview');
           option.setAttribute('data-category', 'preview');
           option.textContent = parseVersionLabel(ver.filename, ver.version, ver.type);
-          previewGroup.appendChild(option);
+          dropdown.appendChild(option);
         });
-
-        dropdown.appendChild(previewGroup);
       }
 
       if (officialVersions.length === 0 && previewVersions.length === 0) {
@@ -1941,7 +1922,7 @@
           }
 
           const category = option.getAttribute('data-category');
-          if (game === 'legends' && category === 'official') {
+          if (game === 'legends' && category === 'final') {
             option.style.display = '';
             visibleCount++;
           } else if (game === 'preview' && category === 'preview') {
