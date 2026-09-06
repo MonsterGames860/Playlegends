@@ -16,6 +16,9 @@
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
   
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  
   <style>
     /* ============= GLOBAL RESET & VARIABLES ============= */
     * {
@@ -428,10 +431,10 @@
 
     .version-select {
       padding: 10px 14px;
-      background: rgba(26, 30, 46, 0.8);
+      background: #000000;
       border: 1px solid var(--border-color);
       border-radius: 4px;
-      color: var(--text-primary);
+      color: #ffffff;
       font-size: 12px;
       font-weight: 500;
       cursor: pointer;
@@ -440,15 +443,27 @@
     }
 
     .version-select:hover {
-      background: rgba(58, 134, 255, 0.1);
+      background: #000000;
       border-color: var(--neon-blue);
+      color: var(--neon-blue);
     }
 
     .version-select:focus {
       outline: none;
-      background: rgba(58, 134, 255, 0.15);
+      background: #000000;
       border-color: var(--neon-blue);
       box-shadow: 0 0 12px rgba(58, 134, 255, 0.3);
+      color: var(--neon-blue);
+    }
+
+    .version-select option {
+      background: #000000;
+      color: #ffffff;
+    }
+
+    .version-select option:hover {
+      background: #1a1a1a;
+      color: var(--neon-blue);
     }
 
     /* --- News/Content Section --- */
@@ -1132,6 +1147,7 @@
     // Index.html ile aynı Firebase project kullan (play-legends)
     const firebaseConfig = {
       apiKey: "AIzaSyAG6FsNjMgIXIGQmmmHC6GWjWuzNVDq5KM",
+      authDomain: "play-legends.firebaseapp.com",
       projectId: "play-legends",
       databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
     };
@@ -1237,7 +1253,156 @@
       }
     };
 
-    // ============= CONSTANTS & CONFIG =============
+    // ============= STATIC FALLBACK VERSIONS =============
+    const STATIC_AVAILABLE_VERSIONS = [
+      // ANA SÜRÜMLER
+      { filename: 'game-1.9.0.html', version: '1.9.0', type: 'release', category: 'final' },
+      { filename: 'game-b-5.3.2.html', version: '5.3.2', type: 'beta', category: 'final' },
+      { filename: 'game-a-1.0.2.html', version: '1.0.2', type: 'alpha', category: 'final' },
+      { filename: 'game-i-1.6.2.html', version: '1.6.2', type: 'indev', category: 'final' },
+      // PREVIEW SÜRÜMLER
+      { filename: 'game-1.0p1.html', version: '1.0p1', type: 'preview', category: 'preview' },
+      { filename: 'game-1.0Ip1.html', version: '1.0Ip1', type: 'indev_preview', category: 'preview' },
+      { filename: 'game-1.0Ap1.html', version: '1.0Ap1', type: 'alpha_preview', category: 'preview' },
+      { filename: 'game-1.0Bp1.html', version: '1.0Bp1', type: 'beta_preview', category: 'preview' }
+    ];
+
+    /**
+     * Versiyonu kategoriye ayır (final veya preview)
+     */
+    function getVersionCategory(type) {
+      if (['indev_preview', 'beta_preview', 'alpha_preview', 'preview'].includes(type)) {
+        return 'preview';
+      }
+      return 'final';
+    }
+
+    /**
+     * Dinamik versiyon etiketi oluştur
+     */
+    function parseVersionLabel(filename, version, type) {
+      // ANA SÜRÜMLER (FINAL KATEGORISI)
+      if (type === 'release') {
+        return `Version ${version}`;
+      }
+      if (type === 'indev') {
+        return `Version ${version} (Indev)`;
+      }
+      if (type === 'alpha') {
+        return `Version ${version} (Alpha)`;
+      }
+      if (type === 'beta') {
+        return `Version ${version} (Beta)`;
+      }
+
+      // PREVIEW SÜRÜMLER (PREVIEW KATEGORISI)
+      if (type === 'indev_preview' || /Ip\d/i.test(version)) {
+        return `I-Preview ${version}`;
+      }
+      if (type === 'beta_preview' || /Bp\d/i.test(version)) {
+        return `B-Preview ${version}`;
+      }
+      if (type === 'alpha_preview' || /Ap\d/i.test(version)) {
+        return `A-Preview ${version}`;
+      }
+      if (type === 'preview' || /p\d/i.test(version)) {
+        return `Preview ${version}`;
+      }
+
+      return `${version}`;
+    }
+
+    /**
+     * /versions API'sinden versiyon listesini çek
+     */
+    async function updateVersionDropdown() {
+      try {
+        console.log('📡 /versions endpoint\'inden versiyonlar çekiliyor...');
+        const response = await fetch('/versions', {
+          method: 'GET',
+          headers: {
+            'Accept': 'application/json'
+          }
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}`);
+        }
+
+        const data = await response.json();
+        const versions = data.versions || data || [];
+
+        console.log(`✅ ${versions.length} versiyon sunucudan yüklendi`);
+        populateVersionDropdown(versions);
+      } catch (error) {
+        console.warn(`⚠️ /versions çekilemedi: ${error.message}`);
+        console.log('📦 Yedek versiyon listesi kullanılıyor...');
+        populateVersionDropdown(STATIC_AVAILABLE_VERSIONS);
+      }
+    }
+
+    /**
+     * Dropdown'ı kategorilere göre doldur
+     */
+    function populateVersionDropdown(allVersions = []) {
+      const dropdown = document.getElementById('versionSelect');
+      
+      if (!dropdown) {
+        console.error('❌ #versionSelect element bulunamadı');
+        return;
+      }
+
+      dropdown.innerHTML = '';
+
+      if (!allVersions || allVersions.length === 0) {
+        const option = document.createElement('option');
+        option.value = '';
+        option.textContent = '⚠️ Versiyon bulunamadı';
+        dropdown.appendChild(option);
+        return;
+      }
+
+      const officialVersions = allVersions.filter(v => v.category === 'final');
+      
+      if (officialVersions.length > 0) {
+        const officialGroup = document.createElement('optgroup');
+        officialGroup.label = '📦 Official Releases';
+
+        officialVersions.forEach(ver => {
+          const option = document.createElement('option');
+          option.value = ver.filename;
+          option.setAttribute('data-type', ver.type);
+          option.setAttribute('data-category', 'final');
+          option.textContent = parseVersionLabel(ver.filename, ver.version, ver.type);
+          officialGroup.appendChild(option);
+        });
+
+        dropdown.appendChild(officialGroup);
+      }
+
+      const previewVersions = allVersions.filter(v => v.category === 'preview');
+      
+      if (previewVersions.length > 0) {
+        const previewGroup = document.createElement('optgroup');
+        previewGroup.label = '🔮 Preview Builds';
+
+        previewVersions.forEach(ver => {
+          const option = document.createElement('option');
+          option.value = ver.filename;
+          option.setAttribute('data-type', ver.type);
+          option.setAttribute('data-category', 'preview');
+          option.textContent = parseVersionLabel(ver.filename, ver.version, ver.type);
+          previewGroup.appendChild(option);
+        });
+
+        dropdown.appendChild(previewGroup);
+      }
+
+      console.log(`✅ Dropdown dolduruldu: ${dropdown.options.length} seçenek`);
+    }
+
+    
+        // ============= CONSTANTS & CONFIG =============
     const BANNED_USERNAMES = [
       'admin', 'moderator', 'system', 'user', 'test', 'root',
       'nobody', 'guest', 'undefined', 'null', 'player', 'operator'
@@ -1263,8 +1428,7 @@
       // Preview Versions
       preview: [
         { regex: /^game-(\d+\.\d+)([VIAB])p(\d+)\.html$/i, type: 'preview' },
-        { regex: /^game-(\d+\.\d+)p(\d+)\.html$/i, type: 'preview' },
-        { regex: /^gameexp\.html$/i, type: 'preview', version: '0.1.0p1' }
+        { regex: /^game-(\d+\.\d+)p(\d+)\.html$/i, type: 'preview' }
       ]
     };
 
@@ -1358,47 +1522,12 @@
       return patchB - patchA;
     }
 
+
+
     /**
-     * Update version dropdown from scanned versions
+     * Load custom versions from localStorage
      */
-    async function updateVersionDropdown() {
-      try {
-        const response = await fetch('./api/versions');
-        if (!response.ok) throw new Error('Failed to fetch versions');
-        
-        const versions = await response.json();
-        const dropdown = document.getElementById('versionSelect');
-        const newVersionSelect = document.getElementById('newVersionSelect');
-        
-        // Clear existing options
-        dropdown.innerHTML = '';
-        newVersionSelect.innerHTML = '<option value="">Select a version...</option>';
-        
-        if (versions.length === 0) {
-          dropdown.innerHTML = '<option value="">No versions available</option>';
-          return;
-        }
-        
-        // Sort versions
-        versions.sort((a, b) => compareVersions(a.version, b.version));
-        
-        // Add versions to dropdowns
-        versions.forEach(v => {
-          const option1 = document.createElement('option');
-          option1.value = v.filename;
-          option1.textContent = `Version: ${v.version}${v.type === 'preview' ? ' (Preview)' : ''}`;
-          dropdown.appendChild(option1);
-          
-          const option2 = document.createElement('option');
-          option2.value = v.filename;
-          option2.textContent = `Version: ${v.version}${v.type === 'preview' ? ' (Preview)' : ''}`;
-          newVersionSelect.appendChild(option2);
-        });
-      } catch (error) {
-        console.error('Error updating versions:', error);
-        document.getElementById('versionSelect').innerHTML = '<option value="">No versions available</option>';
-      }
-    }
+
 
     /**
      * Load and display news from localStorage
@@ -1644,7 +1773,27 @@
         })
         .catch((error) => {
           console.error('Email Login Error:', error);
-          alert('Login failed. Wrong email or password.');
+          
+          // Firebase error codes
+          switch(error.code) {
+            case 'auth/user-not-found':
+              alert('Email not found. Please sign up first.');
+              break;
+            case 'auth/wrong-password':
+              alert('Wrong password. Please try again.');
+              break;
+            case 'auth/invalid-email':
+              alert('Invalid email address.');
+              break;
+            case 'auth/user-disabled':
+              alert('This account has been disabled.');
+              break;
+            case 'auth/network-request-failed':
+              alert('Network error. Check your internet connection.');
+              break;
+            default:
+              alert('Login failed: ' + error.message);
+          }
         });
     });
 
@@ -1733,7 +1882,7 @@
     // ============= GAME SELECTION & BANNER LOGIC =============
 
     /**
-     * Game tab selection
+     * Game tab selection with filtering
      */
     document.querySelectorAll('.game-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -1743,6 +1892,7 @@
         const game = tab.getAttribute('data-game');
         const bannerFile = tab.getAttribute('data-banner');
         const bannerSection = document.getElementById('bannerSection');
+        const dropdown = document.getElementById('versionSelect');
 
         if (game === 'legends') {
           document.getElementById('bannerTitle').textContent = 'Legends';
@@ -1752,8 +1902,39 @@
           document.getElementById('bannerDesc').textContent = 'Test upcoming features';
         }
 
-        // Update banner background (without assets/)
+        // Update banner background
         bannerSection.style.backgroundImage = `linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
+
+        // ===== TAB FILTERING =====
+        let visibleCount = 0;
+        Array.from(dropdown.options).forEach(option => {
+          if (option.value === '') {
+            option.style.display = 'none';
+            return;
+          }
+
+          const category = option.getAttribute('data-category');
+          if (game === 'legends' && category === 'official') {
+            option.style.display = '';
+            visibleCount++;
+          } else if (game === 'preview' && category === 'preview') {
+            option.style.display = '';
+            visibleCount++;
+          } else {
+            option.style.display = 'none';
+          }
+        });
+
+        // Auto-select first visible option
+        let selected = false;
+        Array.from(dropdown.options).forEach(option => {
+          if (!selected && option.style.display !== 'none' && option.value !== '') {
+            dropdown.value = option.value;
+            selected = true;
+          }
+        });
+
+        console.log(`✅ Filtered dropdown: ${visibleCount} versions visible for ${game}`);
       });
     });
 

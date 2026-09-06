@@ -4,6 +4,19 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Legends Indev v1.6.2 - Perlin World</title>
+<link rel="manifest" href="./pe-final-manifest.json">
+<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
+<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
+<meta name="theme-color" content="#0b0c10">
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
+
+<!-- Google Sign-In -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
 <!-- [MODÜLER DİL MİMARİSİ] Aşağıdaki JS bloğu, projedeki ayrı language.js
      dosyasının BİREBİR içeriğidir. Kod hâlâ modüler bir yapı olarak
      (window.LegendsLanguage API'si + window.langData) organize edilmiştir;
@@ -17410,5 +17423,36 @@ animate();
   setTimeout(applyPublishedVersion,1200);
 })();
 </script>
+
+<!-- Firebase & Google Sign-In Initialization -->
+<script>
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyAG6FsNjMgIXIGQmmmHC6GWjWuzNVDq5KM",
+    authDomain: "play-legends.firebaseapp.com",
+    projectId: "play-legends",
+    databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
+  };
+
+  // Firebase Initialize
+  if (typeof firebase !== 'undefined') {
+    try {
+      firebase.initializeApp(firebaseConfig);
+      console.log('✅ Firebase initialized in game');
+    } catch (err) {
+      console.warn('Firebase already initialized:', err);
+    }
+  }
+
+  // Google Sign-In Button (Show only if not logged in)
+  window.addEventListener('load', function() {
+    const gameUser = localStorage.getItem('gameUser');
+    if (!gameUser && typeof google !== 'undefined') {
+      // Opsiyonal: Login butonunu oyunun üstüne eklemek isterseniz
+      console.log('Google Sign-In ready. User can login from launcher.');
+    }
+  });
+</script>
+
 </body>
 </html>
