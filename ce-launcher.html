@@ -48,6 +48,8 @@
       // Update bildirimini göster
       let updateShown = false;
       function showUpdateNotification() {
+        // Zaten bannerımız varsa çıkış yap
+        if (document.getElementById('update-banner')) return;
         if (updateShown) return;
         updateShown = true;
         
@@ -2856,7 +2858,9 @@
       const bannerSection = document.querySelector('.banner-section');
       if (!bannerSection) return;
       
+      // İçeriği temizle
       bannerSection.innerHTML = '';
+      bannerSection.style.position = 'relative';
       
       const container = document.createElement('div');
       container.style.cssText = `
@@ -2873,7 +2877,8 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        object-position: center;
         opacity: 0.7;
         filter: hue-rotate(0deg) saturate(1.5);
         animation: glitch 0.3s infinite;
@@ -2886,7 +2891,8 @@
         position: absolute;
         width: 100%;
         height: 100%;
-        object-fit: cover;
+        object-fit: contain;
+        object-position: center;
         opacity: 0.5;
         mix-blend-mode: screen;
         filter: hue-rotate(330deg) saturate(2);
@@ -3111,15 +3117,16 @@
       const data = versionData[gameKey];
       if (!data) return;
 
-      // Update banner with logo overlay
+      // BANNER SECTIONI GÜNCELLE
       const bannerSection = document.querySelector('.banner-section');
       if (bannerSection) {
         bannerSection.innerHTML = '';
         bannerSection.style.position = 'relative';
         
         if (gameKey === 'ssss') {
+          // SSSS için özel banner
           showSSSSBanner();
-          // SSSS için exe.gif logosunu ekle (sol alt köşe)
+          // exe.gif logosunu overlay olarak ekle
           const ssssLogo = document.createElement('img');
           ssssLogo.src = './exe.gif';
           ssssLogo.style.cssText = `
@@ -3135,43 +3142,39 @@
           ssssLogo.onerror = () => console.warn('⚠️ exe.gif not found');
           bannerSection.appendChild(ssssLogo);
         } else {
+          // Normal banner (Legends veya Legends Preview)
           const bannerImg = document.createElement('img');
           bannerImg.src = data.banner;
           bannerImg.style.cssText = `
             width: 100%;
             height: 100%;
-            object-fit: cover;
+            object-fit: contain;
+            object-position: center;
+            background: linear-gradient(135deg, rgba(157, 78, 221, 0.1), rgba(0, 217, 255, 0.1));
+            padding: 8px;
             border-radius: 8px;
           `;
+          bannerImg.onerror = () => console.warn(`⚠️ Banner not found: ${data.banner}`);
           bannerSection.appendChild(bannerImg);
           
-          // Logo dosyasını belirle
+          // Logo dosyasını belirle ve ekle
           let logoFile = '';
-          let logoText = '';
-          
           if (gameKey === 'legends') {
             logoFile = './legends.png';
-            logoText = 'LEGENDS';
           } else if (gameKey === 'legends-preview') {
             logoFile = './preview.png';
-            logoText = 'PREVIEW';
           }
           
-          // Logo overlay container oluştur (sol alt köşe)
-          const logoOverlay = document.createElement('div');
-          logoOverlay.style.cssText = `
-            position: absolute;
-            bottom: 16px;
-            left: 16px;
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            gap: 8px;
-            z-index: 10;
-          `;
-          
-          // Logo görüntüsü (genişlik artırıldı, yükseklik aynı)
+          // Logo overlay container
           if (logoFile) {
+            const logoOverlay = document.createElement('div');
+            logoOverlay.style.cssText = `
+              position: absolute;
+              bottom: 16px;
+              left: 16px;
+              z-index: 10;
+            `;
+            
             const logoImg = document.createElement('img');
             logoImg.src = logoFile;
             logoImg.style.cssText = `
@@ -3179,21 +3182,21 @@
               height: 80px;
               object-fit: contain;
               filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5));
+              display: block;
             `;
-            logoImg.onerror = () => console.warn(`⚠️ ${logoFile} not found`);
+            logoImg.onerror = () => console.warn(`⚠️ Logo not found: ${logoFile}`);
             logoOverlay.appendChild(logoImg);
+            bannerSection.appendChild(logoOverlay);
           }
-          
-          bannerSection.appendChild(logoOverlay);
         }
       }
 
-      // Update version select
+      // SÜRÜM SEÇİMİ GÜNCELLE
       const versionSelect = document.getElementById('versionSelect');
       if (versionSelect) {
         versionSelect.innerHTML = '';
+        versionSelect.style.borderColor = '';
         
-        // Eğer sürüm yoksa uyarı göster
         if (!data.versions || data.versions.length === 0) {
           const errorOption = document.createElement('option');
           errorOption.value = '';
@@ -3217,14 +3220,14 @@
         }
       }
 
-      // Update news section with tab-specific content
+      // NEWS SECTION GÜNCELLE
       const newsSection = document.querySelector('.news-updates');
       if (newsSection) {
         const title = newsSection.querySelector('h3');
         if (title) {
-          // Her tab'ın kendi başlığı
+          title.textContent = data.newsTitle;
+          // SSSS için glitch efekti, diğerleri için normal
           if (gameKey === 'ssss') {
-            title.textContent = data.newsTitle;
             title.style.cssText = `
               color: #ff0000;
               text-shadow: 0 0 10px #ff0000, 0 0 20px #000;
@@ -3232,26 +3235,28 @@
               font-weight: bold;
             `;
           } else {
-            title.textContent = data.newsTitle;
-            title.style.cssText = '';
+            title.style.cssText = 'color: #fff; font-weight: 600;';
           }
         }
 
-        // Her tab'ın kendi news listesi
+        // News listesini güncelle
         const newsList = newsSection.querySelector('.news-list');
         if (newsList) {
           newsList.innerHTML = '';
-          data.defaultNews.forEach(item => {
-            const newsItem = document.createElement('div');
-            newsItem.className = 'news-item';
-            newsItem.innerHTML = `
-              <div class="news-card" style="padding: 12px; border-left: 3px solid #00d9ff; margin-bottom: 8px;">
-                <div style="font-weight: 600;">${item.title}</div>
-                <div style="font-size: 0.85em; color: #888; margin-top: 4px;">${item.date}</div>
-              </div>
-            `;
-            newsList.appendChild(newsItem);
-          });
+          
+          if (data.defaultNews && data.defaultNews.length > 0) {
+            data.defaultNews.forEach(item => {
+              const newsItem = document.createElement('div');
+              newsItem.className = 'news-item';
+              newsItem.innerHTML = `
+                <div class="news-card" style="padding: 12px; border-left: 3px solid ${gameKey === 'ssss' ? '#ff0000' : '#00d9ff'}; margin-bottom: 8px; background: rgba(0,0,0,0.3); border-radius: 4px;">
+                  <div style="font-weight: 600;">${item.title}</div>
+                  <div style="font-size: 0.85em; color: #888; margin-top: 4px;">${item.date}</div>
+                </div>
+              `;
+              newsList.appendChild(newsItem);
+            });
+          }
         }
       }
     }
