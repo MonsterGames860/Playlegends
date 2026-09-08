@@ -19,6 +19,113 @@
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
+  <!-- Service Worker Registration -->
+  <script>
+    // Service Worker Kayıt ve Update Mekanizması (sw2.js)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw2.js').then(registration => {
+          console.log('✅ Service Worker (sw2) registered');
+          
+          // Güncellemeyi kontrol et
+          setInterval(() => {
+            registration.update();
+          }, 60000); // Her 60 saniyede kontrol et
+          
+          // Update tespit edildiğinde
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Kullanıcıya güncelleme olduğunu bildir
+                showUpdateNotification();
+              }
+            });
+          });
+        }).catch(error => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+      });
+      
+      // Update bildirimini göster
+      let updateShown = false;
+      function showUpdateNotification() {
+        if (updateShown) return;
+        updateShown = true;
+        
+        const updateBanner = document.createElement('div');
+        updateBanner.id = 'update-banner';
+        updateBanner.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(90deg, #9d4edd 0%, #00d9ff 100%);
+          color: #fff;
+          padding: 12px 20px;
+          text-align: center;
+          font-weight: 600;
+          z-index: 9998;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
+          animation: slideDown 0.3s ease-out;
+        `;
+        updateBanner.innerHTML = `
+          <span>🎮 Yeni güncelleme mevcut! Uygulamayı yenile.</span>
+          <button id="update-btn" style="
+            background: #0b0c10;
+            color: #00d9ff;
+            border: 1px solid #00d9ff;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+          ">Güncelle</button>
+        `;
+        
+        // Animate girişi
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes slideDown {
+            from {
+              transform: translateY(-100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateY(0);
+              opacity: 1;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+        document.body.insertBefore(updateBanner, document.body.firstChild);
+        
+        // Güncelle butonu
+        document.getElementById('update-btn').addEventListener('click', () => {
+          // Service Worker'a güncelle mesajı gönder
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+              type: 'SKIP_WAITING'
+            });
+          }
+          
+          // Sayfayı yenile
+          window.location.reload();
+        });
+      }
+      
+      // Yeni Service Worker'ın kontrolü ele aldığında sayfayı yenile
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // Sayfa otomatik yenilenir
+        window.location.reload();
+      });
+    }
+  </script>
+  
   <style>
     /* ============= GLOBAL RESET & VARIABLES ============= */
     * {
@@ -985,6 +1092,62 @@
         opacity: 0;
         transform: scaleY(1);
       }
+    }
+
+    /* 12-Renkli Play Button Glitch Efekti */
+    @keyframes play-btn-glitch {
+      0% {
+        text-shadow: 
+          -2px 0 #FF0000,
+          2px 0 #00FF00,
+          0 -2px #0000FF,
+          0 2px #FFFF00,
+          -3px -3px #FF00FF,
+          3px 3px #00FFFF,
+          -1px 1px #FF6600,
+          1px -1px #00FF99,
+          -2px -2px #FF0099,
+          2px 2px #00CCFF,
+          -3px 0 #FFCC00,
+          3px 0 #FF0066;
+        filter: brightness(1.2);
+      }
+      50% {
+        text-shadow: 
+          2px 0 #0000FF,
+          -2px 0 #00FF00,
+          -2px 2px #FF0000,
+          2px -2px #00FFFF,
+          0 -3px #FFFF00,
+          0 3px #FF00FF,
+          3px 1px #FF6600,
+          -3px -1px #00FF99,
+          1px 2px #FF0099,
+          -1px -2px #00CCFF,
+          0 3px #FFCC00,
+          0 -3px #FF0066;
+        filter: brightness(1.3);
+      }
+      100% {
+        text-shadow: 
+          -2px 0 #FF0000,
+          2px 0 #00FF00,
+          0 -2px #0000FF,
+          0 2px #FFFF00,
+          -3px -3px #FF00FF,
+          3px 3px #00FFFF,
+          -1px 1px #FF6600,
+          1px -1px #00FF99,
+          -2px -2px #FF0099,
+          2px 2px #00CCFF,
+          -3px 0 #FFCC00,
+          3px 0 #FF0066;
+        filter: brightness(1.2);
+      }
+    }
+
+    .play-btn.ssss-glitch {
+      animation: play-btn-glitch 0.15s infinite !important;
     }
 
     .ssss-tab {
@@ -2572,6 +2735,8 @@
     }
 
     // ============= LEGENDS SSSS TAB SYSTEM =============
+    let ssssNameInterval = null;
+    
     function generateRandomSSSSName() {
       // Tüm karakterler random olacak
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:",.<>?/~`§█▒░╝╚╔╩';
@@ -2581,6 +2746,22 @@
         ssss += chars[Math.floor(Math.random() * chars.length)];
       }
       return `Legends ${ssss}`;
+    }
+    
+    function startSSSSNameJumble() {
+      const ssssLabel = document.querySelector('.ssss-label');
+      if (!ssssLabel) return;
+      
+      ssssNameInterval = setInterval(() => {
+        ssssLabel.textContent = generateRandomSSSSName();
+      }, 100);
+    }
+    
+    function stopSSSSNameJumble() {
+      if (ssssNameInterval) {
+        clearInterval(ssssNameInterval);
+        ssssNameInterval = null;
+      }
     }
 
     function addLegendsSSSVersion() {
@@ -2598,7 +2779,7 @@
       ssssTab.className = 'game-tab ssss-tab';
       ssssTab.setAttribute('data-game', 'ssss');
       ssssTab.setAttribute('data-banner', 'ssss-banner');
-      ssssTab.setAttribute('data-icon', '/final-icon.png');
+      ssssTab.setAttribute('data-icon', './exe-icon.gif');
       ssssTab.style.cssText = `
         background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(139, 0, 0, 0.3)) !important;
         border-color: #ff0000 !important;
@@ -2607,14 +2788,14 @@
       
       ssssTab.innerHTML = `
         <div class="game-tab-icon ssss-icon">
-          <img src="./final-icon.png" style="
+          <img src="./exe-icon.gif" style="
             width: 100%; 
             height: 100%; 
             filter: saturate(0) brightness(0.7) hue-rotate(0deg) drop-shadow(0 0 5px #ff0000);
             animation: icon-glitch-shimmer 0.3s infinite;
           " alt="SSSS">
         </div>
-        <span class="game-tab-label ssss-label" style="animation: glitch 0.4s infinite; color: #ff0000;">${generateRandomSSSSName()}</span>
+        <span class="game-tab-label ssss-label" style="animation: glitch 0.4s infinite; color: #ff0000;">Legends SSSS</span>
       `;
       
       // Add to game-tabs
@@ -2635,12 +2816,10 @@
         });
         ssssTab.classList.add('active');
         
-        // Update play button styling
+        // Update play button styling with glitch
         const playBtn = document.getElementById('playBtn');
         if (playBtn) {
-          playBtn.style.background = '#ff0000';
-          playBtn.style.boxShadow = '0 0 20px #ff0000';
-          playBtn.style.animation = 'ssss-shake 0.1s infinite';
+          playBtn.classList.add('ssss-glitch');
         }
         
         // Show SSSS banner
@@ -2654,6 +2833,9 @@
             versionSelect.value = 'gameexe.html';
           }
         }
+        
+        // Start jumble efekti
+        startSSSSNameJumble();
       });
       
       // Add click handlers to other tabs to reset styling
@@ -2661,14 +2843,14 @@
         tab.addEventListener('click', () => {
           const playBtn = document.getElementById('playBtn');
           if (playBtn) {
-            playBtn.style.background = '';
-            playBtn.style.boxShadow = '';
-            playBtn.style.animation = '';
+            playBtn.classList.remove('ssss-glitch');
           }
+          // Stop jumble efekti
+          stopSSSSNameJumble();
         });
       });
       
-      alert('🔴 Something has been unlocked...');
+      // Alert kaldırıldı - direkt banner gösterilecek
     }
 
     function showSSSSBanner() {
@@ -2746,29 +2928,400 @@
       }
     }
 
+    // ============= SÜRÜM VERİLERİ (JSON'DAN YÜKLENECEK) =============
+    let versionData = {
+      'legends': {
+        banner: './final-banner.png',
+        versions: [],
+        newsTitle: '📰 NEWS & UPDATES - LEGENDS',
+        defaultNews: [
+          { title: '🌴 New Island Update', date: '2026-09-08' },
+          { title: '🐛 Bug Fixes & Improvements', date: '2026-09-07' },
+          { title: '⚡ Performance Optimization', date: '2026-09-06' }
+        ]
+      },
+      'legends-preview': {
+        banner: './preview-banner.png',
+        versions: [],
+        newsTitle: '📰 NEWS & UPDATES - PREVIEW',
+        defaultNews: [
+          { title: '🧪 New Weather System Testing', date: '2026-09-08' },
+          { title: '🎯 Community Features Early Access', date: '2026-09-07' },
+          { title: '📝 Your Feedback Shapes Development', date: '2026-09-06' }
+        ]
+      },
+      'ssss': {
+        banner: 'ssss',
+        versions: [
+          { value: 'gameexe.html', label: 'Version 0.0.0 (Forgotten)' }
+        ],
+        newsTitle: '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️',
+        defaultNews: [
+          { title: '⚠️ CORRUPTED DATA DETECTED ⚠️', date: '????-??-??' },
+          { title: '𝓔𝓷𝓽𝓮𝓻 𝓪𝓽 𝔂𝓸𝓾𝓻 𝓸𝔀𝓷 𝓻𝓲𝓼𝓴...', date: '????-??-??' },
+          { title: '✞ ABANDONED ✞', date: '????-??-??' }
+        ]
+      }
+    };
+
+    // ============= SÜRÜMLERI JSON'DAN YÜKLE =============
+    async function loadVersionsFromJSON() {
+      try {
+        const response = await fetch('./versions.json');
+        
+        // Dosya bulunamadıysa hata
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: Dosya bulunamadı`);
+        }
+        
+        const data = await response.json();
+        
+        // Veri kontrolü
+        if (!data.versions || !Array.isArray(data.versions)) {
+          throw new Error('Geçersiz versions.json formatı');
+        }
+        
+        // Sürümleri kategorilere göre ayır
+        const finalVersions = data.versions.filter(v => v.category === 'final');
+        const previewVersions = data.versions.filter(v => v.category === 'preview');
+        
+        // Legends (final) sürümleri
+        versionData.legends.versions = finalVersions.map(v => ({
+          value: v.filename,
+          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+        }));
+        
+        // Legends Preview sürümleri
+        versionData['legends-preview'].versions = previewVersions.map(v => ({
+          value: v.filename,
+          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+        }));
+        
+        console.log('✅ Versions loaded from JSON:', versionData);
+        return true;
+      } catch (error) {
+        console.error('❌ Error loading versions.json:', error);
+        
+        // Hata göster
+        showVersionLoadError(error.message);
+        
+        // Fallback: localStorage'dan yükle
+        return loadVersionsFromLocalStorage();
+      }
+    }
+
+    // ============= LOCALSTORAGE'DAN SÜRÜMLERI YÜKLE (FALLBACK) =============
+    function loadVersionsFromLocalStorage() {
+      try {
+        const STORAGE_KEY = 'legends_versions';
+        const versionsData = localStorage.getItem(STORAGE_KEY);
+        
+        if (!versionsData) {
+          console.warn('⚠️ No versions in localStorage either');
+          return false;
+        }
+        
+        const versions = JSON.parse(versionsData);
+        
+        // Sürümleri kategorilere ayır
+        const finalVersions = versions.filter(v => v.category === 'final');
+        const previewVersions = versions.filter(v => v.category === 'preview');
+        
+        versionData.legends.versions = finalVersions.map(v => ({
+          value: v.filename,
+          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+        }));
+        
+        versionData['legends-preview'].versions = previewVersions.map(v => ({
+          value: v.filename,
+          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+        }));
+        
+        console.log('✅ Versions loaded from localStorage');
+        return true;
+      } catch (error) {
+        console.error('❌ localStorage error:', error);
+        return false;
+      }
+    }
+
+    // ============= SÜRÜM YÜKLEMESİ HATASI =============
+    function showVersionLoadError(errorMessage) {
+      // Kullanıcıya hata göstermek için banner oluştur
+      const errorBanner = document.createElement('div');
+      errorBanner.id = 'version-load-error';
+      errorBanner.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(90deg, #ff006e 0%, #ff4757 100%);
+        color: #fff;
+        padding: 12px 20px;
+        text-align: center;
+        font-weight: 600;
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+      `;
+      errorBanner.innerHTML = `
+        <span>⚠️ Sürüm yönetimi dosyası yüklenemedi. ${errorMessage}</span>
+        <button onclick="this.parentElement.remove()" style="
+          background: rgba(255,255,255,0.2);
+          border: 1px solid #fff;
+          color: #fff;
+          padding: 4px 12px;
+          border-radius: 4px;
+          cursor: pointer;
+        ">Kapat</button>
+      `;
+      
+      document.body.insertBefore(errorBanner, document.body.firstChild);
+      
+      // 5 saniye sonra otomatik kapat
+      setTimeout(() => {
+        const banner = document.getElementById('version-load-error');
+        if (banner) banner.remove();
+      }, 5000);
+    }
+
+    function updateGameContent(gameKey) {
+      const data = versionData[gameKey];
+      if (!data) return;
+
+      // Update banner with logo overlay
+      const bannerSection = document.querySelector('.banner-section');
+      if (bannerSection) {
+        bannerSection.innerHTML = '';
+        bannerSection.style.position = 'relative';
+        
+        if (gameKey === 'ssss') {
+          showSSSSBanner();
+          // SSSS için exe.gif logosunu ekle (sol alt köşe)
+          const ssssLogo = document.createElement('img');
+          ssssLogo.src = './exe.gif';
+          ssssLogo.style.cssText = `
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            width: 240px;
+            height: 80px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 10px #ff0000);
+            z-index: 10;
+          `;
+          ssssLogo.onerror = () => console.warn('⚠️ exe.gif not found');
+          bannerSection.appendChild(ssssLogo);
+        } else {
+          const bannerImg = document.createElement('img');
+          bannerImg.src = data.banner;
+          bannerImg.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+          `;
+          bannerSection.appendChild(bannerImg);
+          
+          // Logo dosyasını belirle
+          let logoFile = '';
+          let logoText = '';
+          
+          if (gameKey === 'legends') {
+            logoFile = './legends.png';
+            logoText = 'LEGENDS';
+          } else if (gameKey === 'legends-preview') {
+            logoFile = './preview.png';
+            logoText = 'PREVIEW';
+          }
+          
+          // Logo overlay container oluştur (sol alt köşe)
+          const logoOverlay = document.createElement('div');
+          logoOverlay.style.cssText = `
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+            z-index: 10;
+          `;
+          
+          // Logo görüntüsü (genişlik artırıldı, yükseklik aynı)
+          if (logoFile) {
+            const logoImg = document.createElement('img');
+            logoImg.src = logoFile;
+            logoImg.style.cssText = `
+              width: 240px;
+              height: 80px;
+              object-fit: contain;
+              filter: drop-shadow(0 0 8px rgba(157, 78, 221, 0.5));
+            `;
+            logoImg.onerror = () => console.warn(`⚠️ ${logoFile} not found`);
+            logoOverlay.appendChild(logoImg);
+          }
+          
+          bannerSection.appendChild(logoOverlay);
+        }
+      }
+
+      // Update version select
+      const versionSelect = document.getElementById('versionSelect');
+      if (versionSelect) {
+        versionSelect.innerHTML = '';
+        
+        // Eğer sürüm yoksa uyarı göster
+        if (!data.versions || data.versions.length === 0) {
+          const errorOption = document.createElement('option');
+          errorOption.value = '';
+          errorOption.textContent = '❌ Sürüm yüklenenemedi';
+          errorOption.disabled = true;
+          errorOption.selected = true;
+          versionSelect.appendChild(errorOption);
+          versionSelect.style.borderColor = '#ff006e';
+          return;
+        }
+        
+        data.versions.forEach(ver => {
+          const option = document.createElement('option');
+          option.value = ver.value;
+          option.textContent = ver.label;
+          versionSelect.appendChild(option);
+        });
+        
+        if (data.versions.length > 0) {
+          versionSelect.value = data.versions[0].value;
+        }
+      }
+
+      // Update news section with tab-specific content
+      const newsSection = document.querySelector('.news-updates');
+      if (newsSection) {
+        const title = newsSection.querySelector('h3');
+        if (title) {
+          // Her tab'ın kendi başlığı
+          if (gameKey === 'ssss') {
+            title.textContent = data.newsTitle;
+            title.style.cssText = `
+              color: #ff0000;
+              text-shadow: 0 0 10px #ff0000, 0 0 20px #000;
+              animation: glitch 0.3s infinite;
+              font-weight: bold;
+            `;
+          } else {
+            title.textContent = data.newsTitle;
+            title.style.cssText = '';
+          }
+        }
+
+        // Her tab'ın kendi news listesi
+        const newsList = newsSection.querySelector('.news-list');
+        if (newsList) {
+          newsList.innerHTML = '';
+          data.defaultNews.forEach(item => {
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            newsItem.innerHTML = `
+              <div class="news-card" style="padding: 12px; border-left: 3px solid #00d9ff; margin-bottom: 8px;">
+                <div style="font-weight: 600;">${item.title}</div>
+                <div style="font-size: 0.85em; color: #888; margin-top: 4px;">${item.date}</div>
+              </div>
+            `;
+            newsList.appendChild(newsItem);
+          });
+        }
+      }
+    }
+
+    // ============= GAME TAB HANDLERS =============
+    function setupGameTabHandlers() {
+      const gameTabs = document.querySelectorAll('.game-tab');
+      gameTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          // Remove active from all tabs
+          gameTabs.forEach((t) => t.classList.remove('active'));
+          // Add active to clicked tab
+          tab.classList.add('active');
+
+          // Get game key
+          const gameKey = tab.getAttribute('data-game');
+          
+          // Update content
+          updateGameContent(gameKey);
+
+          // SSSS için jumble efektini başlat
+          if (gameKey === 'ssss') {
+            startSSSSNameJumble();
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) {
+              playBtn.classList.add('ssss-glitch');
+            }
+          } else {
+            stopSSSSNameJumble();
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) {
+              playBtn.classList.remove('ssss-glitch');
+            }
+          }
+        });
+      });
+    }
+
     // Play game function
     function playGame() {
       const dropdown = document.getElementById('versionSelect');
       const selectedFile = dropdown.value;
+      
+      // Aktif tab'ı bul
+      const activeTab = document.querySelector('.game-tab.active');
+      const gameKey = activeTab ? activeTab.getAttribute('data-game') : 'legends';
 
       if (!selectedFile) {
-        alert('Please select a version first!');
+        alert('❌ Lütfen önce bir sürüm seçiniz!');
         return;
       }
 
-      // Easter egg version opens in new window
-      if (selectedFile === 'gameexe.html') {
-        window.open(selectedFile, '_blank');
-        return;
+      // Easter egg version (SSSS) ayrı PWA'da açılır
+      if (gameKey === 'ssss') {
+        if (selectedFile === 'gameexe.html') {
+          console.log('🔓 Opening SSSS Easter Egg...');
+          window.open(selectedFile, 'ssss_game', 'width=1200,height=800');
+          return;
+        }
       }
 
-      // Normal versions open in iframe
+      // Normal sürümler iframe'de açılır
       const gameOverlay = document.getElementById('gameOverlay');
-      if (!gameOverlay) return;
+      if (!gameOverlay) {
+        console.error('❌ Game overlay not found');
+        alert('❌ Oyun penceresi açılamadı!');
+        return;
+      }
 
       const gameFrame = document.getElementById('gameFrame');
-      gameFrame.src = './' + selectedFile;
-      gameOverlay.style.display = 'flex';
+      if (!gameFrame) {
+        console.error('❌ Game frame not found');
+        alert('❌ Oyun çerçevesi bulunamadı!');
+        return;
+      }
+      
+      // Dosyanın var olup olmadığını kontrol etmek için basit bir fetch
+      fetch('./' + selectedFile, { method: 'HEAD' })
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP ${response.status}`);
+          }
+          gameFrame.src = './' + selectedFile;
+          gameOverlay.style.display = 'flex';
+          console.log('✅ Game started:', selectedFile);
+        })
+        .catch(error => {
+          console.error('❌ File not found:', selectedFile, error);
+          alert(`❌ Oyun dosyası bulunamadı:\n${selectedFile}\n\nLütfen yöneticiye bildirin.`);
+        });
     }
 
     // Make functions global for debugging
@@ -2778,13 +3331,25 @@
     window.profileClickCount = () => profileClickCount;
 
     console.log('🎮 Easter egg system loaded. Type: window.unlockEasterEgg() to unlock');
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       const closeBtn = document.querySelector('.close-game-btn');
       if (closeBtn) {
         closeBtn.addEventListener('click', () => {
           const gameOverlay = document.getElementById('gameOverlay');
           if (gameOverlay) gameOverlay.style.display = 'none';
         });
+      }
+      
+      // JSON'dan sürümleri yükle
+      await loadVersionsFromJSON();
+      
+      // Setup game tab handlers
+      setupGameTabHandlers();
+      
+      // Initialize with first game
+      const firstTab = document.querySelector('.game-tab');
+      if (firstTab) {
+        firstTab.click();
       }
     });
 

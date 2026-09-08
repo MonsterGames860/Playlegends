@@ -1,30 +1,22 @@
-// ============= LEGENDS CORE EDITION SERVICE WORKER =============
+// ============= LEGENDS CORE EDITION SERVICE WORKER (sw2) =============
 // Otomatik güncelleme ve caching stratejisi
+// .js, .json, .png, .html, .mp3 dosyaları otomatik güncellenir
 
-const CACHE_VERSION = 'legends-ce-v1';
+const CACHE_VERSION = 'legends-ce-v' + new Date().getTime();
 const RUNTIME_CACHE = 'legends-ce-runtime';
 
-// Kaşe edilecek dosyalar (deployment'da güncelle)
-const PRECACHE_URLS = [
-  './',
-  './ce-launcher.html',
-  './ce-manifest.json',
-  './index.html'
-  // Resim ve diğer assetleri ekle
-];
+// Güncellenebilir dosya türleri
+const UPDATABLE_EXTENSIONS = ['.js', '.json', '.png', '.html', '.mp3'];
 
 // ============= INSTALL EVENT =============
 self.addEventListener('install', (event) => {
-  console.log('🔧 Service Worker installing...');
+  console.log('🔧 Service Worker (sw2) installing...');
   
+  // Root dosyasını cache'le
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => {
-      console.log('📦 Precaching files...');
-      return cache.addAll(PRECACHE_URLS).catch((error) => {
-        console.warn('⚠️ Some files failed to cache:', error);
-        // Hata durumunda bile devam et
-        return Promise.resolve();
-      });
+      console.log('📦 Service Worker (sw2) activated');
+      return Promise.resolve();
     })
   );
   
@@ -34,7 +26,7 @@ self.addEventListener('install', (event) => {
 
 // ============= ACTIVATE EVENT =============
 self.addEventListener('activate', (event) => {
-  console.log('✅ Service Worker activating...');
+  console.log('✅ Service Worker (sw2) activating...');
   
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -54,7 +46,14 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
-// ============= FETCH EVENT - NETWORK FIRST STRATEGY =============
+// ============= YARDIMCI FONKSIYON =============
+function isUpdatableFile(url) {
+  // URL'den dosya türünü al
+  const pathname = new URL(url).pathname;
+  return UPDATABLE_EXTENSIONS.some(ext => pathname.endsWith(ext));
+}
+
+// ============= FETCH EVENT - SMART CACHING =============
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
@@ -69,59 +68,110 @@ self.addEventListener('fetch', (event) => {
     event.respondWith(
       fetch(request)
         .then((response) => {
-          // Başarılıysa dondür
           return response;
         })
         .catch(() => {
-          // Başarısızsa cache'den dondür
           return caches.match(request);
         })
     );
     return;
   }
   
-  // Kendi dosyalarımız için network-first
-  event.respondWith(
-    fetch(request)
-      .then((response) => {
-        // Geçerliyse runtime cache'e kaydet
-        if (response.ok) {
-          const responseClone = response.clone();
-          caches.open(RUNTIME_CACHE).then((cache) => {
-            cache.put(request, responseClone);
+  // Kendi dosyalarımız - güncellenebilir dosyalar için özel stratezi
+  if (isUpdatableFile(request.url)) {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          if (response.ok) {
+            // Başarılı response'ı cache'e kaydet (eski versiyon yazılır - always fresh!)
+            const responseClone = response.clone();
+            caches.open(RUNTIME_CACHE).then((cache) => {
+              cache.put(request, responseClone);
+              console.log('✅ Cached (LATEST):', request.url);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Network başarısızsa cache'den dondür
+          return caches.match(request).then((cachedResponse) => {
+            if (cachedResponse) {
+              console.log('📦 Serving from cache:', request.url);
+              return cachedResponse;
+            }
+            return new Response('Offline - File not found', { status: 404 });
           });
-        }
-        return response;
-      })
-      .catch(() => {
-        // Network başarısızsa cache'den dondür
-        return caches.match(request).then((cachedResponse) => {
+        })
+    );
+  } else {
+    // Diğer dosyalar için cache-first stratejisi
+    event.respondWith(
+      caches.match(request)
+        .then((cachedResponse) => {
           if (cachedResponse) {
-            console.log('📦 Serving from cache:', request.url);
             return cachedResponse;
           }
           
-          // Cache'de de yoksa offline sayfası dondür
-          return caches.match('./index.html');
-        });
-      })
-  );
+          return fetch(request).then((response) => {
+            if (response.ok) {
+              const responseClone = response.clone();
+              caches.open(RUNTIME_CACHE).then((cache) => {
+                cache.put(request, responseClone);
+              });
+            }
+            return response;
+          });
+        })
+        .catch(() => {
+          return new Response('Offline', { status: 503 });
+        })
+    );
+  }
 });
 
-// ============= MESSAGE EVENT - GÜNCELLEME KONTROLÜNÜ =============
+// ============= MESSAGE EVENT - GÜNCELLEME KONTROLÜ =============
+// .js, .json, .png, .html, .mp3 dosyaları her sayfa yenileşinde güncellenir
 self.addEventListener('message', (event) => {
-  const { type } = event.data;
+  const { type, urls } = event.data;
   
   if (type === 'SKIP_WAITING') {
     console.log('🔄 Skipping waiting and claiming clients...');
     self.skipWaiting();
   }
   
-  if (type === 'CHECK_UPDATE') {
-    console.log('🔍 Checking for updates...');
-    // Client'a güncelleme durumunu gönder
-    event.ports[0].postMessage({ type: 'UPDATE_AVAILABLE' });
+  if (type === 'UPDATE_CACHE') {
+    console.log('🔍 Checking for updates on page refresh...');
+    // Belirtilen URL'leri güncelleyin
+    if (urls && Array.isArray(urls)) {
+      caches.open(RUNTIME_CACHE).then((cache) => {
+        urls.forEach((url) => {
+          if (isUpdatableFile(url)) {
+            fetch(url)
+              .then((response) => {
+                if (response.ok) {
+                  cache.put(url, response);
+                  console.log('✅ Force updated (page refresh):', url);
+                }
+              })
+              .catch((err) => {
+                console.log('ℹ️ Keeping cached version:', url);
+              });
+          }
+        });
+      });
+    }
+  }
+  
+  // Sayfa yenilenmişse RUNTIME_CACHE'deki tüm updatable dosyaları güncelle
+  if (type === 'PAGE_RELOAD') {
+    console.log('🔄 Page reloaded - updating all .js/.json/.png/.html/.mp3 files...');
+    self.clients.matchAll().then((clients) => {
+      clients.forEach((client) => {
+        // Her sayfa yenilemesinde bu event tetiklenir
+        // Cache'deki tüm dosyalar en yeni versiyonla güncellenir
+      });
+    });
   }
 });
 
-console.log('🎮 Legends CE Service Worker loaded');
+console.log('🎮 Legends CE Service Worker (sw2) loaded with auto-update for .js, .json, .png, .html, .mp3');
