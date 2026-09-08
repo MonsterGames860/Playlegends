@@ -19,113 +19,6 @@
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
-  <!-- Service Worker Registration -->
-  <script>
-    // Service Worker Kayıt ve Update Mekanizması
-    if ('serviceWorker' in navigator) {
-      window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').then(registration => {
-          console.log('✅ Service Worker registered');
-          
-          // Güncellemeyi kontrol et
-          setInterval(() => {
-            registration.update();
-          }, 60000); // Her 60 saniyede kontrol et
-          
-          // Update tespit edildiğinde
-          registration.addEventListener('updatefound', () => {
-            const newWorker = registration.installing;
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Kullanıcıya güncelleme olduğunu bildir
-                showUpdateNotification();
-              }
-            });
-          });
-        }).catch(error => {
-          console.error('❌ Service Worker registration failed:', error);
-        });
-      });
-      
-      // Update bildirimini göster
-      let updateShown = false;
-      function showUpdateNotification() {
-        if (updateShown) return;
-        updateShown = true;
-        
-        const updateBanner = document.createElement('div');
-        updateBanner.id = 'update-banner';
-        updateBanner.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          background: linear-gradient(90deg, #9d4edd 0%, #00d9ff 100%);
-          color: #fff;
-          padding: 12px 20px;
-          text-align: center;
-          font-weight: 600;
-          z-index: 9998;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
-          animation: slideDown 0.3s ease-out;
-        `;
-        updateBanner.innerHTML = `
-          <span>🎮 Yeni güncelleme mevcut! Uygulamayı yenile.</span>
-          <button id="update-btn" style="
-            background: #0b0c10;
-            color: #00d9ff;
-            border: 1px solid #00d9ff;
-            padding: 6px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-          ">Güncelle</button>
-        `;
-        
-        // Animate girişi
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes slideDown {
-            from {
-              transform: translateY(-100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateY(0);
-              opacity: 1;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-        document.body.insertBefore(updateBanner, document.body.firstChild);
-        
-        // Güncelle butonu
-        document.getElementById('update-btn').addEventListener('click', () => {
-          // Service Worker'a güncelle mesajı gönder
-          if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({
-              type: 'SKIP_WAITING'
-            });
-          }
-          
-          // Sayfayı yenile
-          window.location.reload();
-        });
-      }
-      
-      // Yeni Service Worker'ın kontrolü ele aldığında sayfayı yenile
-      navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Sayfa otomatik yenilenir
-        window.location.reload();
-      });
-    }
-  </script>
-  
   <style>
     /* ============= GLOBAL RESET & VARIABLES ============= */
     * {
@@ -1092,62 +985,6 @@
         opacity: 0;
         transform: scaleY(1);
       }
-    }
-
-    /* 12-Renkli Play Button Glitch Efekti */
-    @keyframes play-btn-glitch {
-      0% {
-        text-shadow: 
-          -2px 0 #FF0000,
-          2px 0 #00FF00,
-          0 -2px #0000FF,
-          0 2px #FFFF00,
-          -3px -3px #FF00FF,
-          3px 3px #00FFFF,
-          -1px 1px #FF6600,
-          1px -1px #00FF99,
-          -2px -2px #FF0099,
-          2px 2px #00CCFF,
-          -3px 0 #FFCC00,
-          3px 0 #FF0066;
-        filter: brightness(1.2);
-      }
-      50% {
-        text-shadow: 
-          2px 0 #0000FF,
-          -2px 0 #00FF00,
-          -2px 2px #FF0000,
-          2px -2px #00FFFF,
-          0 -3px #FFFF00,
-          0 3px #FF00FF,
-          3px 1px #FF6600,
-          -3px -1px #00FF99,
-          1px 2px #FF0099,
-          -1px -2px #00CCFF,
-          0 3px #FFCC00,
-          0 -3px #FF0066;
-        filter: brightness(1.3);
-      }
-      100% {
-        text-shadow: 
-          -2px 0 #FF0000,
-          2px 0 #00FF00,
-          0 -2px #0000FF,
-          0 2px #FFFF00,
-          -3px -3px #FF00FF,
-          3px 3px #00FFFF,
-          -1px 1px #FF6600,
-          1px -1px #00FF99,
-          -2px -2px #FF0099,
-          2px 2px #00CCFF,
-          -3px 0 #FFCC00,
-          3px 0 #FF0066;
-        filter: brightness(1.2);
-      }
-    }
-
-    .play-btn.ssss-glitch {
-      animation: play-btn-glitch 0.15s infinite !important;
     }
 
     .ssss-tab {
@@ -2735,8 +2572,6 @@
     }
 
     // ============= LEGENDS SSSS TAB SYSTEM =============
-    let ssssNameInterval = null;
-    
     function generateRandomSSSSName() {
       // Tüm karakterler random olacak
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:",.<>?/~`§█▒░╝╚╔╩';
@@ -2746,22 +2581,6 @@
         ssss += chars[Math.floor(Math.random() * chars.length)];
       }
       return `Legends ${ssss}`;
-    }
-    
-    function startSSSSNameJumble() {
-      const ssssLabel = document.querySelector('.ssss-label');
-      if (!ssssLabel) return;
-      
-      ssssNameInterval = setInterval(() => {
-        ssssLabel.textContent = generateRandomSSSSName();
-      }, 100);
-    }
-    
-    function stopSSSSNameJumble() {
-      if (ssssNameInterval) {
-        clearInterval(ssssNameInterval);
-        ssssNameInterval = null;
-      }
     }
 
     function addLegendsSSSVersion() {
@@ -2779,7 +2598,7 @@
       ssssTab.className = 'game-tab ssss-tab';
       ssssTab.setAttribute('data-game', 'ssss');
       ssssTab.setAttribute('data-banner', 'ssss-banner');
-      ssssTab.setAttribute('data-icon', './exe-icon.gif');
+      ssssTab.setAttribute('data-icon', '/final-icon.png');
       ssssTab.style.cssText = `
         background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(139, 0, 0, 0.3)) !important;
         border-color: #ff0000 !important;
@@ -2788,14 +2607,14 @@
       
       ssssTab.innerHTML = `
         <div class="game-tab-icon ssss-icon">
-          <img src="./exe-icon.gif" style="
+          <img src="./final-icon.png" style="
             width: 100%; 
             height: 100%; 
             filter: saturate(0) brightness(0.7) hue-rotate(0deg) drop-shadow(0 0 5px #ff0000);
             animation: icon-glitch-shimmer 0.3s infinite;
           " alt="SSSS">
         </div>
-        <span class="game-tab-label ssss-label" style="animation: glitch 0.4s infinite; color: #ff0000;">Legends SSSS</span>
+        <span class="game-tab-label ssss-label" style="animation: glitch 0.4s infinite; color: #ff0000;">${generateRandomSSSSName()}</span>
       `;
       
       // Add to game-tabs
@@ -2816,10 +2635,12 @@
         });
         ssssTab.classList.add('active');
         
-        // Update play button styling with glitch
+        // Update play button styling
         const playBtn = document.getElementById('playBtn');
         if (playBtn) {
-          playBtn.classList.add('ssss-glitch');
+          playBtn.style.background = '#ff0000';
+          playBtn.style.boxShadow = '0 0 20px #ff0000';
+          playBtn.style.animation = 'ssss-shake 0.1s infinite';
         }
         
         // Show SSSS banner
@@ -2833,9 +2654,6 @@
             versionSelect.value = 'gameexe.html';
           }
         }
-        
-        // Start jumble efekti
-        startSSSSNameJumble();
       });
       
       // Add click handlers to other tabs to reset styling
@@ -2843,14 +2661,14 @@
         tab.addEventListener('click', () => {
           const playBtn = document.getElementById('playBtn');
           if (playBtn) {
-            playBtn.classList.remove('ssss-glitch');
+            playBtn.style.background = '';
+            playBtn.style.boxShadow = '';
+            playBtn.style.animation = '';
           }
-          // Stop jumble efekti
-          stopSSSSNameJumble();
         });
       });
       
-      // Alert kaldırıldı - direkt banner gösterilecek
+      alert('🔴 Something has been unlocked...');
     }
 
     function showSSSSBanner() {
@@ -2928,149 +2746,6 @@
       }
     }
 
-    // ============= SÜRÜM VERİLERİ =============
-    const versionData = {
-      'legends': {
-        banner: './final-banner.png',
-        versions: [
-          { value: 'legends.html', label: 'Version 1.2.0 (Indev)' },
-          { value: 'legends-preview.html', label: 'Version 1.1.5 (Preview)' }
-        ],
-        news: [
-          '🌴 New island discovered with mysterious structures!',
-          '🐛 Fixed critical bugs in world generation',
-          '⚡ Performance optimization for better FPS'
-        ]
-      },
-      'legends-preview': {
-        banner: './preview-banner.png',
-        versions: [
-          { value: 'legends-preview.html', label: 'Version 1.1.5 (Preview)' },
-          { value: 'legends-old.html', label: 'Version 1.0.0 (Stable)' }
-        ],
-        news: [
-          '🧪 Testing new weather systems',
-          '🎯 Early access to community features',
-          '📝 Your feedback shapes development'
-        ]
-      },
-      'ssss': {
-        banner: 'ssss',
-        versions: [
-          { value: 'gameexe.html', label: 'Version 0.0.0 (Forgotten)' }
-        ],
-        news: [
-          '⚠️ CORRUPTED DATA DETECTED ⚠️',
-          '𝓔𝓷𝓽𝓮𝓻 𝓪𝓽 𝔂𝓸𝓾𝓻 𝓸𝔀𝓷 𝓻𝓲𝓼𝓴...',
-          '✞ ABANDONED ✞'
-        ]
-      }
-    };
-
-    function updateGameContent(gameKey) {
-      const data = versionData[gameKey];
-      if (!data) return;
-
-      // Update banner
-      const bannerSection = document.querySelector('.banner-section');
-      if (bannerSection) {
-        if (gameKey === 'ssss') {
-          showSSSSBanner();
-        } else {
-          bannerSection.innerHTML = '';
-          const bannerImg = document.createElement('img');
-          bannerImg.src = data.banner;
-          bannerImg.style.cssText = `
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 8px;
-          `;
-          bannerSection.appendChild(bannerImg);
-        }
-      }
-
-      // Update version select
-      const versionSelect = document.getElementById('versionSelect');
-      if (versionSelect) {
-        versionSelect.innerHTML = '';
-        data.versions.forEach(ver => {
-          const option = document.createElement('option');
-          option.value = ver.value;
-          option.textContent = ver.label;
-          versionSelect.appendChild(option);
-        });
-        if (data.versions.length > 0) {
-          versionSelect.value = data.versions[0].value;
-        }
-      }
-
-      // Update news section
-      const newsSection = document.querySelector('.news-updates');
-      if (newsSection) {
-        const title = newsSection.querySelector('h3');
-        if (title) {
-          if (gameKey === 'ssss') {
-            title.textContent = '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️';
-            title.style.cssText = `
-              color: #ff0000;
-              text-shadow: 0 0 10px #ff0000, 0 0 20px #000;
-              animation: glitch 0.3s infinite;
-              font-weight: bold;
-            `;
-          } else {
-            title.textContent = 'NEWS & UPDATES';
-            title.style.cssText = '';
-          }
-        }
-
-        const newsList = newsSection.querySelector('.news-list');
-        if (newsList) {
-          newsList.innerHTML = '';
-          data.news.forEach(item => {
-            const newsItem = document.createElement('div');
-            newsItem.className = 'news-item';
-            newsItem.textContent = item;
-            newsList.appendChild(newsItem);
-          });
-        }
-      }
-    }
-
-    // ============= GAME TAB HANDLERS =============
-    function setupGameTabHandlers() {
-      const gameTabs = document.querySelectorAll('.game-tab');
-      gameTabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-          // Remove active from all tabs
-          gameTabs.forEach((t) => t.classList.remove('active'));
-          // Add active to clicked tab
-          tab.classList.add('active');
-
-          // Get game key
-          const gameKey = tab.getAttribute('data-game');
-          
-          // Update content
-          updateGameContent(gameKey);
-
-          // SSSS için jumble efektini başlat
-          if (gameKey === 'ssss') {
-            startSSSSNameJumble();
-            const playBtn = document.getElementById('playBtn');
-            if (playBtn) {
-              playBtn.classList.add('ssss-glitch');
-            }
-          } else {
-            stopSSSSNameJumble();
-            const playBtn = document.getElementById('playBtn');
-            if (playBtn) {
-              playBtn.classList.remove('ssss-glitch');
-            }
-          }
-        });
-      });
-    }
-
     // Play game function
     function playGame() {
       const dropdown = document.getElementById('versionSelect');
@@ -3110,15 +2785,6 @@
           const gameOverlay = document.getElementById('gameOverlay');
           if (gameOverlay) gameOverlay.style.display = 'none';
         });
-      }
-      
-      // Setup game tab handlers
-      setupGameTabHandlers();
-      
-      // Initialize with first game
-      const firstTab = document.querySelector('.game-tab');
-      if (firstTab) {
-        firstTab.click();
       }
     });
 
