@@ -4,19 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
 <title>Legends Indev v1.6.2 - Perlin World</title>
-<link rel="manifest" href="./pe-final-manifest.json">
-<link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
-<link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==">
-<meta name="theme-color" content="#0b0c10">
-
-<!-- Firebase SDK -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js"></script>
-
-<!-- Google Sign-In -->
-<script src="https://accounts.google.com/gsi/client" async defer></script>
-
 <!-- [MODÜLER DİL MİMARİSİ] Aşağıdaki JS bloğu, projedeki ayrı language.js
      dosyasının BİREBİR içeriğidir. Kod hâlâ modüler bir yapı olarak
      (window.LegendsLanguage API'si + window.langData) organize edilmiştir;
@@ -3008,20 +2995,7 @@ body.low-health::after {
   <div class="legends-modal-content">
     <div class="legends-modal-header">LEGENDS LOGIN</div>
     <div class="legends-modal-body">
-      <div id="auth-form-container">
-        <input type="email" id="auth-email" placeholder="Email address" class="legends-input">
-        <input type="password" id="auth-password" placeholder="Password" class="legends-input">
-        <button id="auth-login-btn" class="legends-btn primary">LOG IN</button>
-        <div class="auth-divider">OR</div>
-        <button id="auth-google-btn" class="legends-btn secondary" style="background: white; color: #333; display: flex; align-items: center; justify-content: center; gap: 10px;">
-          <span>LOG IN WITH GOOGLE</span>
-        </button>
-        <div class="auth-divider">OR</div>
-        <button id="auth-guest-btn" class="legends-btn secondary">PLAY AS GUEST</button>
-      </div>
-      <div class="auth-signup-hint">
-        Don't have an account? <a href="https://playlegends.vercel.app" target="_blank">Click here to sign in from our website.</a>
-      </div>
+      <div style="color:#aaa; text-align:center; padding:20px;">Loading...</div>
     </div>
   </div>
 </div>
@@ -17428,101 +17402,61 @@ animate();
 })();
 </script>
 
-<!-- Firebase & Google Sign-In Initialization -->
 <script>
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyAG6FsNjMgIXIGQmmmHC6GWjWuzNVDq5KM",
-    authDomain: "play-legends.firebaseapp.com",
-    projectId: "play-legends",
-    databaseURL: "https://play-legends-default-rtdb.europe-west1.firebasedatabase.app"
-  };
-
-  // Firebase Initialize - Retry logic
-  function initializeGameFirebase() {
-    if (typeof firebase === 'undefined' || !firebase.app) {
-      console.warn('⚠️ Firebase SDK not loaded. Retrying...');
-      setTimeout(initializeGameFirebase, 500);
-      return;
-    }
-
-    try {
-      if (firebase.apps.length > 0) {
-        console.log('✅ Firebase already initialized in game');
-        return;
-      }
-      firebase.initializeApp(firebaseConfig);
-      console.log('✅ Firebase initialized in game');
-    } catch (err) {
-      console.warn('Firebase initialization:', err.message);
-    }
-  }
-
-  // Load Firebase when page is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initializeGameFirebase);
-  } else {
-    initializeGameFirebase();
-  }
-
-  // ============= GOOGLE LOGIN HANDLER =============
-  document.addEventListener('DOMContentLoaded', () => {
-    const googleBtn = document.getElementById('auth-google-btn');
-    if (googleBtn) {
-      googleBtn.addEventListener('click', handleGameGoogleLogin);
-    }
-  });
-
-  function handleGameGoogleLogin() {
-    if (typeof firebase === 'undefined' || !firebase.auth) {
-      alert('Firebase not loaded. Please refresh the page.');
-      return;
-    }
-
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.setCustomParameters({ prompt: "select_account" });
+  // ============= AUTO-LOGIN CHECK =============
+  function checkGameAutoLogin() {
     const auth = firebase.auth();
+    const modal = document.getElementById('legends-auth-modal');
+    const body = modal ? modal.querySelector('.legends-modal-body') : null;
+    
+    if (!body) return;
 
-    auth.signInWithPopup(provider).then((cred) => {
-      const user = cred.user;
-      
-      // Save user info
-      localStorage.setItem('gameUser', JSON.stringify({
-        username: user.displayName || "Player",
-        email: user.email,
-        uid: user.uid,
-        rank: 'Player',
-        type: 'google',
-        loginTime: new Date().toISOString()
-      }));
-
-      // Hide auth modal
-      const authModal = document.getElementById('legends-auth-modal');
-      if (authModal) authModal.style.display = 'none';
-      
-      console.log('✅ Google Login Success:', user.displayName);
-
-    }).catch((error) => {
-      console.error("Google Login Error:", error.code, error.message);
-      
-      if (error.code === 'auth/popup-closed-by-user') {
-        return; // User closed popup, no error needed
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // Logged in
+        localStorage.setItem('gameUser', JSON.stringify({
+          username: user.displayName || "Player",
+          email: user.email,
+          uid: user.uid,
+          rank: 'Player',
+          type: 'firebase'
+        }));
+        
+        body.innerHTML = '<div style="color:#06ffa5; text-align:center; padding:20px; font-weight:bold;">✅ Logged in! Game starting...</div>';
+        setTimeout(() => { modal.style.display = 'none'; }, 2000);
+      } else {
+        // Not logged in
+        body.innerHTML = `
+          <div style="background:rgba(255,0,110,0.1); border:1px solid rgba(255,0,110,0.5); border-radius:8px; padding:20px; text-align:center; color:#fff; margin-bottom:15px;">
+            <strong>⚠️ Login Required</strong><br>
+            <span style="color:#aaa; font-size:12px; margin-top:8px; display:block;">
+              Sign up or log in from our website first, then come back here to play.
+            </span>
+          </div>
+          <button onclick="playAsGuest()" style="padding:12px; background:transparent; border:2px solid #00d9ff; border-radius:6px; color:#00d9ff; font-size:14px; font-weight:bold; cursor:pointer; width:100%; margin-bottom:15px;">PLAY AS GUEST</button>
+          <div style="color:#00d9ff; font-size:12px; text-align:center;">
+            Don't have an account? <a href="https://playlegends.vercel.app" target="_blank" style="color:#00d9ff; text-decoration:none; font-weight:bold;">Click here to sign in</a>
+          </div>
+        `;
+        modal.style.display = 'flex';
       }
-      
-      let errorMsg = 'Google Login failed';
-      switch(error.code) {
-        case 'auth/account-exists-with-different-credential':
-          errorMsg = 'This email is already registered with a different sign-in method.';
-          break;
-        case 'auth/network-request-failed':
-          errorMsg = 'Network error. Please check your connection.';
-          break;
-      }
-      
-      alert(errorMsg);
     });
   }
-</script>
 
+  function playAsGuest() {
+    const guestId = 'Guest_' + Math.random().toString(36).substr(2, 9).toUpperCase();
+    localStorage.setItem('gameUser', JSON.stringify({
+      username: guestId,
+      rank: 'Guest',
+      type: 'guest'
+    }));
+    document.getElementById('legends-auth-modal').style.display = 'none';
+  }
+
+  // Check on load
+  document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(checkGameAutoLogin, 2000);
+  });
+</script>
 </body>
 </html>

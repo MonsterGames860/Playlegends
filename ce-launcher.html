@@ -330,7 +330,7 @@
       height: 300px;
       background-size: cover;
       background-position: center;
-      background-image: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      background-image: url('./final-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
       position: relative;
       overflow: hidden;
     }
@@ -928,6 +928,135 @@
       color: var(--text-secondary);
       font-size: 13px;
     }
+
+    /* ===== EASTER EGG ANIMATIONS ===== */
+    @keyframes shake {
+      0%, 100% { transform: translateX(0) rotate(0deg); }
+      25% { transform: translateX(-3px) rotate(-1deg); }
+      50% { transform: translateX(3px) rotate(1deg); }
+      75% { transform: translateX(-2px) rotate(-0.5deg); }
+    }
+
+    @keyframes glitch {
+      0%, 100% {
+        text-shadow: 2px 0 #00d9ff, -2px 0 #ff0000;
+      }
+      50% {
+        text-shadow: -2px 0 #00d9ff, 2px 0 #ff0000;
+      }
+    }
+
+    @keyframes flicker {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+
+    @keyframes ssss-shake {
+      0% { transform: translate(0, 0) scale(1); }
+      10% { transform: translate(-2px, -2px) scale(0.98); }
+      20% { transform: translate(2px, 2px) scale(1.02); }
+      30% { transform: translate(-3px, 1px) scale(0.99); }
+      40% { transform: translate(3px, -1px) scale(1.01); }
+      50% { transform: translate(1px, -3px) scale(0.98); }
+      60% { transform: translate(-1px, 3px) scale(1.02); }
+      70% { transform: translate(2px, -2px) scale(1); }
+      80% { transform: translate(-2px, 2px) scale(0.99); }
+      90% { transform: translate(0, 1px) scale(1.01); }
+      100% { transform: translate(0, 0) scale(1); }
+    }
+
+    @keyframes icon-glitch-shimmer {
+      0%, 100% { filter: drop-shadow(0 0 2px #ff0000); }
+      25% { filter: drop-shadow(3px -3px 5px #ff0000) drop-shadow(-3px 3px 5px #00d9ff); }
+      50% { filter: drop-shadow(-3px -3px 5px #00d9ff) drop-shadow(3px 3px 5px #ff0000); }
+      75% { filter: drop-shadow(3px 3px 5px #ff0000) drop-shadow(-3px -3px 5px #ff00ff); }
+    }
+
+    @keyframes glitch-flash {
+      0% {
+        opacity: 1;
+        transform: scaleY(1);
+      }
+      50% {
+        opacity: 0.8;
+        transform: scaleY(0.98);
+      }
+      100% {
+        opacity: 0;
+        transform: scaleY(1);
+      }
+    }
+
+    /* 12-Renkli Play Button Glitch Efekti */
+    @keyframes play-btn-glitch {
+      0% {
+        text-shadow: 
+          -2px 0 #FF0000,
+          2px 0 #00FF00,
+          0 -2px #0000FF,
+          0 2px #FFFF00,
+          -3px -3px #FF00FF,
+          3px 3px #00FFFF,
+          -1px 1px #FF6600,
+          1px -1px #00FF99,
+          -2px -2px #FF0099,
+          2px 2px #00CCFF,
+          -3px 0 #FFCC00,
+          3px 0 #FF0066;
+        filter: brightness(1.2);
+      }
+      50% {
+        text-shadow: 
+          2px 0 #0000FF,
+          -2px 0 #00FF00,
+          -2px 2px #FF0000,
+          2px -2px #00FFFF,
+          0 -3px #FFFF00,
+          0 3px #FF00FF,
+          3px 1px #FF6600,
+          -3px -1px #00FF99,
+          1px 2px #FF0099,
+          -1px -2px #00CCFF,
+          0 3px #FFCC00,
+          0 -3px #FF0066;
+        filter: brightness(1.3);
+      }
+      100% {
+        text-shadow: 
+          -2px 0 #FF0000,
+          2px 0 #00FF00,
+          0 -2px #0000FF,
+          0 2px #FFFF00,
+          -3px -3px #FF00FF,
+          3px 3px #00FFFF,
+          -1px 1px #FF6600,
+          1px -1px #00FF99,
+          -2px -2px #FF0099,
+          2px 2px #00CCFF,
+          -3px 0 #FFCC00,
+          3px 0 #FF0066;
+        filter: brightness(1.2);
+      }
+    }
+
+    .play-btn.ssss-glitch {
+      animation: play-btn-glitch 0.15s infinite !important;
+    }
+
+    .ssss-tab {
+      animation: glitch 0.4s infinite;
+    }
+
+    .ssss-icon {
+      animation: icon-glitch-shimmer 0.3s infinite !important;
+      filter: drop-shadow(0 0 3px #ff0000);
+    }
+
+    .ssss-label {
+      animation: glitch 0.4s infinite;
+      color: #ff0000 !important;
+      font-weight: bold;
+    }
   </style>
 </head>
 
@@ -938,7 +1067,7 @@
     <div class="sidebar">
       <!-- Profile Card -->
       <div class="profile-card" id="profileCard">
-        <div class="profile-avatar" id="profileAvatar">👤</div>
+        <div class="profile-avatar" id="profileAvatar" onclick="handleProfileClick()" style="cursor: pointer;">👤</div>
         <div class="profile-info">
           <div class="profile-name" id="profileName">Guest User</div>
           <div class="profile-status guest" id="profileStatus">Guest</div>
@@ -987,7 +1116,7 @@
 
         <!-- Play Bar -->
         <div class="play-bar">
-          <button class="play-btn" id="playBtn">▶ PLAY</button>
+          <button class="play-btn" id="playBtn" onclick="playGame()">▶ PLAY</button>
           <select class="version-select" id="versionSelect">
             <option value="">No versions available</option>
           </select>
@@ -1965,17 +2094,46 @@
         const bannerFile = tab.getAttribute('data-banner');
         const bannerSection = document.getElementById('bannerSection');
         const dropdown = document.getElementById('versionSelect');
+        const playBtn = document.getElementById('playBtn');
+
+        // Reset play button styling for normal tabs
+        if (game !== 'ssss' && playBtn) {
+          playBtn.style.background = '';
+          playBtn.style.boxShadow = '';
+          playBtn.style.animation = '';
+        }
 
         if (game === 'legends') {
           document.getElementById('bannerTitle').textContent = 'Legends';
           document.getElementById('bannerDesc').textContent = 'Welcome to the world of voxel games';
+          bannerSection.style.backgroundImage = `url('./final-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
+          bannerSection.innerHTML = '';
+          bannerSection.style.backgroundImage = `url('./final-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
+          bannerSection.style.backgroundSize = 'cover';
+          bannerSection.style.backgroundPosition = 'center';
+          
+          // Reset news section
+          const newsTitle = document.querySelector('.news-updates h3');
+          if (newsTitle) {
+            newsTitle.textContent = '📰 NEWS & UPDATES';
+            newsTitle.style.cssText = '';
+          }
         } else if (game === 'preview') {
           document.getElementById('bannerTitle').textContent = 'Legends Preview';
           document.getElementById('bannerDesc').textContent = 'Test upcoming features';
+          bannerSection.style.backgroundImage = `url('./preview-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
+          bannerSection.innerHTML = '';
+          bannerSection.style.backgroundImage = `url('./preview-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
+          bannerSection.style.backgroundSize = 'cover';
+          bannerSection.style.backgroundPosition = 'center';
+          
+          // Reset news section
+          const newsTitle = document.querySelector('.news-updates h3');
+          if (newsTitle) {
+            newsTitle.textContent = '📰 NEWS & UPDATES';
+            newsTitle.style.cssText = '';
+          }
         }
-
-        // Update banner background
-        bannerSection.style.backgroundImage = `linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
 
         // ===== TAB FILTERING =====
         let visibleCount = 0;
@@ -2192,7 +2350,91 @@
       document.getElementById('newsDate').value = '';
     });
 
-    // ============= INITIALIZATION =============
+    // ============= AUTO-LOGIN CHECK =============
+    /**
+     * Check if user is already logged in from index.html
+     */
+    async function checkAutoLogin() {
+      try {
+        // Wait for Firebase to initialize
+        let retries = 0;
+        while ((typeof firebase === 'undefined' || !firebase.apps || firebase.apps.length === 0) && retries < 20) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+          retries++;
+        }
+
+        if (typeof firebase === 'undefined' || !firebase.auth) {
+          console.warn('Firebase not available for auto-login');
+          return;
+        }
+
+        const auth = firebase.auth();
+        
+        // Check if user is currently logged in Firebase
+        auth.onAuthStateChanged((firebaseUser) => {
+          if (firebaseUser) {
+            // User is logged in
+            console.log('✅ Auto-login: User found in Firebase');
+            
+            const user = {
+              username: firebaseUser.displayName || "Player",
+              email: firebaseUser.email,
+              uid: firebaseUser.uid,
+              rank: 'Player',
+              type: 'firebase',
+              loginTime: new Date().toISOString()
+            };
+            
+            saveUser(user);
+            updateProfileCard(user);
+            closeAuthModal();
+          } else {
+            // No user logged in Firebase - show login required message
+            console.log('⚠️ No auto-login: User not logged in');
+            showLoginRequiredModal();
+          }
+        });
+
+      } catch (error) {
+        console.warn('Auto-login check failed:', error);
+      }
+    }
+
+    /**
+     * Show message requiring login
+     */
+    function showLoginRequiredModal() {
+      const authModal = document.getElementById('authModal');
+      if (!authModal) return;
+
+      authModal.classList.add('active');
+      
+      // Add message to modal
+      const modalContent = authModal.querySelector('.modal');
+      if (modalContent && !document.getElementById('login-required-msg')) {
+        const msg = document.createElement('div');
+        msg.id = 'login-required-msg';
+        msg.style.cssText = `
+          background: rgba(255, 0, 110, 0.1);
+          border: 1px solid var(--neon-pink);
+          border-radius: 8px;
+          padding: 16px;
+          margin-bottom: 16px;
+          text-align: center;
+          color: var(--text-secondary);
+          font-size: 13px;
+          line-height: 1.6;
+        `;
+        msg.innerHTML = `
+          <strong>⚠️ Login Required</strong><br>
+          <span style="font-size: 12px; margin-top: 8px; display: block;">
+            Sign up or log in first, then come back to access the launcher.<br>
+            This ensures your progress is saved to your account!
+          </span>
+        `;
+        modalContent.insertBefore(msg, modalContent.querySelector('.auth-tabs'));
+      }
+    }
 
     /**
      * Initialize launcher on page load
@@ -2212,13 +2454,14 @@
           console.warn('⚠️ Firebase may not be fully loaded');
         }
         
+        // Check auto-login from index.html
+        checkAutoLogin();
+        
         const user = getUser();
 
         if (user) {
           updateProfileCard(user);
           closeAuthModal();
-        } else {
-          document.getElementById('authModal').classList.add('active');
         }
 
         // Update versions dropdown from API
@@ -2300,6 +2543,325 @@
     } else {
       initializeLauncher();
     }
+
+    // ============= EASTER EGG - PROFILE CLICK COUNTER =============
+    let profileClickCount = 0;
+    let easterEggUnlocked = false;
+
+    // Glitchy text generator (mostly shows HELP)
+    function generateGlitchyText() {
+      const chars = 'HELPṰẪ╝₽ℌ҈∞▒█░╗╚╔╩╬▲▼◆◇●○';
+      const words = ['HELP', 'HELP', 'HELP', '§§§§', 'LEGENDS', 'H3LP'];
+      
+      let text = '';
+      for (let i = 0; i < 4; i++) {
+        if (Math.random() > 0.7) {
+          text += words[Math.floor(Math.random() * words.length)][i] || chars[Math.floor(Math.random() * chars.length)];
+        } else {
+          text += chars[Math.floor(Math.random() * chars.length)];
+        }
+      }
+      return text;
+    }
+
+    function handleProfileClick() {
+      profileClickCount++;
+      console.log(`Profile clicks: ${profileClickCount}`);
+
+      if (profileClickCount === 5) {
+        alert('🚫 Don\'t click anymore please');
+      } else if (profileClickCount === 10) {
+        alert('⚠️ You\'ll regret this!');
+      } else if (profileClickCount === 20 && !easterEggUnlocked) {
+        easterEggUnlocked = true;
+        
+        // Glitch flash + ses efekti
+        showGlitchFlash();
+        playGlitchSound();
+        
+        setTimeout(() => {
+          unlockEasterEgg();
+        }, 1500);
+      }
+    }
+
+    function showGlitchFlash() {
+      const flash = document.createElement('div');
+      flash.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: #ff0000;
+        z-index: 9999;
+        animation: glitch-flash 0.5s ease-out forwards;
+        pointer-events: none;
+      `;
+      document.body.appendChild(flash);
+      
+      setTimeout(() => flash.remove(), 500);
+    }
+
+    function playGlitchSound() {
+      const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      const now = audioContext.currentTime;
+      
+      // Tiz ses (2000Hz)
+      const osc = audioContext.createOscillator();
+      const gain = audioContext.createGain();
+      
+      osc.frequency.value = 2000;
+      osc.connect(gain);
+      gain.connect(audioContext.destination);
+      
+      gain.gain.setValueAtTime(0.3, now);
+      gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+      
+      osc.start(now);
+      osc.stop(now + 0.5);
+    }
+
+    function unlockEasterEgg() {
+      console.log('🎮 EASTER EGG UNLOCKED!');
+      addLegendsSSSVersion();
+    }
+
+    // ============= LEGENDS SSSS TAB SYSTEM =============
+    let ssssNameInterval = null;
+    
+    function generateRandomSSSSName() {
+      // Tüm karakterler random olacak
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:",.<>?/~`§█▒░╝╚╔╩';
+      
+      let ssss = '';
+      for (let i = 0; i < 4; i++) {
+        ssss += chars[Math.floor(Math.random() * chars.length)];
+      }
+      return `Legends ${ssss}`;
+    }
+    
+    function startSSSSNameJumble() {
+      const ssssLabel = document.querySelector('.ssss-label');
+      if (!ssssLabel) return;
+      
+      ssssNameInterval = setInterval(() => {
+        ssssLabel.textContent = generateRandomSSSSName();
+      }, 100);
+    }
+    
+    function stopSSSSNameJumble() {
+      if (ssssNameInterval) {
+        clearInterval(ssssNameInterval);
+        ssssNameInterval = null;
+      }
+    }
+
+    function addLegendsSSSVersion() {
+      const gameTabs = document.querySelector('.game-tabs');
+      if (!gameTabs) return;
+      
+      // Check if already exists
+      if (document.querySelector('.ssss-label')) {
+        console.log('✅ SSSS tab already exists');
+        return;
+      }
+      
+      // Create SSSS tab
+      const ssssTab = document.createElement('button');
+      ssssTab.className = 'game-tab ssss-tab';
+      ssssTab.setAttribute('data-game', 'ssss');
+      ssssTab.setAttribute('data-banner', 'ssss-banner');
+      ssssTab.setAttribute('data-icon', './exe-icon.gif');
+      ssssTab.style.cssText = `
+        background: linear-gradient(135deg, rgba(255, 0, 0, 0.3), rgba(139, 0, 0, 0.3)) !important;
+        border-color: #ff0000 !important;
+        animation: glitch 0.4s infinite;
+      `;
+      
+      ssssTab.innerHTML = `
+        <div class="game-tab-icon ssss-icon">
+          <img src="./exe-icon.gif" style="
+            width: 100%; 
+            height: 100%; 
+            filter: saturate(0) brightness(0.7) hue-rotate(0deg) drop-shadow(0 0 5px #ff0000);
+            animation: icon-glitch-shimmer 0.3s infinite;
+          " alt="SSSS">
+        </div>
+        <span class="game-tab-label ssss-label" style="animation: glitch 0.4s infinite; color: #ff0000;">Legends SSSS</span>
+      `;
+      
+      // Add to game-tabs
+      const logoutBtn = gameTabs.querySelector('.logout-btn');
+      if (logoutBtn) {
+        gameTabs.insertBefore(ssssTab, logoutBtn);
+      } else {
+        gameTabs.appendChild(ssssTab);
+      }
+      
+      console.log('✅ SSSS tab added');
+      
+      // Tab click handler
+      ssssTab.addEventListener('click', () => {
+        // Deactivate other tabs
+        document.querySelectorAll('.game-tab').forEach(tab => {
+          tab.classList.remove('active');
+        });
+        ssssTab.classList.add('active');
+        
+        // Update play button styling with glitch
+        const playBtn = document.getElementById('playBtn');
+        if (playBtn) {
+          playBtn.classList.add('ssss-glitch');
+        }
+        
+        // Show SSSS banner
+        showSSSSBanner();
+        
+        // Update dropdown
+        const versionSelect = document.getElementById('versionSelect');
+        if (versionSelect) {
+          const ssssOption = Array.from(versionSelect.options).find(opt => opt.value === 'gameexe.html');
+          if (ssssOption) {
+            versionSelect.value = 'gameexe.html';
+          }
+        }
+        
+        // Start jumble efekti
+        startSSSSNameJumble();
+      });
+      
+      // Add click handlers to other tabs to reset styling
+      document.querySelectorAll('.game-tab:not(.ssss-tab)').forEach(tab => {
+        tab.addEventListener('click', () => {
+          const playBtn = document.getElementById('playBtn');
+          if (playBtn) {
+            playBtn.classList.remove('ssss-glitch');
+          }
+          // Stop jumble efekti
+          stopSSSSNameJumble();
+        });
+      });
+      
+      // Alert kaldırıldı - direkt banner gösterilecek
+    }
+
+    function showSSSSBanner() {
+      const bannerSection = document.querySelector('.banner-section');
+      if (!bannerSection) return;
+      
+      bannerSection.innerHTML = '';
+      
+      const container = document.createElement('div');
+      container.style.cssText = `
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      `;
+      
+      // Banner 1
+      const banner1 = document.createElement('img');
+      banner1.src = './final-banner.png';
+      banner1.style.cssText = `
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.7;
+        filter: hue-rotate(0deg) saturate(1.5);
+        animation: glitch 0.3s infinite;
+      `;
+      
+      // Banner 2
+      const banner2 = document.createElement('img');
+      banner2.src = './preview-banner.png';
+      banner2.style.cssText = `
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        opacity: 0.5;
+        mix-blend-mode: screen;
+        filter: hue-rotate(330deg) saturate(2);
+        animation: glitch 0.3s infinite reverse;
+      `;
+      
+      // Red overlay
+      const overlay = document.createElement('div');
+      overlay.style.cssText = `
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 0, 0, 0.4);
+        animation: flicker 0.2s infinite;
+        z-index: 10;
+      `;
+      
+      container.appendChild(banner1);
+      container.appendChild(banner2);
+      container.appendChild(overlay);
+      bannerSection.appendChild(container);
+      
+      // Update News & Updates section with horror text
+      const newsSection = document.querySelector('.news-updates');
+      if (newsSection) {
+        const title = newsSection.querySelector('h3');
+        if (title) {
+          title.textContent = '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️';
+          title.style.cssText = `
+            color: #ff0000;
+            text-shadow: 0 0 10px #ff0000, 0 0 20px #000;
+            animation: glitch 0.3s infinite;
+            font-weight: bold;
+          `;
+        }
+      }
+    }
+
+    // Play game function
+    function playGame() {
+      const dropdown = document.getElementById('versionSelect');
+      const selectedFile = dropdown.value;
+
+      if (!selectedFile) {
+        alert('Please select a version first!');
+        return;
+      }
+
+      // Easter egg version opens in new window
+      if (selectedFile === 'gameexe.html') {
+        window.open(selectedFile, '_blank');
+        return;
+      }
+
+      // Normal versions open in iframe
+      const gameOverlay = document.getElementById('gameOverlay');
+      if (!gameOverlay) return;
+
+      const gameFrame = document.getElementById('gameFrame');
+      gameFrame.src = './' + selectedFile;
+      gameOverlay.style.display = 'flex';
+    }
+
+    // Make functions global for debugging
+    window.handleProfileClick = handleProfileClick;
+    window.unlockEasterEgg = unlockEasterEgg;
+    window.playGame = playGame;
+    window.profileClickCount = () => profileClickCount;
+
+    console.log('🎮 Easter egg system loaded. Type: window.unlockEasterEgg() to unlock');
+    document.addEventListener('DOMContentLoaded', () => {
+      const closeBtn = document.querySelector('.close-game-btn');
+      if (closeBtn) {
+        closeBtn.addEventListener('click', () => {
+          const gameOverlay = document.getElementById('gameOverlay');
+          if (gameOverlay) gameOverlay.style.display = 'none';
+        });
+      }
+    });
 
   </script>
 </body>
