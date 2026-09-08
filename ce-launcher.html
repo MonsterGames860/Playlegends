@@ -27,17 +27,15 @@
         navigator.serviceWorker.register('./sw2.js').then(registration => {
           console.log('✅ Service Worker (sw2) registered');
           
-          // Güncellemeyi kontrol et
-          setInterval(() => {
-            registration.update();
-          }, 60000); // Her 60 saniyede kontrol et
+          // Güncellemeyi kontrol et (ilk yüklemede)
+          registration.update();
           
           // Update tespit edildiğinde
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Kullanıcıya güncelleme olduğunu bildir
+                // Sadece en az bir kez yeniden yükle
                 showUpdateNotification();
               }
             });
@@ -104,7 +102,7 @@
         document.head.appendChild(style);
         document.body.insertBefore(updateBanner, document.body.firstChild);
         
-        // Güncelle butonu
+        // Güncelle butonu - kullanıcı tıklayana kadar yenileme yapma
         document.getElementById('update-btn').addEventListener('click', () => {
           // Service Worker'a güncelle mesajı gönder
           if (navigator.serviceWorker.controller) {
@@ -113,15 +111,16 @@
             });
           }
           
-          // Sayfayı yenile
-          window.location.reload();
+          // Sadece butona tıklandığında yenile
+          setTimeout(() => {
+            window.location.reload();
+          }, 500);
         });
       }
       
-      // Yeni Service Worker'ın kontrolü ele aldığında sayfayı yenile
+      // Kontroller değiştiğinde (güncelleme sonrası)
       navigator.serviceWorker.addEventListener('controllerchange', () => {
-        // Sayfa otomatik yenilenir
-        window.location.reload();
+        console.log('✅ Service Worker updated - new version active');
       });
     }
   </script>
@@ -3017,8 +3016,8 @@
         const versionsData = localStorage.getItem(STORAGE_KEY);
         
         if (!versionsData) {
-          console.warn('⚠️ No versions in localStorage either');
-          return false;
+          console.warn('⚠️ No versions in localStorage either - using default fallback');
+          return loadDefaultFallbackVersions();
         }
         
         const versions = JSON.parse(versionsData);
@@ -3041,8 +3040,29 @@
         return true;
       } catch (error) {
         console.error('❌ localStorage error:', error);
-        return false;
+        return loadDefaultFallbackVersions();
       }
+    }
+
+    // ============= DEFAULT FALLBACK SÜRÜMLERI =============
+    function loadDefaultFallbackVersions() {
+      // Varsayılan sürümler (versions.json ve localStorage yüklenenemezse)
+      versionData.legends.versions = [
+        { value: 'game-i-1.6.2.html', label: 'Version 1.6.2 (INDEV)' },
+        { value: 'game-i-1.6.1.html', label: 'Version 1.6.1 (INDEV)' },
+        { value: 'game-i-1.5.0.html', label: 'Version 1.5.0 (INDEV)' },
+        { value: 'game-i-1.4.0.html', label: 'Version 1.4.0 (INDEV)' },
+        { value: 'game-i-1.3.0.html', label: 'Version 1.3.0 (INDEV)' },
+        { value: 'game-i-1.2.0.html', label: 'Version 1.2.0 (INDEV)' },
+        { value: 'game-i-1.1.0.html', label: 'Version 1.1.0 (INDEV)' }
+      ];
+      
+      versionData['legends-preview'].versions = [
+        { value: 'game-1.7.0Ip1.html', label: 'Version 1.7.0Ip1 (INDEV_PREVIEW)' }
+      ];
+      
+      console.log('✅ Using default fallback versions');
+      return true;
     }
 
     // ============= SÜRÜM YÜKLEMESİ HATASI =============
