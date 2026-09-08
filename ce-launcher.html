@@ -19,6 +19,113 @@
   <!-- Google Sign-In -->
   <script src="https://accounts.google.com/gsi/client" async defer></script>
   
+  <!-- Service Worker Registration -->
+  <script>
+    // Service Worker Kayıt ve Update Mekanizması
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').then(registration => {
+          console.log('✅ Service Worker registered');
+          
+          // Güncellemeyi kontrol et
+          setInterval(() => {
+            registration.update();
+          }, 60000); // Her 60 saniyede kontrol et
+          
+          // Update tespit edildiğinde
+          registration.addEventListener('updatefound', () => {
+            const newWorker = registration.installing;
+            newWorker.addEventListener('statechange', () => {
+              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                // Kullanıcıya güncelleme olduğunu bildir
+                showUpdateNotification();
+              }
+            });
+          });
+        }).catch(error => {
+          console.error('❌ Service Worker registration failed:', error);
+        });
+      });
+      
+      // Update bildirimini göster
+      let updateShown = false;
+      function showUpdateNotification() {
+        if (updateShown) return;
+        updateShown = true;
+        
+        const updateBanner = document.createElement('div');
+        updateBanner.id = 'update-banner';
+        updateBanner.style.cssText = `
+          position: fixed;
+          top: 0;
+          left: 0;
+          right: 0;
+          background: linear-gradient(90deg, #9d4edd 0%, #00d9ff 100%);
+          color: #fff;
+          padding: 12px 20px;
+          text-align: center;
+          font-weight: 600;
+          z-index: 9998;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 16px;
+          box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
+          animation: slideDown 0.3s ease-out;
+        `;
+        updateBanner.innerHTML = `
+          <span>🎮 Yeni güncelleme mevcut! Uygulamayı yenile.</span>
+          <button id="update-btn" style="
+            background: #0b0c10;
+            color: #00d9ff;
+            border: 1px solid #00d9ff;
+            padding: 6px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+          ">Güncelle</button>
+        `;
+        
+        // Animate girişi
+        const style = document.createElement('style');
+        style.textContent = `
+          @keyframes slideDown {
+            from {
+              transform: translateY(-100%);
+              opacity: 0;
+            }
+            to {
+              transform: translateY(0);
+              opacity: 1;
+            }
+          }
+        `;
+        document.head.appendChild(style);
+        document.body.insertBefore(updateBanner, document.body.firstChild);
+        
+        // Güncelle butonu
+        document.getElementById('update-btn').addEventListener('click', () => {
+          // Service Worker'a güncelle mesajı gönder
+          if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+              type: 'SKIP_WAITING'
+            });
+          }
+          
+          // Sayfayı yenile
+          window.location.reload();
+        });
+      }
+      
+      // Yeni Service Worker'ın kontrolü ele aldığında sayfayı yenile
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        // Sayfa otomatik yenilenir
+        window.location.reload();
+      });
+    }
+  </script>
+  
   <style>
     /* ============= GLOBAL RESET & VARIABLES ============= */
     * {
@@ -2821,6 +2928,149 @@
       }
     }
 
+    // ============= SÜRÜM VERİLERİ =============
+    const versionData = {
+      'legends': {
+        banner: './final-banner.png',
+        versions: [
+          { value: 'legends.html', label: 'Version 1.2.0 (Indev)' },
+          { value: 'legends-preview.html', label: 'Version 1.1.5 (Preview)' }
+        ],
+        news: [
+          '🌴 New island discovered with mysterious structures!',
+          '🐛 Fixed critical bugs in world generation',
+          '⚡ Performance optimization for better FPS'
+        ]
+      },
+      'legends-preview': {
+        banner: './preview-banner.png',
+        versions: [
+          { value: 'legends-preview.html', label: 'Version 1.1.5 (Preview)' },
+          { value: 'legends-old.html', label: 'Version 1.0.0 (Stable)' }
+        ],
+        news: [
+          '🧪 Testing new weather systems',
+          '🎯 Early access to community features',
+          '📝 Your feedback shapes development'
+        ]
+      },
+      'ssss': {
+        banner: 'ssss',
+        versions: [
+          { value: 'gameexe.html', label: 'Version 0.0.0 (Forgotten)' }
+        ],
+        news: [
+          '⚠️ CORRUPTED DATA DETECTED ⚠️',
+          '𝓔𝓷𝓽𝓮𝓻 𝓪𝓽 𝔂𝓸𝓾𝓻 𝓸𝔀𝓷 𝓻𝓲𝓼𝓴...',
+          '✞ ABANDONED ✞'
+        ]
+      }
+    };
+
+    function updateGameContent(gameKey) {
+      const data = versionData[gameKey];
+      if (!data) return;
+
+      // Update banner
+      const bannerSection = document.querySelector('.banner-section');
+      if (bannerSection) {
+        if (gameKey === 'ssss') {
+          showSSSSBanner();
+        } else {
+          bannerSection.innerHTML = '';
+          const bannerImg = document.createElement('img');
+          bannerImg.src = data.banner;
+          bannerImg.style.cssText = `
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 8px;
+          `;
+          bannerSection.appendChild(bannerImg);
+        }
+      }
+
+      // Update version select
+      const versionSelect = document.getElementById('versionSelect');
+      if (versionSelect) {
+        versionSelect.innerHTML = '';
+        data.versions.forEach(ver => {
+          const option = document.createElement('option');
+          option.value = ver.value;
+          option.textContent = ver.label;
+          versionSelect.appendChild(option);
+        });
+        if (data.versions.length > 0) {
+          versionSelect.value = data.versions[0].value;
+        }
+      }
+
+      // Update news section
+      const newsSection = document.querySelector('.news-updates');
+      if (newsSection) {
+        const title = newsSection.querySelector('h3');
+        if (title) {
+          if (gameKey === 'ssss') {
+            title.textContent = '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️';
+            title.style.cssText = `
+              color: #ff0000;
+              text-shadow: 0 0 10px #ff0000, 0 0 20px #000;
+              animation: glitch 0.3s infinite;
+              font-weight: bold;
+            `;
+          } else {
+            title.textContent = 'NEWS & UPDATES';
+            title.style.cssText = '';
+          }
+        }
+
+        const newsList = newsSection.querySelector('.news-list');
+        if (newsList) {
+          newsList.innerHTML = '';
+          data.news.forEach(item => {
+            const newsItem = document.createElement('div');
+            newsItem.className = 'news-item';
+            newsItem.textContent = item;
+            newsList.appendChild(newsItem);
+          });
+        }
+      }
+    }
+
+    // ============= GAME TAB HANDLERS =============
+    function setupGameTabHandlers() {
+      const gameTabs = document.querySelectorAll('.game-tab');
+      gameTabs.forEach((tab) => {
+        tab.addEventListener('click', () => {
+          // Remove active from all tabs
+          gameTabs.forEach((t) => t.classList.remove('active'));
+          // Add active to clicked tab
+          tab.classList.add('active');
+
+          // Get game key
+          const gameKey = tab.getAttribute('data-game');
+          
+          // Update content
+          updateGameContent(gameKey);
+
+          // SSSS için jumble efektini başlat
+          if (gameKey === 'ssss') {
+            startSSSSNameJumble();
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) {
+              playBtn.classList.add('ssss-glitch');
+            }
+          } else {
+            stopSSSSNameJumble();
+            const playBtn = document.getElementById('playBtn');
+            if (playBtn) {
+              playBtn.classList.remove('ssss-glitch');
+            }
+          }
+        });
+      });
+    }
+
     // Play game function
     function playGame() {
       const dropdown = document.getElementById('versionSelect');
@@ -2860,6 +3110,15 @@
           const gameOverlay = document.getElementById('gameOverlay');
           if (gameOverlay) gameOverlay.style.display = 'none';
         });
+      }
+      
+      // Setup game tab handlers
+      setupGameTabHandlers();
+      
+      // Initialize with first game
+      const firstTab = document.querySelector('.game-tab');
+      if (firstTab) {
+        firstTab.click();
       }
     });
 
