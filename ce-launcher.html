@@ -400,10 +400,13 @@
       display: flex !important;
     }
 
-    /* Banner - sabit yükseklik */
+    /* Banner - sabit yükseklik, full width */
     .game-content-container .banner-section {
-      flex: 0 0 300px;
-      min-height: 300px;
+      flex: 0 0 400px;
+      min-height: 400px;
+      width: 100%;
+      margin: 0;
+      padding: 0;
     }
 
     /* Play bar - sabit */
@@ -749,10 +752,7 @@
     }
 
     .no-news-message {
-      text-align: center;
-      padding: 32px 24px;
-      color: var(--text-secondary);
-      font-size: 14px;
+      display: none;
     }
 
     /* ============= MODAL STYLES ============= */
@@ -2546,12 +2546,20 @@
           console.log('📦 Legends container:', legendsContainer);
           if (legendsContainer) {
             console.log('✅ Showing legends container');
-            legendsContainer.style.display = 'block';
+            legendsContainer.style.display = 'flex';
+            
+            // Tüm diğer container'ları gizle
+            document.querySelectorAll('.game-content-container').forEach(c => {
+              if (c !== legendsContainer) {
+                c.style.display = 'none';
+              }
+            });
+            
             updateGameContent('legends', legendsContainer);
           } else {
             console.error('❌ Legends container not found!');
           }
-          firstTab.click();
+          // firstTab.click() yapma - updateGameContent zaten çağrıldı
         }
 
         // Check offline status
@@ -2784,6 +2792,18 @@
           tab.classList.remove('active');
         });
         ssssTab.classList.add('active');
+        
+        // Tüm container'ları gizle
+        document.querySelectorAll('.game-content-container').forEach(container => {
+          container.style.display = 'none';
+        });
+
+        // SSSS container'ını göster
+        const ssssContainer = document.getElementById('ssssContent');
+        if (ssssContainer) {
+          ssssContainer.style.display = 'flex';
+          updateGameContent('ssss', ssssContainer);
+        }
       });
     }
 
