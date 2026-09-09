@@ -1154,7 +1154,7 @@
       <div class="content-area">
         
         <!-- Legends Tab Content -->
-        <div class="game-content-container" id="legendsContent" style="display: none;">
+        <div class="game-content-container" id="legendsContent" style="display: block;">
           <div class="banner-section">
             <div class="banner-overlay"></div>
             <div class="banner-content">
@@ -2169,6 +2169,46 @@
     /**
      * Game tab selection with filtering
      */
+    // ============= VERSION DATA - FALLBACK (hemen tanımla) =============
+    let versionData = {
+      'legends': {
+        banner: './final-banner.png',
+        versions: [
+          { value: 'game-1.6.2.html', label: 'Version 1.6.2 (Indev)' }
+        ],
+        newsTitle: '📰 NEWS & UPDATES - LEGENDS',
+        defaultNews: [
+          { title: '🌴 New Island Update', date: '2026-09-08' },
+          { title: '🐛 Bug Fixes & Improvements', date: '2026-09-07' },
+          { title: '⚡ Performance Optimization', date: '2026-09-06' }
+        ]
+      },
+      'legends-preview': {
+        banner: './preview-banner.png',
+        versions: [
+          { value: 'game-p-1.7.0.html', label: 'Version 1.7.0 (I-Preview)' }
+        ],
+        newsTitle: '📰 NEWS & UPDATES - PREVIEW',
+        defaultNews: [
+          { title: '🧪 New Weather System Testing', date: '2026-09-08' },
+          { title: '🎯 Community Features Early Access', date: '2026-09-07' },
+          { title: '📝 Your Feedback Shapes Development', date: '2026-09-06' }
+        ]
+      },
+      'ssss': {
+        banner: 'ssss',
+        versions: [
+          { value: 'gameexe.html', label: 'Version 0.0.0 (Forgotten)' }
+        ],
+        newsTitle: '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️',
+        defaultNews: [
+          { title: '⚠️ CORRUPTED DATA DETECTED ⚠️', date: '????-??-??' },
+          { title: '𝓔𝓷𝓽𝓮𝓻 𝓪𝓽 𝔂𝓸𝓾𝓻 𝓸𝔀𝓷 𝓻𝓲𝓼𝓴...', date: '????-??-??' },
+          { title: '✞ ABANDONED ✞', date: '????-??-??' }
+        ]
+      }
+    };
+
     // ============= TAB SWITCHING - HER SEKME AYRILIYOR =============
     document.querySelectorAll('.game-tab').forEach(tab => {
       tab.addEventListener('click', () => {
@@ -2208,31 +2248,39 @@
     /**
      * Open My Versions modal
      */
-    document.getElementById('myVersionsBtn').addEventListener('click', () => {
-      if (!navigator.onLine) {
-        alert('Cannot add new versions in offline mode.');
-        return;
-      }
-      populateVersionsList();
-      document.getElementById('versionsModal').classList.add('active');
-    });
+    const myVersionsBtn = document.getElementById('myVersionsBtn');
+    if (myVersionsBtn) {
+      myVersionsBtn.addEventListener('click', () => {
+        if (!navigator.onLine) {
+          alert('Cannot add new versions in offline mode.');
+          return;
+        }
+        populateVersionsList();
+        document.getElementById('versionsModal').classList.add('active');
+      });
+    }
 
     /**
      * Close My Versions modal
      */
-    document.getElementById('closeVersionsBtn').addEventListener('click', () => {
-      document.getElementById('versionsModal').classList.remove('active');
-    });
+    const closeVersionsBtn = document.getElementById('closeVersionsBtn');
+    if (closeVersionsBtn) {
+      closeVersionsBtn.addEventListener('click', () => {
+        document.getElementById('versionsModal').classList.remove('active');
+      });
+    }
 
     /**
      * Create new version profile
      */
-    document.getElementById('createVersionBtn').addEventListener('click', () => {
-      const name = document.getElementById('versionNameInput').value.trim();
-      const icon = document.getElementById('versionIconSelect').value;
-      const version = document.getElementById('newVersionSelect').value;
+    const createVersionBtn = document.getElementById('createVersionBtn');
+    if (createVersionBtn) {
+      createVersionBtn.addEventListener('click', () => {
+        const name = document.getElementById('versionNameInput').value.trim();
+        const icon = document.getElementById('versionIconSelect').value;
+        const version = document.getElementById('newVersionSelect').value;
 
-      if (!name) {
+        if (!name) {
         alert('Please enter a profile name.');
         return;
       }
@@ -2265,7 +2313,8 @@
       saveCustomVersion(newVersion);
       document.getElementById('versionNameInput').value = '';
       alert('Profile created successfully!');
-    });
+      });
+    }
 
     // ============= OFFLINE MODE LOGIC =============
 
@@ -2328,24 +2377,6 @@
         editBtn.style.display = 'none';
       }
     }
-
-    /**
-     * Save news button
-     */
-    document.getElementById('saveNewsBtn').addEventListener('click', () => {
-      const title = document.getElementById('newsTitle').value.trim();
-      const date = document.getElementById('newsDate').value.trim();
-      addNews(title, date);
-    });
-
-    /**
-     * Cancel news button
-     */
-    document.getElementById('cancelNewsBtn').addEventListener('click', () => {
-      document.getElementById('addNewsForm').classList.remove('active');
-      document.getElementById('newsTitle').value = '';
-      document.getElementById('newsDate').value = '';
-    });
 
     // ============= AUTO-LOGIN CHECK =============
     /**
@@ -2470,12 +2501,17 @@
 
         // Set active game tab ve göster (ilk sekme = Legends)
         const firstTab = document.querySelector('.game-tab.active');
+        console.log('🎮 First tab:', firstTab);
         if (firstTab) {
           // İlk container'ı (Legends) göster
           const legendsContainer = document.getElementById('legendsContent');
+          console.log('📦 Legends container:', legendsContainer);
           if (legendsContainer) {
+            console.log('✅ Showing legends container');
             legendsContainer.style.display = 'block';
             updateGameContent('legends', legendsContainer);
+          } else {
+            console.error('❌ Legends container not found!');
           }
           firstTab.click();
         }
@@ -2793,45 +2829,6 @@
     }
 
     // ============= SÜRÜM VERİLERİ (JSON'DAN YÜKLENECEK) =============
-    let versionData = {
-      'legends': {
-        banner: './final-banner.png',
-        versions: [
-          { value: 'game-1.6.2.html', label: 'Version 1.6.2 (Indev)' }
-        ],
-        newsTitle: '📰 NEWS & UPDATES - LEGENDS',
-        defaultNews: [
-          { title: '🌴 New Island Update', date: '2026-09-08' },
-          { title: '🐛 Bug Fixes & Improvements', date: '2026-09-07' },
-          { title: '⚡ Performance Optimization', date: '2026-09-06' }
-        ]
-      },
-      'legends-preview': {
-        banner: './preview-banner.png',
-        versions: [
-          { value: 'game-p-1.7.0.html', label: 'Version 1.7.0 (I-Preview)' }
-        ],
-        newsTitle: '📰 NEWS & UPDATES - PREVIEW',
-        defaultNews: [
-          { title: '🧪 New Weather System Testing', date: '2026-09-08' },
-          { title: '🎯 Community Features Early Access', date: '2026-09-07' },
-          { title: '📝 Your Feedback Shapes Development', date: '2026-09-06' }
-        ]
-      },
-      'ssss': {
-        banner: 'ssss',
-        versions: [
-          { value: 'gameexe.html', label: 'Version 0.0.0 (Forgotten)' }
-        ],
-        newsTitle: '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️',
-        defaultNews: [
-          { title: '⚠️ CORRUPTED DATA DETECTED ⚠️', date: '????-??-??' },
-          { title: '𝓔𝓷𝓽𝓮𝓻 𝓪𝓽 𝔂𝓸𝓾𝓻 𝓸𝔀𝓷 𝓻𝓲𝓼𝓴...', date: '????-??-??' },
-          { title: '✞ ABANDONED ✞', date: '????-??-??' }
-        ]
-      }
-    };
-
     // ============= YARDIMCI: TYPE FORMAT DÖNÜŞTÜRME =============
     function formatTypeLabel(typeString) {
       // indev_preview → I-Preview
@@ -2991,6 +2988,8 @@
     }
 
     function updateGameContent(gameKey, container) {
+      console.log('🔄 updateGameContent called:', gameKey, 'container:', container);
+      
       if (!container) {
         console.error('❌ Container not provided for:', gameKey);
         return;
