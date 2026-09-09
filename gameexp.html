@@ -18,6 +18,86 @@
      değiştirebilirsiniz — kod tamamen aynıdır.
      Varsayılan dil EN'dir; kullanıcı tercihi localStorage'da 'legends_lang'
      anahtarıyla saklanır. -->
+<!-- ========== LEGENDS SPLASH TEXT STİLLERİ (Minecraft Tarzı) ========== -->
+<style>
+/* ========== LEGENDS SPLASH TEXT STİLLERİ (Minecraft Tarzı) ========== */
+
+.splash-wrapper {
+  position: relative;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  padding: 10px 20px;
+  margin: 8px 0 12px 0;
+  z-index: 100;
+}
+
+.splash-text {
+  display: block;
+  font-size: clamp(18px, 4vw, 36px);
+  font-weight: 900;
+  color: #FFFF55;
+  text-shadow: 
+    2px 2px 0px #000,
+    -1px -1px 0px rgba(0, 0, 0, 0.5);
+  transform: skewX(-20deg) rotate(-15deg);
+  font-family: Arial, sans-serif;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  animation: splashPulse 2.5s ease-in-out infinite;
+}
+
+/* Minecraft Nefes Alma Animasyonu */
+@keyframes splashPulse {
+  0% {
+    transform: skewX(-20deg) rotate(-15deg) scale(0.95);
+    opacity: 0.8;
+    text-shadow: 
+      2px 2px 0px #000,
+      -1px -1px 0px rgba(0, 0, 0, 0.5),
+      0 0 8px rgba(255, 255, 85, 0.4);
+  }
+  50% {
+    transform: skewX(-20deg) rotate(-15deg) scale(1.05);
+    opacity: 1;
+    text-shadow: 
+      2px 2px 0px #000,
+      -1px -1px 0px rgba(0, 0, 0, 0.5),
+      0 0 20px rgba(255, 255, 85, 0.8);
+  }
+  100% {
+    transform: skewX(-20deg) rotate(-15deg) scale(0.95);
+    opacity: 0.8;
+    text-shadow: 
+      2px 2px 0px #000,
+      -1px -1px 0px rgba(0, 0, 0, 0.5),
+      0 0 8px rgba(255, 255, 85, 0.4);
+  }
+}
+
+/* Tablet & Desktop için metin boyutu */
+@media (min-width: 768px) {
+  .splash-text {
+    font-size: 32px;
+  }
+}
+
+/* Mobile için kompakt versiyon */
+@media (max-width: 480px) {
+  .splash-text {
+    font-size: 18px;
+    transform: skewX(-15deg) rotate(-10deg);
+  }
+  
+  .splash-wrapper {
+    height: 50px;
+    padding: 5px 10px;
+  }
+}
+</style>
+
 <script>
 /* =====================================================================
    language.js — Legends Indev Modüler Dil Mimarisi
@@ -2482,6 +2562,12 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 #chat-area,#tab-list,input{font-family:'Minecraftia',monospace!important;font-size:13px!important;font-weight:400!important;letter-spacing:0px;}
 .chat-msg,.chat-message{font-family:'Minecraftia',monospace!important;font-size:7px!important;font-weight:400!important;letter-spacing:0px;}
 #chat-input,#chat-hint{font-family:'Minecraftia',monospace!important;font-size:10px!important;font-weight:normal!important;letter-spacing:0px;text-shadow:none!important;}
+/* ========== SPLASH TEXT STİLLERİ (Minecraft Tarzı) ========== */
+.splash-wrapper{position:relative;height:60px;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:10px 20px;margin:8px 0 12px 0;}
+.splash-text{display:block;font-size:clamp(18px,4vw,36px);font-weight:900;color:#FFFF55;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5);transform:skewX(-20deg);font-family:Arial,sans-serif;letter-spacing:1px;white-space:nowrap;animation:splashPulse 2.5s ease-in-out infinite;}
+@keyframes splashPulse{0%{transform:skewX(-20deg) scale(0.95);opacity:0.8;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5),0 0 8px rgba(255,255,85,0.4);}50%{transform:skewX(-20deg) scale(1.05);opacity:1;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5),0 0 20px rgba(255,255,85,0.8);}100%{transform:skewX(-20deg) scale(0.95);opacity:0.8;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5),0 0 8px rgba(255,255,85,0.4);}}
+@media(max-width:480px){.splash-text{font-size:18px;transform:skewX(-15deg);}.splash-wrapper{height:50px;padding:5px 10px;}}
+/* ========== MENU OVERLAY ========== */
 #menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;overflow:hidden;}
 .menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px 18px;max-height:96vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
 .menu-screen::-webkit-scrollbar{width:4px;}
@@ -3677,7 +3763,16 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
   <div class="legends-modal-content">
     <div class="legends-modal-header">LEGENDS LOGIN</div>
     <div class="legends-modal-body">
-      <div style="color:#aaa; text-align:center; padding:20px;">Loading...</div>
+      <div id="auth-form-container">
+        <input type="email" id="auth-email" placeholder="Email address" class="legends-input">
+        <input type="password" id="auth-password" placeholder="Password" class="legends-input">
+        <button id="auth-login-btn" class="legends-btn primary">LOG IN</button>
+        <div class="auth-divider">OR</div>
+        <button id="auth-guest-btn" class="legends-btn secondary">PLAY AS GUEST</button>
+      </div>
+      <div class="auth-signup-hint">
+        Don't have an account? <a href="https://playlegends.vercel.app" target="_blank">Click here to sign in from our website.</a>
+      </div>
     </div>
   </div>
 </div>
@@ -3721,6 +3816,9 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
        Dil artık Ayarlar → Dil sekmesinden, 7 dil arasından seçiliyor. -->
   <div class="menu-screen active" id="screen-main">
     <div class="menu-logo-image"><img src="i-preview-icon.png" alt="Legends I-Preview"></div>
+    <div id="splashContainer" class="splash-wrapper">
+      <span id="splashText" class="splash-text">Loading...</span>
+    </div>
     <div class="game-version">Legends I-Preview v1.7Ip1</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
     <button class="mbtn" id="btn-multiplayer"></button>
@@ -27829,59 +27927,270 @@ console.log(`
 })();
 </script>
 
+<!-- ========== LEGENDS SPLASH TEXT SİSTEMİ (Minecraft Tarzı - Geliştirilmiş) ========== -->
 <script>
-  // ============= AUTO-LOGIN CHECK =============
-  function checkGameAutoLogin() {
-    const auth = firebase.auth();
-    const modal = document.getElementById('legends-auth-modal');
-    const body = modal ? modal.querySelector('.legends-modal-body') : null;
-    
-    if (!body) return;
+/**
+ * Legends Splash Text Sistemi - Dinamik Versiyon
+ * Tarih-ağırlıklı, Minecraft stilinde splash text
+ * Zaman-sınırlı splash text desteği ile
+ * 
+ * Özellikler:
+ * - Sayfa her açıldığında yeni splash text seçilir
+ * - Ana menüye her dönüş yeni metni tetikler
+ * - Belirli aralıklarla otomatik güncelleme
+ * - Tarih-bazlı özel metinler (doğum günleri vb.)
+ * - Zaman-sınırlı metinler (availableUntil sonrası görünmez)
+ * 
+ * Gereksinimler:
+ * - splashtext.json dosyası (proje kökü)
+ * - HTML'de: <div id="splashContainer" class="splash-wrapper">
+ *            <span id="splashText" class="splash-text">Loading...</span>
+ *           </div>
+ */
 
-    auth.onAuthStateChanged((user) => {
-      if (user) {
-        // Logged in
-        localStorage.setItem('gameUser', JSON.stringify({
-          username: user.displayName || "Player",
-          email: user.email,
-          uid: user.uid,
-          rank: 'Player',
-          type: 'firebase'
-        }));
-        
-        body.innerHTML = '<div style="color:#06ffa5; text-align:center; padding:20px; font-weight:bold;">✅ Logged in! Game starting...</div>';
-        setTimeout(() => { modal.style.display = 'none'; }, 2000);
-      } else {
-        // Not logged in
-        body.innerHTML = `
-          <div style="background:rgba(255,0,110,0.1); border:1px solid rgba(255,0,110,0.5); border-radius:8px; padding:20px; text-align:center; color:#fff; margin-bottom:15px;">
-            <strong>⚠️ Login Required</strong><br>
-            <span style="color:#aaa; font-size:12px; margin-top:8px; display:block;">
-              Sign up or log in from our website first, then come back here to play.
-            </span>
-          </div>
-          <button onclick="playAsGuest()" style="padding:12px; background:transparent; border:2px solid #00d9ff; border-radius:6px; color:#00d9ff; font-size:14px; font-weight:bold; cursor:pointer; width:100%; margin-bottom:15px;">PLAY AS GUEST</button>
-          <div style="color:#00d9ff; font-size:12px; text-align:center;">
-            Don't have an account? <a href="https://playlegends.vercel.app" target="_blank" style="color:#00d9ff; text-decoration:none; font-weight:bold;">Click here to sign in</a>
-          </div>
-        `;
-        modal.style.display = 'flex';
+let splashTextData = null;
+let splashRefreshInterval = null;
+let splashSelectionHistory = []; // 🔄 Seçim geçmişi - her metin ilk 5'te çıksın
+const GUARANTEE_ROTATION_COUNT = 5; // Döngü boyutu
+
+/**
+ * Belirtilen tarihin geçip geçmediğini kontrol et
+ * @param {string} dateStr - ISO format (YYYY-MM-DD)
+ * @returns {boolean} - true = tarih geçti (metin artık görünmez)
+ */
+function isDateExpired(dateStr) {
+  try {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const expireDate = new Date(dateStr);
+    expireDate.setHours(0, 0, 0, 0);
+    return today > expireDate;
+  } catch (e) {
+    console.warn(`⚠️ Geçersiz tarih formatı: ${dateStr}`);
+    return false;
+  }
+}
+
+/**
+ * splashtext.json dosyasını yükle
+ */
+async function loadSplashTextData() {
+  try {
+    const response = await fetch('./splashtext.json');
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    splashTextData = await response.json();
+    console.log('✅ Splash Text verisi yüklendi');
+  } catch (error) {
+    console.error('❌ Splash Text yükleme hatası:', error);
+    // Fallback veri
+    splashTextData = {
+      general: [
+        'Also try Miniblox!',
+        'Also try Minecraft!',
+        'Welcome to Legends!',
+        'Legends Never Die!',
+        'Made with passion and code!'
+      ],
+      timedGeneral: [
+        { text: 'Indev Phase!', availableUntil: '2028-01-01' },
+        { text: 'Early Access!', availableUntil: '2027-12-31' }
+      ],
+      technoblade: [
+        'Technoblade Never Dies!',
+        'Blood for the Blood God!',
+        'Potato King\'s Seal of Approval!'
+      ],
+      neonmonster: [
+        'Happy Birthday NeonMonster!',
+        'Glow up, NeonMonster!',
+        'Birthday neon vibes!'
+      ],
+      specialDates: []
+    };
+  }
+}
+
+/**
+ * Bugünün tarihinin özel gün olup olmadığını kontrol et
+ * @returns {Object|null} Özel gün yapısı veya null
+ */
+function checkSpecialDate() {
+  if (!splashTextData) return null;
+  
+  const today = new Date();
+  const month = today.getMonth() + 1; // 1-12
+  const day = today.getDate(); // 1-31
+  
+  const specialDate = splashTextData.specialDates.find(
+    date => date.month === month && date.day === day
+  );
+  
+  return specialDate || null;
+}
+
+/**
+ * Splash text seç (tarih-ağırlıklı + zaman-sınırlı algoritma)
+ * ÖZELLÍK: Tüm metinler ilk 5 çağrıda görünme garantisi
+ * @returns {string} Seçilen splash text
+ */
+/**
+ * Splash text seç (tarih-ağırlıklı + zaman-sınırlı + GARANTİLİ ROTASYON)
+ * 
+ * ÖZEL SİSTEM: Tüm metinler ilk 5 seçimde garantili görünür!
+ * - Her metin seçildikten sonra geçmiş listesine eklenir
+ * - İlk 5 seçim farklı metinler olmaya zorlanır
+ * - 5'inci seçimden sonra normal rasgele seçim başlar
+ * 
+ * @returns {string} Seçilen splash text
+ */
+function selectSplashText() {
+  if (!splashTextData) {
+    return 'Welcome to Legends!';
+  }
+  
+  // Zaman-sınırlı genel metinleri kontrol et
+  const validTimedTexts = [];
+  if (splashTextData.timedGeneral && Array.isArray(splashTextData.timedGeneral)) {
+    for (const timedText of splashTextData.timedGeneral) {
+      // availableUntil tarihinden sonra metin kaldırılır
+      if (!isDateExpired(timedText.availableUntil)) {
+        validTimedTexts.push(timedText.text);
+      }
+    }
+  }
+  
+  // Zaman-sınırlı ve sonsuz metinleri birleştir
+  let allGeneralTexts = [
+    ...(splashTextData.general || []),
+    ...validTimedTexts
+  ];
+  
+  // Özel gün kontrolü - metinleri havuza ekle
+  const specialDate = checkSpecialDate();
+  if (specialDate) {
+    const categoryTexts = splashTextData[specialDate.category];
+    if (categoryTexts && categoryTexts.length > 0) {
+      allGeneralTexts.push(...categoryTexts);
+    }
+  }
+  
+  if (allGeneralTexts.length === 0) {
+    return 'Welcome to Legends!';
+  }
+  
+  // 🔄 GARANTİLİ ROTASYON SİSTEMİ
+  // İlk 5 seçimde tüm metinler farklı olmalı
+  if (splashSelectionHistory.length < GUARANTEE_ROTATION_COUNT) {
+    // Seçim geçmişinde olmayan metinleri filtrele
+    const availableTexts = allGeneralTexts.filter(
+      text => !splashSelectionHistory.includes(text)
+    );
+    
+    if (availableTexts.length > 0) {
+      const randomIndex = Math.floor(Math.random() * availableTexts.length);
+      const selectedText = availableTexts[randomIndex];
+      
+      // Geçmişe ekle
+      splashSelectionHistory.push(selectedText);
+      
+      console.log(`📊 Garantili Rotasyon: ${splashSelectionHistory.length}/${GUARANTEE_ROTATION_COUNT}`);
+      
+      return selectedText;
+    }
+  }
+  
+  // 5 seçimden sonra geçmişi sıfırla ve normal seçime dön
+  if (splashSelectionHistory.length >= GUARANTEE_ROTATION_COUNT) {
+    splashSelectionHistory = [];
+    console.log('🔄 Rotasyon tamamlandı, döngü baştan başlıyor...');
+  }
+  
+  // Normal rasgele seçim
+  const randomIndex = Math.floor(Math.random() * allGeneralTexts.length);
+  return allGeneralTexts[randomIndex];
+}
+
+/**
+ * Splash Text'i DOM'a ekle ve animasyonu başlat (her defasında yeni metin seçilir)
+ */
+function updateSplashText() {
+  const splashElement = document.getElementById('splashText');
+  
+  if (!splashElement) {
+    console.warn('⚠️ #splashText elementi bulunamadı');
+    return;
+  }
+  
+  // Splash text seç ve göster
+  const selectedText = selectSplashText();
+  splashElement.textContent = selectedText;
+  splashElement.style.opacity = '0.8';
+  
+  console.log(`🎯 Splash Text: "${selectedText}"`);
+}
+
+/**
+ * Ana menüye geri dönüş anında splash'ı güncelle
+ * (ekranlı navigasyonla birlikte çalışır)
+ */
+function setupMainMenuObserver() {
+  const mainMenuScreen = document.getElementById('screen-main');
+  
+  if (!mainMenuScreen) {
+    console.warn('⚠️ #screen-main elementi bulunamadı');
+    return;
+  }
+  
+  // MutationObserver - ana menü aktifleştiğinde splash'ı güncelle
+  const observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      if (mutation.attributeName === 'class') {
+        const hasActive = mainMenuScreen.classList.contains('active');
+        if (hasActive) {
+          console.log('📍 Ana menüye döndü, splash text güncelleniyor...');
+          updateSplashText();
+        }
       }
     });
-  }
+  });
+  
+  // Gözlemeyi başlat
+  observer.observe(mainMenuScreen, { attributes: true, attributeFilter: ['class'] });
+}
 
-  function playAsGuest() {
-    const guestId = 'Guest_' + Math.random().toString(36).substr(2, 9).toUpperCase();
-    localStorage.setItem('gameUser', JSON.stringify({
-      username: guestId,
-      rank: 'Guest',
-      type: 'guest'
-    }));
-    document.getElementById('legends-auth-modal').style.display = 'none';
-  }
+/**
+ * Sayfa yüklendiğinde çalıştırılacak
+ */
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Splash text verisi yükle
+  await loadSplashTextData();
+  
+  // 2. İlk splash text'i göster
+  updateSplashText();
+  
+  // 3. Ana menü observer'ını kur (menüye her dönüşte güncelle)
+  setupMainMenuObserver();
+  
+  // 4. Opsiyonel: Belirli aralıklarla otomatik güncelleme (ör: her 5 saniye)
+  // Eğer sürekli değişmesini istersen bunu aktif et:
+  // splashRefreshInterval = setInterval(() => {
+  //   const mainMenuScreen = document.getElementById('screen-main');
+  //   if (mainMenuScreen && mainMenuScreen.classList.contains('active')) {
+  //     updateSplashText();
+  //   }
+  // }, 5000); // 5 saniyede bir değiş
+  
+  console.log('✅ Splash Text Sistemi hazır!');
+});
 
-  // Check on load
-  setTimeout(checkGameAutoLogin, 500);
+// Cleanup: sayfa kapatıldığında interval'ı temizle
+window.addEventListener('beforeunload', () => {
+  if (splashRefreshInterval) {
+    clearInterval(splashRefreshInterval);
+  }
+});
 </script>
 
 </body>
