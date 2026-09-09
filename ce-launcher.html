@@ -392,10 +392,29 @@
       display: flex;
       flex-direction: column;
       width: 100%;
+      height: 100%;
+      gap: 0;
     }
 
     .game-content-container[style*="display: block"] {
       display: flex !important;
+    }
+
+    /* Banner - sabit yükseklik */
+    .game-content-container .banner-section {
+      flex: 0 0 300px;
+      min-height: 300px;
+    }
+
+    /* Play bar - sabit */
+    .game-content-container .play-bar {
+      flex: 0 0 auto;
+    }
+
+    /* News section - kalan alanı kapla */
+    .game-content-container .content-section {
+      flex: 1;
+      overflow-y: auto;
     }
 
     .banner-overlay {
@@ -568,6 +587,13 @@
       color: var(--text-primary);
       text-transform: uppercase;
       letter-spacing: 1px;
+    }
+
+    /* News List - dinamik, flex container */
+    .news-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
     }
 
     .edit-news-btn {
