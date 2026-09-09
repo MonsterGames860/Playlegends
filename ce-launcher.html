@@ -1146,6 +1146,362 @@
       color: #ff0000 !important;
       font-weight: bold;
     }
+
+    /* ============= INSTALLATIONS & NEWS DETAIL SCREENS ============= */
+    .installations-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 850;
+      display: none;
+      flex-direction: column;
+      background: var(--bg-primary);
+      overflow: hidden;
+    }
+
+    .installations-screen.active {
+      display: flex;
+    }
+
+    .installations-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 18px 24px;
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .installations-back {
+      width: 40px;
+      height: 40px;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: rgba(0, 217, 255, 0.06);
+      color: var(--text-primary);
+      font-size: 22px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .installations-back:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .installations-header h1 {
+      flex: 1;
+      font-size: 22px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+
+    .installations-toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 24px;
+      border-bottom: 1px solid var(--border-color);
+      background: rgba(26, 30, 46, 0.55);
+    }
+
+    .installation-search {
+      flex: 1 1 220px;
+      min-width: 160px;
+    }
+
+    .sort-control {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-secondary);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .installations-filters {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: auto;
+      color: var(--text-secondary);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .filter-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .installations-body {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px;
+    }
+
+    .installations-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 14px;
+    }
+
+    .installation-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      min-height: 88px;
+      padding: 14px;
+      background: linear-gradient(135deg, rgba(26, 30, 46, 0.86), rgba(22, 33, 62, 0.66));
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      transition: var(--transition);
+    }
+
+    .installation-card:hover {
+      border-color: var(--neon-cyan);
+      box-shadow: var(--shadow-sm);
+      transform: translateY(-2px);
+    }
+
+    .installation-icon {
+      width: 48px;
+      height: 48px;
+      flex: 0 0 48px;
+      display: grid;
+      place-items: center;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      background: rgba(0, 0, 0, 0.35);
+      font-size: 28px;
+    }
+
+    .installation-icon img {
+      width: 38px;
+      height: 38px;
+      object-fit: contain;
+    }
+
+    .installation-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .installation-name {
+      overflow: hidden;
+      color: var(--text-primary);
+      font-size: 14px;
+      font-weight: 700;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .installation-detail {
+      margin-top: 5px;
+      color: var(--text-secondary);
+      font-size: 11px;
+    }
+
+    .installation-actions {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 5px;
+    }
+
+    .installation-actions button {
+      padding: 5px 7px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: rgba(0, 0, 0, 0.25);
+      color: var(--text-secondary);
+      font-size: 10px;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .installation-actions button:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .installation-actions .danger:hover {
+      border-color: var(--neon-pink);
+      color: var(--neon-pink);
+    }
+
+    .installations-empty {
+      padding: 64px 24px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .installation-form {
+      display: none;
+      max-width: 640px;
+      margin: 24px auto 0;
+      padding: 20px;
+      background: rgba(26, 30, 46, 0.76);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+    }
+
+    .installation-form.active {
+      display: block;
+    }
+
+    /* Show New/Edit Installation directly in front of the user. */
+    .installations-screen:has(#installationForm.active)::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 900;
+      background: rgba(0, 0, 0, 0.72);
+    }
+
+    #installationForm.active {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      z-index: 901;
+      width: min(640px, calc(100% - 32px));
+      max-height: calc(100vh - 32px);
+      margin: 0;
+      overflow-y: auto;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.6);
+    }
+
+    .installation-form-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .installation-form-actions .btn {
+      flex: 1;
+    }
+
+    .version-family-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+
+    .version-family-tab {
+      flex: 1;
+      padding: 9px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 5px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .version-family-tab.active {
+      border-color: var(--neon-cyan);
+      background: rgba(0, 217, 255, 0.1);
+      color: var(--neon-cyan);
+    }
+
+    .news-detail-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      background: rgba(0, 0, 0, 0.78);
+    }
+
+    .news-detail-overlay.active {
+      display: flex;
+    }
+
+    .news-detail {
+      width: min(680px, 100%);
+      max-height: 82vh;
+      overflow-y: auto;
+      padding: 28px;
+      background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+      border: 1px solid var(--border-color);
+      border-radius: 10px;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .news-detail-title {
+      margin-bottom: 8px;
+      font-size: 22px;
+      line-height: 1.25;
+    }
+
+    .news-detail-date {
+      margin-bottom: 20px;
+      color: var(--text-tertiary);
+      font-size: 11px;
+    }
+
+    .news-detail-notes {
+      color: var(--text-secondary);
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+
+    .news-card {
+      cursor: pointer;
+    }
+
+    .news-card-controls {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      flex-shrink: 0;
+    }
+
+    .news-card-control {
+      padding: 4px 8px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: transparent;
+      color: var(--text-secondary);
+      font-size: 10px;
+      cursor: pointer;
+    }
+
+    .news-card-control:hover {
+      border-color: var(--neon-cyan);
+      color: var(--neon-cyan);
+    }
+
+    .news-card-control.danger:hover {
+      border-color: var(--neon-pink);
+      color: var(--neon-pink);
+    }
+
+    @media (max-width: 760px) {
+      .sidebar {
+        width: 220px;
+      }
+
+      .installations-toolbar {
+        padding: 12px 16px;
+      }
+
+      .installations-body {
+        padding: 16px;
+      }
+
+      .installations-filters {
+        width: 100%;
+        margin-left: 0;
+      }
+    }
   </style>
 </head>
 
@@ -1185,7 +1541,7 @@
       <div class="header-bar">
         <div class="header-title" id="headerTitle">LEGENDS</div>
         <div class="header-spacer"></div>
-        <button class="my-versions-btn" id="myVersionsBtn">My Versions</button>
+        <button class="my-versions-btn" id="myVersionsBtn">Installations</button>
       </div>
 
       <!-- Content Area -->
@@ -1212,6 +1568,7 @@
               <div class="news-title-section">
                 <div class="news-title">NEWS & UPDATES</div>
               </div>
+              <button class="edit-news-btn news-editor-trigger" type="button" data-news-game="legends" style="display: none;">Manage</button>
             </div>
             <div class="news-list" id="legendsNewsList"></div>
           </div>
@@ -1238,6 +1595,7 @@
               <div class="news-title-section">
                 <div class="news-title">NEWS & UPDATES</div>
               </div>
+              <button class="edit-news-btn news-editor-trigger" type="button" data-news-game="legends-preview" style="display: none;">Manage</button>
             </div>
             <div class="news-list" id="previewNewsList"></div>
           </div>
@@ -1264,20 +1622,101 @@
               <div class="news-title-section">
                 <div class="news-title">NEWS & UPDATES</div>
               </div>
+              <button class="edit-news-btn news-editor-trigger" type="button" data-news-game="ssss" style="display: none;">Manage</button>
             </div>
             <div class="news-list" id="ssssNewsList"></div>
           </div>
         </div>
         
       </div>
-          </div>
+    </div>
+  </div>
 
-          <div id="newsContainer">
-            <div class="no-news-message">No announcements available</div>
-          </div>
-        </div>
+  <!-- Installations Screen -->
+  <section class="installations-screen" id="installationsScreen" aria-hidden="true">
+    <div class="installations-header">
+      <button class="installations-back" id="installationsBackBtn" type="button" aria-label="Back">‹</button>
+      <h1>Installations</h1>
+      <button class="btn btn-primary" id="newInstallationBtn" type="button">New Installation</button>
+    </div>
+
+    <div class="installations-toolbar">
+      <input class="form-input installation-search" id="installationSearch" type="search" placeholder="Search installations..." />
+      <label class="sort-control" for="installationSort">
+        Sort by
+        <select class="form-select" id="installationSort">
+          <option value="name">Name</option>
+          <option value="lastPlayed">Last Played</option>
+        </select>
+      </label>
+      <div class="installations-filters" aria-label="Version filters">
+        <label class="filter-toggle">
+          <input type="checkbox" id="showInstallationsVersions" checked />
+          <span>Versions</span>
+        </label>
+        <label class="filter-toggle">
+          <input type="checkbox" id="showInstallationsPreviews" checked />
+          <span>Previews</span>
+        </label>
       </div>
     </div>
+
+    <div class="installations-body">
+      <div class="installation-form" id="installationForm">
+        <div class="modal-title" id="installationFormTitle">New Installation</div>
+        <div class="form-group">
+          <label class="form-label" for="installationNameInput">Installation Name</label>
+          <input class="form-input" id="installationNameInput" type="text" placeholder="e.g. Survival World" maxlength="80" />
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="installationIconInput">Icon</label>
+          <select class="form-select" id="installationIconInput">
+            <option value="🎮">🎮 Game</option>
+            <option value="🌿">🌿 Grass</option>
+            <option value="🪨">🪨 Stone</option>
+            <option value="⭐">⭐ Star</option>
+            <option value="🧪">🧪 Preview</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Version</label>
+          <div class="version-family-tabs">
+            <button class="version-family-tab active" type="button" data-family="final">Legends Versions</button>
+            <button class="version-family-tab" type="button" data-family="preview">Legends Preview Versions</button>
+          </div>
+          <select class="form-select" id="installationVersionInput">
+            <option value="">Select a version...</option>
+          </select>
+        </div>
+        <div class="installation-form-actions">
+          <button class="btn btn-primary" id="saveInstallationBtn" type="button">Install</button>
+          <button class="btn btn-secondary" id="cancelInstallationBtn" type="button">Cancel</button>
+        </div>
+      </div>
+
+      <div class="installations-list" id="installationsList"></div>
+      <div class="installations-empty" id="installationsEmpty" style="display: none;">
+        No installations created yet. Select <strong>New Installation</strong> to create one.
+      </div>
+    </div>
+  </section>
+
+  <!-- News Detail Screen -->
+  <div class="news-detail-overlay" id="newsDetailOverlay" role="dialog" aria-modal="true">
+    <article class="news-detail">
+      <div class="news-detail-title" id="newsDetailTitle"></div>
+      <div class="news-detail-date" id="newsDetailDate"></div>
+      <div class="news-detail-notes" id="newsDetailNotes"></div>
+      <button class="btn btn-secondary" id="closeNewsDetailBtn" type="button" style="margin-top: 24px; width: 100%;">Close</button>
+    </article>
+  </div>
+
+  <!-- Game Overlay -->
+  <div id="gameOverlay" style="display: none; position: fixed; inset: 0; z-index: 1100; background: #000; flex-direction: column;">
+    <div style="display: flex; justify-content: flex-end; padding: 10px; background: var(--bg-secondary);">
+      <button class="btn btn-secondary close-game-btn" type="button">Close</button>
+    </div>
+    <iframe id="gameFrame" title="Legends game" style="flex: 1; width: 100%; border: 0; background: #000;" allow="fullscreen"></iframe>
   </div>
 
   <!-- Auth Modal -->
@@ -1337,10 +1776,10 @@
     </div>
   </div>
 
-  <!-- My Versions Modal -->
+  <!-- Legacy Installations Modal (kept for backward compatibility) -->
   <div class="modal-overlay" id="versionsModal">
     <div class="modal" style="max-width: 500px;">
-      <div class="modal-header">My Versions</div>
+      <div class="modal-header">Installations</div>
 
       <div class="versions-container">
         <!-- Add New Version Form -->
@@ -1528,12 +1967,18 @@
      */
     async function loadStaticVersions() {
       try {
-        const response = await fetch('/versions.json');
+        const response = await fetch('./versions.json');
         if (response.ok) {
           const data = await response.json();
           STATIC_AVAILABLE_VERSIONS = data.versions || [];
           localStorage.setItem('versionsLastUpdate', data.lastUpdated || new Date().toISOString());
           console.log(`✅ Loaded ${STATIC_AVAILABLE_VERSIONS.length} versions from versions.json`);
+          if (typeof populateVersionDropdown === 'function') {
+            populateVersionDropdown(STATIC_AVAILABLE_VERSIONS);
+          }
+          if (typeof renderInstallations === 'function') {
+            renderInstallations();
+          }
         }
       } catch (error) {
         console.warn('Could not load versions.json:', error);
@@ -2215,11 +2660,7 @@
           { value: 'game-1.6.2.html', label: 'Version 1.6.2 (Indev)' }
         ],
         newsTitle: '📰 NEWS & UPDATES - LEGENDS',
-        defaultNews: [
-          { title: '🌴 New Island Update', date: '2026-09-08' },
-          { title: '🐛 Bug Fixes & Improvements', date: '2026-09-07' },
-          { title: '⚡ Performance Optimization', date: '2026-09-06' }
-        ]
+        defaultNews: []
       },
       'legends-preview': {
         banner: './preview-banner.png',
@@ -2227,16 +2668,12 @@
           { value: 'game-p-1.7.0.html', label: 'Version 1.7.0 (I-Preview)' }
         ],
         newsTitle: '📰 NEWS & UPDATES - PREVIEW',
-        defaultNews: [
-          { title: '🧪 New Weather System Testing', date: '2026-09-08' },
-          { title: '🎯 Community Features Early Access', date: '2026-09-07' },
-          { title: '📝 Your Feedback Shapes Development', date: '2026-09-06' }
-        ]
+        defaultNews: []
       },
       'ssss': {
         banner: 'ssss',
         versions: [
-          { value: 'gameexe.html', label: 'Version 0.0.0 (Forgotten)' }
+          { value: 'gameexp.html', label: 'Version 0.0.0 (Forgotten)' }
         ],
         newsTitle: '⚠️ W͟Â̸R̴N̵I̴Ñ̸G͝S̸ &̴ ̴C̷Ỏ̶R̴Ŕ̷U̶P̵T̷I̶Ọ̴N ⚠️',
         defaultNews: [
@@ -2284,17 +2721,12 @@
     // ============= MY VERSIONS MODAL LOGIC =============
 
     /**
-     * Open My Versions modal
+     * Open Installations screen
      */
     const myVersionsBtn = document.getElementById('myVersionsBtn');
     if (myVersionsBtn) {
       myVersionsBtn.addEventListener('click', () => {
-        if (!navigator.onLine) {
-          alert('Cannot add new versions in offline mode.');
-          return;
-        }
-        populateVersionsList();
-        document.getElementById('versionsModal').classList.add('active');
+         openInstallationsScreen();
       });
     }
 
@@ -2454,6 +2886,9 @@
             saveUser(user);
             updateProfileCard(user);
             closeAuthModal();
+            if (typeof hydrateRankFromFirebase === 'function') {
+              hydrateRankFromFirebase();
+            }
           } else {
             // No user logged in Firebase - show login required message
             console.log('⚠️ No auto-login: User not logged in');
@@ -2598,7 +3033,7 @@
       setInterval(async () => {
         try {
           // Cache bust with timestamp
-          const response = await fetch('/versions.json?t=' + Date.now());
+          const response = await fetch('./versions.json?t=' + Date.now());
           
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -2715,11 +3150,13 @@
     let ssssNameInterval = null;
     
     function generateRandomSSSSName() {
-      // Tüm karakterler random olacak
-      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:",.<>?/~`§█▒░╝╚╔╩';
-      
+      // Minecraft-style jumble: ASCII letters, numbers and symbols only.
+      // Emojis are intentionally excluded.
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:',.<>?/~`";
+
       let ssss = '';
-      for (let i = 0; i < 4; i++) {
+      const length = 4 + Math.floor(Math.random() * 5);
+      for (let i = 0; i < length; i++) {
         ssss += chars[Math.floor(Math.random() * chars.length)];
       }
       return `Legends ${ssss}`;
@@ -2784,6 +3221,7 @@
       }
       
       console.log('✅ SSSS tab added');
+      startSSSSNameJumble();
       
       // Tab click handler
       ssssTab.addEventListener('click', () => {
@@ -3025,7 +3463,7 @@
         gap: 12px;
       `;
       errorBanner.innerHTML = `
-        <span>⚠️ Sürüm yönetimi dosyası yüklenemedi. ${errorMessage}</span>
+        <span>⚠️ The versions file could not be loaded. ${errorMessage}</span>
         <button onclick="this.parentElement.remove()" style="
           background: rgba(255,255,255,0.2);
           border: 1px solid #fff;
@@ -3033,7 +3471,7 @@
           padding: 4px 12px;
           border-radius: 4px;
           cursor: pointer;
-        ">Kapat</button>
+        ">Close</button>
       `;
       
       document.body.insertBefore(errorBanner, document.body.firstChild);
@@ -3269,7 +3707,7 @@
 
       // Easter egg version (SSSS) ayrı PWA'da açılır
       if (gameKey === 'ssss') {
-        if (selectedFile === 'gameexe.html') {
+        if (selectedFile === 'gameexp.html') {
           console.log('🔓 Opening SSSS Easter Egg...');
           window.open(selectedFile, 'ssss_game', 'width=1200,height=800');
           return;
@@ -3337,6 +3775,712 @@
       if (firstTab) {
         firstTab.click();
       }
+    });
+
+    // ============= COMPLETED NEWS & INSTALLATIONS SYSTEM =============
+    // This block replaces the unfinished modal/local demo logic above while
+    // keeping the launcher's existing Firebase authentication and styling.
+    const NEWS_STORAGE_KEY = 'ceNewsByGame';
+    const INSTALLATIONS_STORAGE_KEY = 'ceInstallations';
+    let activeNewsEditorGame = 'legends';
+    let editingNewsId = null;
+    let installationState = { editingId: null, family: 'final' };
+    let sharedNewsListenerStarted = false;
+
+    function escapeHTML(value) {
+      return String(value == null ? '' : value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+
+    function getNewsState() {
+      try {
+        const stored = JSON.parse(localStorage.getItem(NEWS_STORAGE_KEY) || '{}');
+        return {
+          legends: Array.isArray(stored.legends) ? stored.legends : [],
+          'legends-preview': Array.isArray(stored['legends-preview']) ? stored['legends-preview'] : [],
+          ssss: Array.isArray(stored.ssss) ? stored.ssss : []
+        };
+      } catch (error) {
+        console.warn('Could not read news updates:', error);
+        return { legends: [], 'legends-preview': [], ssss: [] };
+      }
+    }
+
+    function saveNewsState(newsState, syncRemote = true) {
+      localStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify(newsState));
+      if (syncRemote && typeof firebase !== 'undefined' && firebase.database) {
+        try {
+          firebase.database().ref('launcherNews').set(newsState).catch(error => {
+            console.warn('Shared news save failed; local copy kept:', error);
+          });
+        } catch (error) {
+          console.warn('Shared news is unavailable; local copy kept:', error);
+        }
+      }
+    }
+
+    function startSharedNewsListener() {
+      if (sharedNewsListenerStarted || typeof firebase === 'undefined' || !firebase.database) return;
+      sharedNewsListenerStarted = true;
+      try {
+        firebase.database().ref('launcherNews').on('value', snapshot => {
+          const remoteNews = snapshot.val();
+          if (!remoteNews || typeof remoteNews !== 'object') return;
+          const normalized = {
+            legends: Array.isArray(remoteNews.legends) ? remoteNews.legends : [],
+            'legends-preview': Array.isArray(remoteNews['legends-preview']) ? remoteNews['legends-preview'] : [],
+            ssss: Array.isArray(remoteNews.ssss) ? remoteNews.ssss : []
+          };
+          localStorage.setItem(NEWS_STORAGE_KEY, JSON.stringify(normalized));
+          renderAllNews();
+        }, error => console.warn('Shared news listener unavailable:', error));
+      } catch (error) {
+        console.warn('Shared news listener unavailable:', error);
+      }
+    }
+
+    function hasEditNewsPermission(user) {
+      if (!user) return false;
+      const rank = String(user.rank || user.role || '').toLowerCase();
+      return rank === 'owner' || rank === 'dev' || rank === 'developer';
+    }
+
+    async function hydrateRankFromFirebase() {
+      const user = getUser();
+      if (!user || !user.uid || typeof firebase === 'undefined' || !firebase.database) return;
+      try {
+        const snapshot = await firebase.database().ref(`users/${user.uid}/rank`).once('value');
+        const rank = snapshot.val();
+        if (rank) {
+          user.rank = rank;
+          saveUser(user);
+          updateProfileCard(user);
+          renderAllNews();
+        }
+      } catch (error) {
+        // A restricted database rule should not prevent the launcher from working.
+        console.warn('Could not load user rank:', error);
+      }
+    }
+
+    function getNewsGameListId(gameKey) {
+      return gameKey === 'legends-preview' ? 'previewNewsList' : `${gameKey}NewsList`;
+    }
+
+    function renderNewsForGame(gameKey) {
+      const list = document.getElementById(getNewsGameListId(gameKey));
+      if (!list) return;
+      const state = getNewsState();
+      const items = Array.isArray(state[gameKey]) ? state[gameKey] : [];
+      const canManage = hasEditNewsPermission(getUser());
+
+      if (!items.length) {
+        list.innerHTML = '<div class="no-news-message" style="display: block;">No updates available yet.</div>';
+        return;
+      }
+
+      list.innerHTML = items.map((item, index) => {
+        const safeId = escapeHTML(item.id);
+        const controls = canManage ? `
+          <div class="news-card-controls" onclick="event.stopPropagation()">
+            <button class="news-card-control" type="button" onclick="moveNewsItem('${safeId}', -1)">↑</button>
+            <button class="news-card-control" type="button" onclick="moveNewsItem('${safeId}', 1)">↓</button>
+            <button class="news-card-control" type="button" onclick="editNewsItem('${safeId}', '${escapeHTML(gameKey)}')">Edit</button>
+            <button class="news-card-control danger" type="button" onclick="deleteNewsItem('${safeId}', '${escapeHTML(gameKey)}')">Delete</button>
+          </div>
+        ` : '';
+        return `
+          <article class="news-card" data-news-id="${safeId}" onclick="openNewsDetail('${safeId}', '${escapeHTML(gameKey)}')">
+            <div class="news-card-content">
+              <div class="news-card-title">${escapeHTML(item.title)}</div>
+              <div class="news-card-date">${escapeHTML(item.date || '')}</div>
+            </div>
+            ${controls}
+          </article>
+        `;
+      }).join('');
+    }
+
+    function renderAllNews() {
+      ['legends', 'legends-preview', 'ssss'].forEach(renderNewsForGame);
+      updateNewsEditButton();
+    }
+
+    function loadAndDisplayNews() {
+      renderAllNews();
+      startSharedNewsListener();
+    }
+
+    function updateNewsEditButton() {
+      const canManage = hasEditNewsPermission(getUser());
+      document.querySelectorAll('.news-editor-trigger').forEach(button => {
+        button.style.display = canManage ? 'block' : 'none';
+        button.onclick = () => openNewsEditor(button.dataset.newsGame);
+      });
+    }
+
+    function ensureNewsEditor() {
+      let editor = document.getElementById('newsEditorOverlay');
+      if (editor) return editor;
+      editor = document.createElement('div');
+      editor.id = 'newsEditorOverlay';
+      editor.className = 'news-detail-overlay';
+      editor.innerHTML = `
+        <article class="news-detail">
+          <div class="modal-header" id="newsEditorHeading">New Update</div>
+          <div class="form-group">
+            <label class="form-label" for="newsTitleInput">Update Title / Category</label>
+            <input class="form-input" id="newsTitleInput" type="text" maxlength="120" placeholder="e.g. Version 1.6.2 Update" />
+          </div>
+          <div class="form-group" style="margin-top: 14px;">
+            <label class="form-label" for="newsNotesInput">Update Notes</label>
+            <textarea class="form-input" id="newsNotesInput" rows="9" maxlength="10000" placeholder="Write the update notes here..."></textarea>
+          </div>
+          <div class="installation-form-actions">
+            <button class="btn btn-primary" id="saveNewsBtn" type="button">Save Update</button>
+            <button class="btn btn-secondary" id="cancelNewsBtn" type="button">Cancel</button>
+          </div>
+        </article>
+      `;
+      document.body.appendChild(editor);
+      editor.querySelector('#cancelNewsBtn').addEventListener('click', () => editor.classList.remove('active'));
+      editor.querySelector('#saveNewsBtn').addEventListener('click', saveNewsFromEditor);
+      return editor;
+    }
+
+    function openNewsEditor(gameKey, item = null) {
+      if (!hasEditNewsPermission(getUser())) {
+        alert('Only Owner / Developer users can manage updates.');
+        return;
+      }
+      const editor = ensureNewsEditor();
+      activeNewsEditorGame = gameKey;
+      editingNewsId = item ? item.id : null;
+      editor.querySelector('#newsEditorHeading').textContent = item ? 'Edit Update' : 'New Update';
+      editor.querySelector('#newsTitleInput').value = item ? item.title : '';
+      editor.querySelector('#newsNotesInput').value = item ? item.notes : '';
+      editor.classList.add('active');
+      editor.querySelector('#newsTitleInput').focus();
+    }
+
+    function saveNewsFromEditor() {
+      const titleInput = document.getElementById('newsTitleInput');
+      const notesInput = document.getElementById('newsNotesInput');
+      const title = titleInput.value.trim();
+      const notes = notesInput.value.trim();
+      if (!title || !notes) {
+        alert('Please enter both an update title and update notes.');
+        return;
+      }
+
+      const state = getNewsState();
+      const items = state[activeNewsEditorGame] || [];
+      const now = new Date().toISOString();
+      if (editingNewsId) {
+        const item = items.find(entry => entry.id === editingNewsId);
+        if (item) {
+          item.title = title;
+          item.notes = notes;
+          item.date = now.slice(0, 10);
+        }
+      } else {
+        items.unshift({
+          id: `news-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          title,
+          notes,
+          date: now.slice(0, 10),
+          createdAt: now
+        });
+      }
+      state[activeNewsEditorGame] = items;
+      saveNewsState(state);
+      document.getElementById('newsEditorOverlay').classList.remove('active');
+      renderAllNews();
+    }
+
+    function openNewsDetail(id, gameKey) {
+      const item = (getNewsState()[gameKey] || []).find(entry => entry.id === id);
+      if (!item) return;
+      document.getElementById('newsDetailTitle').textContent = item.title;
+      document.getElementById('newsDetailDate').textContent = item.date || '';
+      document.getElementById('newsDetailNotes').textContent = item.notes || '';
+      document.getElementById('newsDetailOverlay').classList.add('active');
+    }
+
+    function editNewsItem(id, gameKey) {
+      const item = (getNewsState()[gameKey] || []).find(entry => entry.id === id);
+      if (item) openNewsEditor(gameKey, item);
+    }
+
+    function deleteNewsItem(id, gameKey) {
+      if (!hasEditNewsPermission(getUser()) || !confirm('Delete this update?')) return;
+      const state = getNewsState();
+      state[gameKey] = (state[gameKey] || []).filter(item => item.id !== id);
+      saveNewsState(state);
+      renderAllNews();
+    }
+
+    function moveNewsItem(id, direction) {
+      if (!hasEditNewsPermission(getUser())) return;
+      const state = getNewsState();
+      // The clicked control supplies its game through the card lookup.
+      const card = Array.from(document.querySelectorAll('.news-card[data-news-id]'))
+        .find(candidate => candidate.dataset.newsId === id);
+      const list = card ? card.closest('.news-list') : null;
+      const gameKey = list && list.id === 'previewNewsList' ? 'legends-preview' : list && list.id === 'ssssNewsList' ? 'ssss' : 'legends';
+      const gameItems = state[gameKey] || [];
+      const index = gameItems.findIndex(item => item.id === id);
+      const nextIndex = index + direction;
+      if (index < 0 || nextIndex < 0 || nextIndex >= gameItems.length) return;
+      [gameItems[index], gameItems[nextIndex]] = [gameItems[nextIndex], gameItems[index]];
+      state[gameKey] = gameItems;
+      saveNewsState(state);
+      renderAllNews();
+    }
+
+    function getInstallationsStorageKey() {
+      const user = getUser();
+      const identity = user && (user.uid || user.username);
+      return `${INSTALLATIONS_STORAGE_KEY}:${identity || 'guest'}`;
+    }
+
+    function getInstallations() {
+      try {
+        const values = JSON.parse(localStorage.getItem(getInstallationsStorageKey()) || '[]');
+        return Array.isArray(values) ? values : [];
+      } catch (error) {
+        return [];
+      }
+    }
+
+    function isSSSSVersion(filename) {
+      const value = String(filename || '').toLowerCase();
+      return value === 'gameexp.html' || value === 'gameexe.html' || value.includes('ssss');
+    }
+
+    function saveInstallations(values) {
+      localStorage.setItem(getInstallationsStorageKey(), JSON.stringify(values));
+    }
+
+    function extractVersionNumber(filename) {
+      const match = String(filename || '').match(/\d+\.\d+(?:\.\d+)?(?:[A-Za-z]+p?\d*)?/);
+      return match ? match[0] : String(filename || '').replace(/^game-/, '').replace(/\.html$/i, '');
+    }
+
+    function getVersionRecords() {
+      const records = STATIC_AVAILABLE_VERSIONS.length ? STATIC_AVAILABLE_VERSIONS : [
+        ...(versionData.legends.versions || []).map(v => ({
+          filename: v.value,
+          version: extractVersionNumber(v.value),
+          type: 'indev',
+          category: 'final'
+        })),
+        ...(versionData['legends-preview'].versions || []).map(v => ({
+          filename: v.value,
+          version: extractVersionNumber(v.value),
+          type: 'indev_preview',
+          category: 'preview'
+        }))
+      ];
+      return records
+        .map(record => ({ ...record, version: record.version || extractVersionNumber(record.filename) }))
+        .sort((a, b) => compareVersions(String(a.version || ''), String(b.version || '')));
+    }
+
+    function versionCategory(record) {
+      return record.category === 'preview' || String(record.type || '').includes('preview') ? 'preview' : 'final';
+    }
+
+    function versionLabel(record) {
+      return parseVersionLabel(record.filename, record.version || record.filename, record.type || '');
+    }
+
+    async function ensureVersionsManifestLoaded() {
+      if (STATIC_AVAILABLE_VERSIONS.length) return true;
+      try {
+        const manifestUrl = new URL('./versions.json', document.baseURI).href + `?t=${Date.now()}`;
+        const response = await fetch(manifestUrl, { cache: 'no-store' });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        if (!Array.isArray(data.versions)) throw new Error('Invalid versions.json format');
+        STATIC_AVAILABLE_VERSIONS = data.versions;
+        localStorage.setItem('versionsLastUpdate', data.lastUpdated || new Date().toISOString());
+        populateVersionDropdown(STATIC_AVAILABLE_VERSIONS);
+        return true;
+      } catch (error) {
+        console.warn('Could not load versions.json for Installations:', error);
+        return false;
+      }
+    }
+
+    function populateInstallationVersionInput(family = installationState.family) {
+      const select = document.getElementById('installationVersionInput');
+      if (!select) return;
+      select.innerHTML = '';
+      const records = getVersionRecords().filter(record => versionCategory(record) === family);
+      if (!records.length) {
+        select.innerHTML = '<option value="">No versions available</option>';
+        return;
+      }
+      records.forEach(record => {
+        const option = document.createElement('option');
+        option.value = record.filename;
+        option.textContent = versionLabel(record);
+        option.dataset.category = versionCategory(record);
+        select.appendChild(option);
+      });
+    }
+
+    function getRecordForFilename(filename) {
+      return getVersionRecords().find(record => record.filename === filename) || {
+        filename,
+        version: filename,
+        type: filename && filename.toLowerCase().includes('p') ? 'preview' : 'indev',
+        category: filename && filename.toLowerCase().includes('p') ? 'preview' : 'final'
+      };
+    }
+
+    function resetInstallationForm() {
+      installationState.editingId = null;
+      document.getElementById('installationFormTitle').textContent = 'New Installation';
+      document.getElementById('installationNameInput').value = '';
+      document.getElementById('installationIconInput').value = '🎮';
+      document.getElementById('saveInstallationBtn').textContent = 'Install';
+      installationState.family = 'final';
+      document.querySelectorAll('.version-family-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.family === 'final'));
+      populateInstallationVersionInput('final');
+      document.getElementById('installationForm').classList.add('active');
+    }
+
+    async function openInstallationsScreen() {
+      const screen = document.getElementById('installationsScreen');
+      if (!screen) return;
+      document.getElementById('versionsModal').classList.remove('active');
+      screen.classList.add('active');
+      screen.setAttribute('aria-hidden', 'false');
+      await ensureVersionsManifestLoaded();
+      renderInstallations();
+    }
+
+    function closeInstallationsScreen() {
+      const screen = document.getElementById('installationsScreen');
+      if (!screen) return;
+      screen.classList.remove('active');
+      screen.setAttribute('aria-hidden', 'true');
+      document.getElementById('installationForm').classList.remove('active');
+    }
+
+    function editInstallation(id) {
+      const item = getInstallations().find(entry => entry.id === id);
+      if (!item) return;
+      const record = getRecordForFilename(item.filename);
+      installationState.editingId = id;
+      installationState.family = versionCategory(record);
+      document.getElementById('installationFormTitle').textContent = 'Edit Installation';
+      document.getElementById('installationNameInput').value = item.displayName;
+      document.getElementById('installationIconInput').value = item.icon;
+      document.querySelectorAll('.version-family-tab').forEach(tab => tab.classList.toggle('active', tab.dataset.family === installationState.family));
+      populateInstallationVersionInput(installationState.family);
+      document.getElementById('installationVersionInput').value = item.filename;
+      document.getElementById('saveInstallationBtn').textContent = 'Save Changes';
+      document.getElementById('installationForm').classList.add('active');
+    }
+
+    function duplicateInstallation(id) {
+      const values = getInstallations();
+      const original = values.find(item => item.id === id);
+      if (!original) return;
+      const base = original.displayName.replace(/ \(\d+\)$/, '');
+      let number = 1;
+      let name = `${base} (${number})`;
+      while (values.some(item => item.displayName.toLowerCase() === name.toLowerCase())) {
+        number += 1;
+        name = `${base} (${number})`;
+      }
+      values.push({
+        ...original,
+        id: `installation-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+        displayName: name,
+        createdAt: new Date().toISOString(),
+        lastPlayed: null
+      });
+      saveInstallations(values);
+      renderInstallations();
+    }
+
+    function deleteInstallation(id) {
+      const item = getInstallations().find(entry => entry.id === id);
+      if (!item || !confirm(`Delete "${item.displayName}"?`)) return;
+      saveInstallations(getInstallations().filter(entry => entry.id !== id));
+      renderInstallations();
+    }
+
+    function launchInstallation(id) {
+      const values = getInstallations();
+      const item = values.find(entry => entry.id === id);
+      if (!item) return;
+      if (isSSSSVersion(item.filename)) return;
+      item.lastPlayed = new Date().toISOString();
+      saveInstallations(values);
+      const tab = document.querySelector(`.game-tab[data-game="${versionCategory(getRecordForFilename(item.filename)) === 'preview' ? 'preview' : 'legends'}"]`);
+      if (tab) tab.click();
+      closeInstallationsScreen();
+      const gameKey = versionCategory(getRecordForFilename(item.filename)) === 'preview' ? 'legends-preview' : 'legends';
+      const container = document.getElementById(gameKey === 'legends-preview' ? 'previewContent' : 'legendsContent');
+      const select = container && container.querySelector('.version-select');
+      if (select) {
+        select.value = item.filename;
+        playGame(gameKey);
+      }
+    }
+
+    function renderInstallations() {
+      const list = document.getElementById('installationsList');
+      const empty = document.getElementById('installationsEmpty');
+      if (!list || !empty) return;
+      const search = (document.getElementById('installationSearch').value || '').trim().toLowerCase();
+      const sort = document.getElementById('installationSort').value;
+      const showFinal = document.getElementById('showInstallationsVersions').checked;
+      const showPreview = document.getElementById('showInstallationsPreviews').checked;
+      let values = getInstallations().filter(item => {
+        if (isSSSSVersion(item.filename)) return false;
+        const category = versionCategory(getRecordForFilename(item.filename));
+        const visibleCategory = category === 'preview' ? showPreview : showFinal;
+        return visibleCategory && item.displayName.toLowerCase().includes(search);
+      });
+      values.sort((a, b) => sort === 'lastPlayed'
+        ? String(b.lastPlayed || '').localeCompare(String(a.lastPlayed || ''))
+        : a.displayName.localeCompare(b.displayName, undefined, { sensitivity: 'base' }));
+
+      empty.style.display = values.length ? 'none' : 'block';
+      list.innerHTML = values.map(item => {
+        const record = getRecordForFilename(item.filename);
+        const icon = String(item.icon || '🎮').startsWith('/') ? `<img src="${escapeHTML(item.icon)}" alt="Icon" />` : escapeHTML(item.icon || '🎮');
+        return `
+          <article class="installation-card">
+            <div class="installation-icon">${icon}</div>
+            <div class="installation-info">
+              <div class="installation-name" title="${escapeHTML(item.displayName)}">${escapeHTML(item.displayName)}</div>
+              <div class="installation-detail">${escapeHTML(versionLabel(record))} · ${versionCategory(record) === 'preview' ? 'Preview' : 'Version'}</div>
+            </div>
+            <div class="installation-actions">
+              <button type="button" data-installation-action="play" data-installation-id="${escapeHTML(item.id)}">Play</button>
+              <button type="button" data-installation-action="edit" data-installation-id="${escapeHTML(item.id)}">Edit</button>
+              <button type="button" data-installation-action="duplicate" data-installation-id="${escapeHTML(item.id)}">Duplicate</button>
+              <button class="danger" type="button" data-installation-action="delete" data-installation-id="${escapeHTML(item.id)}">Delete</button>
+            </div>
+          </article>
+        `;
+      }).join('');
+    }
+
+    function saveInstallationFromForm() {
+      const name = document.getElementById('installationNameInput').value.trim();
+      const icon = document.getElementById('installationIconInput').value;
+      const filename = document.getElementById('installationVersionInput').value;
+      if (!name || !filename) {
+        alert('Please enter an installation name and select a version.');
+        return;
+      }
+      if (isSSSSVersion(filename)) {
+        alert('SSSS cannot be added to Installations.');
+        return;
+      }
+      if (isNameBanned(name)) {
+        alert('This name is not available.');
+        return;
+      }
+      const values = getInstallations();
+      const now = new Date().toISOString();
+      if (installationState.editingId) {
+        const item = values.find(entry => entry.id === installationState.editingId);
+        if (item) {
+          item.displayName = name;
+          item.icon = icon;
+          item.filename = filename;
+          item.updatedAt = now;
+        }
+      } else {
+        values.push({
+          id: `installation-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          displayName: name,
+          icon,
+          filename,
+          createdAt: now,
+          lastPlayed: null
+        });
+      }
+      saveInstallations(values);
+      document.getElementById('installationForm').classList.remove('active');
+      installationState.editingId = null;
+      renderInstallations();
+    }
+
+    function populateVersionDropdown(allVersions = []) {
+      const records = allVersions.length ? allVersions : getVersionRecords();
+      ['legendsContent', 'previewContent'].forEach(containerId => {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const select = container.querySelector('.version-select');
+        if (!select) return;
+        const family = containerId === 'previewContent' ? 'preview' : 'final';
+        const filtered = records.filter(record => versionCategory(record) === family);
+        select.innerHTML = filtered.length ? '' : '<option value="">No versions available</option>';
+        filtered.forEach(record => {
+          const option = document.createElement('option');
+          option.value = record.filename;
+          option.textContent = versionLabel(record);
+          select.appendChild(option);
+        });
+      });
+    }
+
+    function updateGameContent(gameKey, container) {
+      if (!container || !versionData[gameKey]) return;
+      const data = versionData[gameKey];
+      const banner = container.querySelector('.banner-section');
+      if (banner) {
+        banner.innerHTML = '';
+        const image = document.createElement('img');
+        image.src = data.banner;
+        image.alt = gameKey === 'legends-preview' ? 'Legends Preview' : 'Legends';
+        image.style.cssText = 'width:100%;height:100%;object-fit:cover;object-position:center;display:block;';
+        image.onerror = () => { image.style.background = 'linear-gradient(135deg, #16213e, #0b0c10)'; };
+        banner.appendChild(image);
+        const overlay = document.createElement('div');
+        overlay.className = 'banner-overlay';
+        banner.appendChild(overlay);
+        const logo = document.createElement('img');
+        logo.src = gameKey === 'legends-preview' ? './preview.png' : './legends.png';
+        logo.alt = gameKey === 'legends-preview' ? 'Legends Preview' : 'Legends';
+        logo.style.cssText = 'position:absolute;left:24px;bottom:20px;width:240px;height:80px;object-fit:contain;z-index:2;filter:drop-shadow(0 0 8px rgba(157,78,221,.5));';
+        banner.appendChild(logo);
+      }
+      const select = container.querySelector('.version-select');
+      if (select) {
+        if (gameKey === 'ssss') {
+          select.innerHTML = '<option value="gameexp.html">Version 0.0.0 (Forgotten)</option>';
+          select.value = 'gameexp.html';
+        } else {
+        const family = gameKey === 'legends-preview' ? 'preview' : 'final';
+        const records = getVersionRecords().filter(record => versionCategory(record) === family);
+        select.innerHTML = records.length ? '' : '<option value="">No versions available</option>';
+        records.forEach(record => {
+          const option = document.createElement('option');
+          option.value = record.filename;
+          option.textContent = versionLabel(record);
+          select.appendChild(option);
+        });
+        if (records.length) select.value = records[0].filename;
+        }
+      }
+      const title = container.querySelector('.news-title');
+      if (title) title.textContent = 'NEWS & UPDATES';
+      renderNewsForGame(gameKey);
+      updateNewsEditButton();
+    }
+
+    function setupGameTabHandlers() {
+      // Existing tab listeners are installed above. This named function is kept
+      // for the final initializer so older launcher builds no longer throw.
+    }
+
+    function playGame(gameKey) {
+      const containerId = gameKey === 'legends-preview' ? 'previewContent' : gameKey === 'ssss' ? 'ssssContent' : 'legendsContent';
+      const container = document.getElementById(containerId);
+      const select = container && container.querySelector('.version-select');
+      const selectedFile = select && select.value;
+      if (!selectedFile) {
+        alert('Please select a version first.');
+        return;
+      }
+
+      // SSSS is a separate easter-egg page, not an iframe game and not an installation.
+      if (gameKey === 'ssss') {
+        const ssssUrl = new URL('gameexp.html', document.baseURI).href;
+        const ssssWindow = window.open(ssssUrl, 'legends_ssss_game', 'popup=yes,width=1200,height=800');
+        if (!ssssWindow) {
+          // A direct navigation is the reliable fallback when the browser blocks popups.
+          window.location.href = ssssUrl;
+        } else {
+          ssssWindow.focus();
+        }
+        return;
+      }
+
+      const overlay = document.getElementById('gameOverlay');
+      const frame = document.getElementById('gameFrame');
+      if (!overlay || !frame) {
+        alert('The game window could not be opened.');
+        return;
+      }
+      const fileUrl = new URL(selectedFile, document.baseURI).href;
+      frame.src = fileUrl;
+      overlay.style.display = 'flex';
+      localStorage.setItem(STORAGE_KEYS.LAST_PLAYED, JSON.stringify({ file: selectedFile, gameKey, playedAt: new Date().toISOString() }));
+      frame.onerror = () => {
+        overlay.style.display = 'none';
+        alert(`The selected version could not be opened: ${selectedFile}`);
+      };
+    }
+
+    window.openNewsDetail = openNewsDetail;
+    window.openNewsEditor = openNewsEditor;
+    window.editNewsItem = editNewsItem;
+    window.deleteNewsItem = deleteNewsItem;
+    window.moveNewsItem = moveNewsItem;
+    window.openInstallationsScreen = openInstallationsScreen;
+    window.closeInstallationsScreen = closeInstallationsScreen;
+    window.editInstallation = editInstallation;
+    window.duplicateInstallation = duplicateInstallation;
+    window.deleteInstallation = deleteInstallation;
+    window.launchInstallation = launchInstallation;
+    window.playGame = playGame;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('installationsBackBtn')?.addEventListener('click', closeInstallationsScreen);
+      document.getElementById('newInstallationBtn')?.addEventListener('click', async () => {
+        await ensureVersionsManifestLoaded();
+        resetInstallationForm();
+      });
+      document.getElementById('cancelInstallationBtn')?.addEventListener('click', () => {
+        document.getElementById('installationForm').classList.remove('active');
+      });
+      document.getElementById('saveInstallationBtn')?.addEventListener('click', saveInstallationFromForm);
+      document.getElementById('installationsList')?.addEventListener('click', event => {
+        const button = event.target.closest('[data-installation-action]');
+        if (!button) return;
+        const id = button.dataset.installationId;
+        const action = button.dataset.installationAction;
+        if (action === 'play') launchInstallation(id);
+        if (action === 'edit') editInstallation(id);
+        if (action === 'duplicate') duplicateInstallation(id);
+        if (action === 'delete') deleteInstallation(id);
+      });
+      document.getElementById('installationSearch')?.addEventListener('input', renderInstallations);
+      document.getElementById('installationSort')?.addEventListener('change', renderInstallations);
+      document.getElementById('showInstallationsVersions')?.addEventListener('change', renderInstallations);
+      document.getElementById('showInstallationsPreviews')?.addEventListener('change', renderInstallations);
+      document.querySelectorAll('.version-family-tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+          installationState.family = tab.dataset.family;
+          document.querySelectorAll('.version-family-tab').forEach(button => button.classList.toggle('active', button === tab));
+          populateInstallationVersionInput(installationState.family);
+        });
+      });
+      document.getElementById('closeNewsDetailBtn')?.addEventListener('click', () => {
+        document.getElementById('newsDetailOverlay').classList.remove('active');
+      });
+      document.getElementById('newsDetailOverlay')?.addEventListener('click', event => {
+        if (event.target.id === 'newsDetailOverlay') event.currentTarget.classList.remove('active');
+      });
+      renderAllNews();
+      startSharedNewsListener();
+      hydrateRankFromFirebase();
     });
 
   </script>
