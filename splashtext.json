@@ -1,0 +1,140 @@
+{
+  "general": [
+    "Also try Miniblox!",
+    "Also try Terraria!",
+    "Also try Minecraft!",
+    "Also try Hytale!",
+    "Watch out for Figure and Seek!",
+    "Doors are meant to be opened... or locked!",
+    "Suited for Dragon Riders!",
+    "Roblox studio made us do this!",
+    "The Cake is a Lie!",
+    "It's dangerous to go alone! Take this!",
+    "Do a barrel roll!",
+    "Finish Him!",
+    "Victory Royale!",
+    "Praise the Sun!",
+    "Steel your heart, Dragon Hunter!",
+    "Hey you, you're finally awake!",
+    "Mumbo, IS THIS REDSTONE?",
+    "Bumbo Coniho was here!",
+    "DanTDM's Custom Laboratory Approved!",
+    "Stampy's Lovely World expansion pack!",
+    "Dream speedrun music intensifies!",
+    "That was a 1 in 7.5 trillion chance!",
+    "CaptainSparklez - Revenge of the Voxels!",
+    "Creeper, Aww Man!",
+    "PewDiePie's IKEA Tower inspired!",
+    "Floor Gang OOH!",
+    "Markiplier: Was that the bite of '87?!",
+    "Jacksepticeye: TOP OF THE MORNING!",
+    "CaseOh: Can this world hold my inventory?!",
+    "Is that a speedrun record?",
+    "Poggers in the chat!",
+    "Dragons of Berk would be proud!",
+    "Train your dragon, rule the realm!",
+    "Isle of Berk vibes!",
+    "Ice, Fire, and Voxels!",
+    "Legends never die, they just respawn!",
+    "Press F to pay respects.",
+    "All your base are belong to us!",
+    "Stop right there, criminal scum!",
+    "Achievement Unlocked: Played Legends!",
+    "Cheat code: UP UP DOWN DOWN LEFT RIGHT...",
+    "WASD is the true pathway!",
+    "Don't dig straight down!",
+    "Watch out for the darkness!",
+    "Is that a creeper? No, wait...",
+    "Building blocks of reality!",
+    "Need more inventory space!",
+    "Night is falling, craft a bed!",
+    "It's not a bug, it's a feature!",
+    "Endless worlds, endless ideas!",
+    "Mining away at 3 AM!",
+    "What does the dragon say?",
+    "Diamonds are a voxel's best friend!",
+    "Redstone... wait, wrong engine!",
+    "One more block won't hurt.",
+    "Surviving the night since 2026!",
+    "Punch trees, gain wood, build empires!",
+    "Drop your loot before you dive!",
+    "Keep inventory: TRUE!",
+    "Powered by Three.js!",
+    "Voxel, Voxel everywhere!",
+    "Welcome to Legends!",
+    "Brownie Approved!",
+    "Beware of the Dragons!",
+    "100% Chunk Friendly!",
+    "Made with passion and code!"
+  ],
+  "timedGeneral": [
+    {
+      "text": "Indev Phase!",
+      "availableUntil": "2028-01-01"
+    },
+    {
+      "text": "Alpha Testing in Progress!",
+      "availableUntil": "2027-12-31"
+    },
+    {
+      "text": "Early Access Build!",
+      "availableUntil": "2028-06-30"
+    },
+    {
+      "text": "Pre-Release Version!",
+      "availableUntil": "2028-03-15"
+    },
+    {
+      "text": "Coming Soon: Full Release!",
+      "availableUntil": "2028-12-31"
+    }
+  ],
+  "technoblade": [
+    "Technoblade Never Dies!",
+    "Officer, I drop-kicked that block in self-defense!",
+    "Welcome to the Syndicate!",
+    "Blood for the Blood God!",
+    "Subscribe to Technoblade!",
+    "Not even close!",
+    "If you wish to defeat me, train for another 100 years!",
+    "Potato King's Seal of Approval!",
+    "The blade returns...",
+    "Immortalized in code and legend.",
+    "Your legacy inspires us all.",
+    "Technoblade would have loved this.",
+    "In memory of a gaming legend.",
+    "Rest easy, warrior.",
+    "Forever in our hearts.",
+    "The Potato King's wisdom lives on."
+  ],
+  "neonmonster": [
+    "Happy Birthday NeonMonster!",
+    "Glow up, NeonMonster!",
+    "Birthday neon vibes!",
+    "NeonMonster's day to shine!",
+    "Celebrating the legend!",
+    "Another year of awesome!",
+    "Birthday wishes for NeonMonster!",
+    "Make some noise for NeonMonster!"
+  ],
+  "specialDates": [
+    {
+      "month": 3,
+      "day": 20,
+      "category": "neonmonster",
+      "priority": 0.87
+    },
+    {
+      "month": 6,
+      "day": 1,
+      "category": "technoblade",
+      "priority": 0.75
+    },
+    {
+      "month": 6,
+      "day": 30,
+      "category": "technoblade",
+      "priority": 0.75
+    }
+  ]
+}
