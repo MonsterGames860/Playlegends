@@ -381,9 +381,21 @@
       height: 300px;
       background-size: cover;
       background-position: center;
-      background-image: url('./final-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
       position: relative;
       overflow: hidden;
+    }
+
+    /* Game Content Container - Her sekme için */
+    .game-content-container {
+      display: none;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+    }
+
+    .game-content-container[style*="display: block"] {
+      display: flex !important;
     }
 
     .banner-overlay {
