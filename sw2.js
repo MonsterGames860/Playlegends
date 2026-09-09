@@ -4,6 +4,7 @@
 
 const CACHE_VERSION = 'legends-ce-v' + new Date().getTime();
 const RUNTIME_CACHE = 'legends-ce-runtime';
+const DEPLOY_VERSION_KEY = 'legends-ce-deploy-version';
 
 // Güncellenebilir dosya türleri
 const UPDATABLE_EXTENSIONS = ['.js', '.json', '.png', '.html', '.mp3'];
@@ -130,48 +131,29 @@ self.addEventListener('fetch', (event) => {
 });
 
 // ============= MESSAGE EVENT - GÜNCELLEME KONTROLÜ =============
-// .js, .json, .png, .html, .mp3 dosyaları her sayfa yenileşinde güncellenir
+// Sadece yeni deploy edilmişse banner göster (1 kez)
 self.addEventListener('message', (event) => {
-  const { type, urls } = event.data;
+  const { type, deployVersion } = event.data;
   
   if (type === 'SKIP_WAITING') {
     console.log('🔄 Skipping waiting and claiming clients...');
     self.skipWaiting();
   }
   
-  if (type === 'UPDATE_CACHE') {
-    console.log('🔍 Checking for updates on page refresh...');
-    // Belirtilen URL'leri güncelleyin
-    if (urls && Array.isArray(urls)) {
-      caches.open(RUNTIME_CACHE).then((cache) => {
-        urls.forEach((url) => {
-          if (isUpdatableFile(url)) {
-            fetch(url)
-              .then((response) => {
-                if (response.ok) {
-                  cache.put(url, response);
-                  console.log('✅ Force updated (page refresh):', url);
-                }
-              })
-              .catch((err) => {
-                console.log('ℹ️ Keeping cached version:', url);
-              });
-          }
-        });
-      });
-    }
-  }
-  
-  // Sayfa yenilenmişse RUNTIME_CACHE'deki tüm updatable dosyaları güncelle
-  if (type === 'PAGE_RELOAD') {
-    console.log('🔄 Page reloaded - updating all .js/.json/.png/.html/.mp3 files...');
+  // Deploy version kontrolü (yeni güncelleme check)
+  if (type === 'CHECK_NEW_DEPLOY') {
+    console.log('🔍 Checking for new deployment...');
+    
+    // IndexedDB veya cache'den son deploy version'ı al
     self.clients.matchAll().then((clients) => {
       clients.forEach((client) => {
-        // Her sayfa yenilemesinde bu event tetiklenir
-        // Cache'deki tüm dosyalar en yeni versiyonla güncellenir
+        // Son bilinen deploy version'ı kontrol et
+        // Eğer farklı ise, banner göster
+        client.postMessage({
+          type: 'NEW_DEPLOY_AVAILABLE',
+          hasUpdate: deployVersion !== undefined // Yeni version varsa true
+        });
       });
     });
   }
 });
-
-console.log('🎮 Legends CE Service Worker (sw2) loaded with auto-update for .js, .json, .png, .html, .mp3');

@@ -27,6 +27,10 @@
         navigator.serviceWorker.register('./sw2.js').then(registration => {
           console.log('✅ Service Worker (sw2) registered');
           
+          // Deploy version'ı localStorage'dan al
+          const lastDeployVersion = localStorage.getItem('legends-ce-deploy-version');
+          let updateChecked = false;
+          
           // Güncellemeyi kontrol et (ilk yüklemede)
           registration.update();
           
@@ -35,8 +39,11 @@
             const newWorker = registration.installing;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Sadece en az bir kez yeniden yükle
-                showUpdateNotification();
+                // Yeni SW bulundu - banner göster (sadece 1 kez)
+                if (!updateChecked) {
+                  updateChecked = true;
+                  showUpdateNotification();
+                }
               }
             });
           });
@@ -45,7 +52,7 @@
         });
       });
       
-      // Update bildirimini göster
+      // Update bildirimini göster (Sadece yeni deployment varsa)
       let updateShown = false;
       function showUpdateNotification() {
         // Zaten bannerımız varsa çıkış yap
@@ -103,6 +110,11 @@
         `;
         document.head.appendChild(style);
         document.body.insertBefore(updateBanner, document.body.firstChild);
+        
+        // Deploy version'ı güncelle
+        const deployTime = new Date().toISOString();
+        localStorage.setItem('legends-ce-deploy-version', deployTime);
+        console.log('📝 Deploy version saved:', deployTime);
         
         // Güncelle butonu - kullanıcı tıklayana kadar yenileme yapma
         document.getElementById('update-btn').addEventListener('click', () => {
@@ -2969,6 +2981,20 @@
       }
     };
 
+    // ============= YARDIMCI: TYPE FORMAT DÖNÜŞTÜRME =============
+    function formatTypeLabel(typeString) {
+      // indev_preview → I-Preview
+      if (typeString === 'indev_preview') {
+        return 'I-Preview';
+      }
+      // indev → Indev
+      if (typeString === 'indev') {
+        return 'Indev';
+      }
+      // Diğerleri: ilk harfi büyük, underscore boşluk
+      return typeString.charAt(0).toUpperCase() + typeString.slice(1).replace(/_/g, ' ');
+    }
+
     // ============= SÜRÜMLERI JSON'DAN YÜKLE =============
     async function loadVersionsFromJSON() {
       try {
@@ -2993,13 +3019,13 @@
         // Legends (final) sürümleri
         versionData.legends.versions = finalVersions.map(v => ({
           value: v.filename,
-          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+          label: `Version ${v.version} (${formatTypeLabel(v.type)})`
         }));
         
         // Legends Preview sürümleri
         versionData['legends-preview'].versions = previewVersions.map(v => ({
           value: v.filename,
-          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+          label: `Version ${v.version} (${formatTypeLabel(v.type)})`
         }));
         
         console.log('✅ Versions loaded from JSON:', versionData);
@@ -3034,12 +3060,12 @@
         
         versionData.legends.versions = finalVersions.map(v => ({
           value: v.filename,
-          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+          label: `Version ${v.version} (${formatTypeLabel(v.type)})`
         }));
         
         versionData['legends-preview'].versions = previewVersions.map(v => ({
           value: v.filename,
-          label: `Version ${v.version} (${v.type.toUpperCase().replace('_', ' ')})`
+          label: `Version ${v.version} (${formatTypeLabel(v.type)})`
         }));
         
         console.log('✅ Versions loaded from localStorage');
@@ -3115,7 +3141,12 @@
 
     function updateGameContent(gameKey) {
       const data = versionData[gameKey];
-      if (!data) return;
+      if (!data) {
+        console.error('❌ Game data not found for:', gameKey);
+        return;
+      }
+
+      console.log('🔄 Updating content for:', gameKey, data);
 
       // BANNER SECTIONI GÜNCELLE
       const bannerSection = document.querySelector('.banner-section');
@@ -3144,6 +3175,10 @@
         } else {
           // Normal banner (Legends veya Legends Preview)
           const bannerImg = document.createElement('img');
+          
+          // Banner dosya yolunu konsola yazdır (debug için)
+          console.log('📸 Loading banner:', data.banner, 'for', gameKey);
+          
           bannerImg.src = data.banner;
           bannerImg.style.cssText = `
             width: 100%;
@@ -3154,15 +3189,24 @@
             padding: 8px;
             border-radius: 8px;
           `;
-          bannerImg.onerror = () => console.warn(`⚠️ Banner not found: ${data.banner}`);
+          bannerImg.onerror = () => {
+            console.warn(`⚠️ Banner not found: ${data.banner}`);
+            // Fallback: gradient arka planı göster
+            bannerImg.style.background = 'linear-gradient(135deg, rgba(157, 78, 221, 0.3), rgba(0, 217, 255, 0.3))';
+            bannerImg.style.content = '❌ Banner Not Found';
+          };
+          bannerImg.onload = () => console.log('✅ Banner loaded:', data.banner);
           bannerSection.appendChild(bannerImg);
           
           // Logo dosyasını belirle ve ekle
           let logoFile = '';
+          let logoLabel = '';
           if (gameKey === 'legends') {
             logoFile = './legends.png';
+            logoLabel = 'LEGENDS';
           } else if (gameKey === 'legends-preview') {
             logoFile = './preview.png';
+            logoLabel = 'PREVIEW';
           }
           
           // Logo overlay container
@@ -3185,6 +3229,7 @@
               display: block;
             `;
             logoImg.onerror = () => console.warn(`⚠️ Logo not found: ${logoFile}`);
+            logoImg.onload = () => console.log('✅ Logo loaded:', logoFile);
             logoOverlay.appendChild(logoImg);
             bannerSection.appendChild(logoOverlay);
           }
@@ -3205,6 +3250,7 @@
           errorOption.selected = true;
           versionSelect.appendChild(errorOption);
           versionSelect.style.borderColor = '#ff006e';
+          console.warn('⚠️ No versions for:', gameKey);
           return;
         }
         
@@ -3217,6 +3263,7 @@
         
         if (data.versions.length > 0) {
           versionSelect.value = data.versions[0].value;
+          console.log('✅ Versions loaded for', gameKey, ':', data.versions.length);
         }
       }
 
@@ -3226,6 +3273,8 @@
         const title = newsSection.querySelector('h3');
         if (title) {
           title.textContent = data.newsTitle;
+          console.log('📰 News title set to:', data.newsTitle);
+          
           // SSSS için glitch efekti, diğerleri için normal
           if (gameKey === 'ssss') {
             title.style.cssText = `
@@ -3256,6 +3305,7 @@
               `;
               newsList.appendChild(newsItem);
             });
+            console.log('✅ News items loaded for', gameKey);
           }
         }
       }
@@ -3333,20 +3383,23 @@
         return;
       }
       
-      // Dosyanın var olup olmadığını kontrol etmek için basit bir fetch
-      fetch('./' + selectedFile, { method: 'HEAD' })
-        .then(response => {
-          if (!response.ok) {
-            throw new Error(`HTTP ${response.status}`);
-          }
-          gameFrame.src = './' + selectedFile;
-          gameOverlay.style.display = 'flex';
-          console.log('✅ Game started:', selectedFile);
-        })
-        .catch(error => {
-          console.error('❌ File not found:', selectedFile, error);
-          alert(`❌ Oyun dosyası bulunamadı:\n${selectedFile}\n\nLütfen yöneticiye bildirin.`);
-        });
+      // Dosyayı hemen yükle (HEAD isteği kaldırıldı - timeout'u kaldırıyor)
+      const fileUrl = './' + selectedFile;
+      console.log('🎮 Loading game:', fileUrl);
+      
+      gameFrame.src = fileUrl;
+      gameOverlay.style.display = 'flex';
+      
+      // Error handling - iframe yükleme hatası
+      gameFrame.onerror = () => {
+        console.error('❌ Failed to load game:', fileUrl);
+        alert(`❌ Oyun dosyası yüklenemedi:\n${selectedFile}\n\nLütfen dosyanın var olduğundan emin olun.`);
+        gameOverlay.style.display = 'none';
+      };
+      
+      gameFrame.onload = () => {
+        console.log('✅ Game loaded successfully:', fileUrl);
+      };
     }
 
     // Make functions global for debugging
