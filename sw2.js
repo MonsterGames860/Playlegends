@@ -1,10 +1,12 @@
 // ============= LEGENDS CORE EDITION SERVICE WORKER (sw2) =============
 // Otomatik güncelleme ve caching stratejisi
 // .js, .json, .png, .html, .mp3 dosyaları otomatik güncellenir
+// Yeni deploy algılanırsa sayfa 1 kez yenilenir
 
 const CACHE_VERSION = 'legends-ce-v' + new Date().getTime();
 const RUNTIME_CACHE = 'legends-ce-runtime';
 const DEPLOY_VERSION_KEY = 'legends-ce-deploy-version';
+const PAGE_REFRESH_KEY = 'legends-ce-page-refreshed';
 
 // Güncellenebilir dosya türleri
 const UPDATABLE_EXTENSIONS = ['.js', '.json', '.png', '.html', '.mp3'];
@@ -13,15 +15,13 @@ const UPDATABLE_EXTENSIONS = ['.js', '.json', '.png', '.html', '.mp3'];
 self.addEventListener('install', (event) => {
   console.log('🔧 Service Worker (sw2) installing...');
   
-  // Root dosyasını cache'le
   event.waitUntil(
     caches.open(CACHE_VERSION).then((cache) => {
-      console.log('📦 Service Worker (sw2) activated');
+      console.log('📦 Service Worker (sw2) cache created');
       return Promise.resolve();
     })
   );
   
-  // Yeni Service Worker'ı hemen aktif et
   self.skipWaiting();
 });
 
@@ -33,7 +33,6 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          // Eski cache versiyonlarını sil
           if (cacheName !== CACHE_VERSION && cacheName !== RUNTIME_CACHE) {
             console.log('🗑️ Deleting old cache:', cacheName);
             return caches.delete(cacheName);
@@ -43,13 +42,22 @@ self.addEventListener('activate', (event) => {
     })
   );
   
-  // Beklemeden controllership'i ele al
   self.clients.claim();
+  
+  // Yeni SW kuruldu - sayfa yenileme flag'ını kontrol et
+  console.log('🔄 New SW activated - checking if page needs refresh...');
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({
+        type: 'NEW_SW_ACTIVATED',
+        shouldRefresh: true
+      });
+    });
+  });
 });
 
 // ============= YARDIMCI FONKSIYON =============
 function isUpdatableFile(url) {
-  // URL'den dosya türünü al
   const pathname = new URL(url).pathname;
   return UPDATABLE_EXTENSIONS.some(ext => pathname.endsWith(ext));
 }
@@ -59,12 +67,11 @@ self.addEventListener('fetch', (event) => {
   const { request } = event;
   const url = new URL(request.url);
   
-  // Sadece GET isteklerini işle
   if (request.method !== 'GET') {
     return;
   }
   
-  // Firebase ve dış kaynaklar için network-first
+  // Dış kaynaklar için network-first
   if (url.hostname !== location.hostname) {
     event.respondWith(
       fetch(request)
@@ -78,13 +85,12 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Kendi dosyalarımız - güncellenebilir dosyalar için özel stratezi
+  // Kendi dosyalarımız - güncellenebilir dosyalar
   if (isUpdatableFile(request.url)) {
     event.respondWith(
       fetch(request)
         .then((response) => {
           if (response.ok) {
-            // Başarılı response'ı cache'e kaydet (eski versiyon yazılır - always fresh!)
             const responseClone = response.clone();
             caches.open(RUNTIME_CACHE).then((cache) => {
               cache.put(request, responseClone);
@@ -94,7 +100,6 @@ self.addEventListener('fetch', (event) => {
           return response;
         })
         .catch(() => {
-          // Network başarısızsa cache'den dondür
           return caches.match(request).then((cachedResponse) => {
             if (cachedResponse) {
               console.log('📦 Serving from cache:', request.url);
@@ -105,7 +110,7 @@ self.addEventListener('fetch', (event) => {
         })
     );
   } else {
-    // Diğer dosyalar için cache-first stratejisi
+    // Diğer dosyalar için cache-first
     event.respondWith(
       caches.match(request)
         .then((cachedResponse) => {
@@ -131,29 +136,19 @@ self.addEventListener('fetch', (event) => {
 });
 
 // ============= MESSAGE EVENT - GÜNCELLEME KONTROLÜ =============
-// Sadece yeni deploy edilmişse banner göster (1 kez)
 self.addEventListener('message', (event) => {
-  const { type, deployVersion } = event.data;
+  const { type } = event.data;
   
   if (type === 'SKIP_WAITING') {
     console.log('🔄 Skipping waiting and claiming clients...');
     self.skipWaiting();
   }
   
-  // Deploy version kontrolü (yeni güncelleme check)
-  if (type === 'CHECK_NEW_DEPLOY') {
-    console.log('🔍 Checking for new deployment...');
-    
-    // IndexedDB veya cache'den son deploy version'ı al
-    self.clients.matchAll().then((clients) => {
-      clients.forEach((client) => {
-        // Son bilinen deploy version'ı kontrol et
-        // Eğer farklı ise, banner göster
-        client.postMessage({
-          type: 'NEW_DEPLOY_AVAILABLE',
-          hasUpdate: deployVersion !== undefined // Yeni version varsa true
-        });
-      });
-    });
+  // Client tarafından sayfa refresh'i onaylandıysa
+  if (type === 'PAGE_REFRESHED') {
+    console.log('✅ Page has been refreshed - new SW is active');
+    // Sonraki açılışlarda yenileme yapılmayacak
   }
 });
+
+console.log('🎮 Legends CE Service Worker (sw2) loaded - Auto-refresh on new deploy');

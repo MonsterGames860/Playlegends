@@ -27,112 +27,43 @@
         navigator.serviceWorker.register('./sw2.js').then(registration => {
           console.log('✅ Service Worker (sw2) registered');
           
-          // Deploy version'ı localStorage'dan al
-          const lastDeployVersion = localStorage.getItem('legends-ce-deploy-version');
-          let updateChecked = false;
-          
-          // Güncellemeyi kontrol et (ilk yüklemede)
-          registration.update();
-          
-          // Update tespit edildiğinde
+          // Yeni SW'nin activate olmasını dinle
           registration.addEventListener('updatefound', () => {
             const newWorker = registration.installing;
             newWorker.addEventListener('statechange', () => {
               if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                // Yeni SW bulundu - banner göster (sadece 1 kez)
-                if (!updateChecked) {
-                  updateChecked = true;
-                  showUpdateNotification();
-                }
+                console.log('🔔 New Service Worker installed - ready to activate');
               }
             });
+          });
+          
+          // SW'den mesaj dinle
+          navigator.serviceWorker.addEventListener('message', (event) => {
+            const { type, shouldRefresh } = event.data;
+            
+            if (type === 'NEW_SW_ACTIVATED' && shouldRefresh) {
+              // Yeni SW kuruldu - sayfayı 1 kez yenile
+              const pageRefreshed = sessionStorage.getItem('legends-ce-page-refreshed');
+              
+              if (!pageRefreshed) {
+                console.log('🔄 New deployment detected - refreshing page (1 time)...');
+                sessionStorage.setItem('legends-ce-page-refreshed', 'true');
+                
+                // Versions.json yeniden yüklenecek
+                setTimeout(() => {
+                  window.location.reload();
+                }, 500);
+              } else {
+                console.log('✅ Page already refreshed - no more auto-refresh needed');
+              }
+            }
           });
         }).catch(error => {
           console.error('❌ Service Worker registration failed:', error);
         });
       });
       
-      // Update bildirimini göster (Sadece yeni deployment varsa)
-      let updateShown = false;
-      function showUpdateNotification() {
-        // Zaten bannerımız varsa çıkış yap
-        if (document.getElementById('update-banner')) return;
-        if (updateShown) return;
-        updateShown = true;
-        
-        const updateBanner = document.createElement('div');
-        updateBanner.id = 'update-banner';
-        updateBanner.style.cssText = `
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          background: linear-gradient(90deg, #9d4edd 0%, #00d9ff 100%);
-          color: #fff;
-          padding: 12px 20px;
-          text-align: center;
-          font-weight: 600;
-          z-index: 9998;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-          box-shadow: 0 4px 12px rgba(157, 78, 221, 0.3);
-          animation: slideDown 0.3s ease-out;
-        `;
-        updateBanner.innerHTML = `
-          <span>🎮 Yeni güncelleme mevcut! Uygulamayı yenile.</span>
-          <button id="update-btn" style="
-            background: #0b0c10;
-            color: #00d9ff;
-            border: 1px solid #00d9ff;
-            padding: 6px 16px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-          ">Güncelle</button>
-        `;
-        
-        // Animate girişi
-        const style = document.createElement('style');
-        style.textContent = `
-          @keyframes slideDown {
-            from {
-              transform: translateY(-100%);
-              opacity: 0;
-            }
-            to {
-              transform: translateY(0);
-              opacity: 1;
-            }
-          }
-        `;
-        document.head.appendChild(style);
-        document.body.insertBefore(updateBanner, document.body.firstChild);
-        
-        // Deploy version'ı güncelle
-        const deployTime = new Date().toISOString();
-        localStorage.setItem('legends-ce-deploy-version', deployTime);
-        console.log('📝 Deploy version saved:', deployTime);
-        
-        // Güncelle butonu - kullanıcı tıklayana kadar yenileme yapma
-        document.getElementById('update-btn').addEventListener('click', () => {
-          // Service Worker'a güncelle mesajı gönder
-          if (navigator.serviceWorker.controller) {
-            navigator.serviceWorker.controller.postMessage({
-              type: 'SKIP_WAITING'
-            });
-          }
-          
-          // Sadece butona tıklandığında yenile
-          setTimeout(() => {
-            window.location.reload();
-          }, 500);
-        });
-      }
-      
-      // Kontroller değiştiğinde (güncelleme sonrası)
+      // Kontroller değiştiğinde
       navigator.serviceWorker.addEventListener('controllerchange', () => {
         console.log('✅ Service Worker updated - new version active');
       });
@@ -1221,53 +1152,86 @@
 
       <!-- Content Area -->
       <div class="content-area">
-        <!-- Banner Section -->
-        <div class="banner-section" id="bannerSection">
-          <div class="banner-overlay"></div>
-          <div class="banner-content">
-            <div class="banner-text">
-              <h1 class="banner-title" id="bannerTitle">Legends</h1>
-              <p class="banner-description" id="bannerDesc">
-                Welcome to the world of voxel games
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <!-- Play Bar -->
-        <div class="play-bar">
-          <button class="play-btn" id="playBtn" onclick="playGame()">▶ PLAY</button>
-          <select class="version-select" id="versionSelect">
-            <option value="">No versions available</option>
-          </select>
-        </div>
-
-        <!-- News/Content Section -->
-        <div class="content-section" id="contentSection">
-          <div class="news-header">
-            <div class="news-title-section">
-              <div class="news-title">News & Updates</div>
-            </div>
-            <button class="edit-news-btn" id="editNewsBtn" style="display: none;">
-              Edit News
-            </button>
-          </div>
-
-          <div class="add-news-form" id="addNewsForm">
-            <div class="add-news-form-group">
-              <label class="add-news-form-label">Announcement Title</label>
-              <input type="text" class="add-news-form-input" id="newsTitle" placeholder="Enter title" />
-            </div>
-            <div class="add-news-form-group">
-              <label class="add-news-form-label">Date (YYYY-MM-DD)</label>
-              <input type="text" class="add-news-form-input" id="newsDate" placeholder="2024-12-15" />
-            </div>
-            <div class="add-news-form-group">
-              <div class="add-news-form-buttons">
-                <button type="button" class="add-news-form-btn submit" id="saveNewsBtn">Save</button>
-                <button type="button" class="add-news-form-btn cancel" id="cancelNewsBtn">Cancel</button>
+        
+        <!-- Legends Tab Content -->
+        <div class="game-content-container" id="legendsContent" style="display: none;">
+          <div class="banner-section">
+            <div class="banner-overlay"></div>
+            <div class="banner-content">
+              <div class="banner-text">
+                <h1 class="banner-title">Legends</h1>
               </div>
             </div>
+          </div>
+          <div class="play-bar">
+            <button class="play-btn" id="legendsPlayBtn" onclick="playGame('legends')">▶ PLAY</button>
+            <select class="version-select" id="legendsVersionSelect">
+              <option value="">No versions available</option>
+            </select>
+          </div>
+          <div class="content-section">
+            <div class="news-header">
+              <div class="news-title-section">
+                <div class="news-title">NEWS & UPDATES</div>
+              </div>
+            </div>
+            <div class="news-list" id="legendsNewsList"></div>
+          </div>
+        </div>
+
+        <!-- Legends Preview Tab Content -->
+        <div class="game-content-container" id="previewContent" style="display: none;">
+          <div class="banner-section">
+            <div class="banner-overlay"></div>
+            <div class="banner-content">
+              <div class="banner-text">
+                <h1 class="banner-title">Legends Preview</h1>
+              </div>
+            </div>
+          </div>
+          <div class="play-bar">
+            <button class="play-btn" id="previewPlayBtn" onclick="playGame('legends-preview')">▶ PLAY</button>
+            <select class="version-select" id="previewVersionSelect">
+              <option value="">No versions available</option>
+            </select>
+          </div>
+          <div class="content-section">
+            <div class="news-header">
+              <div class="news-title-section">
+                <div class="news-title">NEWS & UPDATES</div>
+              </div>
+            </div>
+            <div class="news-list" id="previewNewsList"></div>
+          </div>
+        </div>
+
+        <!-- SSSS Tab Content -->
+        <div class="game-content-container" id="ssssContent" style="display: none;">
+          <div class="banner-section">
+            <div class="banner-overlay"></div>
+            <div class="banner-content">
+              <div class="banner-text">
+                <h1 class="banner-title">SSSS</h1>
+              </div>
+            </div>
+          </div>
+          <div class="play-bar">
+            <button class="play-btn" id="ssssPlayBtn" onclick="playGame('ssss')">▶ PLAY</button>
+            <select class="version-select" id="ssssVersionSelect">
+              <option value="">No versions available</option>
+            </select>
+          </div>
+          <div class="content-section">
+            <div class="news-header">
+              <div class="news-title-section">
+                <div class="news-title">NEWS & UPDATES</div>
+              </div>
+            </div>
+            <div class="news-list" id="ssssNewsList"></div>
+          </div>
+        </div>
+        
+      </div>
           </div>
 
           <div id="newsContainer">
@@ -2205,86 +2169,37 @@
     /**
      * Game tab selection with filtering
      */
+    // ============= TAB SWITCHING - HER SEKME AYRILIYOR =============
     document.querySelectorAll('.game-tab').forEach(tab => {
       tab.addEventListener('click', () => {
+        // Tüm tabları non-active yap
         document.querySelectorAll('.game-tab').forEach(t => t.classList.remove('active'));
         tab.classList.add('active');
 
-        const game = tab.getAttribute('data-game');
-        const bannerFile = tab.getAttribute('data-banner');
-        const bannerSection = document.getElementById('bannerSection');
-        const dropdown = document.getElementById('versionSelect');
-        const playBtn = document.getElementById('playBtn');
-
-        // Reset play button styling for normal tabs
-        if (game !== 'ssss' && playBtn) {
-          playBtn.style.background = '';
-          playBtn.style.boxShadow = '';
-          playBtn.style.animation = '';
-        }
-
-        if (game === 'legends') {
-          document.getElementById('bannerTitle').textContent = 'Legends';
-          document.getElementById('bannerDesc').textContent = 'Welcome to the world of voxel games';
-          bannerSection.style.backgroundImage = `url('./final-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
-          bannerSection.innerHTML = '';
-          bannerSection.style.backgroundImage = `url('./final-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
-          bannerSection.style.backgroundSize = 'cover';
-          bannerSection.style.backgroundPosition = 'center';
-          
-          // Reset news section
-          const newsTitle = document.querySelector('.news-updates h3');
-          if (newsTitle) {
-            newsTitle.textContent = '📰 NEWS & UPDATES';
-            newsTitle.style.cssText = '';
-          }
-        } else if (game === 'preview') {
-          document.getElementById('bannerTitle').textContent = 'Legends Preview';
-          document.getElementById('bannerDesc').textContent = 'Test upcoming features';
-          bannerSection.style.backgroundImage = `url('./preview-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
-          bannerSection.innerHTML = '';
-          bannerSection.style.backgroundImage = `url('./preview-banner.png'), linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%)`;
-          bannerSection.style.backgroundSize = 'cover';
-          bannerSection.style.backgroundPosition = 'center';
-          
-          // Reset news section
-          const newsTitle = document.querySelector('.news-updates h3');
-          if (newsTitle) {
-            newsTitle.textContent = '📰 NEWS & UPDATES';
-            newsTitle.style.cssText = '';
-          }
-        }
-
-        // ===== TAB FILTERING =====
-        let visibleCount = 0;
-        Array.from(dropdown.options).forEach(option => {
-          if (option.value === '') {
-            option.style.display = 'none';
-            return;
-          }
-
-          const category = option.getAttribute('data-category');
-          if (game === 'legends' && category === 'final') {
-            option.style.display = '';
-            visibleCount++;
-          } else if (game === 'preview' && category === 'preview') {
-            option.style.display = '';
-            visibleCount++;
-          } else {
-            option.style.display = 'none';
-          }
+        // Tüm content containerları gizle
+        document.querySelectorAll('.game-content-container').forEach(container => {
+          container.style.display = 'none';
         });
 
-        // Auto-select first visible option
-        let selected = false;
-        Array.from(dropdown.options).forEach(option => {
-          if (!selected && option.style.display !== 'none' && option.value !== '') {
-            dropdown.value = option.value;
-            selected = true;
-          }
-        });
+        const gameKey = tab.getAttribute('data-game');
+        console.log('🎮 Switched to tab:', gameKey);
 
-        console.log(`✅ Filtered dropdown: ${visibleCount} versions visible for ${game}`);
+        // Doğru container'ı göster
+        let contentContainer = null;
+        if (gameKey === 'legends') {
+          contentContainer = document.getElementById('legendsContent');
+          updateGameContent('legends', contentContainer);
+        } else if (gameKey === 'preview') {
+          contentContainer = document.getElementById('previewContent');
+          updateGameContent('legends-preview', contentContainer);
+        } else if (gameKey === 'ssss') {
+          contentContainer = document.getElementById('ssssContent');
+          updateGameContent('ssss', contentContainer);
+        }
+
+        if (contentContainer) {
+          contentContainer.style.display = 'block';
+        }
       });
     });
 
@@ -2376,44 +2291,6 @@
     }
 
     // ============= PLAY BUTTON LOGIC =============
-
-    /**
-     * Play button
-     */
-    document.getElementById('playBtn').addEventListener('click', () => {
-      const versionSelect = document.getElementById('versionSelect');
-      const selectedFile = versionSelect.value;
-
-      if (!selectedFile) {
-        alert('Please select a version.');
-        return;
-      }
-
-      const user = getUser();
-      
-      // Index.html ile uyumlu format'ta user bilgisini kaydet
-      localStorage.setItem('gameUser', JSON.stringify({
-        username: user.username,
-        rank: user.rank,
-        email: user.email,
-        uid: user.uid || '',
-        type: user.type,
-        loginTime: new Date().toISOString()
-      }));
-
-      localStorage.setItem(STORAGE_KEYS.LAST_PLAYED, JSON.stringify({
-        file: selectedFile,
-        timestamp: new Date().toISOString()
-      }));
-
-      const gameWindow = window.open('./' + selectedFile, '_blank', 'width=1280,height=720,fullscreen=1');
-      
-      if (!gameWindow) {
-        alert('Game window could not be opened. Check your pop-up blocker settings.');
-      } else {
-        console.log(`✅ Launching: ${selectedFile} with user: ${user.username}`);
-      }
-    });
 
     // ============= LOGOUT LOGIC =============
 
@@ -2591,9 +2468,15 @@
         loadAndDisplayNews();
         updateNewsEditButton();
 
-        // Set active game tab
+        // Set active game tab ve göster (ilk sekme = Legends)
         const firstTab = document.querySelector('.game-tab.active');
         if (firstTab) {
+          // İlk container'ı (Legends) göster
+          const legendsContainer = document.getElementById('legendsContent');
+          if (legendsContainer) {
+            legendsContainer.style.display = 'block';
+            updateGameContent('legends', legendsContainer);
+          }
           firstTab.click();
         }
 
@@ -2615,7 +2498,6 @@
         }
 
         console.log('🎮 Legends CE Launcher initialized');
-        console.log(`📡 Loaded versions: ${document.getElementById('versionSelect').length - 1} available`);
 
         // ============= AUTO-UPDATE VERSIONS EVERY 30 SECONDS =============
         startVersionsAutoUpdate();
@@ -2828,42 +2710,7 @@
           tab.classList.remove('active');
         });
         ssssTab.classList.add('active');
-        
-        // Update play button styling with glitch
-        const playBtn = document.getElementById('playBtn');
-        if (playBtn) {
-          playBtn.classList.add('ssss-glitch');
-        }
-        
-        // Show SSSS banner
-        showSSSSBanner();
-        
-        // Update dropdown
-        const versionSelect = document.getElementById('versionSelect');
-        if (versionSelect) {
-          const ssssOption = Array.from(versionSelect.options).find(opt => opt.value === 'gameexe.html');
-          if (ssssOption) {
-            versionSelect.value = 'gameexe.html';
-          }
-        }
-        
-        // Start jumble efekti
-        startSSSSNameJumble();
       });
-      
-      // Add click handlers to other tabs to reset styling
-      document.querySelectorAll('.game-tab:not(.ssss-tab)').forEach(tab => {
-        tab.addEventListener('click', () => {
-          const playBtn = document.getElementById('playBtn');
-          if (playBtn) {
-            playBtn.classList.remove('ssss-glitch');
-          }
-          // Stop jumble efekti
-          stopSSSSNameJumble();
-        });
-      });
-      
-      // Alert kaldırıldı - direkt banner gösterilecek
     }
 
     function showSSSSBanner() {
@@ -2949,7 +2796,9 @@
     let versionData = {
       'legends': {
         banner: './final-banner.png',
-        versions: [],
+        versions: [
+          { value: 'game-1.6.2.html', label: 'Version 1.6.2 (Indev)' }
+        ],
         newsTitle: '📰 NEWS & UPDATES - LEGENDS',
         defaultNews: [
           { title: '🌴 New Island Update', date: '2026-09-08' },
@@ -2959,7 +2808,9 @@
       },
       'legends-preview': {
         banner: './preview-banner.png',
-        versions: [],
+        versions: [
+          { value: 'game-p-1.7.0.html', label: 'Version 1.7.0 (I-Preview)' }
+        ],
         newsTitle: '📰 NEWS & UPDATES - PREVIEW',
         defaultNews: [
           { title: '🧪 New Weather System Testing', date: '2026-09-08' },
@@ -3139,24 +2990,69 @@
       }, 5000);
     }
 
-    function updateGameContent(gameKey) {
+    function updateGameContent(gameKey, container) {
+      if (!container) {
+        console.error('❌ Container not provided for:', gameKey);
+        return;
+      }
+
       const data = versionData[gameKey];
       if (!data) {
         console.error('❌ Game data not found for:', gameKey);
         return;
       }
 
-      console.log('🔄 Updating content for:', gameKey, data);
+      console.log('🔄 Updating content for:', gameKey, 'in container:', container.id);
 
-      // BANNER SECTIONI GÜNCELLE
-      const bannerSection = document.querySelector('.banner-section');
+      // BANNER SECTIONI GÜNCELLE (container'ın içinde)
+      const bannerSection = container.querySelector('.banner-section');
       if (bannerSection) {
         bannerSection.innerHTML = '';
         bannerSection.style.position = 'relative';
         
         if (gameKey === 'ssss') {
           // SSSS için özel banner
-          showSSSSBanner();
+          const container1 = document.createElement('div');
+          container1.style.cssText = `
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+          `;
+          
+          // Banner 1
+          const banner1 = document.createElement('img');
+          banner1.src = './final-banner.png';
+          banner1.style.cssText = `
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            opacity: 0.7;
+            filter: hue-rotate(0deg) saturate(1.5);
+            animation: glitch 0.3s infinite;
+          `;
+          
+          // Banner 2
+          const banner2 = document.createElement('img');
+          banner2.src = './preview-banner.png';
+          banner2.style.cssText = `
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            object-position: center;
+            opacity: 0.5;
+            mix-blend-mode: screen;
+            filter: hue-rotate(330deg) saturate(2);
+            animation: glitch 0.3s infinite reverse;
+          `;
+          
+          container1.appendChild(banner1);
+          container1.appendChild(banner2);
+          bannerSection.appendChild(container1);
+          
           // exe.gif logosunu overlay olarak ekle
           const ssssLogo = document.createElement('img');
           ssssLogo.src = './exe.gif';
@@ -3176,7 +3072,6 @@
           // Normal banner (Legends veya Legends Preview)
           const bannerImg = document.createElement('img');
           
-          // Banner dosya yolunu konsola yazdır (debug için)
           console.log('📸 Loading banner:', data.banner, 'for', gameKey);
           
           bannerImg.src = data.banner;
@@ -3191,22 +3086,16 @@
           `;
           bannerImg.onerror = () => {
             console.warn(`⚠️ Banner not found: ${data.banner}`);
-            // Fallback: gradient arka planı göster
-            bannerImg.style.background = 'linear-gradient(135deg, rgba(157, 78, 221, 0.3), rgba(0, 217, 255, 0.3))';
-            bannerImg.style.content = '❌ Banner Not Found';
           };
           bannerImg.onload = () => console.log('✅ Banner loaded:', data.banner);
           bannerSection.appendChild(bannerImg);
           
           // Logo dosyasını belirle ve ekle
           let logoFile = '';
-          let logoLabel = '';
           if (gameKey === 'legends') {
             logoFile = './legends.png';
-            logoLabel = 'LEGENDS';
           } else if (gameKey === 'legends-preview') {
             logoFile = './preview.png';
-            logoLabel = 'PREVIEW';
           }
           
           // Logo overlay container
@@ -3236,8 +3125,8 @@
         }
       }
 
-      // SÜRÜM SEÇİMİ GÜNCELLE
-      const versionSelect = document.getElementById('versionSelect');
+      // SÜRÜM SEÇİMİ GÜNCELLE (container'ın içinde)
+      const versionSelect = container.querySelector('.version-select');
       if (versionSelect) {
         versionSelect.innerHTML = '';
         versionSelect.style.borderColor = '';
@@ -3267,29 +3156,17 @@
         }
       }
 
-      // NEWS SECTION GÜNCELLE
-      const newsSection = document.querySelector('.news-updates');
-      if (newsSection) {
-        const title = newsSection.querySelector('h3');
-        if (title) {
-          title.textContent = data.newsTitle;
+      // NEWS SECTION GÜNCELLE (container'ın içinde)
+      const newsContainer = container.querySelector('.content-section');
+      if (newsContainer) {
+        const newsTitle = newsContainer.querySelector('.news-title');
+        if (newsTitle) {
+          newsTitle.textContent = data.newsTitle;
           console.log('📰 News title set to:', data.newsTitle);
-          
-          // SSSS için glitch efekti, diğerleri için normal
-          if (gameKey === 'ssss') {
-            title.style.cssText = `
-              color: #ff0000;
-              text-shadow: 0 0 10px #ff0000, 0 0 20px #000;
-              animation: glitch 0.3s infinite;
-              font-weight: bold;
-            `;
-          } else {
-            title.style.cssText = 'color: #fff; font-weight: 600;';
-          }
         }
 
         // News listesini güncelle
-        const newsList = newsSection.querySelector('.news-list');
+        const newsList = newsContainer.querySelector('.news-list');
         if (newsList) {
           newsList.innerHTML = '';
           
@@ -3311,48 +3188,22 @@
       }
     }
 
-    // ============= GAME TAB HANDLERS =============
-    function setupGameTabHandlers() {
-      const gameTabs = document.querySelectorAll('.game-tab');
-      gameTabs.forEach((tab) => {
-        tab.addEventListener('click', () => {
-          // Remove active from all tabs
-          gameTabs.forEach((t) => t.classList.remove('active'));
-          // Add active to clicked tab
-          tab.classList.add('active');
-
-          // Get game key
-          const gameKey = tab.getAttribute('data-game');
-          
-          // Update content
-          updateGameContent(gameKey);
-
-          // SSSS için jumble efektini başlat
-          if (gameKey === 'ssss') {
-            startSSSSNameJumble();
-            const playBtn = document.getElementById('playBtn');
-            if (playBtn) {
-              playBtn.classList.add('ssss-glitch');
-            }
-          } else {
-            stopSSSSNameJumble();
-            const playBtn = document.getElementById('playBtn');
-            if (playBtn) {
-              playBtn.classList.remove('ssss-glitch');
-            }
-          }
-        });
-      });
-    }
-
     // Play game function
-    function playGame() {
-      const dropdown = document.getElementById('versionSelect');
-      const selectedFile = dropdown.value;
-      
-      // Aktif tab'ı bul
-      const activeTab = document.querySelector('.game-tab.active');
-      const gameKey = activeTab ? activeTab.getAttribute('data-game') : 'legends';
+    function playGame(gameKey) {
+      // Aktif container'ı bul
+      const activeContainer = document.querySelector('.game-content-container[style*="display: block"]');
+      if (!activeContainer) {
+        console.error('❌ Active container not found');
+        return;
+      }
+
+      const versionSelect = activeContainer.querySelector('.version-select');
+      if (!versionSelect) {
+        console.error('❌ Version select not found in active container');
+        return;
+      }
+
+      const selectedFile = versionSelect.value;
 
       if (!selectedFile) {
         alert('❌ Lütfen önce bir sürüm seçiniz!');
@@ -3383,14 +3234,14 @@
         return;
       }
       
-      // Dosyayı hemen yükle (HEAD isteği kaldırıldı - timeout'u kaldırıyor)
+      // Dosyayı hemen yükle
       const fileUrl = './' + selectedFile;
       console.log('🎮 Loading game:', fileUrl);
       
       gameFrame.src = fileUrl;
       gameOverlay.style.display = 'flex';
       
-      // Error handling - iframe yükleme hatası
+      // Error handling
       gameFrame.onerror = () => {
         console.error('❌ Failed to load game:', fileUrl);
         alert(`❌ Oyun dosyası yüklenemedi:\n${selectedFile}\n\nLütfen dosyanın var olduğundan emin olun.`);
