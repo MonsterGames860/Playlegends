@@ -4401,7 +4401,7 @@
 
       // SSSS is a separate easter-egg page, not an iframe game and not an installation.
       if (gameKey === 'ssss') {
-        const ssssUrl = new URL('gameexp.html', document.baseURI).href;
+        const ssssUrl = new URL('gameexe.html', document.baseURI).href;
         const ssssWindow = window.open(ssssUrl, 'legends_ssss_game', 'popup=yes,width=1200,height=800');
         if (!ssssWindow) {
           // A direct navigation is the reliable fallback when the browser blocks popups.
@@ -4412,20 +4412,18 @@
         return;
       }
 
-      const overlay = document.getElementById('gameOverlay');
-      const frame = document.getElementById('gameFrame');
-      if (!overlay || !frame) {
-        alert('The game window could not be opened.');
-        return;
-      }
+      // 🔧 FIX: Window.open ile ayrı PWA penceresinde aç (iframe yerine)
       const fileUrl = new URL(selectedFile, document.baseURI).href;
-      frame.src = fileUrl;
-      overlay.style.display = 'flex';
+      const gameWindow = window.open(fileUrl, 'legends_game_' + gameKey, 'popup=yes,width=1200,height=800');
+      
+      if (!gameWindow) {
+        // Popup engellenmişse fallback
+        window.location.href = fileUrl;
+      } else {
+        gameWindow.focus();
+      }
+      
       localStorage.setItem(STORAGE_KEYS.LAST_PLAYED, JSON.stringify({ file: selectedFile, gameKey, playedAt: new Date().toISOString() }));
-      frame.onerror = () => {
-        overlay.style.display = 'none';
-        alert(`The selected version could not be opened: ${selectedFile}`);
-      };
     }
 
     window.openNewsDetail = openNewsDetail;
@@ -4444,7 +4442,17 @@
     document.addEventListener('DOMContentLoaded', () => {
       document.getElementById('installationsBackBtn')?.addEventListener('click', closeInstallationsScreen);
       document.getElementById('newInstallationBtn')?.addEventListener('click', async () => {
-        await ensureVersionsManifestLoaded();
+        // Yeni Yükleme formu açılırken versions.json yüklemeyi zorla
+        try {
+          const response = await fetch('./versions.json?t=' + Date.now());
+          if (response.ok) {
+            const data = await response.json();
+            versionRecords = data.versions || [];
+            console.log('✅ Versions yüklendi:', versionRecords.length);
+          }
+        } catch (error) {
+          console.error('Versions yüklenemedi:', error);
+        }
         resetInstallationForm();
       });
       document.getElementById('cancelInstallationBtn')?.addEventListener('click', () => {
