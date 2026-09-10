@@ -22,27 +22,37 @@
 <style>
 /* ========== LEGENDS SPLASH TEXT STİLLERİ (Minecraft Tarzı) ========== */
 
-.splash-wrapper {
-  position: relative;
-  height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  pointer-events: none;
-  padding: 10px 20px;
-  margin: 8px 0 12px 0;
-  z-index: 100;
-}
-
-.splash-text {
+.splash-text-static {
   display: block;
-  font-size: clamp(18px, 4vw, 36px);
+  position: fixed;
+  font-size: clamp(14px, 3vw, 22px);
   font-weight: 900;
+  font-style: normal;
   color: #FFFF55;
   text-shadow: 
     2px 2px 0px #000,
     -1px -1px 0px rgba(0, 0, 0, 0.5);
-  transform: skewX(-20deg) rotate(-15deg);
+  transform: rotate(-20deg);
+  font-family: Arial, sans-serif;
+  letter-spacing: 1px;
+  white-space: nowrap;
+  animation: splashPulse 2.5s ease-in-out infinite;
+  top: 15px;
+  right: 20px;
+  pointer-events: none;
+  z-index: 200;
+}
+
+.splash-text {
+  display: block;
+  font-size: clamp(14px, 3vw, 22px);
+  font-weight: 900;
+  font-style: normal;
+  color: #FFFF55;
+  text-shadow: 
+    2px 2px 0px #000,
+    -1px -1px 0px rgba(0, 0, 0, 0.5);
+  transform: none;
   font-family: Arial, sans-serif;
   letter-spacing: 1px;
   white-space: nowrap;
@@ -52,7 +62,7 @@
 /* Minecraft Nefes Alma Animasyonu */
 @keyframes splashPulse {
   0% {
-    transform: skewX(-20deg) rotate(-15deg) scale(0.95);
+    transform: rotate(-20deg) scale(0.95);
     opacity: 0.8;
     text-shadow: 
       2px 2px 0px #000,
@@ -60,7 +70,7 @@
       0 0 8px rgba(255, 255, 85, 0.4);
   }
   50% {
-    transform: skewX(-20deg) rotate(-15deg) scale(1.05);
+    transform: rotate(-20deg) scale(1.05);
     opacity: 1;
     text-shadow: 
       2px 2px 0px #000,
@@ -68,7 +78,7 @@
       0 0 20px rgba(255, 255, 85, 0.8);
   }
   100% {
-    transform: skewX(-20deg) rotate(-15deg) scale(0.95);
+    transform: rotate(-20deg) scale(0.95);
     opacity: 0.8;
     text-shadow: 
       2px 2px 0px #000,
@@ -80,20 +90,15 @@
 /* Tablet & Desktop için metin boyutu */
 @media (min-width: 768px) {
   .splash-text {
-    font-size: 32px;
+    font-size: 22px;
   }
 }
 
 /* Mobile için kompakt versiyon */
 @media (max-width: 480px) {
   .splash-text {
-    font-size: 18px;
-    transform: skewX(-15deg) rotate(-10deg);
-  }
-  
-  .splash-wrapper {
-    height: 50px;
-    padding: 5px 10px;
+    font-size: 13px;
+    transform: rotate(-20deg);
   }
 }
 </style>
@@ -2563,10 +2568,7 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .chat-msg,.chat-message{font-family:'Minecraftia',monospace!important;font-size:7px!important;font-weight:400!important;letter-spacing:0px;}
 #chat-input,#chat-hint{font-family:'Minecraftia',monospace!important;font-size:10px!important;font-weight:normal!important;letter-spacing:0px;text-shadow:none!important;}
 /* ========== SPLASH TEXT STİLLERİ (Minecraft Tarzı) ========== */
-.splash-wrapper{position:relative;height:60px;display:flex;align-items:center;justify-content:center;pointer-events:none;padding:10px 20px;margin:8px 0 12px 0;}
-.splash-text{display:block;font-size:clamp(18px,4vw,36px);font-weight:900;color:#FFFF55;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5);transform:skewX(-20deg);font-family:Arial,sans-serif;letter-spacing:1px;white-space:nowrap;animation:splashPulse 2.5s ease-in-out infinite;}
-@keyframes splashPulse{0%{transform:skewX(-20deg) scale(0.95);opacity:0.8;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5),0 0 8px rgba(255,255,85,0.4);}50%{transform:skewX(-20deg) scale(1.05);opacity:1;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5),0 0 20px rgba(255,255,85,0.8);}100%{transform:skewX(-20deg) scale(0.95);opacity:0.8;text-shadow:2px 2px 0px #000,-1px -1px 0px rgba(0,0,0,0.5),0 0 8px rgba(255,255,85,0.4);}}
-@media(max-width:480px){.splash-text{font-size:18px;transform:skewX(-15deg);}.splash-wrapper{height:50px;padding:5px 10px;}}
+
 /* ========== MENU OVERLAY ========== */
 #menu-overlay{position:fixed;top:0;left:0;width:100%;height:100%;background:radial-gradient(ellipse at 50% 30%,#1e3050 0%,#0a0f1a 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;z-index:1000;color:#fff;overflow:hidden;}
 .menu-screen{display:none;flex-direction:column;align-items:center;width:100%;max-width:420px;padding:0 18px 18px;max-height:96vh;overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:rgba(117,167,255,.3) transparent;}
@@ -2578,7 +2580,8 @@ button,.mbtn,.world-card,.btn{font-weight:normal!important;font-size:14px!import
 .game-version{font-size:13px;color:rgba(255,255,255,.5);margin-bottom:26px;}
 #screen-main .game-version{position:fixed;left:14px;bottom:12px;margin:0;z-index:2;font-size:11px;color:rgba(255,255,255,.62);text-shadow:0 1px 3px #000;letter-spacing:.4px;}
 #screen-main .game-version{position:fixed!important;left:max(10px,env(safe-area-inset-left));bottom:max(10px,env(safe-area-inset-bottom));pointer-events:none;}
-.menu-logo-image{display:block;width:min(100%,420px);height:auto;max-height:150px;object-fit:contain;margin:0 auto 12px;overflow:hidden;}
+.menu-logo-image{display:block;width:min(100%,420px);height:auto;max-height:150px;object-fit:contain;margin:0 auto 12px;overflow:visible;position:relative;z-index:1;perspective:1000px;}
+.menu-logo-image::after{content:'';position:absolute;top:0;left:0;right:0;bottom:0;pointer-events:none;z-index:300;}
 .menu-logo-image img{display:block;width:100%;height:auto;max-width:100%;max-height:150px;object-fit:contain;}
 /* All pre-game menu headers use the uploaded I-Preview mark. */
 #menu-overlay .game-logo{display:block;width:100%;max-width:420px;height:clamp(78px,20vw,132px);flex:0 0 auto;margin:0 auto 10px;padding:0;background:url('i-preview-icon.png') center/contain no-repeat;font-size:0!important;color:transparent!important;letter-spacing:0;text-shadow:none;white-space:normal;overflow:visible;}
@@ -3815,9 +3818,9 @@ body.me-locked{overflow:hidden!important;touch-action:none!important;}
   <!-- [MODÜLER DİL MİMARİSİ] Köşedeki TR/EN hızlı geçiş butonu kaldırıldı.
        Dil artık Ayarlar → Dil sekmesinden, 7 dil arasından seçiliyor. -->
   <div class="menu-screen active" id="screen-main">
-    <div class="menu-logo-image"><img src="i-preview-icon.png" alt="Legends I-Preview"></div>
-    <div id="splashContainer" class="splash-wrapper">
-      <span id="splashText" class="splash-text">Loading...</span>
+    <div class="menu-logo-image">
+      <img src="i-preview-icon.png" alt="Legends I-Preview">
+      <span class="splash-text-static" id="splashText">Loading...</span>
     </div>
     <div class="game-version">Legends I-Preview v1.7Ip1</div>
     <button class="mbtn primary" id="btn-singleplayer"></button>
@@ -27950,8 +27953,148 @@ console.log(`
 
 let splashTextData = null;
 let splashRefreshInterval = null;
-let splashSelectionHistory = []; // 🔄 Seçim geçmişi - her metin ilk 5'te çıksın
-const GUARANTEE_ROTATION_COUNT = 5; // Döngü boyutu
+
+// 🎮 Splash Text Verileri - Direkt HTML içine gömülü
+const SPLASH_TEXT_DATABASE = {
+  "general": [
+    "Also try Miniblox!",
+    "Also try Terraria!",
+    "Also try Minecraft!",
+    "Also try Hytale!",
+    "Watch out for Figure and Seek!",
+    "Doors are meant to be opened... or locked!",
+    "Suited for Dragon Riders!",
+    "Roblox studio made us do this!",
+    "The Cake is a Lie!",
+    "It's dangerous to go alone! Take this!",
+    "Do a barrel roll!",
+    "Finish Him!",
+    "Victory Royale!",
+    "Praise the Sun!",
+    "Steel your heart, Dragon Hunter!",
+    "Hey you, you're finally awake!",
+    "Mumbo, IS THIS REDSTONE?",
+    "Bumbo Coniho was here!",
+    "DanTDM's Custom Laboratory Approved!",
+    "Stampy's Lovely World expansion pack!",
+    "Dream speedrun music intensifies!",
+    "That was a 1 in 7.5 trillion chance!",
+    "CaptainSparklez - Revenge of the Voxels!",
+    "Creeper, Aww Man!",
+    "PewDiePie's IKEA Tower inspired!",
+    "Floor Gang OOH!",
+    "Markiplier: Was that the bite of '87?!",
+    "Jacksepticeye: TOP OF THE MORNING!",
+    "CaseOh: Can this world hold my inventory?!",
+    "Is that a speedrun record?",
+    "Poggers in the chat!",
+    "Dragons of Berk would be proud!",
+    "Train your dragon, rule the realm!",
+    "Isle of Berk vibes!",
+    "Ice, Fire, and Voxels!",
+    "Legends never die, they just respawn!",
+    "Press F to pay respects.",
+    "All your base are belong to us!",
+    "Stop right there, criminal scum!",
+    "Achievement Unlocked: Played Legends!",
+    "Cheat code: UP UP DOWN DOWN LEFT RIGHT...",
+    "WASD is the true pathway!",
+    "Don't dig straight down!",
+    "Watch out for the darkness!",
+    "Is that a creeper? No, wait...",
+    "Building blocks of reality!",
+    "Need more inventory space!",
+    "Night is falling, craft a bed!",
+    "It's not a bug, it's a feature!",
+    "Endless worlds, endless ideas!",
+    "Mining away at 3 AM!",
+    "What does the dragon say?",
+    "Diamonds are a voxel's best friend!",
+    "Redstone... wait, wrong engine!",
+    "One more block won't hurt.",
+    "Surviving the night since 2026!",
+    "Punch trees, gain wood, build empires!",
+    "Drop your loot before you dive!",
+    "Keep inventory: TRUE!",
+    "Powered by Three.js!",
+    "Voxel, Voxel everywhere!",
+    "Welcome to Legends!",
+    "Brownie Approved!",
+    "Beware of the Dragons!",
+    "100% Chunk Friendly!",
+    "Made with passion and code!"
+  ],
+  "timedGeneral": [
+    {
+      "text": "Indev Phase!",
+      "availableUntil": "2028-01-01"
+    },
+    {
+      "text": "Alpha Testing in Progress!",
+      "availableUntil": "2027-12-31"
+    },
+    {
+      "text": "Early Access Build!",
+      "availableUntil": "2028-06-30"
+    },
+    {
+      "text": "Pre-Release Version!",
+      "availableUntil": "2028-03-15"
+    },
+    {
+      "text": "Coming Soon: Full Release!",
+      "availableUntil": "2028-12-31"
+    }
+  ],
+  "technoblade": [
+    "Technoblade Never Dies!",
+    "Officer, I drop-kicked that block in self-defense!",
+    "Welcome to the Syndicate!",
+    "Blood for the Blood God!",
+    "Subscribe to Technoblade!",
+    "Not even close!",
+    "If you wish to defeat me, train for another 100 years!",
+    "Potato King's Seal of Approval!",
+    "The blade returns...",
+    "Immortalized in code and legend.",
+    "Your legacy inspires us all.",
+    "Technoblade would have loved this.",
+    "In memory of a gaming legend.",
+    "Rest easy, warrior.",
+    "Forever in our hearts.",
+    "The Potato King's wisdom lives on."
+  ],
+  "neonmonster": [
+    "Happy Birthday NeonMonster!",
+    "Glow up, NeonMonster!",
+    "Birthday neon vibes!",
+    "NeonMonster's day to shine!",
+    "Celebrating the legend!",
+    "Another year of awesome!",
+    "Birthday wishes for NeonMonster!",
+    "Make some noise for NeonMonster!"
+  ],
+  "specialDates": [
+    {
+      "month": 3,
+      "day": 20,
+      "category": "neonmonster",
+      "priority": 0.87
+    },
+    {
+      "month": 6,
+      "day": 1,
+      "category": "technoblade",
+      "priority": 0.75
+    },
+    {
+      "month": 6,
+      "day": 30,
+      "category": "technoblade",
+      "priority": 0.75
+    }
+  ]
+};
 
 /**
  * Belirtilen tarihin geçip geçmediğini kontrol et
@@ -27972,45 +28115,7 @@ function isDateExpired(dateStr) {
 }
 
 /**
- * splashtext.json dosyasını yükle
- */
-async function loadSplashTextData() {
-  try {
-    const response = await fetch('./splashtext.json');
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    splashTextData = await response.json();
-    console.log('✅ Splash Text verisi yüklendi');
-  } catch (error) {
-    console.error('❌ Splash Text yükleme hatası:', error);
-    // Fallback veri
-    splashTextData = {
-      general: [
-        'Also try Miniblox!',
-        'Also try Minecraft!',
-        'Welcome to Legends!',
-        'Legends Never Die!',
-        'Made with passion and code!'
-      ],
-      timedGeneral: [
-        { text: 'Indev Phase!', availableUntil: '2028-01-01' },
-        { text: 'Early Access!', availableUntil: '2027-12-31' }
-      ],
-      technoblade: [
-        'Technoblade Never Dies!',
-        'Blood for the Blood God!',
-        'Potato King\'s Seal of Approval!'
-      ],
-      neonmonster: [
-        'Happy Birthday NeonMonster!',
-        'Glow up, NeonMonster!',
-        'Birthday neon vibes!'
-      ],
-      specialDates: []
-    };
-  }
-}
+ * Veriyi doğrudan ata (HTML içine gömülü)
 
 /**
  * Bugünün tarihinin özel gün olup olmadığını kontrol et
@@ -28080,33 +28185,6 @@ function selectSplashText() {
     return 'Welcome to Legends!';
   }
   
-  // 🔄 GARANTİLİ ROTASYON SİSTEMİ
-  // İlk 5 seçimde tüm metinler farklı olmalı
-  if (splashSelectionHistory.length < GUARANTEE_ROTATION_COUNT) {
-    // Seçim geçmişinde olmayan metinleri filtrele
-    const availableTexts = allGeneralTexts.filter(
-      text => !splashSelectionHistory.includes(text)
-    );
-    
-    if (availableTexts.length > 0) {
-      const randomIndex = Math.floor(Math.random() * availableTexts.length);
-      const selectedText = availableTexts[randomIndex];
-      
-      // Geçmişe ekle
-      splashSelectionHistory.push(selectedText);
-      
-      console.log(`📊 Garantili Rotasyon: ${splashSelectionHistory.length}/${GUARANTEE_ROTATION_COUNT}`);
-      
-      return selectedText;
-    }
-  }
-  
-  // 5 seçimden sonra geçmişi sıfırla ve normal seçime dön
-  if (splashSelectionHistory.length >= GUARANTEE_ROTATION_COUNT) {
-    splashSelectionHistory = [];
-    console.log('🔄 Rotasyon tamamlandı, döngü baştan başlıyor...');
-  }
-  
   // Normal rasgele seçim
   const randomIndex = Math.floor(Math.random() * allGeneralTexts.length);
   return allGeneralTexts[randomIndex];
@@ -28164,8 +28242,8 @@ function setupMainMenuObserver() {
  * Sayfa yüklendiğinde çalıştırılacak
  */
 document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Splash text verisi yükle
-  await loadSplashTextData();
+  // 1. Splash text verisi - HTML içine gömülü
+  splashTextData = SPLASH_TEXT_DATABASE;
   
   // 2. İlk splash text'i göster
   updateSplashText();
